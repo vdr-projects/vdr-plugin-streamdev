@@ -59,8 +59,8 @@ public:
 	virtual uchar *Get(int &Count);
 	virtual void Del(int Count);
 
-	virtual void Attach(void) { m_Device->AttachReceiver(m_Receiver); }
-	virtual void Detach(void) { m_Device->Detach(m_Receiver); }
+	virtual void Attach(void);
+	virtual void Detach(void);
 
 	// Statistical purposes:
 	virtual std::string Report(void);

@@ -257,6 +257,18 @@ void cStreamdevLiveStreamer::Del(int Count)
 		break;
 	}
 }
+	
+void cStreamdevLiveStreamer::Attach(void) 
+{ 
+	printf("RIGHT ATTACH\n");
+	m_Device->AttachReceiver(m_Receiver); 
+}
+
+void cStreamdevLiveStreamer::Detach(void) 
+{ 
+	printf("RIGHT DETACH\n");
+	m_Device->Detach(m_Receiver); 
+}
 
 std::string cStreamdevLiveStreamer::Report(void) 
 {

@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.h,v 1.6 2005/02/11 17:02:22 lordjaxom Exp $
+ *  $Id: streamer.h,v 1.7 2005/03/12 12:54:19 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_STREAMER_H
@@ -61,8 +61,8 @@ public:
 	virtual uchar *Get(int &Count) { return m_SendBuffer->Get(Count); }
 	virtual void Del(int Count) { m_SendBuffer->Del(Count); }
 
-	virtual void Detach(void) = 0;
-	virtual void Attach(void) = 0;
+	virtual void Detach(void) {}
+	virtual void Attach(void) {}
 };
 
 #endif // VDR_STREAMDEV_STREAMER_H
