@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.2 2005/01/25 14:14:43 lordjaxom Exp $
+ *  $Id: device.c,v 1.3 2005/02/08 14:19:29 lordjaxom Exp $
  */
  
 #include "client/device.h"
@@ -97,7 +97,8 @@ bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel,
 		return true;
 
 	m_Channel = Channel;
-	return ClientSocket.SetChannelDevice(m_Channel);
+	bool r = ClientSocket.SetChannelDevice(m_Channel);
+	Dprintf("setchanneldevice r=%d\n", r);
 }
 
 bool cStreamdevDevice::SetPid(cPidHandle *Handle, int Type, bool On) {
