@@ -1,0 +1,298 @@
+This is a "plugin" for the Video Disk Recorder (VDR).
+
+Written by:                  Sascha Volkenandt <sascha@akv-soft.de>
+
+Project's homepage:          http://www.magoa.net/linux/
+
+Latest version available at: http://www.magoa.net/linux/index.php?view=streamdev
+
+See the file COPYING for license information.
+
+Contents:
+---------
+
+1.   Description
+2.   Installation
+2.1  VDR 1.2.X
+2.2  VDR 1.3.X
+3.   Usage
+3.1  Usage VDR-to-VDR server
+3.2  Usage HTTP server
+3.3  Usage VDR-to-VDR client
+3.4  General Usage Notes
+4.   VDR-to-VDR client notes (PLEASE READ IF YOU HAVE ONE)
+4.1  EPG data [OUTDATED]
+4.2  Teletext / OSD Teletext
+4.3  AnalogTV [OUTDATED]
+5.   Known Problems
+
+
+1. Description:
+---------------
+
+This PlugIn is a VDR implementation of the VTP (Video Transfer Protocol) 
+Version 0.0.3 (see file PROTOCOL) and a basic HTTP Streaming Protocol.
+
+It consists of a server and a client part, but both parts are compiled together
+with the PlugIn source, but appear as separate PlugIns to VDR. 
+
+The client part acts as a full Input Device, so it can be used in conjunction 
+with a DXR3-Card, XINE, SoftDevice or others to act as a working VDR 
+installation without any DVB-Hardware including EPG-Handling.
+
+The server part acts as a Receiver-Device and works transparently in the 
+background within your running VDR. It can serve multiple clients and it can
+distribute multiple input streams (i.e. from multiple DVB-cards) to multiple 
+clients using the native VTP protocol (for VDR-clients), or using the HTTP 
+protocol supporting clients such as XINE, MPlayer and so on. With XMMS or
+WinAMP, you can also listen to radio channels over a HTTP connection.
+
+It is possible to attach as many clients as the bus and network can handle, as
+long as there is a device which can receive a specific channel. Multiple
+channels homed on the same transponder (which is determined by it's frequency)
+can be broadcasted with a single device.
+
+Additional clients can be programmed using the Protocol Instructions inside
+the PROTOCOL file.
+
+
+2. Installation:
+----------------
+
+Let's say streamdev's version is 0.3.1 and vdr's version is 1.X.X. If you 
+use anything else please exchange the version numbers appropriately (this
+way I don't have to update this section all the times;) ).
+
+After compiling the PlugIn as stated below, start either (or both) parts of it
+by specifying "-P streamdev-client" and/or "-P streamdev-server" on the VDR
+command line.
+
+What's important is that the client requests a channel using its Unique Channel
+ID. So, in order to find the channel at the server, it must have the same ID
+that is used on the client. You can achieve this by putting the server's 
+channels.conf on the client, preferably after scanning (in case you use 1.2.X
+with AutoPID or 1.3.X).
+
+If you want to drive additional Input-Devices (with different sources) on the 
+client, you can merge the channels.conf files. VDR will detect if the local 
+device or the network device can receive the channels.
+
+Last, but not least you have to put the provided streamdevhosts.conf.example
+into the "plugins" subfolder of your config-directory (which is equal to your 
+video-directory if not specified otherwise), rename it to streamdevhosts.conf
+and adjust it to your needs. The syntax is the same as for svdrphosts.conf, so
+please consult VDR's documentation on how to fill that file, if you can't do
+it on-the-fly. For example, if you didn't specify a separate config-directory,
+and specified your video directory as "/video0", the file has to be put to
+/video0/plugins/streamdevhosts.conf.
+
+
+2.1 VDR 1.2.X:
+--------------
+
+It is recommended that you apply a patch to VDR that improves thread 
+cancellation. You can work without it, but you _might_ have delays in switching
+(especially when using VDR-to-VDR streaming) that are around three seconds. 
+
+cd vdr-1.X.X/PLUGINS/src
+tar xvfz vdr-streamdev-0.3.1.tgz
+ln -s streamdev-0.3.1 streamdev
+cd ../..
+patch -p1 <PLUGINS/src/streamdev/patches/thread.c.diff
+make [options, if necessary] vdr
+make [options, if necessary] plugins
+
+2.2 VDR 1.3.X:
+--------------
+
+cd vdr-1.X.X/PLUGINS/src
+tar xvfz vdr-streamdev-0.3.1.tgz
+ln -s streamdev-0.3.1 streamdev
+cd ../..
+make [options, if necessary] vdr
+make [options, if necessary] plugins
+
+
+3. Usage:
+---------
+
+Start the server core itself by specifying -Pstreamdev-server on your VDR 
+commandline. To use the client core, specify -Pstreamdev-client. Both parts
+can run in one VDR instance, if necessary.
+
+The parameter "Suspend behaviour" allows you to specify how the server should 
+react in case the client requests a channel that would require switching the
+primary device (i.e. disrupt live-tv). If set to "Offer suspend mode" (the 
+default), you will have a new entry in the main menu. Activating that will put
+the server into "Suspend Mode" (a picture is displayed on TV). Then, a client
+may switch the primary card to wherever it likes to. While watching TV (Suspend
+deactivated), the client may not switch the transponder on the primary device.
+If you set the behaviour to "Always suspended", there will be normal live-tv
+on the server, but whenever a client decides to switch the transponder, the 
+server will lose it's live-tv. Set to "Never suspended", the server always 
+prevents the client from switching transponders. If you set "Client may 
+suspend" to yes, the client can suspend the server remotely (this only applies
+if "Offer suspend mode" is selected).
+
+
+3.1 Usage VDR-to-VDR server:
+----------------------------
+
+You can activate the VDR-to-VDR server part in the PlugIn's Setup Menu. It is
+deactivated by default. The Parameter "VDR-to-VDR Server Port" specifies the 
+port where you want the server to listen for incoming connections. The server
+will be activated when you push the OK button inside the setup menu, so there's
+no need to restart VDR.
+
+NOTE: This mainly applies to One-Card-Systems, since with multiple cards there
+is no need to switch transponders on the primary interface, if the secondary
+can stream a given channel (i.e. if it is not blocked by a recording). If both
+cards are in use (i.e. when something is recorded, or by multiple clients), 
+this applies to Multiple-Card-Systems as well.
+
+3.2 Usage HTTP server:
+----------------------
+
+You can use the HTTP part by accessing the server with a HTTP-capable media
+player (such as XINE, MPlayer, and so on, if you have appropriate MPEG2-codecs
+installed). In the PlugIn's Setup, you can specify the port the server will
+listen to with the parameter "HTTP Server Port". The parameter "HTTP Streamtype"
+allows you to specify a default stream type, which is used if no specific type
+has been requested in the URL (see below). The supported stream types are:
+
+TS     Transport Stream (i.e. a dump from the device)
+PES    Packetized Elemetary Stream (VDR's native recording format)
+PS     Program Stream (SVCD, DVD like stream)
+ES     Elementary Stream (only Video, if available, otherwise only Audio)
+
+If you leave the default port (3000), you can access the streams like this:
+
+http://hostname:3000/3
+http://hostname:3000/S19.2E-0-12480-898
+
+The first one will deliver a channel by number on the server, the second one
+will request the channel by unique channel id. In addition, you can specify 
+the desired stream type as a path to the channel.
+
+http://hostname:3000/TS/3
+http://hostname:3000/PES/S19.2E-0-12480-898
+
+The first one would deliver the stream in TS, the second one in PES format. 
+Possible values are 'PES', 'TS', 'PS' and 'ES'. You need to specify the ES 
+format explicitly if you want to listen to radio channels. Play them pack i.e. 
+with mpg123.
+
+mpg123 http://hostname:3000/ES/200
+
+3.3 Usage VDR-to-VDR client:
+----------------------------
+
+The parameter "Remote IP" uses an IP-Adress-Editor, where you can just enter
+the IP number with the number keys on your remote. After three digits (or if 
+the next digit would result in an invalid IP adress, or if the first digit is
+0), the current position jumps to the next one. You can change positions with 
+the left and right buttons, and you can cycle the current position using up 
+and down. To confirm the entered address, press OK. So, if you want to enter 
+the IP address "127.0.0.1", just mark the corresponding entry as active and 
+type "127001<OK>" on your remote. If you want to enter "192.168.1.12", type 
+"1921681<Right>12<OK>". 
+
+The parameters "Remote IP" and "Remote Port" in the client's setup specify the 
+address of the remote VDR-to-VDR server to connect to. Activate the client by
+setting "Start Client" to yes. It is disabled by default, because it wouldn't
+make much sense to start the client without specifying a server anyway. The 
+client is activated after you push the OK button, so there's no need to restart
+VDR. Deactivation on-the-fly is not possible, so in order to deactivate the 
+client, you will have to restart VDR. All other settings can be changed without
+restarting VDR.
+
+The client will try to connect to the server (in case it isn't yet) whenever 
+a remote channel is requested. Just activate the client and switch to a 
+channel that's not available by local devices. If anything goes wrong with the 
+connection between the two, you will see it in the logfile instantly. If you 
+now switch the client to a channel which isn't covered by it's own local
+devices, it will ask the server for it. If the server can (currently) receive
+that channel, the client will show it until you switch again, or until the 
+server needs that card (if no other is free) for a recording on a different 
+transponder.
+
+You can choose a remote streamtype in the setup. I'd suggest TS streaming as
+it has a much shorter delay than PES streaming (compared to live-view of the
+same channel on the server), and transmits more information such as AC3 and 
+teletext data.
+
+When setting the parameter "MultiPID streaming" to yes (the default) (only 
+applies if the streamtype is TS), only the needed PIDs are transferred, and 
+additional PIDs can be turned on during an active transfer. This makes it 
+possible to switch languages, receive additional channels (for recording on 
+the client) and use plugins that use receivers themselves (like osdteletext).
+
+The last parameter, "Synchronize EPG", will have the client synchronize it's 
+program table with the server every now and then, but not regularly. This 
+happens when starting the client, and everytime VDR does its housekeeping 
+tasks. The only thing that's guaranteed is, that there will be a minimum 
+interval of ten seconds between each EPG synchronization.
+
+The client has a Main Menu entry called "Streaming Control". This is used to 
+control various aspects of the remote server VDR. Inside, you will find 
+"Remote Timers", "Remote Recordings", "Suspend server" and "Synchronize EPG".
+
+The "Remote Timers" entry gives you the possibility to edit, create and delete
+the server's timers remotely. Every timer is synchronized before the requested
+action actually takes place. This only leaves a very short time-span (of a few
+milliseconds) in which a race-condition could happen.
+
+"Remote Recordings" shows up all recordings that the server can access. Only
+deleting recordings is implemented, yet.
+
+With "Suspend Server", you can send the server into suspend mode remotely, if
+the server is set to "Offer suspend mode" and allows the client to suspend.
+
+Last but not least, "Synchronize EPG" starts a synchronization in case you 
+don't want to do it regularly, or in case you just activated it and can't wait
+for the first synchronization to happen by itself.
+
+3.4 General Usage Notes:
+------------------------
+
+If there's still some debug output on stdout, please ignore it ;)
+
+
+4. VDR-to-VDR client notes:
+---------------------------
+
+4.1  EPG data:
+--------------
+
+[ OUTDATED, see "Synchronize EPG" in 3.2 ]
+
+4.2  Teletext / OSD Teletext:
+-----------------------------
+
+Usual teletext will probably not work on the client, if it has no DVB hardware.
+I never tried, and probably I never will, so don't ask about it please ;)
+
+Osdteletext-0.3.1 (and later) definitely work when used in MultiPID Streaming
+mode.
+
+
+4.3 AnalogTV
+------------
+
+Works with ivtv and analogue cards according to Andreas Kool.
+
+
+5. Known Problems:
+------------------
+
+- Recordings & Timers on the client side could endanger Timers & Recordings on
+	the server, as they will have the same priority (by default). Set the 
+	default priority to i.e. 40 if you want the server to supersede the client.
+
+- Sometimes, if you reload VDR too often (for example while recompiling), the
+  driver can get "stuck" in some situations. Try a driver restart if anything
+  you think should work doesn't before sending a bug-report :-).
+	[ ADDITION ]
+	In the meantime I have discovered that this error is caused by the all-
+	mysterical UPT (unknown picture type) error :-(.
+

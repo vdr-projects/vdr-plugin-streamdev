@@ -1,0 +1,21 @@
+Special thanks go to the following persons (if you think your name is missing
+here, please send an email to sascha@akv-soft.de):
+
+The Metzler Brothers
+  because I took a whole lot of code from their libdvbmpeg package
+
+Angelus (DOm)
+  for providing italian language texts
+	for reporting problems with the Elchi-Patch
+
+Michal
+  for sending a patch to select the HTTP streamtype via remote
+
+Rolf Ahrenberg
+  for providing finnish language texts
+
+Rantanen Teemu
+  for providing vdr-incompletesections.diff
+
+Thomas Keil
+	for providing vdr-localchannelprovide.diff

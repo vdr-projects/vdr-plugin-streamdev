@@ -1,0 +1,61 @@
+diff -u vdr-1.3.11/config.c vdr-1.3.11.LocalChannelProvide/config.c
+--- vdr-1.3.11/config.c	2004-05-16 14:43:55.000000000 +0200
++++ vdr-1.3.11.LocalChannelProvide/config.c	2004-08-29 17:55:59.000000000 +0200
+@@ -297,6 +297,7 @@
+   ResumeID = 0;
+   CurrentChannel = -1;
+   CurrentVolume = MAXVOLUME;
++  LocalChannelProvide = 1;
+ }
+ 
+ cSetup& cSetup::operator= (const cSetup &s)
+@@ -450,6 +451,7 @@
+   else if (!strcasecmp(Name, "ResumeID"))            ResumeID           = atoi(Value);
+   else if (!strcasecmp(Name, "CurrentChannel"))      CurrentChannel     = atoi(Value);
+   else if (!strcasecmp(Name, "CurrentVolume"))       CurrentVolume      = atoi(Value);
++  else if (!strcasecmp(Name, "LocalChannelProvide")) LocalChannelProvide = atoi(Value);
+   else
+      return false;
+   return true;
+@@ -510,6 +512,7 @@
+   Store("ResumeID",           ResumeID);
+   Store("CurrentChannel",     CurrentChannel);
+   Store("CurrentVolume",      CurrentVolume);
++  Store("LocalChannelProvide",LocalChannelProvide);
+ 
+   Sort();
+ 
+diff -u vdr-1.3.11/config.h vdr-1.3.11.LocalChannelProvide/config.h
+--- vdr-1.3.11/config.h	2004-06-10 15:18:50.000000000 +0200
++++ vdr-1.3.11.LocalChannelProvide/config.h	2004-08-29 17:47:32.000000000 +0200
+@@ -251,6 +251,7 @@
+   int ResumeID;
+   int CurrentChannel;
+   int CurrentVolume;
++  int LocalChannelProvide;
+   int __EndData__;
+   cSetup(void);
+   cSetup& operator= (const cSetup &s);
+diff -u vdr-1.3.11/dvbdevice.c vdr-1.3.11.LocalChannelProvide/dvbdevice.c
+--- vdr-1.3.11/dvbdevice.c	2004-06-19 11:33:42.000000000 +0200
++++ vdr-1.3.11.LocalChannelProvide/dvbdevice.c	2004-08-29 18:00:37.000000000 +0200
+@@ -674,6 +674,8 @@
+ 
+ bool cDvbDevice::ProvidesChannel(const cChannel *Channel, int Priority, bool *NeedsDetachReceivers) const
+ {
++  if (Setup.LocalChannelProvide != 1)
++    return false;
+   bool result = false;
+   bool hasPriority = Priority < 0 || Priority > this->Priority();
+   bool needsDetachReceivers = false;
+diff -u vdr-1.3.11/menu.c vdr-1.3.11.LocalChannelProvide/menu.c
+--- vdr-1.3.11/menu.c	2004-06-13 22:26:51.000000000 +0200
++++ vdr-1.3.11.LocalChannelProvide/menu.c	2004-08-29 17:52:31.000000000 +0200
+@@ -1878,6 +1878,7 @@
+   Add(new cMenuEditIntItem( tr("Setup.DVB$Primary DVB interface"), &data.PrimaryDVB, 1, cDevice::NumDevices()));
+   Add(new cMenuEditBoolItem(tr("Setup.DVB$Video format"),          &data.VideoFormat, "4:3", "16:9"));
+   Add(new cMenuEditStraItem(tr("Setup.DVB$Update channels"),       &data.UpdateChannels, 5, updateChannelsTexts));
++  Add(new cMenuEditBoolItem(tr("Channels available locally"),      &data.LocalChannelProvide));
+ }
+ 
+ eOSState cMenuSetupDVB::ProcessKey(eKeys Key)

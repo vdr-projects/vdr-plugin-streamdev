@@ -1,0 +1,22 @@
+--- vdr-1.3.6/sections.c	2004-02-07 17:51:57.000000000 +0200
++++ sections.c	2004-03-21 18:34:47.000000000 +0200
+@@ -185,11 +185,17 @@
+                   if (fh) {
+                      // Read section data:
+                      unsigned char buf[4096]; // max. allowed size for any EIT section
+-                     int r = safe_read(fh->handle, buf, sizeof(buf));
++		     struct stat statbuf;
++		     int st = fstat(fh->handle, &statbuf);
++		     int ispipe = (st == 0 && !S_ISCHR(statbuf.st_mode));
++		     /*printf("ispipe %d\n", ispipe);*/
++                     int r = safe_read(fh->handle, buf, ispipe ? 3 : sizeof(buf));
+                      if (!DeviceHasLock)
+                         continue; // we do the read anyway, to flush any data that might have come from a different transponder
+-                     if (r > 3) { // minimum number of bytes necessary to get section length
++                     if (r >= 3) { // minimum number of bytes necessary to get section length
+                         int len = (((buf[1] & 0x0F) << 8) | (buf[2] & 0xFF)) + 3;
++			if (ispipe)
++			    r += safe_read(fh->handle, buf+3, len-3);
+                         if (len == r) {
+                            // Distribute data to all attached filters:
+                            int pid = fh->filterData.pid;
