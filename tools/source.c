@@ -56,10 +56,9 @@ ssize_t cTBSource::Write(const void *Buffer, size_t Length) {
 
 bool cTBSource::TimedWrite(const void *Buffer, size_t Length, uint TimeoutMs) {
 	cTBSelect sel;
-	time_t st;
 	int ms, offs;
 
-	st = time_ms();
+	cTimeMs starttime;
 	ms = TimeoutMs;
 	offs = 0;
 	while (Length > 0) {
@@ -77,7 +76,7 @@ bool cTBSource::TimedWrite(const void *Buffer, size_t Length, uint TimeoutMs) {
 			Length -= b;
 		}
 
-		ms -= time_ms() - st;
+		ms = TimeoutMs - starttime.Elapsed();
 		if (ms <= 0) {
 			errno = ETIMEDOUT;
 			return false;
@@ -89,7 +88,6 @@ bool cTBSource::TimedWrite(const void *Buffer, size_t Length, uint TimeoutMs) {
 ssize_t cTBSource::ReadUntil(void *Buffer, size_t Length, const char *Seq,
 		uint TimeoutMs) {
 	char *offs;
-	time_t st;
 	int seqlen, ms;
 	size_t olen;
 	cTBSelect sel;
@@ -108,7 +106,7 @@ ssize_t cTBSource::ReadUntil(void *Buffer, size_t Length, const char *Seq,
 		return olen;
 	}
 
-	st = time_ms();
+	cTimeMs starttime;
 	ms = TimeoutMs;
 	while (m_LineBuffer.Length() < BUFSIZ) {
 		int b;
@@ -142,7 +140,7 @@ ssize_t cTBSource::ReadUntil(void *Buffer, size_t Length, const char *Seq,
 			}
 		}
 
-		ms -= time_ms() - st;
+		ms = TimeoutMs - starttime.Elapsed();
 		if (ms <= 0) {
 			errno = ETIMEDOUT;
 			return -1;

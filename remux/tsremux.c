@@ -80,7 +80,7 @@ uchar *cTSRemux::Process(const uchar *Data, int &Count, int &Result) {
 
   // Check for frame borders:
 
-  if (m_ResultCount >= MINVIDEODATA) {
+  if (m_ResultCount > 0) {
      for (int i = 0; i < m_ResultCount; i++) {
          if (m_ResultBuffer[i] == 0 && m_ResultBuffer[i + 1] == 0 && m_ResultBuffer[i + 2] == 1) {
             switch (m_ResultBuffer[i + 3]) {

@@ -1,5 +1,5 @@
 /*
- *  $Id: filter.c,v 1.1 2004/12/30 22:44:04 lordjaxom Exp $
+ *  $Id: filter.c,v 1.2 2005/02/08 13:59:16 lordjaxom Exp $
  */
 
 #include "client/filter.h"
@@ -82,32 +82,9 @@ cStreamdevFilter *cStreamdevFilters::Matches(u_short Pid, u_char Tid) {
 }
 
 void cStreamdevFilters::Put(const uchar *Data) {
-	static time_t firsterr = 0;
-	static int errcnt = 0;
-	static bool showerr = true;
-
 	int p = m_RingBuffer->Put(Data, TS_SIZE);
-	if (p != TS_SIZE) {
-		++errcnt;
-		if (showerr) {
-			if (firsterr == 0)
-				firsterr = time_ms();
-			else if (firsterr + BUFOVERTIME > time_ms() && errcnt > BUFOVERCOUNT) {
-				esyslog("ERROR: too many buffer overflows, logging stopped");
-				showerr = false;
-				firsterr = time_ms();
-			}
-		} else if (firsterr + BUFOVERTIME < time_ms()) {
-			showerr = true;
-			firsterr = 0;
-			errcnt = 0;
-		}
-
-		if (showerr)
-			esyslog("ERROR: ring buffer overflow (%d bytes dropped)", TS_SIZE - p);
-		else
-			firsterr = time_ms();
-	}
+	if (p != TS_SIZE)
+		m_RingBuffer->ReportOverflow(TS_SIZE - p);
 }
 
 void cStreamdevFilters::Action(void) {

@@ -1,5 +1,5 @@
 /*
- *  $Id: livefilter.c,v 1.1 2004/12/30 22:44:27 lordjaxom Exp $
+ *  $Id: livefilter.c,v 1.2 2005/02/08 13:59:16 lordjaxom Exp $
  */
 
 #include "server/livefilter.h"
@@ -15,12 +15,8 @@ cStreamdevLiveFilter::cStreamdevLiveFilter(cStreamdevLiveStreamer *Streamer) {
 cStreamdevLiveFilter::~cStreamdevLiveFilter() {
 }
 
-void cStreamdevLiveFilter::Process(u_short Pid, u_char Tid, const u_char *Data,
-		int Length) {
-	static time_t firsterr = 0;
-	static int errcnt = 0;
-	static bool showerr = true;
-
+void cStreamdevLiveFilter::Process(u_short Pid, u_char Tid, const u_char *Data, int Length) 
+{
 	uchar buffer[TS_SIZE];
 	int length = Length;
 	int pos = 0;
@@ -37,27 +33,8 @@ void cStreamdevLiveFilter::Process(u_short Pid, u_char Tid, const u_char *Data,
 		pos += chunk;
 
 		int p = m_Streamer->Put(buffer, TS_SIZE);
-		if (p != TS_SIZE) {
-			++errcnt;
-			if (showerr) {
-				if (firsterr == 0)
-					firsterr = time_ms();
-				else if (firsterr + BUFOVERTIME > time_ms() && errcnt > BUFOVERCOUNT) {
-					esyslog("ERROR: too many buffer overflows, logging stopped");
-					showerr = false;
-					firsterr = time_ms();
-				}
-			} else if (firsterr + BUFOVERTIME < time_ms()) {
-				showerr = true;
-				firsterr = 0;
-				errcnt = 0;
-			}
-
-			if (showerr)
-				esyslog("ERROR: ring buffer overflow (%d bytes dropped)", TS_SIZE - p);
-			else
-				firsterr = time_ms();
-		}
+		if (p != TS_SIZE)
+			m_Streamer->ReportOverflow(TS_SIZE - p);
 	}
 }
 

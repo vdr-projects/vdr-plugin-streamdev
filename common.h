@@ -1,5 +1,5 @@
 /*
- *  $Id: common.h,v 1.1 2004/12/30 22:43:55 lordjaxom Exp $
+ *  $Id: common.h,v 1.2 2005/02/08 13:59:16 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_COMMON_H
@@ -50,7 +50,7 @@ cChannel *ChannelFromString(char *String);
 #define BUFOVERTIME  5000
 #define BUFOVERCOUNT 100
 
-#define STREAMDEVHOSTS AddDirectory(cPlugin::ConfigDirectory(), \
+#define STREAMDEVHOSTS (const char*)AddDirectory(cPlugin::ConfigDirectory(), \
                                     "streamdevhosts.conf")
 
 #define POLLFAIL esyslog("Streamdev: Polling failed: %s", strerror(errno))

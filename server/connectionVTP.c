@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.1 2004/12/30 22:44:21 lordjaxom Exp $
+ *  $Id: connectionVTP.c,v 1.2 2005/02/08 13:59:16 lordjaxom Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -284,11 +284,11 @@ bool cConnectionVTP::CmdABRT(char *Opts) {
 	if (ep == Opts || (*ep != '\0' && *ep != ' '))
 		return Respond(500, "Use: ABRT Id");
 
-	time_t st = time_ms();
+	cTimeMs starttime;
 	if (id == siLive)
 		DELETENULL(m_LiveStreamer);
 
-	Dprintf("ABRT took %ld ms\n", time_ms() - st);
+	Dprintf("ABRT took %ld ms\n", starttime.Elapsed());
 	DELETENULL(m_DataSockets[id]);
 	return Respond(220, "Data connection closed");
 }
@@ -422,7 +422,7 @@ bool cConnectionVTP::CmdLSTT(char *Option) {
      if (isnumber(Option)) {
         cTimer *timer = Timers.Get(strtol(Option, NULL, 10) - 1);
         if (timer)
-           Reply(250, "%d %s", timer->Index() + 1, timer->ToText(true));
+           Reply(250, "%d %s", timer->Index() + 1, (const char*)timer->ToText(true));
         else
            Reply(501, "Timer \"%s\" not defined", Option);
         }
@@ -433,7 +433,7 @@ bool cConnectionVTP::CmdLSTT(char *Option) {
      for (int i = 0; i < Timers.Count(); i++) {
          cTimer *timer = Timers.Get(i);
         if (timer)
-           Reply(i < Timers.Count() - 1 ? -250 : 250, "%d %s", timer->Index() + 1, timer->ToText(true));
+           Reply(i < Timers.Count() - 1 ? -250 : 250, "%d %s", timer->Index() + 1, (const char*)timer->ToText(true));
         else
            Reply(501, "Timer \"%d\" not found", i + 1);
          }
@@ -478,7 +478,7 @@ bool cConnectionVTP::CmdMODT(char *Option) {
            isyslog("timer %d modified (%s)", timer->Index() + 1, 
 							 timer->HasFlags(tfActive) ? "active" : "inactive");
 #endif
-           Reply(250, "%d %s", timer->Index() + 1, timer->ToText(true));
+           Reply(250, "%d %s", timer->Index() + 1, (const char*)timer->ToText(true));
            }
         else
            Reply(501, "Timer \"%d\" not defined", n);
@@ -501,11 +501,11 @@ bool cConnectionVTP::CmdNEWT(char *Option) {
            Timers.Add(timer);
            Timers.Save();
            isyslog("timer %d added", timer->Index() + 1);
-           Reply(250, "%d %s", timer->Index() + 1, timer->ToText(true));
+           Reply(250, "%d %s", timer->Index() + 1, (const char*)timer->ToText(true));
            EXIT_WRAPPER();
            }
         else
-           Reply(550, "Timer already defined: %d %s", t->Index() + 1, t->ToText(true));
+           Reply(550, "Timer already defined: %d %s", t->Index() + 1, (const char*)t->ToText(true));
         }
      else
         Reply(501, "Error in timer settings");

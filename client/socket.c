@@ -1,5 +1,5 @@
 /*
- *  $Id: socket.c,v 1.1 2004/12/30 22:44:04 lordjaxom Exp $
+ *  $Id: socket.c,v 1.2 2005/02/08 13:59:16 lordjaxom Exp $
  */
  
 #include <tools/select.h>
@@ -39,15 +39,12 @@ cTBSocket *cClientSocket::DataSocket(eSocketId Id) const {
 
 bool cClientSocket::Command(const cTBString &Command, uint Expected, 
 		uint TimeoutMs) {
-	cTBString pkt;
-	time_t st;
-
 	errno = 0;
 
-	pkt = Command + "\015\012";
+	cTBString pkt = Command + "\015\012";
 	Dprintf("OUT: |%s|\n", (const char*)Command);
 
-	st = time_ms();
+	cTimeMs starttime;
 	if (!TimedWrite((const char*)pkt, pkt.Length(), TimeoutMs)) {
 		esyslog("Streamdev: Lost connection to %s:%d: %s", 
 				(const char*)RemoteIp(), RemotePort(), strerror(errno));
@@ -55,8 +52,9 @@ bool cClientSocket::Command(const cTBString &Command, uint Expected,
 		return false;
 	}
 
-	if (Expected != 0) {
-		TimeoutMs -= time_ms() - st;
+	uint64 elapsed = starttime.Elapsed();
+	if (Expected != 0) { // XXX+ What if elapsed > TimeoutMs?
+		TimeoutMs -= elapsed;
 		return Expect(Expected, NULL, TimeoutMs);
 	}
 

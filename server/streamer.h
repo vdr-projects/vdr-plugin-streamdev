@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.h,v 1.1 2004/12/30 22:44:21 lordjaxom Exp $
+ *  $Id: streamer.h,v 1.2 2005/02/08 13:59:16 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_STREAMER_H
@@ -34,6 +34,7 @@ public:
 	virtual void Stop(void);
 
 	int Put(uchar *Data, int Length) { return m_RingBuffer->Put(Data, Length); }
+	void ReportOverflow(int Bytes) { m_RingBuffer->ReportOverflow(Bytes); }
 
 	virtual void Detach(void) = 0;
 	virtual void Attach(void) = 0;

@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.c,v 1.1 2004/12/30 22:44:21 lordjaxom Exp $
+ *  $Id: streamer.c,v 1.2 2005/02/08 13:59:16 lordjaxom Exp $
  */
  
 #include <vdr/ringbuffer.h>
@@ -13,7 +13,7 @@
 #include "tools/socket.h"
 #include "common.h"
 
-#define VIDEOBUFSIZE MEGABYTE(3)
+#define VIDEOBUFSIZE MEGABYTE(4)
 #define MAXBLOCKSIZE TS_SIZE*10
 
 cStreamdevStreamer::cStreamdevStreamer(const char *Name)

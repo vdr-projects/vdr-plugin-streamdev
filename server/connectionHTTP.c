@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.c,v 1.1 2004/12/30 22:44:19 lordjaxom Exp $
+ *  $Id: connectionHTTP.c,v 1.2 2005/02/08 13:59:16 lordjaxom Exp $
  */
  
 #include "server/connectionHTTP.h"
@@ -99,7 +99,7 @@ void cConnectionHTTP::Flushed(void) {
 		else
 			line.Format("<li><a href=\"http://%s:%d/%s\">%s</a></li>", 
 				(const char*)LocalIp(), StreamdevServerSetup.HTTPServerPort, 
-				m_ListChannel->GetChannelID().ToString(), m_ListChannel->Name());
+				(const char*)m_ListChannel->GetChannelID().ToString(), m_ListChannel->Name());
 		if (!Respond(line))
 			DeferClose();
 		m_ListChannel = Channels.Next(m_ListChannel);

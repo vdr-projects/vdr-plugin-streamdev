@@ -24,18 +24,16 @@ protected:
 	virtual void Receive(uchar *Data, int Length);
 
 public:
-	cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer, int Priority, int Ca,
-			int Pid1  = 0, int Pid2  = 0, int Pid3  = 0, int Pid4  = 0,
-			int Pid5  = 0, int Pid6  = 0, int Pid7  = 0, int Pid8  = 0,
-			int Pid9  = 0, int Pid10 = 0, int Pid11 = 0, int Pid12 = 0,
-			int Pid13 = 0, int Pid14 = 0, int Pid15 = 0, int Pid16 = 0);
+	cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer, int Ca, int Priority,
+	                       const int *Pids);
 	virtual ~cStreamdevLiveReceiver();
 };
 
 class cStreamdevLiveStreamer: public cStreamdevStreamer {
 private:
 	int                     m_Priority;
-	int                     m_Pids[MAXRECEIVEPIDS];
+	int                     m_Pids[MAXRECEIVEPIDS + 1];
+	int                     m_NumPids;
 	const cChannel         *m_Channel;
 	cDevice                *m_Device;
 	cStreamdevLiveReceiver *m_Receiver;

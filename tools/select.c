@@ -16,7 +16,6 @@ cTBSelect::~cTBSelect() {
 
 int cTBSelect::Select(uint TimeoutMs) {
 	struct timeval tv;
-	time_t st, et;
 	ssize_t res;
 	int ms;
 
@@ -26,15 +25,13 @@ int cTBSelect::Select(uint TimeoutMs) {
 	if (TimeoutMs == 0)
 		return ::select(m_MaxFiled + 1, &m_Rfds, &m_Wfds, NULL, &tv);
 
-	st = time_ms();
+	cTimeMs starttime;
 	ms = TimeoutMs;
 	while (ms > 0 && (res = ::select(m_MaxFiled + 1, &m_Rfds, &m_Wfds, NULL, 
 			&tv)) == -1 && errno == EINTR) {
-		et = time_ms();
-		ms -= et - st;
+		ms = TimeoutMs - starttime.Elapsed();
 		tv.tv_usec = (ms % 1000) * 1000;
 		tv.tv_sec = ms / 1000;
-		st = et;
 	}
 	if (ms <= 0) {
 		errno = ETIMEDOUT;

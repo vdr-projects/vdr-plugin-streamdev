@@ -1,5 +1,5 @@
 /*
- *  $Id: remote.c,v 1.1 2004/12/30 22:44:02 lordjaxom Exp $
+ *  $Id: remote.c,v 1.2 2005/02/08 13:59:16 lordjaxom Exp $
  */
  
 #include "client/remote.h"
@@ -457,7 +457,7 @@ const char *cRemoteTimer::ToText(void) {
 		summary = strreplace(strdup(m_Summary), ':', '|');
 
 	asprintf(&m_Buffer, "%d:%s:%s:%04d:%04d:%d:%d:%s:%s", m_Active, 
-			Channel()->GetChannelID().ToString(), PrintDay(m_Day, m_FirstDay), 
+			(const char*)Channel()->GetChannelID().ToString(), PrintDay(m_Day, m_FirstDay), 
 			m_Start, m_Stop, m_Priority, m_Lifetime, m_File, summary ? summary : "");
 
 	if (summary != NULL)

@@ -5,55 +5,29 @@
 #include "remux/ts2es.h"
 #include "common.h"
 
-cStreamdevLiveReceiver::cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer,
-		int Ca, int Priority, 
-		int Pid1,  int Pid2,  int Pid3,  int Pid4,
-		int Pid5,  int Pid6,  int Pid7,  int Pid8,
-		int Pid9,  int Pid10, int Pid11, int Pid12,
-		int Pid13, int Pid14, int Pid15, int Pid16):
-		cReceiver(Ca, Priority, 16, 
-			Pid1, Pid2,  Pid3,  Pid4,  Pid5,  Pid6,  Pid7,  Pid8,
-			Pid9, Pid10, Pid11, Pid12, Pid13, Pid14, Pid15, Pid16) {
-	m_Streamer = Streamer;
+cStreamdevLiveReceiver::cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer, int Ca, 
+                                               int Priority, const int *Pids):
+		cReceiver(Ca, Priority, 0, Pids),
+		m_Streamer(Streamer)
+{
 }
 
-cStreamdevLiveReceiver::~cStreamdevLiveReceiver() {
+cStreamdevLiveReceiver::~cStreamdevLiveReceiver() 
+{
 	Dprintf("Killing live receiver\n");
 	Detach();
 }
 
 void cStreamdevLiveReceiver::Receive(uchar *Data, int Length) {
-	static time_t firsterr = 0;
-	static int errcnt = 0;
-	static bool showerr = true;
-
 	int p = m_Streamer->Put(Data, Length);
-	if (p != Length) {
-		++errcnt;
-		if (showerr) {
-			if (firsterr == 0)
-				firsterr = time_ms();
-			else if (firsterr + BUFOVERTIME > time_ms() && errcnt > BUFOVERCOUNT) {
-				esyslog("ERROR: too many buffer overflows, logging stopped");
-				showerr = false;
-				firsterr = time_ms();
-			}
-		} else if (firsterr + BUFOVERTIME < time_ms()) {
-			showerr = true;
-			firsterr = 0;
-			errcnt = 0;
-		}
-
-		if (showerr)
-			esyslog("ERROR: ring buffer overflow (%d bytes dropped)", Length - p);
-		else
-			firsterr = time_ms();
-	}
+	if (p != Length)
+		m_Streamer->ReportOverflow(Length - p);
 }
 
 cStreamdevLiveStreamer::cStreamdevLiveStreamer(int Priority):
 		cStreamdevStreamer("Live streamer") {
 	m_Priority   = Priority;
+	m_NumPids    = 0;
 	m_Channel    = NULL;
 	m_Device     = NULL;
 	m_Receiver   = NULL;
@@ -91,40 +65,33 @@ void cStreamdevLiveStreamer::Start(cTBSocket *Socket) {
 
 bool cStreamdevLiveStreamer::SetPid(int Pid, bool On) {
 	int idx;
-	bool haspids = false;
 	
 	if (On) {
-		for (idx = 0; idx < MAXRECEIVEPIDS; ++idx) {
+		for (idx = 0; idx < m_NumPids; ++idx) {
 			if (m_Pids[idx] == Pid)
 				return true; // No change needed
-			else if (m_Pids[idx] == 0) {
-				m_Pids[idx] = Pid;
-				haspids = true;
-				break;
-			}
 		}
 
-		if (idx == MAXRECEIVEPIDS) {
+		if (m_NumPids == MAXRECEIVEPIDS) {
 			esyslog("ERROR: Streamdev: No free slot to receive pid %d\n", Pid);
 			return false;
 		}
+
+		m_Pids[m_NumPids++] = Pid;
+		m_Pids[m_NumPids] = 0;
 	} else {
-		for (idx = 0; idx < MAXRECEIVEPIDS; ++idx) {
-			if (m_Pids[idx] == Pid)
-				m_Pids[idx] = 0;
-			else if (m_Pids[idx] != 0)
-				haspids = true;
+		for (idx = 0; idx < m_NumPids; ++idx) {
+			if (m_Pids[idx] == Pid) {
+				--m_NumPids;
+				memmove(&m_Pids[idx], &m_Pids[idx + 1], sizeof(int) * (m_NumPids - idx));
+			}
 		}
 	}
 
 	DELETENULL(m_Receiver);
-	if (haspids) {
+	if (m_NumPids > 0) {
 		Dprintf("Creating Receiver to respect changed pids\n");
-		m_Receiver = new cStreamdevLiveReceiver(this, m_Channel->Ca(), m_Priority, 
-				m_Pids[0],  m_Pids[1],  m_Pids[2],  m_Pids[3], 
-				m_Pids[4],  m_Pids[5],  m_Pids[6],  m_Pids[7], 
-				m_Pids[8],  m_Pids[9],  m_Pids[10], m_Pids[11], 
-				m_Pids[12], m_Pids[13], m_Pids[14], m_Pids[15]);
+		m_Receiver = new cStreamdevLiveReceiver(this, m_Channel->Ca(), m_Priority, m_Pids);
 		if (m_Device != NULL) {
 			Dprintf("Attaching new receiver\n");
 			m_Device->AttachReceiver(m_Receiver);
@@ -141,32 +108,32 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, int StreamType,
 	switch (StreamType) {
 	case stES: 
 		{
-			int pid = ISRADIO(Channel) ? Channel->Apid1() : Channel->Vpid();
+			int pid = ISRADIO(Channel) ? Channel->Apid(0) : Channel->Vpid();
 			m_Remux = new cTS2ESRemux(pid);
 			return SetPid(pid, true);
 		}
 
 	case stPES: 
-		m_Remux = new cTS2PSRemux(Channel->Vpid(), Channel->Apid1(), 
-				Channel->Apid2(), Channel->Dpid1(), 0, false);
+		m_Remux = new cTS2PSRemux(Channel->Vpid(), Channel->Apid(0), Channel->Apid(1), 
+		                          Channel->Dpid(0), 0, false);
 		return SetPid(Channel->Vpid(),  true)
-				&& SetPid(Channel->Apid1(), true)
-				&& SetPid(Channel->Apid2(), true)
-				&& SetPid(Channel->Dpid1(), true);
+		    && SetPid(Channel->Apid(0), true)
+		    && SetPid(Channel->Apid(1), true)
+		    && SetPid(Channel->Dpid(0), true);
 		break;
 
 	case stPS:  
-		m_Remux = new cTS2PSRemux(Channel->Vpid(), Channel->Apid1(), 0, 0, 0, true);
+		m_Remux = new cTS2PSRemux(Channel->Vpid(), Channel->Apid(0), 0, 0, 0, true);
 		return SetPid(Channel->Vpid(),  true)
-				&& SetPid(Channel->Apid1(), true);
+		    && SetPid(Channel->Apid(0), true);
 		break;
 
 	case stTS:
 		if (!StreamPIDS) {
 			return SetPid(Channel->Vpid(),  true)
-					&& SetPid(Channel->Apid1(), true)
-					&& SetPid(Channel->Apid2(), true)
-					&& SetPid(Channel->Dpid1(), true);
+			    && SetPid(Channel->Apid(0), true)
+			    && SetPid(Channel->Apid(1), true)
+			    && SetPid(Channel->Dpid(0), true);
 		}
 		Dprintf("pid streaming mode\n");
 		return true;
