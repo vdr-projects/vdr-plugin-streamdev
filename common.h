@@ -1,5 +1,5 @@
 /*
- *  $Id: common.h,v 1.4 2005/02/10 22:24:26 lordjaxom Exp $
+ *  $Id: common.h,v 1.5 2005/02/11 16:44:14 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_COMMON_H
@@ -42,7 +42,7 @@ class cChannel;
 
 char *GetNextLine(char *String, uint Length, uint &Offset);
 
-const cChannel *ChannelFromString(char *String, int *Apid = NULL);
+const cChannel *ChannelFromString(const char *String, int *Apid = NULL);
 
 /* Disable logging if BUFCOUNT buffer overflows occur within BUFOVERTIME
    milliseconds. Enable logging again if there is no error within BUFOVERTIME
@@ -65,9 +65,10 @@ enum eStreamType {
 	stPES,
 	stPS,
 	stES,
+	stExtern,
 	stTSPIDS,
 
-#define st_CountSetup (stES+1)
+#define st_CountSetup (stExtern+1)
 #define st_Count (stTSPIDS+1)
 };
 

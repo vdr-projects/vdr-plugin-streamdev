@@ -2,21 +2,28 @@
 #define VDR_STREAMDEV_TS2PESREMUX_H
 
 #include "remux/tsremux.h"
+#include <vdr/remux.h>
+#include <vdr/ringbuffer.h>
 
 class cTS2PS;
 
 class cTS2PSRemux: public cTSRemux {
 private:
-	int m_VPid, m_APid1, m_APid2, m_DPid1, m_DPid2;
-	cTS2PS *m_VRemux, *m_ARemux1, *m_ARemux2, *m_DRemux1, *m_DRemux2;
-
-protected:	
-	virtual void PutTSPacket(int Pid, const uint8_t *Data);
-
+	int                m_NumTracks;
+	cTS2PS            *m_Remux[MAXTRACKS];
+	cRingBufferLinear *m_ResultBuffer;
+	int                m_ResultSkipped;
+	int                m_Skipped;
+	bool               m_Synced;
+	bool               m_IsRadio;
+	
 public:
-	cTS2PSRemux(int VPid, int APid1, int APid2, int DPid1, int DPid2, 
-			bool PS = false);
+	cTS2PSRemux(int VPid, const int *Apids, const int *Dpids, const int *Spids);
 	virtual ~cTS2PSRemux();
+
+	int Put(const uchar *Data, int Count);
+	uchar *Get(int &Count);
+	void Del(int Count) { m_ResultBuffer->Del(Count); }
 };
 
 #endif // VDR_STREAMDEV_TS2PESREMUX_H

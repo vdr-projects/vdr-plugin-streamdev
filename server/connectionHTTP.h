@@ -1,11 +1,12 @@
 /*
- *  $Id: connectionHTTP.h,v 1.2 2005/02/10 22:24:26 lordjaxom Exp $
+ *  $Id: connectionHTTP.h,v 1.3 2005/02/11 16:44:15 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVERS_CONNECTIONHTTP_H
 #define VDR_STREAMDEV_SERVERS_CONNECTIONHTTP_H
 
 #include "connection.h"
+#include "server/livestreamer.h"
 
 #include <tools/select.h>
 
@@ -17,27 +18,39 @@ private:
 	enum eHTTPStatus {
 		hsRequest,
 		hsHeaders,
-		hsTransfer,
-		hsListing,
+		hsBody,
+		hsFinished,
 	};
 
-	const cChannel         *m_Channel;
-	int                     m_Apid;
-	const cChannel         *m_ListChannel;
-	cStreamdevLiveStreamer *m_LiveStreamer;
-	eStreamType             m_StreamType;
-	eHTTPStatus             m_Status;
-	bool                    m_Startup;
+	enum eHTTPJob {
+		hjTransfer,
+		hjListing,
+	};
+
+	std::string                       m_Request;
+	//std::map<std::string,std::string> m_Headers; TODO: later?
+	eHTTPStatus                       m_Status;
+	eHTTPJob                          m_Job;
+	// job: transfer
+	cStreamdevLiveStreamer           *m_LiveStreamer;
+	const cChannel                   *m_Channel;
+	int                               m_Apid;
+	eStreamType                       m_StreamType;
+	// job: listing
+	const cChannel                   *m_ListChannel;
+
+protected:
+	bool ProcessRequest(void);
 
 public:
 	cConnectionHTTP(void);
 	virtual ~cConnectionHTTP();
 
-	virtual void Detach(void);
-	virtual void Attach(void);
+	virtual void Attach(void) { if (m_LiveStreamer != NULL) m_LiveStreamer->Attach(); }
+	virtual void Detach(void) { if (m_LiveStreamer != NULL) m_LiveStreamer->Detach(); }
 
 	virtual bool Command(char *Cmd);
-	bool CmdGET(char *Opts);
+	bool CmdGET(const std::string &Opts);
 
 	virtual void Flushed(void);
 };

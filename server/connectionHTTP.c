@@ -1,75 +1,80 @@
 /*
- *  $Id: connectionHTTP.c,v 1.6 2005/02/10 22:24:26 lordjaxom Exp $
+ *  $Id: connectionHTTP.c,v 1.7 2005/02/11 16:44:15 lordjaxom Exp $
  */
  
 #include "server/connectionHTTP.h"
-#include "server/livestreamer.h"
 #include "server/setup.h"
 
-cConnectionHTTP::cConnectionHTTP(void): cServerConnection("HTTP") {
-	m_Channel      = NULL;
-	m_Apid         = 0;
-	m_ListChannel  = NULL;
-	m_LiveStreamer = NULL;
-	m_Status       = hsRequest;
-	m_StreamType   = (eStreamType)StreamdevServerSetup.HTTPStreamType;
-	m_Startup      = false;
+cConnectionHTTP::cConnectionHTTP(void): 
+		cServerConnection("HTTP"),
+		m_Status(hsRequest),
+		m_LiveStreamer(NULL),
+		m_Channel(NULL),
+		m_Apid(0),
+		m_StreamType((eStreamType)StreamdevServerSetup.HTTPStreamType),
+		m_ListChannel(NULL)
+{
+	Dprintf("constructor hsRequest\n");
 }
 
-cConnectionHTTP::~cConnectionHTTP() {
-	if (m_LiveStreamer != NULL) delete m_LiveStreamer;
+cConnectionHTTP::~cConnectionHTTP() 
+{
+	delete m_LiveStreamer;
 }
 
-void cConnectionHTTP::Detach(void) {
-	if (m_LiveStreamer != NULL) m_LiveStreamer->Detach();
-}
-
-void cConnectionHTTP::Attach(void) {
-	if (m_LiveStreamer != NULL) m_LiveStreamer->Attach();
-}
-
-bool cConnectionHTTP::Command(char *Cmd) {
+bool cConnectionHTTP::Command(char *Cmd) 
+{
+	Dprintf("command %s\n", Cmd);
 	switch (m_Status) {
 	case hsRequest:
-		if (strncmp(Cmd, "GET ", 4) == 0) return CmdGET(Cmd + 4);
-		else {
-			DeferClose();
-			m_Status = hsTransfer; // Ignore following lines
-			return Respond("HTTP/1.0 400 Bad Request");
-		}
-		break;
+		Dprintf("Request\n");
+		m_Request = Cmd;
+		m_Status = hsHeaders;
+		return true;
 
 	case hsHeaders:
 		if (*Cmd == '\0') {
-			if (m_ListChannel != NULL) {
-				m_Status = hsListing;
-				return Respond("HTTP/1.0 200 OK")
-						&& Respond("Content-Type: text/html")
-						&& Respond("")
-						&& Respond("<html><head><title>VDR Channel Listing</title></head>")
-						&& Respond("<body><ul>");
-			} else if (m_Channel == NULL) {
+			m_Status = hsBody;
+			return ProcessRequest();
+		}
+		Dprintf("header\n");
+		return true;
+	}
+	return false; // ??? shouldn't happen
+}
+
+bool cConnectionHTTP::ProcessRequest(void) {
+	Dprintf("process\n");
+	if (m_Request.substr(0, 4) == "GET " && CmdGET(m_Request.substr(4))) {
+		switch (m_Job) {
+		case hjListing:
+			return Respond("HTTP/1.0 200 OK")
+			    && Respond("Content-Type: text/html")
+			    && Respond("")
+			    && Respond("<html><head><title>VDR Channel Listing</title></head>")
+			    && Respond("<body><ul>");
+
+		case hjTransfer:
+			if (m_Channel == NULL) {
 				DeferClose();
 				return Respond("HTTP/1.0 404 not found");
 			}
-			m_Status = hsTransfer;
+			
 			m_LiveStreamer = new cStreamdevLiveStreamer(0);
 			cDevice *device = GetDevice(m_Channel, 0);
 			if (device != NULL) {
 				device->SwitchChannel(m_Channel, false);
 				if (m_LiveStreamer->SetChannel(m_Channel, m_StreamType, m_Apid)) {
 					m_LiveStreamer->SetDevice(device);
-					m_Startup = true;
-					if (m_StreamType == stES && (m_Channel->Vpid() == 0 
-							|| m_Channel->Vpid() == 1 || m_Channel->Vpid() == 0x1FFF)) {
+					if (m_StreamType == stES && (m_Apid != 0 || ISRADIO(m_Channel))) {
 						return Respond("HTTP/1.0 200 OK")
-								&& Respond("Content-Type: audio/mpeg")
-								&& Respond((std::string)"icy-name: " + m_Channel->Name())
-								&& Respond("");
+						    && Respond("Content-Type: audio/mpeg")
+						    && Respond((std::string)"icy-name: " + m_Channel->Name())
+						    && Respond("");
 					} else {
 						return Respond("HTTP/1.0 200 OK")
-								&& Respond("Content-Type: video/mpeg")
-								&& Respond("");
+						    && Respond("Content-Type: video/mpeg")
+						    && Respond("");
 					}
 				}
 			}
@@ -77,78 +82,110 @@ bool cConnectionHTTP::Command(char *Cmd) {
 			DeferClose();
 			return Respond("HTTP/1.0 409 Channel not available");
 		}
-		break;
-
-	default:
-		break;
 	}
-	return true;
+
+	DeferClose();
+	return Respond("HTTP/1.0 400 Bad Request");
 }
 
 void cConnectionHTTP::Flushed(void) {
-	if (m_Status == hsListing) {
+	std::string line;
+
+	if (m_Status != hsBody)
+		return;
+
+	switch (m_Job) {
+	case hjListing:
 		if (m_ListChannel == NULL) {
 			Respond("</ul></body></html>");
 			DeferClose();
+			m_Status = hsFinished;
 			return;
 		}
 
-		std::string line;
 		if (m_ListChannel->GroupSep())
 			line = (std::string)"<li>--- " + m_ListChannel->Name() + "---</li>";
-		else
+		else {
+			int index = 1;
 			line = (std::string)"<li><a href=\"http://" + LocalIp() + ":" 
 			     + (const char*)itoa(StreamdevServerSetup.HTTPServerPort) + "/"
+			     + StreamTypes[m_StreamType] + "/"
 			     + (const char*)m_ListChannel->GetChannelID().ToString() + "\">"
-			     + m_ListChannel->Name() + "</a></li>";
+			     + m_ListChannel->Name() + "</a> ";
+			for (int i = 0; m_ListChannel->Apid(i) != 0; ++i, ++index) {
+				line += "<a href=\"http://" + LocalIp() + ":"
+				     + (const char*)itoa(StreamdevServerSetup.HTTPServerPort) + "/"
+				     + StreamTypes[m_StreamType] + "/"
+				     + (const char*)m_ListChannel->GetChannelID().ToString() + "+"
+				     + (const char*)itoa(index) + "\">("
+				     + m_ListChannel->Alang(i) + ")</a> ";
+			}
+			for (int i = 0; m_ListChannel->Dpid(i) != 0; ++i, ++index) {
+				line += "<a href=\"http://" + LocalIp() + ":"
+				     + (const char*)itoa(StreamdevServerSetup.HTTPServerPort) + "/"
+				     + StreamTypes[m_StreamType] + "/"
+				     + (const char*)m_ListChannel->GetChannelID().ToString() + "+"
+				     + (const char*)itoa(index) + "\">("
+				     + m_ListChannel->Dlang(i) + ")</a> ";
+			}
+			line += "</li>";
+		}
 		if (!Respond(line))
 			DeferClose();
 		m_ListChannel = Channels.Next(m_ListChannel);
-	} else if (m_Startup) {
+		break;
+
+	case hjTransfer:
 		Dprintf("streamer start\n");
 		m_LiveStreamer->Start(this);
-		m_Startup = false;
+		m_Status = hsFinished;
+		break;
 	}
 }
 
-bool cConnectionHTTP::CmdGET(char *Opts) {
+bool cConnectionHTTP::CmdGET(const std::string &Opts) {
+	const char *sp = Opts.c_str(), *ptr = sp, *ep;
 	const cChannel *chan;
-	char *ep;
-	int apid = 0;
+	int apid = 0, pos;
 
-	Opts = skipspace(Opts);
-	while (*Opts == '/')
-		++Opts;
+	ptr = skipspace(ptr);
+	while (*ptr == '/')
+		++ptr;
 
-	if (strncasecmp(Opts, "PS/", 3) == 0) {
+	if (strncasecmp(ptr, "PS/", 3) == 0) {
 		m_StreamType = stPS;
-		Opts+=3;
-	} else if (strncasecmp(Opts, "PES/", 4) == 0) {
+		ptr += 3;
+	} else if (strncasecmp(ptr, "PES/", 4) == 0) {
 		m_StreamType = stPES;
-		Opts+=4;
-	} else if (strncasecmp(Opts, "TS/", 3) == 0) {
+		ptr += 4;
+	} else if (strncasecmp(ptr, "TS/", 3) == 0) {
 		m_StreamType = stTS;
-		Opts+=3;
-	} else if (strncasecmp(Opts, "ES/", 3) == 0) {
+		ptr += 3;
+	} else if (strncasecmp(ptr, "ES/", 3) == 0) {
 		m_StreamType = stES;
-		Opts+=3;
+		ptr += 3;
+	} else if (strncasecmp(ptr, "Extern/", 3) == 0) {
+		m_StreamType = stExtern;
+		ptr += 7;
 	}
 
-	while (*Opts == '/')
-		++Opts;
-	for (ep = Opts + strlen(Opts); ep >= Opts && !isspace(*ep); --ep) 
+	while (*ptr == '/')
+		++ptr;
+	for (ep = ptr + strlen(ptr); ep >= ptr && !isspace(*ep); --ep) 
 		;
-	*ep = '\0';
+
+	std::string filespec = Opts.substr(ptr - sp, ep - ptr);
+	Dprintf("substr: %s\n", filespec.c_str());
 
 	Dprintf("before channelfromstring\n");
-	if (strncmp(Opts, "channels.htm", 12) == 0) {
+	if (filespec == "" || filespec.substr(0, 12) == "channels.htm") {
 		m_ListChannel = Channels.First();
-		m_Status = hsHeaders;
-	} else if ((chan = ChannelFromString(Opts, &apid)) != NULL) {
+		m_Job = hjListing;
+	} else if ((chan = ChannelFromString(filespec.c_str(), &apid)) != NULL) {
 		m_Channel = chan;
 		m_Apid = apid;
 		Dprintf("Apid is %d\n", apid);
-		m_Status = hsHeaders;
+		m_Job = hjTransfer;
 	}
 	Dprintf("after channelfromstring\n");
 	return true;

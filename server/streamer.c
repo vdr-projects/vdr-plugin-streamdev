@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.c,v 1.6 2005/02/10 22:24:26 lordjaxom Exp $
+ *  $Id: streamer.c,v 1.7 2005/02/11 16:44:15 lordjaxom Exp $
  */
  
 #include <vdr/ringbuffer.h>
@@ -68,6 +68,7 @@ cStreamdevStreamer::cStreamdevStreamer(const char *Name):
 
 cStreamdevStreamer::~cStreamdevStreamer() 
 {
+	Dprintf("Desctructing streamer\n");
 	Stop();
 	delete m_RingBuffer;
 	delete m_Writer;
@@ -83,8 +84,8 @@ void cStreamdevStreamer::Start(cTBSocket *Socket)
 
 void cStreamdevStreamer::Activate(bool On) 
 {
-	Dprintf("activate streamer\n");
 	if (On && !m_Active) {
+		Dprintf("activate streamer\n");
 		m_Writer->Start();
 		cThread::Start();
 	}
@@ -93,10 +94,11 @@ void cStreamdevStreamer::Activate(bool On)
 void cStreamdevStreamer::Stop(void) 
 {
 	if (m_Active) {
-		Dprintf("stopping live streamer\n");
+		Dprintf("stopping streamer\n");
 		m_Active = false;
 		Cancel(3);
 	}
+	DELETENULL(m_Writer);
 }
 
 void cStreamdevStreamer::Action(void) 

@@ -1,4 +1,6 @@
 #include "remux/ts2es.h"
+#include "server/streamer.h"
+#include "libdvbmpeg/transform.h"
 #include "common.h"
 
 // from VDR's remux.c
@@ -8,40 +10,38 @@ class cTS2ES: public ipack {
 	friend void PutES(uint8_t *Buffer, int Size, void *Data);
 
 private:
-	uint8_t *m_ResultBuffer;
-	int *m_ResultCount;
+	cRingBufferLinear *m_ResultBuffer;
 
 public:
-	cTS2ES(uint8_t *ResultBuffer, int *ResultCount);
+	cTS2ES(cRingBufferLinear *ResultBuffer);
 	~cTS2ES();
 
 	void PutTSPacket(const uint8_t *Buffer);
 };
 
-void PutES(uint8_t *Buffer, int Size, void *Data) {
+void PutES(uint8_t *Buffer, int Size, void *Data) 
+{
 	cTS2ES *This = (cTS2ES*)Data;
 	uint8_t payl = Buffer[8] + 9 + This->start - 1;
 	int count = Size - payl;
 
-	if (*This->m_ResultCount + count > RESULTBUFFERSIZE) {
-		esyslog("ERROR: result buffer overflow (%d + %d > %d)", 
-				*This->m_ResultCount, count, RESULTBUFFERSIZE);
-		count = RESULTBUFFERSIZE - *This->m_ResultCount;
-	}
-	memcpy(This->m_ResultBuffer + *This->m_ResultCount, Buffer + payl, count);
-	*This->m_ResultCount += count;
+	int n = This->m_ResultBuffer->Put(Buffer + payl, count);
+	if (n != count)
+		esyslog("ERROR: result buffer overflow, dropped %d out of %d byte", count - n, count);
 	This->start = 1;
 }
 
-cTS2ES::cTS2ES(uint8_t *ResultBuffer, int *ResultCount) {
+cTS2ES::cTS2ES(cRingBufferLinear *ResultBuffer) 
+{
 	m_ResultBuffer = ResultBuffer;
-	m_ResultCount = ResultCount;
 
 	init_ipack(this, IPACKS, PutES, 0);
 	data = (void*)this;
 }
 
-cTS2ES::~cTS2ES() {
+cTS2ES::~cTS2ES() 
+{
+	free_ipack(this);
 }
 
 void cTS2ES::PutTSPacket(const uint8_t *Buffer) {
@@ -73,16 +73,67 @@ void cTS2ES::PutTSPacket(const uint8_t *Buffer) {
 }
 
 cTS2ESRemux::cTS2ESRemux(int Pid):
-		cTSRemux(false) {
-	m_Pid = Pid;
-  m_Remux = new cTS2ES(m_ResultBuffer, &m_ResultCount);
+		m_Pid(Pid),
+		m_ResultBuffer(new cRingBufferLinear(WRITERBUFSIZE, IPACKS)),
+		m_Remux(new cTS2ES(m_ResultBuffer))
+{
+	m_ResultBuffer->SetTimeouts(0, 100);
 }
 
-cTS2ESRemux::~cTS2ESRemux() {
+cTS2ESRemux::~cTS2ESRemux() 
+{
 	delete m_Remux;
+	delete m_ResultBuffer;
 }
 
-void cTS2ESRemux::PutTSPacket(int Pid, const uint8_t *Data) {
-	if (Pid == m_Pid) m_Remux->PutTSPacket(Data);
+int cTS2ESRemux::Put(const uchar *Data, int Count) 
+{
+	int used = 0;
+
+	// Make sure we are looking at a TS packet:
+
+	while (Count > TS_SIZE) {
+		if (Data[0] == TS_SYNC_BYTE && Data[TS_SIZE] == TS_SYNC_BYTE)
+			break;
+		Data++;
+		Count--;
+		used++;
+	}
+
+	if (used)
+		esyslog("ERROR: skipped %d byte to sync on TS packet", used);
+
+	// Convert incoming TS data into ES:
+
+	for (int i = 0; i < Count; i += TS_SIZE) {
+		if (Count - i < TS_SIZE)
+			break;
+		if (Data[i] != TS_SYNC_BYTE)
+			break;
+		if (m_ResultBuffer->Free() < 2 * IPACKS)
+			break; // A cTS2ES might write one full packet and also a small rest
+		int pid = cTSRemux::GetPid(Data + i + 1);
+		if (Data[i + 3] & 0x10) { // got payload
+			if (m_Pid == pid)
+				m_Remux->PutTSPacket(Data + i);
+		}
+		used += TS_SIZE;
+	}
+
+/*
+  // Check if we're getting anywhere here:
+  if (!synced && skipped >= 0) {
+     if (skipped > MAXNONUSEFULDATA) {
+        esyslog("ERROR: no useful data seen within %d byte of video stream", skipped);
+        skipped = -1;
+        if (exitOnFailure)
+           cThread::EmergencyExit(true);
+        }
+     else
+        skipped += used;
+     }
+*/
+
+	return used;
 }
 

@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.h,v 1.4 2005/02/10 22:24:26 lordjaxom Exp $
+ *  $Id: streamer.h,v 1.5 2005/02/11 16:44:15 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_STREAMER_H
@@ -13,7 +13,7 @@ class cTBSocket;
 class cStreamdevStreamer;
 
 #define STREAMERBUFSIZE MEGABYTE(4)
-#define WRITERBUFSIZE KILOBYTE(192)
+#define WRITERBUFSIZE KILOBYTE(256)
 
 // --- cStreamdevWriter -------------------------------------------------------
 

@@ -3,6 +3,7 @@
 #include "server/livestreamer.h"
 #include "remux/ts2ps.h"
 #include "remux/ts2es.h"
+#include "remux/extern.h"
 #include "common.h"
 
 // --- cStreamdevLiveReceiver -------------------------------------------------
@@ -37,15 +38,21 @@ cStreamdevLiveStreamer::cStreamdevLiveStreamer(int Priority):
 		m_Device(NULL),
 		m_Receiver(NULL),
 		m_PESRemux(NULL),
-		m_Remux(NULL)
+		m_ESRemux(NULL),
+		m_PSRemux(NULL),
+		m_ExtRemux(NULL)
 {
 }
 
 cStreamdevLiveStreamer::~cStreamdevLiveStreamer() 
 {
 	Dprintf("Desctructing Live streamer\n");
+	Stop();
 	delete m_Receiver;
-	delete m_Remux;
+	delete m_PESRemux;
+	delete m_ESRemux;
+	delete m_PSRemux;
+	delete m_ExtRemux;
 #if VDRVERSNUM >= 10300
 	//delete m_Filter; TODO
 #endif
@@ -104,7 +111,7 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 			int pid = ISRADIO(m_Channel) ? m_Channel->Apid(0) : m_Channel->Vpid();
 			if (Apid != 0)
 				pid = Apid;
-			m_Remux = new cTS2ESRemux(pid);
+			m_ESRemux = new cTS2ESRemux(pid);
 			return SetPid(pid, true);
 		}
 
@@ -121,11 +128,28 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 			    && SetPid(m_Channel->Dpid(0), true);
 
 	case stPS:  
-		m_Remux = new cTS2PSRemux(m_Channel->Vpid(), m_Channel->Apid(0), 0, 0, 0, true);
-		return SetPid(m_Channel->Vpid(),  true)
-		    && SetPid(m_Channel->Apid(0), true);
+		m_PSRemux = new cTS2PSRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(),
+		                            m_Channel->Spids());
+		if (Apid != 0)
+			return SetPid(m_Channel->Vpid(),  true)
+			    && SetPid(Apid, true);
+		else
+			return SetPid(m_Channel->Vpid(),  true)
+			    && SetPid(m_Channel->Apid(0), true)
+			    && SetPid(m_Channel->Dpid(0), true);
 
 	case stTS:
+		if (Apid != 0)
+			return SetPid(m_Channel->Vpid(),  true)
+			    && SetPid(Apid, true);
+		else
+			return SetPid(m_Channel->Vpid(),  true)
+			    && SetPid(m_Channel->Apid(0), true)
+			    && SetPid(m_Channel->Dpid(0), true);
+
+	case stExtern:
+		m_ExtRemux = new cExternRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(),
+		                              m_Channel->Spids());
 		if (Apid != 0)
 			return SetPid(m_Channel->Vpid(),  true)
 			    && SetPid(Apid, true);
@@ -170,8 +194,17 @@ int cStreamdevLiveStreamer::Put(const uchar *Data, int Count)
 	case stPES:
 		return m_PESRemux->Put(Data, Count);
 
-	default:
-		abort();
+	case stES:
+		return m_ESRemux->Put(Data, Count);
+
+	case stPS:
+		return m_PSRemux->Put(Data, Count);
+
+	case stExtern:
+		return m_ExtRemux->Put(Data, Count);
+
+	default: // shouldn't happen???
+		return 0;
 	}
 }
 
@@ -184,9 +217,18 @@ uchar *cStreamdevLiveStreamer::Get(int &Count)
 
 	case stPES:
 		return m_PESRemux->Get(Count);
+	
+	case stES:
+		return m_ESRemux->Get(Count);
 
-	default:
-		abort();
+	case stPS:
+		return m_PSRemux->Get(Count);
+
+	case stExtern:
+		return m_ExtRemux->Get(Count);
+
+	default: // shouldn't happen???
+		return 0;
 	}
 }
 
@@ -201,9 +243,18 @@ void cStreamdevLiveStreamer::Del(int Count)
 	case stPES:
 		m_PESRemux->Del(Count);
 		break;
+	
+	case stES:
+		m_ESRemux->Del(Count);
+		break;
 
-	default:
-		abort();
+	case stPS:
+		m_PSRemux->Del(Count);
+		break;
+
+	case stExtern:
+		m_ExtRemux->Del(Count);
+		break;
 	}
 }
 

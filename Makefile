@@ -1,7 +1,7 @@
 #
 # Makefile for a Video Disk Recorder plugin
 #
-# $Id: Makefile,v 1.3 2005/02/10 22:24:26 lordjaxom Exp $
+# $Id: Makefile,v 1.4 2005/02/11 16:44:14 lordjaxom Exp $
 
 # The official name of this plugin.
 # This name will be used in the '-P...' option of VDR to load the plugin.
@@ -63,7 +63,7 @@ SERVEROBJS = $(PLUGIN)-server.o \
 	server/component.o server/suspend.o server/setup.o server/streamer.o \
 	server/livestreamer.o server/livefilter.o \
 	\
-	remux/tsremux.o remux/ts2ps.o remux/ts2es.o 
+	remux/tsremux.o remux/ts2ps.o remux/ts2es.o remux/extern.o
 	
 ifdef DEBUG
 	DEFINES += -DDEBUG

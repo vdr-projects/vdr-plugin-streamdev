@@ -8,7 +8,9 @@
 #include "server/livefilter.h"
 #include "common.h"
 
-class cTSRemux;
+class cTS2PSRemux;
+class cTS2ESRemux;
+class cExternRemux;
 class cRemux;
 
 // --- cStreamdevLiveReceiver -------------------------------------------------
@@ -40,7 +42,9 @@ private:
 	cDevice                *m_Device;
 	cStreamdevLiveReceiver *m_Receiver;
 	cRemux                 *m_PESRemux;
-	cTSRemux               *m_Remux;
+	cTS2ESRemux            *m_ESRemux;
+	cTS2PSRemux            *m_PSRemux;
+	cExternRemux           *m_ExtRemux;
 
 public:
 	cStreamdevLiveStreamer(int Priority);
@@ -55,7 +59,7 @@ public:
 	virtual uchar *Get(int &Count);
 	virtual void Del(int Count);
 
-	virtual void Attach(void) { Dprintf("attach %p\n", m_Device);m_Device->AttachReceiver(m_Receiver); }
+	virtual void Attach(void) { m_Device->AttachReceiver(m_Receiver); }
 	virtual void Detach(void) { m_Device->Detach(m_Receiver); }
 
 	// Statistical purposes:
@@ -66,7 +70,7 @@ public:
 
 inline void cStreamdevLiveReceiver::Activate(bool On) 
 { 
-	Dprintf("LiveReceiver->Activate()\n");
+	Dprintf("LiveReceiver->Activate(%d)\n", On);
 	m_Streamer->Activate(On); 
 }
 

@@ -1,5 +1,5 @@
 /*
- *  $Id: common.c,v 1.3 2005/02/10 22:24:26 lordjaxom Exp $
+ *  $Id: common.c,v 1.4 2005/02/11 16:44:14 lordjaxom Exp $
  */
  
 #include <vdr/channels.h>
@@ -18,6 +18,7 @@ const char *StreamTypes[st_Count] = {
 	"PES",
 	"PS",
 	"ES",
+	"Extern",
 	"", // used internally only
 };
 
@@ -47,23 +48,24 @@ char *GetNextLine(char *String, uint Length, uint &Offset) {
 	return NULL;
 }
 
-const cChannel *ChannelFromString(char *String, int *Apid) {
-	cChannel *channel = NULL;
+const cChannel *ChannelFromString(const char *String, int *Apid) {
+	const cChannel *channel = NULL;
+	char *string = strdup(String);
 	char *ptr, *end;
 	int apididx = 0;
 	
-	if ((ptr = strrchr(String, '+')) != NULL) {
+	if ((ptr = strrchr(string, '+')) != NULL) {
 		*(ptr++) = '\0';
 		apididx = strtoul(ptr, &end, 10);
 		Dprintf("found apididx: %d\n", apididx);
 	}
 
-	if (isnumber(String)) {
+	if (isnumber(string)) {
 		int temp = strtol(String, NULL, 10);
 		if (temp >= 1 && temp <= Channels.MaxNumber())
 			channel = Channels.GetByNumber(temp);
 	} else {
-		channel = Channels.GetByChannelID(tChannelID::FromString(String));
+		channel = Channels.GetByChannelID(tChannelID::FromString(string));
 
 		if (channel == NULL) {
 			int i = 1;
@@ -78,22 +80,18 @@ const cChannel *ChannelFromString(char *String, int *Apid) {
 
 	if (channel != NULL && apididx > 0) {
 		int apid = 0, index = 1;
-		const int *apids = channel->Apids(); 
-		const int *dpids = channel->Dpids(); 
 
-		for (int i = 0; apids[i] != 0; ++i, ++index) {
-			Dprintf("checking apid %d\n", apids[i]);
+		for (int i = 0; channel->Apid(i) != 0; ++i, ++index) {
 			if (index == apididx) {
-				apid = apids[i];
+				apid = channel->Apid(i);
 				break;
 			}
 		}
 
 		if (apid == 0) {
-			for (int i = 0; dpids[i] != 0; ++i, ++index) {
-				Dprintf("checking dpid %d\n", dpids[i]);
+			for (int i = 0; channel->Dpid(i) != 0; ++i, ++index) {
 				if (index == apididx) {
-					apid = dpids[i];
+					apid = channel->Dpid(i);
 					break;
 				}
 			}
@@ -103,6 +101,7 @@ const cChannel *ChannelFromString(char *String, int *Apid) {
 			*Apid = apid;
 	}
 
+	free(string);
 	return channel;
 }
 
