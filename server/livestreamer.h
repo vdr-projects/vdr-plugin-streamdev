@@ -13,6 +13,7 @@
 #endif
 
 class cTSRemux;
+class cRemux;
 
 class cStreamdevLiveReceiver: public cReceiver {
 	friend class cStreamdevLiveStreamer;
@@ -35,14 +36,13 @@ private:
 	int                     m_Priority;
 	int                     m_Pids[MAXRECEIVEPIDS + 1];
 	int                     m_NumPids;
+	eStreamType             m_StreamType;
 	const cChannel         *m_Channel;
 	cDevice                *m_Device;
 	cStreamdevLiveReceiver *m_Receiver;
+	cRemux                 *m_PESRemux;
 	cTSRemux               *m_Remux;
 	uchar                  *m_Buffer;
-
-protected:
-	//virtual uchar *Process(const uchar *Data, int &Count, int &Result);
 
 public:
 	cStreamdevLiveStreamer(int Priority);
@@ -53,6 +53,10 @@ public:
 	bool SetChannel(const cChannel *Channel, eStreamType StreamType);
 	bool SetFilter(u_short Pid, u_char Tid, u_char Mask, bool On);
 	
+	virtual int Put(const uchar *Data, int Count);
+	virtual uchar *Get(int &Count);
+	virtual void Del(int Count);
+
 	virtual void Detach(void);
 	virtual void Attach(void);
 

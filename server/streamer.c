@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.c,v 1.4 2005/02/08 19:54:52 lordjaxom Exp $
+ *  $Id: streamer.c,v 1.5 2005/02/09 19:47:09 lordjaxom Exp $
  */
  
 #include <vdr/ringbuffer.h>
@@ -35,11 +35,15 @@ void cStreamdevWriter::Action(void)
 		int count;
 		uchar *block = m_Streamer->Get(count);
 
-		if (!m_Socket->SafeWrite(block, count)) {
-			esyslog("ERROR: streamdev-server: couldn't send data: %m");
-			break;
+		if (block) {
+			if (!m_Socket->TimedWrite(block, count, 2000)) {
+				esyslog("ERROR: streamdev-server: couldn't send data: %m");
+				break;
+			}
+			if (count > max)
+				max = count;
+			m_Streamer->Del(count);
 		}
-		m_Streamer->Del(count);
 	}
 	m_Active = false;
 	Dprintf("Max. Transmit Blocksize was: %d\n", max);
@@ -112,7 +116,7 @@ void cStreamdevStreamer::Action(void)
 		int got;
 		uchar *block = m_RingBuffer->Get(got);
 
-		if (block && got > 0) {
+		if (block) {
 			int count = Put(block, got);
 			if (count)
 				m_RingBuffer->Del(count);

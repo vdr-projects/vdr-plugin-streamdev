@@ -33,10 +33,12 @@ cStreamdevLiveStreamer::cStreamdevLiveStreamer(int Priority):
 		cStreamdevStreamer("streamdev-livestreaming") {
 	m_Priority   = Priority;
 	m_NumPids    = 0;
+	m_StreamType = stTSPIDS;
 	m_Channel    = NULL;
 	m_Device     = NULL;
 	m_Receiver   = NULL;
 	m_Remux      = NULL;
+	m_PESRemux   = NULL;
 }
 
 cStreamdevLiveStreamer::~cStreamdevLiveStreamer() {
@@ -103,7 +105,8 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 	Dprintf("Initializing Remuxer for full channel transfer\n");
 	printf("ca pid: %d\n", Channel->Ca());
 	m_Channel = Channel;
-	switch (StreamType) {
+	m_StreamType = StreamType;
+	switch (m_StreamType) {
 	case stES: 
 		{
 			int pid = ISRADIO(Channel) ? Channel->Apid(0) : Channel->Vpid();
@@ -112,8 +115,8 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 		}
 
 	case stPES: 
-		m_Remux = new cTS2PSRemux(Channel->Vpid(), Channel->Apid(0), Channel->Apid(1), 
-		                          Channel->Dpid(0), 0, false);
+		m_PESRemux = new cRemux(Channel->Vpid(), Channel->Apids(), Channel->Dpids(), 
+		                        Channel->Spids(), false);
 		return SetPid(Channel->Vpid(),  true)
 		    && SetPid(Channel->Apid(0), true)
 		    && SetPid(Channel->Apid(1), true)
@@ -154,6 +157,51 @@ bool cStreamdevLiveStreamer::SetFilter(u_short Pid, u_char Tid, u_char Mask,
 #else
 	return false;
 #endif
+}
+
+int cStreamdevLiveStreamer::Put(const uchar *Data, int Count) 
+{
+	switch (m_StreamType) {
+	case stTS:
+	case stTSPIDS:
+		return cStreamdevStreamer::Put(Data, Count);
+
+	case stPES:
+		return m_PESRemux->Put(Data, Count);
+
+	default:
+		abort();
+	}
+}
+
+uchar *cStreamdevLiveStreamer::Get(int &Count)
+{
+	switch (m_StreamType) {
+	case stTS:
+	case stTSPIDS:
+		return cStreamdevStreamer::Get(Count);
+
+	case stPES:
+		return m_PESRemux->Get(Count);
+
+	default:
+		abort();
+	}
+}
+
+void cStreamdevLiveStreamer::Del(int Count)
+{
+	switch (m_StreamType) {
+	case stTS:
+	case stTSPIDS:
+		cStreamdevStreamer::Del(Count);
+
+	case stPES:
+		m_PESRemux->Del(Count);
+
+	default:
+		abort();
+	}
 }
 
 // TODO: Remuxer einbinden
