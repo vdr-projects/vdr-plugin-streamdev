@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.4 2005/02/08 15:21:19 lordjaxom Exp $
+ *  $Id: device.c,v 1.5 2005/02/08 17:22:35 lordjaxom Exp $
  */
  
 #include "client/device.h"
@@ -8,7 +8,6 @@
 #include "client/filter.h"
 
 #include "tools/select.h"
-#include "tools/string.h"
 
 #include <vdr/channels.h>
 #include <vdr/ringbuffer.h>

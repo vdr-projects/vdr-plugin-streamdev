@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.c,v 1.3 2005/02/08 15:34:38 lordjaxom Exp $
+ *  $Id: connectionHTTP.c,v 1.4 2005/02/08 17:22:35 lordjaxom Exp $
  */
  
 #include "server/connectionHTTP.h"
@@ -63,7 +63,7 @@ bool cConnectionHTTP::Command(char *Cmd) {
 							|| m_Channel->Vpid() == 1 || m_Channel->Vpid() == 0x1FFF)) {
 						return Respond("HTTP/1.0 200 OK")
 								&& Respond("Content-Type: audio/mpeg")
-								&& Respond((cTBString)"icy-name: " + m_Channel->Name())
+								&& Respond((std::string)"icy-name: " + m_Channel->Name())
 								&& Respond("");
 					} else {
 						return Respond("HTTP/1.0 200 OK")
@@ -86,20 +86,20 @@ bool cConnectionHTTP::Command(char *Cmd) {
 
 void cConnectionHTTP::Flushed(void) {
 	if (m_Status == hsListing) {
-		cTBString line;
-
 		if (m_ListChannel == NULL) {
 			Respond("</ul></body></html>");
 			DeferClose();
 			return;
 		}
 
+		std::string line;
 		if (m_ListChannel->GroupSep())
-			line.Format("<li>--- %s ---</li>", m_ListChannel->Name());
+			line = (std::string)"<li>--- " + m_ListChannel->Name() + "---</li>";
 		else
-			line.Format("<li><a href=\"http://%s:%d/%s\">%s</a></li>", 
-				(const char*)LocalIp(), StreamdevServerSetup.HTTPServerPort, 
-				(const char*)m_ListChannel->GetChannelID().ToString(), m_ListChannel->Name());
+			line = (std::string)"<li><a href=\"http://" + LocalIp() + ":" 
+			     + (const char*)itoa(StreamdevServerSetup.HTTPServerPort) + "/"
+			     + (const char*)m_ListChannel->GetChannelID().ToString() + "\">"
+			     + m_ListChannel->Name() + "</a></li>";
 		if (!Respond(line))
 			DeferClose();
 		m_ListChannel = Channels.Next(m_ListChannel);

@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.c,v 1.2 2005/02/08 13:59:16 lordjaxom Exp $
+ *  $Id: streamer.c,v 1.3 2005/02/08 17:22:35 lordjaxom Exp $
  */
  
 #include <vdr/ringbuffer.h>
@@ -16,10 +16,8 @@
 #define VIDEOBUFSIZE MEGABYTE(4)
 #define MAXBLOCKSIZE TS_SIZE*10
 
-cStreamdevStreamer::cStreamdevStreamer(const char *Name)
-#if VDRVERSNUM >= 10300
-		:cThread("Streamdev: " + (cTBString)Name)
-#endif
+cStreamdevStreamer::cStreamdevStreamer(const char *Name):
+		cThread(((std::string)"Streamdev: " + Name).c_str())
 {
 	m_Active     = false;
 	m_Receivers  = 0;

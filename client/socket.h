@@ -1,5 +1,5 @@
 /*
- *  $Id: socket.h,v 1.2 2005/02/08 15:34:38 lordjaxom Exp $
+ *  $Id: socket.h,v 1.3 2005/02/08 17:22:35 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_CLIENT_CONNECTION_H
@@ -8,6 +8,8 @@
 #include <tools/socket.h>
 
 #include "common.h"
+
+#include <string>
 
 #define CMD_LOCK cMutexLock CmdLock((cMutex*)&m_Mutex)
 
@@ -21,20 +23,20 @@ class cClientSocket: public cTBSocket {
 private:
 	cTBSocket    *m_DataSockets[si_Count];
 	cMutex        m_Mutex;
+	char          m_Buffer[BUFSIZ + 1]; // various uses
 
 protected:
 	/* Send Command, and return true if the command results in Expected. 
 	   Returns false on failure, setting errno appropriately if it has been
 	   a system failure. If Expected is zero, returns immediately after
 		 sending the command. */
-	bool Command(const cTBString &Command, uint Expected = 0, 
-			uint TimeoutMs = 1500);
+	bool Command(const std::string &Command, uint Expected = 0, uint TimeoutMs = 1500);
 
 	/* Fetch results from an ongoing Command called with Expected == 0. Returns
 	   true if the response has the code Expected, returning an internal buffer
 		 in the array pointer pointed to by Result. Returns false on failure, 
 		 setting errno appropriately if it has been a system failure. */
-	bool Expect(uint Expected, cTBString *Result = NULL, uint TimeoutMs = 1500);
+	bool Expect(uint Expected, std::string *Result = NULL, uint TimeoutMs = 1500);
 
 public:
 	cClientSocket(void);

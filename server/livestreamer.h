@@ -59,7 +59,7 @@ public:
 	virtual void Start(cTBSocket *Socket);
 	
 	// Statistical purposes:
-	virtual cTBString Report(void);
+	virtual std::string Report(void);
 };
 
 #endif // VDR_STREAMDEV_LIVESTREAMER_H

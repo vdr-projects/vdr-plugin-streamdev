@@ -1,5 +1,5 @@
 /*
- *  $Id: component.c,v 1.1 2004/12/30 22:44:18 lordjaxom Exp $
+ *  $Id: component.c,v 1.2 2005/02/08 17:22:35 lordjaxom Exp $
  */
  
 #include "server/component.h"
@@ -38,7 +38,7 @@ cServerConnection *cServerComponent::CanAct(const cTBSelect &Select) {
 		cServerConnection *client = NewConnection();
 		if (client->Accept(m_Listen)) {
 			isyslog("Streamdev: Accepted new client (%s) %s:%d", m_Protocol,
-					(const char*)client->RemoteIp(), client->RemotePort());
+					client->RemoteIp().c_str(), client->RemotePort());
 			return client;
 		} else {
 			esyslog("Streamdev: Couldn't accept (%s): %s", m_Protocol, 

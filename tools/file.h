@@ -3,12 +3,12 @@
 
 #include "tools/tools.h"
 #include "tools/source.h"
-#include "tools/string.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <string>
 
 /* cTBFile provides a cTBSource-derived interface for input and output on UNIX 
    files. */
@@ -16,7 +16,7 @@
 class cTBFile: public cTBSource {
 private:
 	bool m_Anonymous;
-	cTBString m_Filename;
+	std::string m_Filename;
 
 	/* Unhide and forbid baseclass method */
 	virtual bool Open(int Fd, bool IsUnixFd = false) { return false; }
@@ -51,7 +51,7 @@ public:
 	   Mode. If the file is created, it receives the attributes given by 
 	   Attribs, defaulting to rw-------. Returns true on success and false on
 	   error, setting errno appropriately. */
-	virtual bool Open(const cTBString &Filename, int Mode, 
+	virtual bool Open(const std::string &Filename, int Mode, 
 			mode_t Attribs = S_IRUSR + S_IWUSR);
 
 	/* Open() associates this file object with Fileno. Fileno must refer to a
@@ -74,7 +74,7 @@ public:
 	/* Unlink() unlinks (deletes) the file referred to by Filename from the
 	   underlying filesystem. Returns true on success and false otherwise, 
 	   setting errno appropriately. */
-	static  bool Unlink(const cTBString &Filename);
+	static  bool Unlink(const std::string &Filename);
 
 	/* Size() returns the current size of the associated file. Returns the 
 	   exact size of the file in bytes. Returns -1 on error, setting errno to
@@ -85,7 +85,7 @@ public:
 	   Symbolic links are followed (the size of the link-target is returned).
 	   Returns the exact size of the file in bytes. Returns -1 on error, 
 	   setting errno to an appropriate value. */
-	static  ssize_t Size(const cTBString &Filename);
+	static  ssize_t Size(const std::string &Filename);
 };
 
 inline ssize_t cTBFile::SysRead(void *Buffer, size_t Length) const {

@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.c,v 1.1 2004/12/30 22:44:19 lordjaxom Exp $
+ *  $Id: connection.c,v 1.2 2005/02/08 17:22:35 lordjaxom Exp $
  */
  
 #include "server/connection.h"
@@ -27,13 +27,13 @@ bool cServerConnection::CanAct(const cTBSelect &Select) {
 		int b;
 		if ((b = Read(m_RdBuf + m_RdBytes, sizeof(m_RdBuf) - m_RdBytes - 1)) < 0) {
 			esyslog("Streamdev: Read from client (%s) %s:%d failed: %s", m_Protocol,
-					(const char*)RemoteIp(), RemotePort(), strerror(errno));
+					RemoteIp().c_str(), RemotePort(), strerror(errno));
 			return false;
 		}
 
 		if (b == 0) {
 			isyslog("Streamdev: Client (%s) %s:%d closed connection", m_Protocol,
-					(const char*)RemoteIp(), RemotePort());
+					RemoteIp().c_str(), RemotePort());
 			return false;
 		}
 
@@ -46,7 +46,7 @@ bool cServerConnection::CanAct(const cTBSelect &Select) {
 		int b;
 		if ((b = Write(m_WrBuf + m_WrOffs, m_WrBytes - m_WrOffs)) < 0) {
 			esyslog("Streamdev: Write to client (%s) %s:%d failed: %s", m_Protocol,
-					(const char*)RemoteIp(), RemotePort(), strerror(errno));
+					RemoteIp().c_str(), RemotePort(), strerror(errno));
 			return false;
 		}
 
@@ -85,18 +85,18 @@ bool cServerConnection::ParseBuffer(void) {
 	return true;
 }
 
-bool cServerConnection::Respond(const char *Message) {
-	uint len = strlen(Message);
-	if (m_WrBytes + len + 2 > sizeof(m_WrBuf)) {
+bool cServerConnection::Respond(const std::string &Message) {
+	if (m_WrBytes + Message.size() + 2 > sizeof(m_WrBuf)) {
 		esyslog("Streamdev: Output buffer overflow (%s) for %s:%d", m_Protocol,
-				(const char*)RemoteIp(), RemotePort());
+		        RemoteIp().c_str(), RemotePort());
 		return false;
 	}
-	Dprintf("OUT: |%s|\n", Message);
-	memcpy(m_WrBuf + m_WrBytes, Message, len);
-	m_WrBuf[m_WrBytes + len] = '\015';
-	m_WrBuf[m_WrBytes + len + 1] = '\012';
-	m_WrBytes += len + 2;
+	Dprintf("OUT: |%s|\n", Message.c_str());
+	memcpy(m_WrBuf + m_WrBytes, Message.c_str(), Message.size());
+
+	m_WrBytes += Message.size();
+	m_WrBuf[m_WrBytes++] = '\015';
+	m_WrBuf[m_WrBytes++] = '\012';
 	return true;
 }
 	

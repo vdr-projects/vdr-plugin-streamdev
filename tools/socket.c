@@ -16,7 +16,7 @@ cTBSocket::~cTBSocket() {
 	if (IsOpen()) Close();
 }
 
-bool cTBSocket::Connect(const cTBString &Host, unsigned int Port) {
+bool cTBSocket::Connect(const std::string &Host, unsigned int Port) {
 	socklen_t len;
 	int socket;
 
@@ -34,7 +34,7 @@ bool cTBSocket::Connect(const cTBString &Host, unsigned int Port) {
 
 	m_RemoteAddr.sin_family = AF_INET;
 	m_RemoteAddr.sin_port   = htons(Port);
-	m_RemoteAddr.sin_addr.s_addr = inet_addr(Host);
+	m_RemoteAddr.sin_addr.s_addr = inet_addr(Host.c_str());
 	if (::connect(socket, (struct sockaddr*)&m_RemoteAddr, 
 			sizeof(m_RemoteAddr)) == -1) 
 		return false;
@@ -50,7 +50,7 @@ bool cTBSocket::Connect(const cTBString &Host, unsigned int Port) {
 	return cTBSource::Open(socket);
 }
 
-bool cTBSocket::Listen(const char *Ip, unsigned int Port, int BackLog) {
+bool cTBSocket::Listen(const std::string &Ip, unsigned int Port, int BackLog) {
 	int val;
 	socklen_t len;
 	int socket;
@@ -66,7 +66,7 @@ bool cTBSocket::Listen(const char *Ip, unsigned int Port, int BackLog) {
 
 	m_LocalAddr.sin_family = AF_INET;
 	m_LocalAddr.sin_port   = htons(Port);
-	m_LocalAddr.sin_addr.s_addr = inet_addr(Ip);
+	m_LocalAddr.sin_addr.s_addr = inet_addr(Ip.c_str());
 	if (::bind(socket, (struct sockaddr*)&m_LocalAddr, sizeof(m_LocalAddr)) 
 			== -1)
 		return false;

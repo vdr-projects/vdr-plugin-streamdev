@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.h,v 1.1 2004/12/30 22:44:19 lordjaxom Exp $
+ *  $Id: connection.h,v 1.2 2005/02/08 17:22:35 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVER_CONNECTION_H
@@ -58,7 +58,7 @@ public:
 
 	/* Will put Message into the response queue, which will be sent in the next
 	   server cycle. Note that Message will be line-terminated by Respond */
-	bool Respond(const char *Message);
+	bool Respond(const std::string &Message);
 
 	/* Will make the socket close after sending all queued output data */
 	void DeferClose(void) { m_DeferClose = true; }

@@ -3,11 +3,11 @@
 
 #include "tools/tools.h"
 #include "tools/source.h"
-#include "tools/string.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <string>
 
 /* cTBSocket provides a cTBSource-derived interface for input and output on
    TCP/IPv4-sockets. */
@@ -35,7 +35,7 @@ public:
 	   by Port of the target host given by Host in numbers-and-dots notation
 	   (i.e. "212.43.45.21"). Returns true if the connection attempt was 
 	   successful and false otherwise, setting errno appropriately. */
-	virtual bool Connect(const cTBString &Host, uint Port);
+	virtual bool Connect(const std::string &Host, uint Port);
 
 	/* Shutdown() shuts down one or both ends of a socket. If called with How
 	   set to SHUT_RD, further reads on this socket will be denied. If called
@@ -54,7 +54,7 @@ public:
 	   BackLog parameter defines the maximum length the queue of pending 
 	   connections may grow to. Returns true if the object is listening on
 	   the specified port and false otherwise, setting errno appropriately. */
-	virtual bool Listen(const char *Ip, uint Port, int BackLog);
+	virtual bool Listen(const std::string &Ip, uint Port, int BackLog);
 
 	/* Accept() returns a newly created cTBSocket, which is connected to the 
 	   first connection request on the queue of pending connections of a
@@ -80,12 +80,12 @@ public:
 	   the interface this socket is connected to locally. This can be 
 	   "0.0.0.0" for a listening socket listening to all interfaces. If the
 	   socket is in its closed state, the result is undefined. */
-	cTBString LocalIp(void) const { return inet_ntoa(m_LocalAddr.sin_addr); }
+	std::string LocalIp(void) const { return inet_ntoa(m_LocalAddr.sin_addr); }
 
 	/* RemoteIp() returns the internet address in numbers-and-dots notation of
 	   the interface this socket is connected to on the remote side. If the
 	   socket is in its closed state, the result is undefined. */
-	cTBString RemoteIp(void) const { return inet_ntoa(m_RemoteAddr.sin_addr); }
+	std::string RemoteIp(void) const { return inet_ntoa(m_RemoteAddr.sin_addr); }
 
 	in_addr_t LocalIpAddr(void) const { return m_LocalAddr.sin_addr.s_addr; }
 	in_addr_t RemoteIpAddr(void) const { return m_RemoteAddr.sin_addr.s_addr; }

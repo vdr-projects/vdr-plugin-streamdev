@@ -1,5 +1,5 @@
 /*
- *  $Id: menu.c,v 1.2 2005/02/08 14:09:27 lordjaxom Exp $
+ *  $Id: menu.c,v 1.3 2005/02/08 17:22:35 lordjaxom Exp $
  */
  
 #include <vdr/menuitems.h>
@@ -47,8 +47,6 @@ eOSState cStreamdevMenu::ProcessKey(eKeys Key) {
 }
 
 void cStreamdevMenu::SuspendServer(void) {
-	cTBString buffer;
-
 	if (ClientSocket.SuspendServer())
 		INFO(tr("Server is suspended"));
 	else
@@ -1026,8 +1024,8 @@ eOSState cStreamdevMenuTimers::Summary(void) {
 		return osContinue;
 
 	cRemoteTimer *ti = CurrentTimer();
-	if (ti && !ti->Summary().IsNull())
-		return AddSubMenu(new cMenuText(tr("Summary"), ti->Summary()));
+	if (ti && ti->Summary() != "")
+		return AddSubMenu(new cMenuText(tr("Summary"), ti->Summary().c_str()));
 
 	return osContinue;
 }

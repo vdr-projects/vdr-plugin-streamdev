@@ -2,9 +2,9 @@
 #define TOOLBOX_SOURCE_H
 
 #include "tools/tools.h"
-#include "tools/string.h"
 
 #include <sys/types.h>
+#include <string>
 
 /* cTBSource provides an abstract interface for input and output. It can
    be used to have common access to different types of UNIX-files. */
@@ -16,7 +16,7 @@ private:
 	size_t m_BytesRead;
 	size_t m_BytesWritten;
 
-	cTBString m_LineBuffer;
+	std::string m_LineBuffer;
 
 public:
 	cTBSource(void);

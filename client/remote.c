@@ -1,5 +1,5 @@
 /*
- *  $Id: remote.c,v 1.2 2005/02/08 13:59:16 lordjaxom Exp $
+ *  $Id: remote.c,v 1.3 2005/02/08 17:22:35 lordjaxom Exp $
  */
  
 #include "client/remote.h"
@@ -34,13 +34,13 @@ cRemoteRecording::cRemoteRecording(const char *Text) {
 	*(ptr++) = '\0';
 	m_StartTime = timestr;
 	idx = -1;
-	while ((idx = m_StartTime.Find(' ', idx + 1)) != -1) m_StartTime[idx] = '\t';
-	Dprintf("m_Start: %s\n", (const char*)m_StartTime);
+	while ((idx = m_StartTime.find(' ', idx + 1)) != -1) m_StartTime[idx] = '\t';
+	Dprintf("m_Start: %s\n", m_StartTime.c_str());
 	if (*ptr == 0) return;
 	if (isspace(*ptr)) ++ptr;
 	if (*ptr == 0) return;
 	m_Name = ptr;
-	Dprintf("file: %s\n", (const char*)m_Name);
+	Dprintf("file: %s\n", m_Name.c_str());
 	m_IsValid = true;
 }
 
@@ -69,21 +69,20 @@ const char *cRemoteRecording::Title(char Delimiter, bool NewIndicator,
 
   if (Level < 0 || Level == HierarchyLevels()) {
     char *s;
-		const char *t;
-    if (Level > 0 && (t = strrchr(m_Name, '~')) != NULL)
+	const char *t;
+    if (Level > 0 && (t = strrchr(m_Name.c_str(), '~')) != NULL)
       t++;
     else
-      t = (const char*)m_Name;
+      t = m_Name.c_str();
 					
-		asprintf(&m_TitleBuffer, "%s%c%c%s", (const char*)m_StartTime, New, 
-				Delimiter, t);
+	asprintf(&m_TitleBuffer, "%s%c%c%s", m_StartTime.c_str(), New, Delimiter, t);
     // let's not display a trailing '~':
     stripspace(m_TitleBuffer);
     s = &m_TitleBuffer[strlen(m_TitleBuffer) - 1];
     if (*s == '~')
       *s = 0;
   } else if (Level < HierarchyLevels()) {
-    const char *s = m_Name;
+    const char *s = m_Name.c_str();
     const char *p = s;
     while (*++s) {
       if (*s == '~') {
@@ -104,7 +103,7 @@ const char *cRemoteRecording::Title(char Delimiter, bool NewIndicator,
 
 int cRemoteRecording::HierarchyLevels(void)
 {
-  const char *s = m_Name;
+  const char *s = m_Name.c_str();
   int level = 0;
   while (*++s) {
     if (*s == '~') ++level;
@@ -191,7 +190,7 @@ cRemoteTimer::cRemoteTimer(const char *Text) {
 	strncpy(m_File, tmpbuf, MaxFileName);
 	Dprintf("file: %s\n", m_File);
 	if (*ptr != '\0') m_Summary = ptr;
-	Dprintf("summary: %s\n", (const char*)m_Summary);
+	Dprintf("summary: %s\n", m_Summary.c_str());
 	m_IsValid = true;
 }
 
@@ -453,8 +452,8 @@ const char *cRemoteTimer::ToText(void) {
 	if (m_Buffer != NULL) free(m_Buffer);
 
 	strreplace(m_File, ':', '|');
-	if (!m_Summary.IsNull())
-		summary = strreplace(strdup(m_Summary), ':', '|');
+	if (m_Summary != "")
+		summary = strreplace(strdup(m_Summary.c_str()), ':', '|');
 
 	asprintf(&m_Buffer, "%d:%s:%s:%04d:%04d:%d:%d:%s:%s", m_Active, 
 			(const char*)Channel()->GetChannelID().ToString(), PrintDay(m_Day, m_FirstDay), 

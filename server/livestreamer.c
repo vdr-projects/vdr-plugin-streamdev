@@ -155,8 +155,7 @@ bool cStreamdevLiveStreamer::SetFilter(u_short Pid, u_char Tid, u_char Mask,
 #endif
 }
 
-uchar *cStreamdevLiveStreamer::Process(const uchar *Data, int &Count,
-		int &Result) {
+uchar *cStreamdevLiveStreamer::Process(const uchar *Data, int &Count, int &Result) {
 	uchar *remuxed = m_Remux != NULL ? m_Remux->Process(Data, Count, Result)
 			: cStreamdevStreamer::Process(Data, Count, Result);
 	if (remuxed) {
@@ -186,18 +185,18 @@ uchar *cStreamdevLiveStreamer::Process(const uchar *Data, int &Count,
 	return NULL;
 }
 
-cTBString cStreamdevLiveStreamer::Report(void) {
-	cTBString result;
+std::string cStreamdevLiveStreamer::Report(void) {
+	std::string result;
 
 	if (m_Device != NULL)
-		result += "+- Device is " + cTBString::Number(m_Device->CardIndex()) + "\n";
+		result += (std::string)"+- Device is " + (const char*)itoa(m_Device->CardIndex()) + "\n";
 	if (m_Receiver != NULL)
 		result += "+- Receiver is allocated\n";
 		
 	result += "+- Pids are ";
 	for (int i = 0; i < MAXRECEIVEPIDS; ++i) 
 		if (m_Pids[i] != 0)
-			result += cTBString::Number(m_Pids[i]) + ", ";
+			result += (std::string)(const char*)itoa(m_Pids[i]) + ", ";
 	result += "\n";
 	return result;
 }

@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.3 2005/02/08 15:34:38 lordjaxom Exp $
+ *  $Id: connectionVTP.c,v 1.4 2005/02/08 17:22:35 lordjaxom Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -82,13 +82,13 @@ bool cConnectionVTP::Command(char *Cmd) {
 	else if (strcasecmp(Cmd, "NEWT") == 0) return CmdNEWT(ep);
 	else if (strcasecmp(Cmd, "DELT") == 0) return CmdDELT(ep);
 	else
-		return Respond(500, (cTBString)"Unknown Command '" + Cmd + "'");
+		return Respond(500, (std::string)"Unknown Command '" + Cmd + "'");
 }
 
 bool cConnectionVTP::CmdCAPS(char *Opts) {
 	if (strcasecmp(Opts, "TSPIDS") == 0) 
-		return Respond(220, (cTBString)"Capability \"" + Opts + "\" accepted");
-	return Respond(561, (cTBString)"Capability \"" + Opts + "\" not known");
+		return Respond(220, (std::string)"Capability \"" + Opts + "\" accepted");
+	return Respond(561, (std::string)"Capability \"" + Opts + "\" not known");
 }
 
 bool cConnectionVTP::CmdPROV(char *Opts) {
@@ -102,7 +102,7 @@ bool cConnectionVTP::CmdPROV(char *Opts) {
 
 	Opts = skipspace(ep);
 	if ((chan = ChannelFromString(Opts)) == NULL)
-		return Respond(550, (cTBString)"Undefined channel \"" + Opts + "\"");
+		return Respond(550, (std::string)"Undefined channel \"" + Opts + "\"");
 
 	return GetDevice(chan, prio) != NULL
 			? Respond(220, "Channel available")
@@ -120,7 +120,7 @@ bool cConnectionVTP::CmdPORT(char *Opts) {
 		return Respond(500, "Use: PORT Id Destination");
 
 	if (id >= si_Count)
-		return Respond(501, "Wrong connection id " + cTBString::Number(id));
+		return Respond(501, (std::string)"Wrong connection id " + (const char*)itoa(id));
 	
 	Opts = skipspace(ep);
 	n = 0;
@@ -166,7 +166,7 @@ bool cConnectionVTP::CmdTUNE(char *Opts) {
 	cDevice *dev;
 	
 	if ((chan = ChannelFromString(Opts)) == NULL)
-		return Respond(550, (cTBString)"Undefined channel \"" + Opts + "\"");
+		return Respond(550, (std::string)"Undefined channel \"" + Opts + "\"");
 
 	if ((dev = GetDevice(chan, 0)) == NULL)
 		return Respond(560, "Channel not available");
@@ -191,8 +191,8 @@ bool cConnectionVTP::CmdADDP(char *Opts) {
 		return Respond(500, "Use: ADDP Pid");
 
 	return m_LiveStreamer && m_LiveStreamer->SetPid(pid, true)
-			? Respond(220, "Pid " + cTBString::Number(pid) + " available")
-			: Respond(560, "Pid " + cTBString::Number(pid) + " not available");
+			? Respond(220, (std::string)"Pid " + (const char*)itoa(pid) + " available")
+			: Respond(560, (std::string)"Pid " + (const char*)itoa(pid) + " not available");
 }
 
 bool cConnectionVTP::CmdDELP(char *Opts) {
@@ -204,8 +204,8 @@ bool cConnectionVTP::CmdDELP(char *Opts) {
 		return Respond(500, "Use: DELP Pid");
 
 	return m_LiveStreamer && m_LiveStreamer->SetPid(pid, false)
-			? Respond(220, "Pid " + cTBString::Number(pid) + " stopped")
-			: Respond(560, "Pid " + cTBString::Number(pid) + " not transferring");
+			? Respond(220, (std::string)"Pid " + (const char*)itoa(pid) + " stopped")
+			: Respond(560, (std::string)"Pid " + (const char*)itoa(pid) + " not transferring");
 }
 
 bool cConnectionVTP::CmdADDF(char *Opts) {
@@ -229,8 +229,8 @@ bool cConnectionVTP::CmdADDF(char *Opts) {
 		return Respond(500, "Use: ADDF Pid Tid Mask");
 
 	return m_LiveStreamer->SetFilter(pid, tid, mask, true)
-			? Respond(220, "Filter " + cTBString::Number(pid) + " transferring")
-			: Respond(560, "Filter " + cTBString::Number(pid) + " not available");
+			? Respond(220, (std::string)"Filter " + (const char*)itoa(pid) + " transferring")
+			: Respond(560, (std::string)"Filter " + (const char*)itoa(pid) + " not available");
 #else
 	return Respond(500, "ADDF known but unimplemented with VDR < 1.3.0");
 #endif
@@ -257,8 +257,8 @@ bool cConnectionVTP::CmdDELF(char *Opts) {
 		return Respond(500, "Use: DELF Pid Tid Mask");
 
 	return m_LiveStreamer->SetFilter(pid, tid, mask, false)
-			? Respond(220, "Filter " + cTBString::Number(pid) + " stopped")
-			: Respond(560, "Filter " + cTBString::Number(pid) + " not transferring");
+			? Respond(220, (std::string)"Filter " + (const char*)itoa(pid) + " stopped")
+			: Respond(560, (std::string)"Filter " + (const char*)itoa(pid) + " not transferring");
 #else
 	return Respond(500, "DELF known but unimplemented with VDR < 1.3.0");
 #endif
@@ -530,12 +530,12 @@ bool cConnectionVTP::CmdDELT(char *Option) {
 	EXIT_WRAPPER();
 }
 
-bool cConnectionVTP::Respond(int Code, const char *Message) {
-	cTBString pkt;
-	if (Code < 0)
-		pkt.Format("%03d-%s", -Code, Message);
-	else	
-		pkt.Format("%03d %s", Code, Message);
-	return cServerConnection::Respond((const char*)pkt);
+bool cConnectionVTP::Respond(int Code, const std::string &Message) {
+	char *buffer;
+	bool result;
+	asprintf(&buffer, "%03d%c%s", Code < 0 ? -Code : Code, Code < 0 ? '-' : ' ', Message.c_str());
+	result = cServerConnection::Respond(buffer);
+	free(buffer);
+	return result;
 }
 	

@@ -87,30 +87,25 @@ bool cTBSource::TimedWrite(const void *Buffer, size_t Length, uint TimeoutMs) {
 
 ssize_t cTBSource::ReadUntil(void *Buffer, size_t Length, const char *Seq,
 		uint TimeoutMs) {
-	char *offs;
 	int seqlen, ms;
-	size_t olen;
+	size_t len;
 	cTBSelect sel;
 
-	seqlen = strlen(Seq);
-	if ((offs = (char*)memmem(m_LineBuffer, m_LineBuffer.Length(), Seq, seqlen))){
-		olen = offs - m_LineBuffer;
-		if (olen >= Length) {
+	if ((len = m_LineBuffer.find(Seq)) != (size_t)-1) {
+		if (len > Length) {
 			errno = ENOBUFS;
 			return -1;
 		}
-		memcpy(Buffer, m_LineBuffer, olen);
-		m_LineBuffer = m_LineBuffer.Mid(olen + seqlen);
-		Dprintf("ReadUntil: Served from Linebuffer: %d, |%.*s|\n", olen, olen - 1,
+		memcpy(Buffer, m_LineBuffer.data(), len);
+		m_LineBuffer.erase(0, len + strlen(Seq));
+		Dprintf("ReadUntil: Served from Linebuffer: %d, |%.*s|\n", len, len - 1,
 				(char*)Buffer);
-		return olen;
+		return len;
 	}
 
 	cTimeMs starttime;
 	ms = TimeoutMs;
-	while (m_LineBuffer.Length() < BUFSIZ) {
-		int b;
-
+	while (m_LineBuffer.size() < BUFSIZ) {
 		sel.Clear();
 		sel.Add(m_Filed, false);
 
@@ -118,25 +113,24 @@ ssize_t cTBSource::ReadUntil(void *Buffer, size_t Length, const char *Seq,
 			return -1;
 		
 		if (sel.CanRead(m_Filed)) {
-			offs = m_LineBuffer.Buffer(BUFSIZ);
-			if ((b = Read(offs + m_LineBuffer.Length(), BUFSIZ 
-					- m_LineBuffer.Length())) == -1)
-				return -1;
+			int b;
 
-			m_LineBuffer.Release(m_LineBuffer.Length() + b);
-			if ((offs = (char*)memmem(m_LineBuffer, m_LineBuffer.Length(), Seq, 
-					seqlen))) {
-				olen = offs - m_LineBuffer;
-				if (olen >= Length) {
+			len = m_LineBuffer.size();
+			m_LineBuffer.resize(BUFSIZ);
+			if ((b = Read((char*)m_LineBuffer.data() + len, BUFSIZ - len)) == -1)
+				return -1;
+			m_LineBuffer.resize(len + b);
+
+			if ((len = m_LineBuffer.find(Seq)) != (size_t)-1) {
+				if (len > Length) {
 					errno = ENOBUFS;
 					return -1;
 				}
-				memcpy(Buffer, m_LineBuffer, olen);
-				m_LineBuffer = m_LineBuffer.Mid(olen + seqlen, m_LineBuffer.Length() 
-						- olen - seqlen);
-				Dprintf("ReadUntil: Served after Read: %d, |%.*s|\n", olen, olen-1,
+				memcpy(Buffer, m_LineBuffer.data(), len);
+				m_LineBuffer.erase(0, len + strlen(Seq));
+				Dprintf("ReadUntil: Served from Linebuffer: %d, |%.*s|\n", len, len - 1,
 						(char*)Buffer);
-				return olen;
+				return len;
 			}
 		}
 
@@ -148,46 +142,5 @@ ssize_t cTBSource::ReadUntil(void *Buffer, size_t Length, const char *Seq,
 	}
 	errno = ENOBUFS;
 	return -1;
-	
-	
-
-/*
-	cTBSelect sel;
-	time_t st, et;
-	int ms, seqlen, offs;
-
-	seqlen = strlen(Seq);
-	st = time_ms();
-	ms = TimeoutMs;
-	offs = 0;
-	while (Length > 0) {
-		int b;
-
-		sel.Clear();
-		sel.Add(m_Filed, false);
-		if (sel.Select(ms) == -1)
-			return -1;
-
-		if (sel.CanRead(m_Filed)) {
-			if ((b = Read((char*)Buffer + offs, Length)) == -1)
-				return -1;
-
-			offs += b;
-			Length -= b;
-
-			if (memmem(Buffer, offs, Seq, seqlen) != NULL)
-				return offs;
-		}
-
-		et = time_ms();
-		ms -= et - st;
-		if (ms <= 0) {
-			errno = ETIMEDOUT;
-			return -1;
-		}
-	}
-	errno = ENOBUFS;
-	return -1;
-*/
 }
 

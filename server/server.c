@@ -1,5 +1,5 @@
 /*
- *  $Id: server.c,v 1.1 2004/12/30 22:44:20 lordjaxom Exp $
+ *  $Id: server.c,v 1.2 2005/02/08 17:22:35 lordjaxom Exp $
  */
 
 #include "server/server.h"
@@ -106,11 +106,11 @@ void cStreamdevServer::Action(void) {
 
 				if (m_Clients.Count() > StreamdevServerSetup.MaxClients) {
 					esyslog("Streamdev: Too many clients, rejecting %s:%d",
-							(const char*)client->RemoteIp(), client->RemotePort());
+					        client->RemoteIp().c_str(), client->RemotePort());
 					client->Reject();
 				} else if (!StreamdevHosts.Acceptable(client->RemoteIpAddr())) {
 					esyslog("Streamdev: Client from %s:%d not allowed to connect",
-							(const char*)client->RemoteIp(), client->RemotePort());
+					        client->RemoteIp().c_str(), client->RemotePort());
 					client->Reject();
 				} else 
 					client->Welcome();
@@ -122,7 +122,7 @@ void cStreamdevServer::Action(void) {
 			cServerConnection *next = m_Clients.Next(s);
 			if (!s->CanAct(select)) {
 				isyslog("Streamdev: Closing connection to %s:%d", 
-						(const char*)s->RemoteIp(), s->RemotePort());
+						s->RemoteIp().c_str(), s->RemotePort());
 				s->Close();
 				m_Clients.Del(s);
 			}

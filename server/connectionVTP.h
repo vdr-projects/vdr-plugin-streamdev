@@ -48,7 +48,7 @@ public:
 	bool CmdNEWT(char *Opts);
 	bool CmdDELT(char *Opts);
 
-	bool Respond(int Code, const char *Message);
+	bool Respond(int Code, const std::string &Message);
 };
 
 #endif // VDR_STREAMDEV_SERVERS_CONNECTIONVTP_H

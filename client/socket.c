@@ -1,5 +1,5 @@
 /*
- *  $Id: socket.c,v 1.3 2005/02/08 15:34:38 lordjaxom Exp $
+ *  $Id: socket.c,v 1.4 2005/02/08 17:22:35 lordjaxom Exp $
  */
  
 #include <tools/select.h>
@@ -39,17 +39,17 @@ cTBSocket *cClientSocket::DataSocket(eSocketId Id) const {
 	return m_DataSockets[Id];
 }
 
-bool cClientSocket::Command(const cTBString &Command, uint Expected, 
-		uint TimeoutMs) {
+bool cClientSocket::Command(const std::string &Command, uint Expected, uint TimeoutMs) 
+{
 	errno = 0;
 
-	cTBString pkt = Command + "\015\012";
-	Dprintf("OUT: |%s|\n", (const char*)Command);
+	std::string pkt = Command + "\015\012";
+	Dprintf("OUT: |%s|\n", Command.c_str());
 
 	cTimeMs starttime;
-	if (!TimedWrite((const char*)pkt, pkt.Length(), TimeoutMs)) {
-		esyslog("Streamdev: Lost connection to %s:%d: %s", 
-				(const char*)RemoteIp(), RemotePort(), strerror(errno));
+	if (!TimedWrite(pkt.c_str(), pkt.size(), TimeoutMs)) {
+		esyslog("Streamdev: Lost connection to %s:%d: %s", RemoteIp().c_str(), RemotePort(), 
+		        strerror(errno));
 		Close();
 		return false;
 	}
@@ -63,34 +63,28 @@ bool cClientSocket::Command(const cTBString &Command, uint Expected,
 	return true;
 }
 
-bool cClientSocket::Expect(uint Expected, cTBString *Result, uint TimeoutMs) {
-	char *buffer;
+bool cClientSocket::Expect(uint Expected, std::string *Result, uint TimeoutMs) {
 	char *endptr;
 	int bufcount;
 	bool res;
 
 	errno = 0;
 
-	buffer = new char[BUFSIZ + 1];
-
-	if ((bufcount = ReadUntil(buffer, BUFSIZ, "\012", TimeoutMs))
-			== -1) {
-		esyslog("Streamdev: Lost connection to %s:%d: %s", 
-				(const char*)RemoteIp(), RemotePort(), strerror(errno));
+	if ((bufcount = ReadUntil(m_Buffer, sizeof(m_Buffer) - 1, "\012", TimeoutMs)) == -1) {
+		esyslog("Streamdev: Lost connection to %s:%d: %s", RemoteIp().c_str(), RemotePort(), 
+		        strerror(errno));
 		Close();
-		delete[] buffer;
 		return false;
 	}
-	if (buffer[bufcount - 1] == '\015')
+	if (m_Buffer[bufcount - 1] == '\015')
 		--bufcount;
-	buffer[bufcount] = '\0';
-	Dprintf("IN: |%s|\n", buffer);
+	m_Buffer[bufcount] = '\0';
+	Dprintf("IN: |%s|\n", m_Buffer);
 
 	if (Result != NULL)
-		*Result = buffer;
+		*Result = m_Buffer;
 
-	res = strtoul(buffer, &endptr, 10) == Expected;
-	delete[] buffer;
+	res = strtoul(m_Buffer, &endptr, 10) == Expected;
 	return res;
 }
 
@@ -125,73 +119,73 @@ bool cClientSocket::CheckConnection(void) {
 	if (!Expect(220)) {
 		if (errno == 0)
 			esyslog("ERROR: Streamdev: Didn't receive greeting from %s:%d", 
-					(const char*)RemoteIp(), RemotePort());
+			        RemoteIp().c_str(), RemotePort());
 		Close();
 		return false;
 	}
 
-	if (!Command((cTBString)"CAPS TSPIDS", 220)) {
+	if (!Command("CAPS TSPIDS", 220)) {
 		if (errno == 0)
 			esyslog("ERROR: Streamdev: Couldn't negotiate capabilities on %s:%d", 
-					(const char*)RemoteIp(), RemotePort());
+					RemoteIp().c_str(), RemotePort());
 		Close();
 		return false;
 	}
 
 	isyslog("Streamdev: Connected to server %s:%d using capabilities TSPIDS",
-	        (const char*)RemoteIp(), RemotePort());
+	        RemoteIp().c_str(), RemotePort());
 	return true;
 }
 
 bool cClientSocket::ProvidesChannel(const cChannel *Channel, int Priority) {
-	cTBString buffer;
-
 	if (!CheckConnection()) return false;
 
 	CMD_LOCK;
 
-	if (!Command("PROV " + cTBString::Number(Priority) + " " 
-			+ Channel->GetChannelID().ToString()))
+	std::string command = (std::string)"PROV " + (const char*)itoa(Priority) + " " 
+	                    + (const char*)Channel->GetChannelID().ToString();
+	if (!Command(command))
 		return false;
 
+	std::string buffer;
 	if (!Expect(220, &buffer)) {
-		if (buffer.Left(3) != "560" && errno == 0)
+		if (buffer.substr(0, 3) != "560" && errno == 0)
 			esyslog("ERROR: Streamdev: Couldn't check if %s:%d provides channel %s",
-					(const char*)RemoteIp(), RemotePort(), Channel->Name());
+			        RemoteIp().c_str(), RemotePort(), Channel->Name());
 		return false;
 	}
 	return true;
 }
 
 bool cClientSocket::CreateDataConnection(eSocketId Id) {
-	int idx;
 	cTBSocket listen(SOCK_STREAM);
-	cTBString buffer;
 
 	if (!CheckConnection()) return false;
 
 	if (m_DataSockets[Id] != NULL)
 		DELETENULL(m_DataSockets[Id]);
 
-	if (!listen.Listen((const char*)LocalIp(), 0, 1)) {
+	if (!listen.Listen(LocalIp(), 0, 1)) {
 		esyslog("ERROR: Streamdev: Couldn't create data connection: %s", 
 				strerror(errno));
 		return false;
 	}
 
-	buffer.Format("PORT %d %s,%d,%d", Id, (const char*)LocalIp(), 
-			(listen.LocalPort() >> 8) & 0xff, listen.LocalPort() & 0xff);
-	idx = 5;
-	while ((idx = buffer.Find('.', idx + 1)) != -1)
-		buffer[idx] = ',';
+	std::string command = (std::string)"PORT " + (const char*)itoa(Id) + " " 
+	                    + LocalIp().c_str() + "," 
+	                    + (const char*)itoa((listen.LocalPort() >> 8) & 0xff) + ","
+	                    + (const char*)itoa(listen.LocalPort() & 0xff);
+	size_t idx = 4;
+	while ((idx = command.find('.', idx + 1)) != (size_t)-1)
+		command[idx] = ',';
 
 	CMD_LOCK;
 
-	if (!Command(buffer, 220)) {
+	if (!Command(command, 220)) {
 		Dprintf("error: %m\n");
 		if (errno == 0)
 			esyslog("ERROR: Streamdev: Couldn't establish data connection to %s:%d",
-					(const char*)RemoteIp(), RemotePort());
+					RemoteIp().c_str(), RemotePort());
 		return false;
 	}
 
@@ -204,7 +198,7 @@ bool cClientSocket::CreateDataConnection(eSocketId Id) {
 	m_DataSockets[Id] = new cTBSocket;
 	if (!m_DataSockets[Id]->Accept(listen)) {
 		esyslog("ERROR: Streamdev: Couldn't establish data connection to %s:%d%s%s",
-				(const char*)RemoteIp(), RemotePort(), errno == 0 ? "" : ": ",
+				RemoteIp().c_str(), RemotePort(), errno == 0 ? "" : ": ",
 				errno == 0 ? "" : strerror(errno));
 		DELETENULL(m_DataSockets[Id]);
 		return false;
@@ -218,10 +212,12 @@ bool cClientSocket::SetChannelDevice(const cChannel *Channel) {
 
 	CMD_LOCK;
 
-	if (!Command((cTBString)"TUNE " + Channel->GetChannelID().ToString(), 220)) {
+	std::string command = (std::string)"TUNE " 
+	                    + (const char*)Channel->GetChannelID().ToString();
+	if (!Command(command, 220)) {
 		if (errno == 0)
 			esyslog("ERROR: Streamdev: Couldn't tune %s:%d to channel %s",
-					(const char*)RemoteIp(), RemotePort(), Channel->Name());
+			        RemoteIp().c_str(), RemotePort(), Channel->Name());
 		return false;
 	}
 	return true;
@@ -232,10 +228,11 @@ bool cClientSocket::SetPid(int Pid, bool On) {
 
 	CMD_LOCK;
 
-	if (!Command((On ? "ADDP " : "DELP ") + cTBString::Number(Pid), 220)) {
+	std::string command = (std::string)(On ? "ADDP " : "DELP ") + (const char*)itoa(Pid);
+	if (!Command(command, 220)) {
 		if (errno == 0)
-			esyslog("Streamdev: Pid %d not available from %s:%d", Pid,
-					(const char*)LocalIp(), LocalPort());
+			esyslog("Streamdev: Pid %d not available from %s:%d", Pid, LocalIp().c_str(), 
+			        LocalPort());
 		return false;
 	}
 	return true;
@@ -243,15 +240,16 @@ bool cClientSocket::SetPid(int Pid, bool On) {
 
 #if VDRVERSNUM >= 10300
 bool cClientSocket::SetFilter(ushort Pid, uchar Tid, uchar Mask, bool On) {
-	cTBString cmd;
 	if (!CheckConnection()) return false;
 
 	CMD_LOCK;
-	cmd.Format("%s %hu %hhu %hhu", On ? "ADDF" : "DELF", Pid, Tid, Mask);
-	if (!Command(cmd, 220)) {
+
+	std::string command = (std::string)(On ? "ADDF " : "DELF ") + (const char*)itoa(Pid)
+	                    + " " + (const char*)itoa(Tid) + " " + (const char*)itoa(Mask);
+	if (!Command(command, 220)) {
 		if (errno == 0)
 				esyslog("Streamdev: Filter %hu, %hhu, %hhu not available from %s:%d", 
-						Pid, Tid, Mask, (const char*)LocalIp(), LocalPort());
+						Pid, Tid, Mask, LocalIp().c_str(), LocalPort());
 		return false;
 	}
 	return true;
@@ -264,7 +262,8 @@ bool cClientSocket::CloseDvr(void) {
 	CMD_LOCK;
 
 	if (m_DataSockets[siLive] != NULL) {
-		if (!Command("ABRT " + cTBString::Number(siLive), 220)) {
+		std::string command = (std::string)"ABRT " + (const char*)itoa(siLive);
+		if (!Command(command, 220)) {
 			if (errno == 0)
 				esyslog("ERROR: Streamdev: Couldn't cleanly close data connection");
 			return false;
@@ -276,8 +275,8 @@ bool cClientSocket::CloseDvr(void) {
 }
 
 bool cClientSocket::SynchronizeEPG(void) {
-	cTBString buffer;
-	bool res;
+	std::string buffer;
+	bool result;
 	FILE *epgfd;
 
 	if (!CheckConnection()) return false;
@@ -295,16 +294,16 @@ bool cClientSocket::SynchronizeEPG(void) {
 		return false;
 	}
 
-	while ((res = Expect(215, &buffer))) {
+	while ((result = Expect(215, &buffer))) {
 		if (buffer[3] == ' ') break;
-		fputs((const char*)buffer + 4, epgfd);
+		fputs(buffer.c_str() + 4, epgfd);
 		fputc('\n', epgfd);
 	}
 
-	if (!res) {
+	if (!result) {
 		if (errno == 0)
 			esyslog("ERROR: Streamdev: Couldn't fetch EPG data from %s:%d",
-					(const char*)RemoteIp(), RemotePort());
+			        RemoteIp().c_str(), RemotePort());
 		fclose(epgfd);
 		return false;
 	}
@@ -333,14 +332,13 @@ bool cClientSocket::Quit(void) {
 	if (!(res = Command("QUIT", 221))) {
 		if (errno == 0)
 			esyslog("ERROR: Streamdev: Couldn't quit command connection to %s:%d",
-					(const char*)RemoteIp(), RemotePort());
+					RemoteIp().c_str(), RemotePort());
 	}
 	Close();
 	return res;
 }
 	
 bool cClientSocket::LoadRecordings(cRemoteRecordings &Recordings) {
-	cTBString buffer;
 	bool res;
 
 	if (!CheckConnection()) return false;
@@ -350,8 +348,9 @@ bool cClientSocket::LoadRecordings(cRemoteRecordings &Recordings) {
 	if (!Command("LSTR"))
 		return false;
 
+	std::string buffer;
 	while ((res = Expect(250, &buffer))) {
-		cRemoteRecording *rec = new cRemoteRecording((const char*)buffer + 4);
+		cRemoteRecording *rec = new cRemoteRecording(buffer.c_str() + 4);
 		Dprintf("recording valid: %d\n", rec->IsValid());
 		if (rec->IsValid())
 			Recordings.Add(rec);
@@ -360,23 +359,24 @@ bool cClientSocket::LoadRecordings(cRemoteRecordings &Recordings) {
 		if (buffer[3] == ' ') break;
 	}
 
-	if (!res && buffer.Left(3) != "550") {
+	if (!res && buffer.substr(0, 3) != "550") {
 		if (errno == 0)
 			esyslog("ERROR: Streamdev: Couldn't fetch recordings from %s:%d",
-					(const char*)RemoteIp(), RemotePort());
+					RemoteIp().c_str(), RemotePort());
 		return false;
 	}
 
 	for (cRemoteRecording *r = Recordings.First(); r; r = Recordings.Next(r)) {
-		if (!Command("LSTR " + cTBString::Number(r->Index())))
+		std::string command = (std::string)"LSTR " + (const char*)itoa(r->Index());
+		if (!Command(command))
 			return false;
 			
 		if (Expect(250, &buffer))
-			r->ParseInfo((const char*)buffer + 4);
-		else if (buffer.Left(3) != "550") {
+			r->ParseInfo(buffer.c_str() + 4);
+		else if (buffer.substr(0, 3) != "550") {
 			if (errno == 0)
-				esyslog("ERROR: Streamdev: Couldn't fetch details for recording from "
-						"%s:%d", (const char*)RemoteIp(), RemotePort());
+				esyslog("ERROR: Streamdev: Couldn't fetch details for recording from %s:%d",
+				        RemoteIp().c_str(), RemotePort());
 			return false;
 		}
 		Dprintf("recording complete: %d\n", r->Index());
@@ -388,11 +388,12 @@ bool cClientSocket::StartReplay(const char *Filename) {
 	if (!CheckConnection()) return false;
 	
 	CMD_LOCK;
-		
-	if (!Command((cTBString)"PLAY " + Filename, 220)) {
+	
+	std::string command = (std::string)"PLAY " + Filename;
+	if (!Command(command, 220)) {
 		if (errno == 0)
 			esyslog("ERROR: Streamdev: Couldn't replay \"%s\" from %s:%d",
-					Filename, (const char*)RemoteIp(), RemotePort());
+					Filename, RemoteIp().c_str(), RemotePort());
 		return false;
 	}
 	return true;
@@ -404,7 +405,8 @@ bool cClientSocket::AbortReplay(void) {
 	CMD_LOCK;
 
 	if (m_DataSockets[siReplay] != NULL) {
-		if (!Command("ABRT " + cTBString::Number(siReplay), 220)) {
+		std::string command = (std::string)"ABRT " + (const char*)itoa(siReplay);
+		if (!Command(command, 220)) {
 			if (errno == 0)
 				esyslog("ERROR: Streamdev: Couldn't cleanly close data connection");
 			return false;
@@ -417,7 +419,6 @@ bool cClientSocket::AbortReplay(void) {
 
 bool cClientSocket::DeleteRecording(cRemoteRecording *Recording) {
 	bool res;
-	cTBString buffer;
 	cRemoteRecording *rec = NULL;
 
 	if (!CheckConnection())
@@ -428,19 +429,20 @@ bool cClientSocket::DeleteRecording(cRemoteRecording *Recording) {
 	if (!Command("LSTR"))
 		return false;
 
+	std::string buffer;
 	while ((res = Expect(250, &buffer))) {
 		if (rec == NULL) {
-			rec = new cRemoteRecording((const char*)buffer + 4);
+			rec = new cRemoteRecording(buffer.c_str() + 4);
 			if (!rec->IsValid() || rec->Index() != Recording->Index())
 				DELETENULL(rec);
 		}
 		if (buffer[3] == ' ') break;
 	}
 
-	if (!res && buffer.Left(3) != "550") {
+	if (!res && buffer.substr(0, 3) != "550") {
 		if (errno == 0)
 			esyslog("ERROR: Streamdev: Couldn't fetch recordings from %s:%d",
-					(const char*)RemoteIp(), RemotePort());
+					RemoteIp().c_str(), RemotePort());
 		if (rec != NULL) delete rec;
 		return false;
 	}
@@ -450,7 +452,8 @@ bool cClientSocket::DeleteRecording(cRemoteRecording *Recording) {
 		return false;
 	}
 
-	if (!Command("DELR " + cTBString::Number(Recording->Index()), 250)) {
+	std::string command = (std::string)"DELR " + (const char*)itoa(Recording->Index());
+	if (!Command(command, 250)) {
 		ERROR(tr("Couldn't delete recording! Try again..."));
 		return false;
 	}
@@ -471,9 +474,6 @@ bool cClientSocket::SuspendServer(void) {
 }
 
 bool cClientSocket::LoadTimers(cRemoteTimers &Timers) {
-	cTBString buffer;
-	bool res;
-
 	if (!CheckConnection()) return false;
 	
 	CMD_LOCK;
@@ -481,39 +481,42 @@ bool cClientSocket::LoadTimers(cRemoteTimers &Timers) {
 	if (!Command("LSTT"))
 		return false;
 
+	bool res;
+	std::string buffer;
 	while ((res = Expect(250, &buffer))) {
-		cRemoteTimer *timer = new cRemoteTimer((const char*)buffer + 4);
+		cRemoteTimer *timer = new cRemoteTimer(buffer.c_str() + 4);
 		Dprintf("timer valid: %d\n", timer->IsValid());
 		if (timer->IsValid())
 			Timers.Add(timer);
 		if (buffer[3] == ' ') break;
 	}
 
-	if (!res && buffer.Left(3) != "550") {
+	if (!res && buffer.substr(0, 3) != "550") {
 		if (errno == 0)
 			esyslog("ERROR: Streamdev: Couldn't fetch recordings from %s:%d",
-					(const char*)RemoteIp(), RemotePort());
+					RemoteIp().c_str(), RemotePort());
 		return false;
 	}
 	return res;
 }
 
 bool cClientSocket::SaveTimer(cRemoteTimer *Old, cRemoteTimer &New) {
-	cTBString buffer;
-
 	if (!CheckConnection()) return false;
 	
 	CMD_LOCK;
 
 	if (New.Index() == -1) { // New timer
-		if (!Command((cTBString)"NEWT " + New.ToText(), 250)) {
+		std::string command = (std::string)"NEWT " + (const char*)New.ToText();
+		if (!Command(command, 250)) {
 			ERROR(tr("Couldn't save timer! Try again..."));
 			return false;
 		}
 	} else { // Modified timer
-		if (!Command("LSTT " + cTBString::Number(New.Index())))
+		std::string command = (std::string)"LSTT " + (const char*)itoa(New.Index());
+		if (!Command(command))
 			return false;
-			
+		
+		std::string buffer;
 		if (!Expect(250, &buffer)) {
 			if (errno == 0)
 				ERROR(tr("Timers not in sync! Try again..."));
@@ -522,7 +525,7 @@ bool cClientSocket::SaveTimer(cRemoteTimer *Old, cRemoteTimer &New) {
 			return false;
 		}
 
-		cRemoteTimer oldstate((const char*)buffer + 4);
+		cRemoteTimer oldstate(buffer.c_str() + 4);
 		if (oldstate != *Old) {
 			/*Dprintf("old timer: %d,%d,%d,%d,%d,%d,%s,%d,%s,%d\n", oldstate.m_Index,
 					oldstate.m_Active,oldstate.m_Day,oldstate.m_Start,oldstate.m_StartTime,oldstate.m_Priority,oldstate.m_File,oldstate.m_FirstDay,(const char*)oldstate.m_Summary,oldstate.m_Channel->Number());
@@ -532,8 +535,10 @@ bool cClientSocket::SaveTimer(cRemoteTimer *Old, cRemoteTimer &New) {
 			return false;
 		}
 
-		if (!Command("MODT " + cTBString::Number(New.Index()) + " " 
-				+ New.ToText(), 250)) {
+
+		command = (std::string)"MODT " + (const char*)itoa(New.Index()) + " " 
+		        + (const char*)New.ToText();
+		if (!Command(command, 250)) {
 			ERROR(tr("Couldn't save timer! Try again..."));
 			return false;
 		}
@@ -542,16 +547,15 @@ bool cClientSocket::SaveTimer(cRemoteTimer *Old, cRemoteTimer &New) {
 }
 
 bool cClientSocket::DeleteTimer(cRemoteTimer *Timer) {
-	cTBString buffer;
-
-	if (!CheckConnection()) 
-		return false;
+	if (!CheckConnection()) return false;
 
 	CMD_LOCK;
 
-	if (!Command("LSTT " + cTBString::Number(Timer->Index())))
+	std::string command = (std::string)"LSTT " + (const char*)itoa(Timer->Index());
+	if (!Command(command))
 		return false;
-		
+	
+	std::string buffer;
 	if (!Expect(250, &buffer)) {
 		if (errno == 0)
 			ERROR(tr("Timers not in sync! Try again..."));
@@ -560,14 +564,14 @@ bool cClientSocket::DeleteTimer(cRemoteTimer *Timer) {
 		return false;
 	}
 
-	cRemoteTimer oldstate((const char*)buffer + 4);
-	
+	cRemoteTimer oldstate(buffer.c_str() + 4);
 	if (oldstate != *Timer) {
 		ERROR(tr("Timers not in sync! Try again..."));
 		return false;
 	}
 
-	if (!Command("DELT " + cTBString::Number(Timer->Index()), 250)) {
+	command = (std::string)"DELT " + (const char*)itoa(Timer->Index());
+	if (!Command(command, 250)) {
 		ERROR(tr("Couldn't delete timer! Try again..."));
 		return false;
 	}

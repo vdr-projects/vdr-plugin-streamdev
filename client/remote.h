@@ -1,13 +1,12 @@
 /*
- *  $Id: remote.h,v 1.1 2004/12/30 22:44:03 lordjaxom Exp $
+ *  $Id: remote.h,v 1.2 2005/02/08 17:22:35 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_REMOTE_H
 #define VDR_STREAMDEV_REMOTE_H
 
 #include <vdr/config.h>
-
-#include "tools/string.h"
+#include <string>
 
 #if VDRVERSNUM < 10300
 class cEventInfo;
@@ -18,13 +17,13 @@ class cChannel;
 
 class cRemoteRecording: public cListObject {
 private:
-	bool      m_IsValid;
-	int       m_Index;
-	bool      m_IsNew;
-	char     *m_TitleBuffer;
-	cTBString m_StartTime;
-	cTBString m_Name;
-	cTBString m_Summary;
+	bool        m_IsValid;
+	int         m_Index;
+	bool        m_IsNew;
+	char       *m_TitleBuffer;
+	std::string m_StartTime;
+	std::string m_Name;
+	std::string m_Summary;
 
 public:
 	cRemoteRecording(const char *Text);
@@ -37,10 +36,10 @@ public:
 
 	bool IsValid(void) const { return m_IsValid; }
 	int Index(void) const { return m_Index; }
-	const char *StartTime(void) const { return m_StartTime; }
+	const char *StartTime(void) const { return m_StartTime.c_str(); }
 	bool IsNew(void) const { return m_IsNew; }
-	const char *Name(void) const { return m_Name; }
-	const char *Summary(void) const { return m_Summary; }
+	const char *Name(void) const { return m_Name.c_str(); }
+	const char *Summary(void) const { return m_Summary.c_str(); }
 	const char *Title(char Delimiter, bool NewIndicator, int Level);
 	int HierarchyLevels(void);
 };
@@ -71,7 +70,7 @@ private:
 	int             m_Lifetime;
 	char            m_File[MaxFileName];
 	time_t          m_FirstDay;
-	cTBString       m_Summary;
+	std::string     m_Summary;
 	char           *m_Buffer;
 	const cChannel *m_Channel;
 
@@ -116,7 +115,7 @@ public:
 	int Lifetime(void) const { return m_Lifetime; }
 	const char *File(void) const { return m_File; }
 	time_t FirstDay(void) const { return m_FirstDay; }
-	const cTBString &Summary(void) const { return m_Summary; }
+	const std::string &Summary(void) const { return m_Summary; }
 	const cChannel *Channel(void) const { return m_Channel; }
 
 	const char *ToText(void);
