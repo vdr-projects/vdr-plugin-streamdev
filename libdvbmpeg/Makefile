@@ -1,5 +1,5 @@
 INCS   = -I.
-CFLAGS =  -g -Wall -O2 -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
+CFLAGS =  -g -Wall -O2 -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -fPIC
 MFLAG  = -M
 OBJS = ctools.o ringbuffy.o remux.o transform.o cpptools.o
 SRC  = $(wildcard *.c)

@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.3 2005/02/08 14:19:29 lordjaxom Exp $
+ *  $Id: device.c,v 1.4 2005/02/08 15:21:19 lordjaxom Exp $
  */
  
 #include "client/device.h"
@@ -63,6 +63,12 @@ bool cStreamdevDevice::ProvidesSource(int Source) const {
 	return false;
 }
 
+bool cStreamdevDevice::ProvidesTransponder(const cChannel *Channel) const
+{
+	Dprintf("ProvidesTransponder\n");
+	return false;
+}
+
 bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority, 
 		bool *NeedsDetachReceivers) const {
 	bool res = false;
@@ -99,6 +105,7 @@ bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel,
 	m_Channel = Channel;
 	bool r = ClientSocket.SetChannelDevice(m_Channel);
 	Dprintf("setchanneldevice r=%d\n", r);
+	return r;
 }
 
 bool cStreamdevDevice::SetPid(cPidHandle *Handle, int Type, bool On) {
