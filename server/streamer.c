@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.c,v 1.3 2005/02/08 17:22:35 lordjaxom Exp $
+ *  $Id: streamer.c,v 1.4 2005/02/08 19:54:52 lordjaxom Exp $
  */
  
 #include <vdr/ringbuffer.h>
@@ -13,34 +13,74 @@
 #include "tools/socket.h"
 #include "common.h"
 
-#define VIDEOBUFSIZE MEGABYTE(4)
-#define MAXBLOCKSIZE TS_SIZE*10
+cStreamdevWriter::cStreamdevWriter(cTBSocket *Socket, cStreamdevStreamer *Streamer):
+		cThread("streamdev-writer"),
+		m_Streamer(Streamer),
+		m_Socket(Socket),
+		m_Active(false)
+{
+}
+
+cStreamdevWriter::~cStreamdevWriter()
+{
+	m_Active = false;
+	Cancel(3);
+}
+
+void cStreamdevWriter::Action(void)
+{
+	int max = 0;
+	m_Active = true;
+	while (m_Active) {
+		int count;
+		uchar *block = m_Streamer->Get(count);
+
+		if (!m_Socket->SafeWrite(block, count)) {
+			esyslog("ERROR: streamdev-server: couldn't send data: %m");
+			break;
+		}
+		m_Streamer->Del(count);
+	}
+	m_Active = false;
+	Dprintf("Max. Transmit Blocksize was: %d\n", max);
+}
 
 cStreamdevStreamer::cStreamdevStreamer(const char *Name):
-		cThread(((std::string)"Streamdev: " + Name).c_str())
+		cThread(Name),
+		m_Active(false),
+		m_Writer(NULL),
+		m_RingBuffer(new cRingBufferLinear(STREAMERBUFSIZE, TS_SIZE * 2, true, 
+	                                       "streamdev-streamer")),
+		m_SendBuffer(new cRingBufferLinear(WRITERBUFSIZE, MAXTRANSMITBLOCKSIZE))
 {
-	m_Active     = false;
-	m_Receivers  = 0;
-	m_Buffer     = NULL;
-	m_Name       = Name;
-	m_Socket     = NULL;
-	m_RingBuffer = new cRingBufferLinear(VIDEOBUFSIZE, TS_SIZE * 2, true);
+	m_RingBuffer->SetTimeouts(0, 100);
+	m_SendBuffer->SetTimeouts(0, 100);
 }
 
-cStreamdevStreamer::~cStreamdevStreamer() {
+cStreamdevStreamer::~cStreamdevStreamer() 
+{
 	Stop();
-	if (m_Buffer != NULL) delete[] m_Buffer;
 	delete m_RingBuffer;
+	delete m_Writer;
+	delete m_SendBuffer;
 }
 
-void cStreamdevStreamer::Start(cTBSocket *Socket) {
-	m_Socket = Socket;
+void cStreamdevStreamer::Start(cTBSocket *Socket) 
+{
+	m_Writer = new cStreamdevWriter(Socket, this);
 	Attach();
-	if (!m_Active)
-		cThread::Start();
 }
 
-void cStreamdevStreamer::Stop(void) {
+void cStreamdevStreamer::Activate(bool On) 
+{
+	if (On && !m_Active) {
+		m_Writer->Start();
+		cThread::Start();
+	}
+}
+
+void cStreamdevStreamer::Stop(void) 
+{
 	if (m_Active) {
 		Dprintf("stopping live streamer\n");
 		m_Active = false;
@@ -48,50 +88,35 @@ void cStreamdevStreamer::Stop(void) {
 	}
 }
 
-uchar *cStreamdevStreamer::Process(const uchar *Data, int &Count, int &Result) {
-	if (m_Buffer == NULL)
-		m_Buffer = new uchar[MAXBLOCKSIZE];
-
-	if (Count > MAXBLOCKSIZE)
-		Count = MAXBLOCKSIZE;
-	memcpy(m_Buffer, Data, Count);
-	Result = Count;
-	return m_Buffer;
+int cStreamdevStreamer::Put(const uchar *Data, int Count)
+{
+	return m_SendBuffer->Put(Data, Count);
 }
 
-void cStreamdevStreamer::Action(void) {
-	int max = 0;
+uchar *cStreamdevStreamer::Get(int &Count)
+{
+	return m_SendBuffer->Get(Count);
+}
 
-#if VDRVERSNUM < 10300
-	isyslog("Streamdev: %s thread started (pid=%d)", m_Name, getpid());
-#endif
+void cStreamdevStreamer::Del(int Count)
+{
+	return m_SendBuffer->Del(Count);
+}
+
+void cStreamdevStreamer::Action(void) 
+{
+	int max = 0;
 
 	m_Active = true;
 	while (m_Active) {
-		int recvd;
-		const uchar *block = m_RingBuffer->Get(recvd);
+		int got;
+		uchar *block = m_RingBuffer->Get(got);
 
-		if (block && recvd > 0) {
-			int result = 0;
-			uchar *sendBlock = Process(block, recvd, result);
-
-			m_RingBuffer->Del(recvd);
-			if (result > max) max = result;
-
-			if (!m_Socket->TimedWrite(sendBlock, result, 150)) {
-				if (errno != ETIMEDOUT) {
-					esyslog("ERROR: Streamdev: Couldn't write data: %s", strerror(errno));
-					m_Active = false;
-				}
-			}
-		} else
-			usleep(1); // this keeps the CPU load low (XXX: waiting buffers)
+		if (block && got > 0) {
+			int count = Put(block, got);
+			if (count)
+				m_RingBuffer->Del(count);
+		}
 	}
-
-	Dprintf("Max. Transmit Blocksize was: %d\n", max);
-
-#if VDRVERSNUM < 10300
-	isyslog("Streamdev: %s thread stopped", m_Name);
-#endif
 }
 

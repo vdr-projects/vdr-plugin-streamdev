@@ -18,23 +18,25 @@ cStreamdevLiveReceiver::~cStreamdevLiveReceiver()
 	Detach();
 }
 
+void cStreamdevLiveReceiver::Activate(bool On)
+{
+	m_Streamer->Activate(On);
+}
+
 void cStreamdevLiveReceiver::Receive(uchar *Data, int Length) {
-	int p = m_Streamer->Put(Data, Length);
+	int p = m_Streamer->Receive(Data, Length);
 	if (p != Length)
 		m_Streamer->ReportOverflow(Length - p);
 }
 
 cStreamdevLiveStreamer::cStreamdevLiveStreamer(int Priority):
-		cStreamdevStreamer("Live streamer") {
+		cStreamdevStreamer("streamdev-livestreaming") {
 	m_Priority   = Priority;
 	m_NumPids    = 0;
 	m_Channel    = NULL;
 	m_Device     = NULL;
 	m_Receiver   = NULL;
 	m_Remux      = NULL;
-	m_Buffer     = NULL;
-	m_Sequence   = 0;
-	memset(m_Pids, 0, sizeof(m_Pids));
 }
 
 cStreamdevLiveStreamer::~cStreamdevLiveStreamer() {
@@ -44,7 +46,6 @@ cStreamdevLiveStreamer::~cStreamdevLiveStreamer() {
 #if VDRVERSNUM >= 10300
 	//delete m_Filter; TODO
 #endif
-	free(m_Buffer);
 }
 
 void cStreamdevLiveStreamer::Detach(void) {
@@ -91,7 +92,7 @@ bool cStreamdevLiveStreamer::SetPid(int Pid, bool On) {
 		m_Receiver = new cStreamdevLiveReceiver(this, m_Channel->Ca(), m_Priority, m_Pids);
 		if (m_Device != NULL) {
 			Dprintf("Attaching new receiver\n");
-			m_Device->AttachReceiver(m_Receiver);
+			Attach();
 		}
 	}
 	return true;
@@ -155,6 +156,8 @@ bool cStreamdevLiveStreamer::SetFilter(u_short Pid, u_char Tid, u_char Mask,
 #endif
 }
 
+// TODO: Remuxer einbinden
+#if 0
 uchar *cStreamdevLiveStreamer::Process(const uchar *Data, int &Count, int &Result) {
 	uchar *remuxed = m_Remux != NULL ? m_Remux->Process(Data, Count, Result)
 			: cStreamdevStreamer::Process(Data, Count, Result);
@@ -184,6 +187,7 @@ uchar *cStreamdevLiveStreamer::Process(const uchar *Data, int &Count, int &Resul
 	}
 	return NULL;
 }
+#endif
 
 std::string cStreamdevLiveStreamer::Report(void) {
 	std::string result;

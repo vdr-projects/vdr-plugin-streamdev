@@ -78,6 +78,8 @@ public:
 	   and errno is set appropriately. TimedRead only works on UNIX file 
 	   descriptor sources. */
 	bool TimedWrite(const void *Buffer, size_t Length, uint TimeoutMs);
+	
+	bool SafeWrite(const void *Buffer, size_t Length);
 
 	/* ReadUntil() tries to read at most Length bytes into the storage pointed
 	   to by Buffer, which must be at least Length bytes in size, within the

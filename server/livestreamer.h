@@ -21,6 +21,7 @@ private:
 	cStreamdevLiveStreamer *m_Streamer;
 
 protected:
+	virtual void Activate(bool On);
 	virtual void Receive(uchar *Data, int Length);
 
 public:
@@ -39,10 +40,9 @@ private:
 	cStreamdevLiveReceiver *m_Receiver;
 	cTSRemux               *m_Remux;
 	uchar                  *m_Buffer;
-	int                     m_Sequence;
 
 protected:
-	virtual uchar *Process(const uchar *Data, int &Count, int &Result);
+	//virtual uchar *Process(const uchar *Data, int &Count, int &Result);
 
 public:
 	cStreamdevLiveStreamer(int Priority);
