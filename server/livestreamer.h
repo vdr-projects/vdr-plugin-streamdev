@@ -40,9 +40,6 @@ private:
 	cTSRemux               *m_Remux;
 	uchar                  *m_Buffer;
 	int                     m_Sequence;
-#if VDRVERSNUM >= 10300
-	cStreamdevLiveFilter   *m_Filter;
-#endif
 
 protected:
 	virtual uchar *Process(const uchar *Data, int &Count, int &Result);
@@ -53,7 +50,7 @@ public:
 
 	void SetDevice(cDevice *Device) { m_Device = Device; }
 	bool SetPid(int Pid, bool On);
-	bool SetChannel(const cChannel *Channel, int StreamType, bool StreamPIDS);
+	bool SetChannel(const cChannel *Channel, eStreamType StreamType);
 	bool SetFilter(u_short Pid, u_char Tid, u_char Mask, bool On);
 	
 	virtual void Detach(void);

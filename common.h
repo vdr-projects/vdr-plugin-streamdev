@@ -1,5 +1,5 @@
 /*
- *  $Id: common.h,v 1.2 2005/02/08 13:59:16 lordjaxom Exp $
+ *  $Id: common.h,v 1.3 2005/02/08 15:34:38 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_COMMON_H
@@ -65,7 +65,10 @@ enum eStreamType {
 	stPES,
 	stPS,
 	stES,
-	st_Count
+	stTSPIDS,
+
+#define st_CountSetup (stES+1)
+#define st_Count (stTSPIDS+1)
 };
 
 enum eSuspendMode {

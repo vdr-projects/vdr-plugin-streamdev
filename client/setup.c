@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.c,v 1.1 2004/12/30 22:44:03 lordjaxom Exp $
+ *  $Id: setup.c,v 1.2 2005/02/08 15:34:38 lordjaxom Exp $
  */
  
 #include <vdr/menuitems.h>
@@ -13,7 +13,6 @@ cStreamdevClientSetup StreamdevClientSetup;
 cStreamdevClientSetup::cStreamdevClientSetup(void) {
 	StartClient   = false;
 	RemotePort    = 2004;
-	StreamPIDS    = true;
 #if VDRVERSNUM >= 10300
 	StreamFilters = false;
 #endif
@@ -30,7 +29,6 @@ bool cStreamdevClientSetup::SetupParse(const char *Name, const char *Value) {
 			strcpy(RemoteIp, Value);
 	}
 	else if (strcmp(Name, "RemotePort") == 0)    RemotePort = atoi(Value);
-	else if (strcmp(Name, "StreamPIDS") == 0)    StreamPIDS = atoi(Value);
 #if VDRVERSNUM >= 10300
 	else if (strcmp(Name, "StreamFilters") == 0) StreamFilters = atoi(Value);
 #endif
@@ -45,7 +43,6 @@ cStreamdevClientMenuSetupPage::cStreamdevClientMenuSetupPage(void) {
 	AddBoolEdit (tr("Start Client"),       m_NewSetup.StartClient);
 	AddIpEdit   (tr("Remote IP"),          m_NewSetup.RemoteIp);
 	AddShortEdit(tr("Remote Port"),        m_NewSetup.RemotePort);
-	AddBoolEdit (tr("MultiPID Streaming"), m_NewSetup.StreamPIDS);
 #if VDRVERSNUM >= 10300
 	AddBoolEdit (tr("Filter Streaming"),   m_NewSetup.StreamFilters);
 #endif
@@ -70,7 +67,6 @@ void cStreamdevClientMenuSetupPage::Store(void) {
 	else
 		SetupStore("RemoteIp",    m_NewSetup.RemoteIp);
 	SetupStore("RemotePort",    m_NewSetup.RemotePort);
-	SetupStore("StreamPIDS",    m_NewSetup.StreamPIDS);
 #if VDRVERSNUM >= 10300
 	SetupStore("StreamFilters", m_NewSetup.StreamFilters);
 #endif

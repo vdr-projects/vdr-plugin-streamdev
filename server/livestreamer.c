@@ -34,9 +34,6 @@ cStreamdevLiveStreamer::cStreamdevLiveStreamer(int Priority):
 	m_Remux      = NULL;
 	m_Buffer     = NULL;
 	m_Sequence   = 0;
-#if VDRVERSNUM >= 10300
-	m_Filter     = NULL;
-#endif
 	memset(m_Pids, 0, sizeof(m_Pids));
 }
 
@@ -45,7 +42,7 @@ cStreamdevLiveStreamer::~cStreamdevLiveStreamer() {
 	delete m_Receiver;
 	delete m_Remux;
 #if VDRVERSNUM >= 10300
-	delete m_Filter;
+	//delete m_Filter; TODO
 #endif
 	free(m_Buffer);
 }
@@ -100,8 +97,8 @@ bool cStreamdevLiveStreamer::SetPid(int Pid, bool On) {
 	return true;
 }
 
-bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, int StreamType,
-		bool StreamPIDS) {
+bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType StreamType) 
+{
 	Dprintf("Initializing Remuxer for full channel transfer\n");
 	printf("ca pid: %d\n", Channel->Ca());
 	m_Channel = Channel;
@@ -120,31 +117,28 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, int StreamType,
 		    && SetPid(Channel->Apid(0), true)
 		    && SetPid(Channel->Apid(1), true)
 		    && SetPid(Channel->Dpid(0), true);
-		break;
 
 	case stPS:  
 		m_Remux = new cTS2PSRemux(Channel->Vpid(), Channel->Apid(0), 0, 0, 0, true);
 		return SetPid(Channel->Vpid(),  true)
 		    && SetPid(Channel->Apid(0), true);
-		break;
 
 	case stTS:
-		if (!StreamPIDS) {
-			return SetPid(Channel->Vpid(),  true)
-			    && SetPid(Channel->Apid(0), true)
-			    && SetPid(Channel->Apid(1), true)
-			    && SetPid(Channel->Dpid(0), true);
-		}
+		return SetPid(Channel->Vpid(),  true)
+		    && SetPid(Channel->Apid(0), true)
+		    && SetPid(Channel->Apid(1), true)
+		    && SetPid(Channel->Dpid(0), true);
+
+	case stTSPIDS:
 		Dprintf("pid streaming mode\n");
 		return true;
-		break;
 	}
 	return false;
 }
 
 bool cStreamdevLiveStreamer::SetFilter(u_short Pid, u_char Tid, u_char Mask, 
 		bool On) {
-#if VDRVERSNUM >= 10300
+#if 0
 	Dprintf("setting filter\n");
 	if (On) {
 		if (m_Filter == NULL) {

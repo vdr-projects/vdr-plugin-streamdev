@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.c,v 1.2 2005/02/08 13:59:16 lordjaxom Exp $
+ *  $Id: connectionHTTP.c,v 1.3 2005/02/08 15:34:38 lordjaxom Exp $
  */
  
 #include "server/connectionHTTP.h"
@@ -57,7 +57,7 @@ bool cConnectionHTTP::Command(char *Cmd) {
 			if (device != NULL) {
 				device->SwitchChannel(m_Channel, false);
 				m_LiveStreamer->SetDevice(device);
-				if (m_LiveStreamer->SetChannel(m_Channel, m_StreamType, false)) {
+				if (m_LiveStreamer->SetChannel(m_Channel, m_StreamType)) {
 					m_Startup = true;
 					if (m_StreamType == stES && (m_Channel->Vpid() == 0 
 							|| m_Channel->Vpid() == 1 || m_Channel->Vpid() == 0x1FFF)) {

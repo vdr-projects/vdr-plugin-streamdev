@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.2 2005/02/08 13:59:16 lordjaxom Exp $
+ *  $Id: connectionVTP.c,v 1.3 2005/02/08 15:34:38 lordjaxom Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -27,10 +27,7 @@
 */
 
 cConnectionVTP::cConnectionVTP(void): cServerConnection("VTP") {
-	m_StreamPIDS   = false;
 	m_LiveStreamer = NULL;
-	m_ClientCaps   = stTS;
-	
 	memset(m_DataSockets, 0, sizeof(cTBSocket*) * si_Count);
 }
 
@@ -89,18 +86,9 @@ bool cConnectionVTP::Command(char *Cmd) {
 }
 
 bool cConnectionVTP::CmdCAPS(char *Opts) {
-	if (strcasecmp(Opts, "TSPIDS") == 0) m_StreamPIDS = true;
-	else {
-		int idx = 0;
-		while (idx < st_Count && strcasecmp(Opts, StreamTypes[idx]) != 0)
-				++idx;
-		
-		if (idx == st_Count)
-			return Respond(561, (cTBString)"Capability \"" + Opts + "\" not known");
-
-		m_ClientCaps = (eStreamType)idx;
-	}
-	return Respond(220, (cTBString)"Capability \"" + Opts + "\" accepted");
+	if (strcasecmp(Opts, "TSPIDS") == 0) 
+		return Respond(220, (cTBString)"Capability \"" + Opts + "\" accepted");
+	return Respond(561, (cTBString)"Capability \"" + Opts + "\" not known");
 }
 
 bool cConnectionVTP::CmdPROV(char *Opts) {
@@ -188,7 +176,7 @@ bool cConnectionVTP::CmdTUNE(char *Opts) {
 
 	delete m_LiveStreamer;
 	m_LiveStreamer = new cStreamdevLiveStreamer(1);
-	m_LiveStreamer->SetChannel(chan, m_ClientCaps, m_StreamPIDS);
+	m_LiveStreamer->SetChannel(chan, stTSPIDS);
 	m_LiveStreamer->SetDevice(dev);
 	
 	return Respond(220, "Channel tuned");

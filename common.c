@@ -1,5 +1,5 @@
 /*
- *  $Id: common.c,v 1.1 2004/12/30 22:43:55 lordjaxom Exp $
+ *  $Id: common.c,v 1.2 2005/02/08 15:34:38 lordjaxom Exp $
  */
  
 #include <vdr/channels.h>
@@ -18,6 +18,7 @@ const char *StreamTypes[st_Count] = {
 	"PES",
 	"PS",
 	"ES",
+	"", // used internally only
 };
 
 const char *SuspendModes[sm_Count] = {
@@ -118,7 +119,7 @@ void cStreamdevMenuSetupPage::AddSuspEdit(const char *Title, int &Value) {
 	Add(new cMenuEditStraItem(Title, &Value, sm_Count, SuspendModesTR));
 }
 void cStreamdevMenuSetupPage::AddTypeEdit(const char *Title, int &Value) {
-	Add(new cMenuEditStraItem(Title, &Value, st_Count, StreamTypes));
+	Add(new cMenuEditStraItem(Title, &Value, st_CountSetup, StreamTypes));
 }
 
 cMenuEditIpItem::cMenuEditIpItem(const char *Name, char *Value):

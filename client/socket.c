@@ -1,5 +1,5 @@
 /*
- *  $Id: socket.c,v 1.2 2005/02/08 13:59:16 lordjaxom Exp $
+ *  $Id: socket.c,v 1.3 2005/02/08 15:34:38 lordjaxom Exp $
  */
  
 #include <tools/select.h>
@@ -15,22 +15,24 @@
 
 cClientSocket ClientSocket;
 
-cClientSocket::cClientSocket(void) {
+cClientSocket::cClientSocket(void) 
+{
 	memset(m_DataSockets, 0, sizeof(cTBSocket*) * si_Count);
 	Reset();
 }
 
-cClientSocket::~cClientSocket() {
+cClientSocket::~cClientSocket() 
+{
 	Reset();
 	if (IsOpen()) Quit();
 }
 
-void cClientSocket::Reset(void) {
-	m_StreamPIDS = false;
-
-	for (int it = 0; it < si_Count; ++it)
+void cClientSocket::Reset(void) 
+{
+	for (int it = 0; it < si_Count; ++it) {
 		if (m_DataSockets[it] != NULL)
 			DELETENULL(m_DataSockets[it]);
+	}
 }
 
 cTBSocket *cClientSocket::DataSocket(eSocketId Id) const {	
@@ -128,7 +130,7 @@ bool cClientSocket::CheckConnection(void) {
 		return false;
 	}
 
-	if (!Command((cTBString)"CAPS TS", 220)) {
+	if (!Command((cTBString)"CAPS TSPIDS", 220)) {
 		if (errno == 0)
 			esyslog("ERROR: Streamdev: Couldn't negotiate capabilities on %s:%d", 
 					(const char*)RemoteIp(), RemotePort());
@@ -136,21 +138,8 @@ bool cClientSocket::CheckConnection(void) {
 		return false;
 	}
 
-	if (StreamdevClientSetup.StreamPIDS) {
-		if (!Command("CAPS TSPIDS", 220)) {
-			if (errno != 0) {
-				Close();
-				return false;
-			}
-
-			esyslog("ERROR: Streamdev: Server %s:%d isn't capable of PID streaming", 
-					(const char*)RemoteIp(), RemotePort());
-		} else
-			m_StreamPIDS = true;
-	}
-
-	isyslog("Streamdev: Connected to server %s:%d using capabilities TS%s",
-			(const char*)RemoteIp(), RemotePort(), m_StreamPIDS ? ", TSPIDS" : "");
+	isyslog("Streamdev: Connected to server %s:%d using capabilities TSPIDS",
+	        (const char*)RemoteIp(), RemotePort());
 	return true;
 }
 
@@ -241,16 +230,13 @@ bool cClientSocket::SetChannelDevice(const cChannel *Channel) {
 bool cClientSocket::SetPid(int Pid, bool On) {
 	if (!CheckConnection()) return false;
 
-	if (m_StreamPIDS) {
-		Dprintf("m_StreamPIDS is ON\n");
-		CMD_LOCK;
+	CMD_LOCK;
 
-		if (!Command((On ? "ADDP " : "DELP ") + cTBString::Number(Pid), 220)) {
-			if (errno == 0)
-				esyslog("Streamdev: Pid %d not available from %s:%d", Pid,
-						(const char*)LocalIp(), LocalPort());
-			return false;
-		}
+	if (!Command((On ? "ADDP " : "DELP ") + cTBString::Number(Pid), 220)) {
+		if (errno == 0)
+			esyslog("Streamdev: Pid %d not available from %s:%d", Pid,
+					(const char*)LocalIp(), LocalPort());
+		return false;
 	}
 	return true;
 }

@@ -10,9 +10,6 @@ class cStreamdevLiveStreamer;
 class cConnectionVTP: public cServerConnection {
 private:
 	cTBSocket              *m_DataSockets[si_Count];
-	eStreamType             m_ClientCaps;
-	bool                    m_StreamPIDS;
-
 	cStreamdevLiveStreamer *m_LiveStreamer;
 
 	// Members adopted from SVDRP
