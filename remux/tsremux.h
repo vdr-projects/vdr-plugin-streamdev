@@ -4,6 +4,8 @@
 #include "libdvbmpeg/transform.h"
 #include <vdr/remux.h>
 
+#define RESULTBUFFERSIZE KILOBYTE(256)
+
 class cTSRemux {
 protected:
   uchar m_ResultBuffer[RESULTBUFFERSIZE];

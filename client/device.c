@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.1 2004/12/30 22:44:00 lordjaxom Exp $
+ *  $Id: device.c,v 1.2 2005/01/25 14:14:43 lordjaxom Exp $
  */
  
 #include "client/device.h"
@@ -131,11 +131,15 @@ void cStreamdevDevice::CloseDvr(void) {
 }
 
 bool cStreamdevDevice::GetTSPacket(uchar *&Data) {
-  if (m_TSBuffer) {
-    int r;
+	if (m_TSBuffer) {
+		Data = m_TSBuffer->Get();
+		return true;
+	}
+	return false;
+    /*int r;
     while ((r = m_TSBuffer->Read()) >= 0) {
       Data = m_TSBuffer->Get();
-#if VDRVERSNUM >= 10300
+#if VDRVERSNUM >= 10300 // --> TODO: no filter streaming yet
 			if (Data != NULL) {
 				u_short pid = (((u_char)Data[1] & PID_MASK_HI) << 8) | Data[2];
 				u_char tid = Data[3];
@@ -151,9 +155,7 @@ bool cStreamdevDevice::GetTSPacket(uchar *&Data) {
       LOG_ERROR;
     	return false;
     }
-  	return true;
-	}
-  return false;
+  	return true;*/
 }
 
 #if VDRVERSNUM >= 10300

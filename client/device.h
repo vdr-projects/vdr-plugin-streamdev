@@ -1,5 +1,5 @@
 /*
- *  $Id: device.h,v 1.1 2004/12/30 22:44:00 lordjaxom Exp $
+ *  $Id: device.h,v 1.2 2005/01/25 14:14:43 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_DEVICE_H
@@ -30,7 +30,7 @@ private:
 
 protected:
 	virtual bool SetChannelDevice(const cChannel *Channel, bool LiveView);
-	virtual bool HasLock(void) { return m_TSBuffer != NULL; }
+	virtual bool HasLock(int TimeoutMs) { return m_TSBuffer != NULL; } // TODO
 
 	virtual bool SetPid(cPidHandle *Handle, int Type, bool On);
 	virtual bool OpenDvr(void);

@@ -1,5 +1,5 @@
 /*
- *  $Id: assembler.c,v 1.1 2004/12/30 22:44:04 lordjaxom Exp $
+ *  $Id: assembler.c,v 1.2 2005/01/25 14:14:43 lordjaxom Exp $
  */
 
 #include "client/assembler.h"
@@ -33,7 +33,7 @@ cStreamdevAssembler::cStreamdevAssembler(cTBSocket *Socket)
 cStreamdevAssembler::~cStreamdevAssembler() {
 	if (m_Active) {
 		m_Active = false;
-		WakeUp();
+/*      WakeUp();*/
 		Cancel(3);
 	}
 	close(m_Pipe[0]);
