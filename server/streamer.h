@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.h,v 1.5 2005/02/11 16:44:15 lordjaxom Exp $
+ *  $Id: streamer.h,v 1.6 2005/02/11 17:02:22 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_STREAMER_H
@@ -36,12 +36,15 @@ public:
 class cStreamdevStreamer: public cThread {
 private:
 	bool               m_Active;
+	bool               m_Running;
 	cStreamdevWriter  *m_Writer;
 	cRingBufferLinear *m_RingBuffer;
 	cRingBufferLinear *m_SendBuffer;
 
 protected:
 	virtual void Action(void);
+
+	bool IsRunning(void) const { return m_Running; }
 
 public:
 	cStreamdevStreamer(const char *Name);

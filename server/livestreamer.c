@@ -91,7 +91,7 @@ bool cStreamdevLiveStreamer::SetPid(int Pid, bool On)
 	if (m_NumPids > 0) {
 		Dprintf("Creating Receiver to respect changed pids\n");
 		m_Receiver = new cStreamdevLiveReceiver(this, m_Channel->Ca(), m_Priority, m_Pids);
-		if (m_Device != NULL) {
+		if (IsRunning() && m_Device != NULL) {
 			Dprintf("Attaching new receiver\n");
 			Attach();
 		}
