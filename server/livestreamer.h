@@ -8,12 +8,10 @@
 #include "server/livefilter.h"
 #include "common.h"
 
-#if MAXRECEIVEPIDS < 16
-#	error Too few receiver pids allowed! Please contact sascha@akv-soft.de!
-#endif
-
 class cTSRemux;
 class cRemux;
+
+// --- cStreamdevLiveReceiver -------------------------------------------------
 
 class cStreamdevLiveReceiver: public cReceiver {
 	friend class cStreamdevLiveStreamer;
@@ -26,10 +24,11 @@ protected:
 	virtual void Receive(uchar *Data, int Length);
 
 public:
-	cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer, int Ca, int Priority,
-	                       const int *Pids);
+	cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer, int Ca, int Priority, const int *Pids);
 	virtual ~cStreamdevLiveReceiver();
 };
+
+// --- cStreamdevLiveStreamer -------------------------------------------------
 
 class cStreamdevLiveStreamer: public cStreamdevStreamer {
 private:
@@ -42,7 +41,6 @@ private:
 	cStreamdevLiveReceiver *m_Receiver;
 	cRemux                 *m_PESRemux;
 	cTSRemux               *m_Remux;
-	uchar                  *m_Buffer;
 
 public:
 	cStreamdevLiveStreamer(int Priority);
@@ -50,20 +48,26 @@ public:
 
 	void SetDevice(cDevice *Device) { m_Device = Device; }
 	bool SetPid(int Pid, bool On);
-	bool SetChannel(const cChannel *Channel, eStreamType StreamType);
+	bool SetChannel(const cChannel *Channel, eStreamType StreamType, int Apid = 0);
 	bool SetFilter(u_short Pid, u_char Tid, u_char Mask, bool On);
 	
 	virtual int Put(const uchar *Data, int Count);
 	virtual uchar *Get(int &Count);
 	virtual void Del(int Count);
 
-	virtual void Detach(void);
-	virtual void Attach(void);
+	virtual void Attach(void) { Dprintf("attach %p\n", m_Device);m_Device->AttachReceiver(m_Receiver); }
+	virtual void Detach(void) { m_Device->Detach(m_Receiver); }
 
-	virtual void Start(cTBSocket *Socket);
-	
 	// Statistical purposes:
 	virtual std::string Report(void);
 };
+
+// --- cStreamdevLiveReceiver reverse inlines ---------------------------------
+
+inline void cStreamdevLiveReceiver::Activate(bool On) 
+{ 
+	Dprintf("LiveReceiver->Activate()\n");
+	m_Streamer->Activate(On); 
+}
 
 #endif // VDR_STREAMDEV_LIVESTREAMER_H

@@ -1,5 +1,5 @@
 /*
- *  $Id: common.h,v 1.3 2005/02/08 15:34:38 lordjaxom Exp $
+ *  $Id: common.h,v 1.4 2005/02/10 22:24:26 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_COMMON_H
@@ -42,7 +42,7 @@ class cChannel;
 
 char *GetNextLine(char *String, uint Length, uint &Offset);
 
-cChannel *ChannelFromString(char *String);
+const cChannel *ChannelFromString(char *String, int *Apid = NULL);
 
 /* Disable logging if BUFCOUNT buffer overflows occur within BUFOVERTIME
    milliseconds. Enable logging again if there is no error within BUFOVERTIME

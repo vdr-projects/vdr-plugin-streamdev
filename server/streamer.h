@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.h,v 1.3 2005/02/08 19:54:52 lordjaxom Exp $
+ *  $Id: streamer.h,v 1.4 2005/02/10 22:24:26 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_STREAMER_H
@@ -12,9 +12,10 @@
 class cTBSocket;
 class cStreamdevStreamer;
 
-#define MAXTRANSMITBLOCKSIZE TS_SIZE*10
 #define STREAMERBUFSIZE MEGABYTE(4)
 #define WRITERBUFSIZE KILOBYTE(192)
+
+// --- cStreamdevWriter -------------------------------------------------------
 
 class cStreamdevWriter: public cThread {
 private:
@@ -30,6 +31,8 @@ public:
 	virtual ~cStreamdevWriter();
 };
 
+// --- cStreamdevStreamer -----------------------------------------------------
+
 class cStreamdevStreamer: public cThread {
 private:
 	bool               m_Active;
@@ -39,8 +42,6 @@ private:
 
 protected:
 	virtual void Action(void);
-
-	//const cTBSocket *Socket(void) const { return m_Socket; }
 
 public:
 	cStreamdevStreamer(const char *Name);
@@ -53,9 +54,9 @@ public:
 	int Receive(uchar *Data, int Length) { return m_RingBuffer->Put(Data, Length); }
 	void ReportOverflow(int Bytes) { m_RingBuffer->ReportOverflow(Bytes); }
 	
-	virtual int Put(const uchar *Data, int Count);
-	virtual uchar *Get(int &Count);
-	virtual void Del(int Count);
+	virtual int Put(const uchar *Data, int Count) { return m_SendBuffer->Put(Data, Count); }
+	virtual uchar *Get(int &Count) { return m_SendBuffer->Get(Count); }
+	virtual void Del(int Count) { m_SendBuffer->Del(Count); }
 
 	virtual void Detach(void) = 0;
 	virtual void Attach(void) = 0;

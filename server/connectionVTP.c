@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.4 2005/02/08 17:22:35 lordjaxom Exp $
+ *  $Id: connectionVTP.c,v 1.5 2005/02/10 22:24:26 lordjaxom Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -92,7 +92,7 @@ bool cConnectionVTP::CmdCAPS(char *Opts) {
 }
 
 bool cConnectionVTP::CmdPROV(char *Opts) {
-	cChannel *chan;
+	const cChannel *chan;
 	int prio;
 	char *ep;
 	

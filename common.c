@@ -1,5 +1,5 @@
 /*
- *  $Id: common.c,v 1.2 2005/02/08 15:34:38 lordjaxom Exp $
+ *  $Id: common.c,v 1.3 2005/02/10 22:24:26 lordjaxom Exp $
  */
  
 #include <vdr/channels.h>
@@ -47,8 +47,16 @@ char *GetNextLine(char *String, uint Length, uint &Offset) {
 	return NULL;
 }
 
-cChannel *ChannelFromString(char *String) {
+const cChannel *ChannelFromString(char *String, int *Apid) {
 	cChannel *channel = NULL;
+	char *ptr, *end;
+	int apididx = 0;
+	
+	if ((ptr = strrchr(String, '+')) != NULL) {
+		*(ptr++) = '\0';
+		apididx = strtoul(ptr, &end, 10);
+		Dprintf("found apididx: %d\n", apididx);
+	}
 
 	if (isnumber(String)) {
 		int temp = strtol(String, NULL, 10);
@@ -67,6 +75,34 @@ cChannel *ChannelFromString(char *String) {
 			}
 		}
 	}
+
+	if (channel != NULL && apididx > 0) {
+		int apid = 0, index = 1;
+		const int *apids = channel->Apids(); 
+		const int *dpids = channel->Dpids(); 
+
+		for (int i = 0; apids[i] != 0; ++i, ++index) {
+			Dprintf("checking apid %d\n", apids[i]);
+			if (index == apididx) {
+				apid = apids[i];
+				break;
+			}
+		}
+
+		if (apid == 0) {
+			for (int i = 0; dpids[i] != 0; ++i, ++index) {
+				Dprintf("checking dpid %d\n", dpids[i]);
+				if (index == apididx) {
+					apid = dpids[i];
+					break;
+				}
+			}
+		}
+
+		if (Apid != NULL) 
+			*Apid = apid;
+	}
+
 	return channel;
 }
 

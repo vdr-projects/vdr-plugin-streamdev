@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.h,v 1.1 2004/12/30 22:44:18 lordjaxom Exp $
+ *  $Id: connectionHTTP.h,v 1.2 2005/02/10 22:24:26 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVERS_CONNECTIONHTTP_H
@@ -21,8 +21,9 @@ private:
 		hsListing,
 	};
 
-	cChannel               *m_Channel;
-	cChannel               *m_ListChannel;
+	const cChannel         *m_Channel;
+	int                     m_Apid;
+	const cChannel         *m_ListChannel;
 	cStreamdevLiveStreamer *m_LiveStreamer;
 	eStreamType             m_StreamType;
 	eHTTPStatus             m_Status;

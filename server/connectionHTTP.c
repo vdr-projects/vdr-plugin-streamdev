@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.c,v 1.5 2005/02/08 19:54:52 lordjaxom Exp $
+ *  $Id: connectionHTTP.c,v 1.6 2005/02/10 22:24:26 lordjaxom Exp $
  */
  
 #include "server/connectionHTTP.h"
@@ -8,6 +8,7 @@
 
 cConnectionHTTP::cConnectionHTTP(void): cServerConnection("HTTP") {
 	m_Channel      = NULL;
+	m_Apid         = 0;
 	m_ListChannel  = NULL;
 	m_LiveStreamer = NULL;
 	m_Status       = hsRequest;
@@ -56,7 +57,7 @@ bool cConnectionHTTP::Command(char *Cmd) {
 			cDevice *device = GetDevice(m_Channel, 0);
 			if (device != NULL) {
 				device->SwitchChannel(m_Channel, false);
-				if (m_LiveStreamer->SetChannel(m_Channel, m_StreamType)) {
+				if (m_LiveStreamer->SetChannel(m_Channel, m_StreamType, m_Apid)) {
 					m_LiveStreamer->SetDevice(device);
 					m_Startup = true;
 					if (m_StreamType == stES && (m_Channel->Vpid() == 0 
@@ -111,8 +112,9 @@ void cConnectionHTTP::Flushed(void) {
 }
 
 bool cConnectionHTTP::CmdGET(char *Opts) {
-	cChannel *chan;
+	const cChannel *chan;
 	char *ep;
+	int apid = 0;
 
 	Opts = skipspace(Opts);
 	while (*Opts == '/')
@@ -138,13 +140,17 @@ bool cConnectionHTTP::CmdGET(char *Opts) {
 		;
 	*ep = '\0';
 
+	Dprintf("before channelfromstring\n");
 	if (strncmp(Opts, "channels.htm", 12) == 0) {
 		m_ListChannel = Channels.First();
 		m_Status = hsHeaders;
-	} else if ((chan = ChannelFromString(Opts)) != NULL) {
+	} else if ((chan = ChannelFromString(Opts, &apid)) != NULL) {
 		m_Channel = chan;
+		m_Apid = apid;
+		Dprintf("Apid is %d\n", apid);
 		m_Status = hsHeaders;
 	}
+	Dprintf("after channelfromstring\n");
 	return true;
 }
 

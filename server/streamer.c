@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.c,v 1.5 2005/02/09 19:47:09 lordjaxom Exp $
+ *  $Id: streamer.c,v 1.6 2005/02/10 22:24:26 lordjaxom Exp $
  */
  
 #include <vdr/ringbuffer.h>
@@ -12,6 +12,8 @@
 #include "server/setup.h"
 #include "tools/socket.h"
 #include "common.h"
+
+// --- cStreamdevWriter -------------------------------------------------------
 
 cStreamdevWriter::cStreamdevWriter(cTBSocket *Socket, cStreamdevStreamer *Streamer):
 		cThread("streamdev-writer"),
@@ -29,6 +31,7 @@ cStreamdevWriter::~cStreamdevWriter()
 
 void cStreamdevWriter::Action(void)
 {
+	Dprintf("Writer start\n");
 	int max = 0;
 	m_Active = true;
 	while (m_Active) {
@@ -49,13 +52,15 @@ void cStreamdevWriter::Action(void)
 	Dprintf("Max. Transmit Blocksize was: %d\n", max);
 }
 
+// --- cStreamdevStreamer -----------------------------------------------------
+
 cStreamdevStreamer::cStreamdevStreamer(const char *Name):
 		cThread(Name),
 		m_Active(false),
 		m_Writer(NULL),
 		m_RingBuffer(new cRingBufferLinear(STREAMERBUFSIZE, TS_SIZE * 2, true, 
 	                                       "streamdev-streamer")),
-		m_SendBuffer(new cRingBufferLinear(WRITERBUFSIZE, MAXTRANSMITBLOCKSIZE))
+		m_SendBuffer(new cRingBufferLinear(WRITERBUFSIZE, TS_SIZE * 2))
 {
 	m_RingBuffer->SetTimeouts(0, 100);
 	m_SendBuffer->SetTimeouts(0, 100);
@@ -71,12 +76,14 @@ cStreamdevStreamer::~cStreamdevStreamer()
 
 void cStreamdevStreamer::Start(cTBSocket *Socket) 
 {
+	Dprintf("start streamer\n");
 	m_Writer = new cStreamdevWriter(Socket, this);
 	Attach();
 }
 
 void cStreamdevStreamer::Activate(bool On) 
 {
+	Dprintf("activate streamer\n");
 	if (On && !m_Active) {
 		m_Writer->Start();
 		cThread::Start();
@@ -90,21 +97,6 @@ void cStreamdevStreamer::Stop(void)
 		m_Active = false;
 		Cancel(3);
 	}
-}
-
-int cStreamdevStreamer::Put(const uchar *Data, int Count)
-{
-	return m_SendBuffer->Put(Data, Count);
-}
-
-uchar *cStreamdevStreamer::Get(int &Count)
-{
-	return m_SendBuffer->Get(Count);
-}
-
-void cStreamdevStreamer::Del(int Count)
-{
-	return m_SendBuffer->Del(Count);
 }
 
 void cStreamdevStreamer::Action(void) 

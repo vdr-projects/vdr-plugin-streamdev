@@ -1,7 +1,7 @@
 #
 # Makefile for a Video Disk Recorder plugin
 #
-# $Id: Makefile,v 1.2 2005/02/08 17:22:35 lordjaxom Exp $
+# $Id: Makefile,v 1.3 2005/02/10 22:24:26 lordjaxom Exp $
 
 # The official name of this plugin.
 # This name will be used in the '-P...' option of VDR to load the plugin.
@@ -48,8 +48,7 @@ DEFINES += -D_GNU_SOURCE
 
 COMMONOBJS = common.o i18n.o \
 	\
-	tools/file.o tools/source.o tools/select.o tools/shared.o tools/socket.o \
-	tools/tools.o
+	tools/source.o tools/select.o tools/socket.o tools/tools.o
 
 CLIENTOBJS = $(PLUGIN)-client.o \
 	\

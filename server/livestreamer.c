@@ -5,6 +5,8 @@
 #include "remux/ts2es.h"
 #include "common.h"
 
+// --- cStreamdevLiveReceiver -------------------------------------------------
+
 cStreamdevLiveReceiver::cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer, int Ca, 
                                                int Priority, const int *Pids):
 		cReceiver(Ca, Priority, 0, Pids),
@@ -18,30 +20,29 @@ cStreamdevLiveReceiver::~cStreamdevLiveReceiver()
 	Detach();
 }
 
-void cStreamdevLiveReceiver::Activate(bool On)
-{
-	m_Streamer->Activate(On);
-}
-
 void cStreamdevLiveReceiver::Receive(uchar *Data, int Length) {
 	int p = m_Streamer->Receive(Data, Length);
 	if (p != Length)
 		m_Streamer->ReportOverflow(Length - p);
 }
 
+// --- cStreamdevLiveStreamer -------------------------------------------------
+
 cStreamdevLiveStreamer::cStreamdevLiveStreamer(int Priority):
-		cStreamdevStreamer("streamdev-livestreaming") {
-	m_Priority   = Priority;
-	m_NumPids    = 0;
-	m_StreamType = stTSPIDS;
-	m_Channel    = NULL;
-	m_Device     = NULL;
-	m_Receiver   = NULL;
-	m_Remux      = NULL;
-	m_PESRemux   = NULL;
+		cStreamdevStreamer("streamdev-livestreaming"),
+		m_Priority(Priority),
+		m_NumPids(0),
+		m_StreamType(stTSPIDS),
+		m_Channel(NULL),
+		m_Device(NULL),
+		m_Receiver(NULL),
+		m_PESRemux(NULL),
+		m_Remux(NULL)
+{
 }
 
-cStreamdevLiveStreamer::~cStreamdevLiveStreamer() {
+cStreamdevLiveStreamer::~cStreamdevLiveStreamer() 
+{
 	Dprintf("Desctructing Live streamer\n");
 	delete m_Receiver;
 	delete m_Remux;
@@ -50,21 +51,12 @@ cStreamdevLiveStreamer::~cStreamdevLiveStreamer() {
 #endif
 }
 
-void cStreamdevLiveStreamer::Detach(void) {
-	m_Device->Detach(m_Receiver);
-}
-
-void cStreamdevLiveStreamer::Attach(void) {
-	m_Device->AttachReceiver(m_Receiver);
-}
-
-void cStreamdevLiveStreamer::Start(cTBSocket *Socket) {
-	Dprintf("LIVESTREAMER START\n");
-	cStreamdevStreamer::Start(Socket);
-}
-
-bool cStreamdevLiveStreamer::SetPid(int Pid, bool On) {
+bool cStreamdevLiveStreamer::SetPid(int Pid, bool On) 
+{
 	int idx;
+
+	if (Pid == 0)
+		return true;
 	
 	if (On) {
 		for (idx = 0; idx < m_NumPids; ++idx) {
@@ -100,7 +92,7 @@ bool cStreamdevLiveStreamer::SetPid(int Pid, bool On) {
 	return true;
 }
 
-bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType StreamType) 
+bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType StreamType, int Apid) 
 {
 	Dprintf("Initializing Remuxer for full channel transfer\n");
 	printf("ca pid: %d\n", Channel->Ca());
@@ -109,29 +101,38 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 	switch (m_StreamType) {
 	case stES: 
 		{
-			int pid = ISRADIO(Channel) ? Channel->Apid(0) : Channel->Vpid();
+			int pid = ISRADIO(m_Channel) ? m_Channel->Apid(0) : m_Channel->Vpid();
+			if (Apid != 0)
+				pid = Apid;
 			m_Remux = new cTS2ESRemux(pid);
 			return SetPid(pid, true);
 		}
 
 	case stPES: 
-		m_PESRemux = new cRemux(Channel->Vpid(), Channel->Apids(), Channel->Dpids(), 
-		                        Channel->Spids(), false);
-		return SetPid(Channel->Vpid(),  true)
-		    && SetPid(Channel->Apid(0), true)
-		    && SetPid(Channel->Apid(1), true)
-		    && SetPid(Channel->Dpid(0), true);
+		Dprintf("PES\n");
+		m_PESRemux = new cRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(), 
+								m_Channel->Spids(), false);
+		if (Apid != 0)
+			return SetPid(m_Channel->Vpid(),  true)
+			    && SetPid(Apid, true);
+		else
+			return SetPid(m_Channel->Vpid(),  true)
+			    && SetPid(m_Channel->Apid(0), true)
+			    && SetPid(m_Channel->Dpid(0), true);
 
 	case stPS:  
-		m_Remux = new cTS2PSRemux(Channel->Vpid(), Channel->Apid(0), 0, 0, 0, true);
-		return SetPid(Channel->Vpid(),  true)
-		    && SetPid(Channel->Apid(0), true);
+		m_Remux = new cTS2PSRemux(m_Channel->Vpid(), m_Channel->Apid(0), 0, 0, 0, true);
+		return SetPid(m_Channel->Vpid(),  true)
+		    && SetPid(m_Channel->Apid(0), true);
 
 	case stTS:
-		return SetPid(Channel->Vpid(),  true)
-		    && SetPid(Channel->Apid(0), true)
-		    && SetPid(Channel->Apid(1), true)
-		    && SetPid(Channel->Dpid(0), true);
+		if (Apid != 0)
+			return SetPid(m_Channel->Vpid(),  true)
+			    && SetPid(Apid, true);
+		else
+			return SetPid(m_Channel->Vpid(),  true)
+			    && SetPid(m_Channel->Apid(0), true)
+			    && SetPid(m_Channel->Dpid(0), true);
 
 	case stTSPIDS:
 		Dprintf("pid streaming mode\n");
@@ -140,8 +141,8 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 	return false;
 }
 
-bool cStreamdevLiveStreamer::SetFilter(u_short Pid, u_char Tid, u_char Mask, 
-		bool On) {
+bool cStreamdevLiveStreamer::SetFilter(u_short Pid, u_char Tid, u_char Mask, bool On) 
+{
 #if 0
 	Dprintf("setting filter\n");
 	if (On) {
@@ -195,49 +196,19 @@ void cStreamdevLiveStreamer::Del(int Count)
 	case stTS:
 	case stTSPIDS:
 		cStreamdevStreamer::Del(Count);
+		break;
 
 	case stPES:
 		m_PESRemux->Del(Count);
+		break;
 
 	default:
 		abort();
 	}
 }
 
-// TODO: Remuxer einbinden
-#if 0
-uchar *cStreamdevLiveStreamer::Process(const uchar *Data, int &Count, int &Result) {
-	uchar *remuxed = m_Remux != NULL ? m_Remux->Process(Data, Count, Result)
-			: cStreamdevStreamer::Process(Data, Count, Result);
-	if (remuxed) {
-		/*if (Socket()->Type() == SOCK_DGRAM) {
-			free(m_Buffer);
-			Result += 12;
-			m_Buffer = MALLOC(uchar, Result);
-			m_Buffer[0] = 0x01;
-			m_Buffer[1] = 0x02;
-			m_Buffer[2] = 0x03;
-			m_Buffer[3] = 0x04;
-			m_Buffer[4] = (Result & 0xff000000) >> 24;
-			m_Buffer[5] = (Result & 0xff0000) >> 16;
-			m_Buffer[6] = (Result & 0xff00) >> 8;
-			m_Buffer[7] = (Result & 0xff);
-			m_Buffer[8] = (m_Sequence & 0xff000000) >> 24;
-			m_Buffer[9] = (m_Sequence & 0xff0000) >> 16;
-			m_Buffer[10] = (m_Sequence & 0xff00) >> 8;
-			m_Buffer[11] = (m_Sequence & 0xff);
-			memcpy(m_Buffer + 12, Data, Result - 12);
-			if (m_Sequence++ == 0x7fffffff)
-				m_Sequence = 0;
-			return m_Buffer;
-		}*/
-		return remuxed;
-	}
-	return NULL;
-}
-#endif
-
-std::string cStreamdevLiveStreamer::Report(void) {
+std::string cStreamdevLiveStreamer::Report(void) 
+{
 	std::string result;
 
 	if (m_Device != NULL)
