@@ -1,5 +1,5 @@
 /*
- *  $Id: menu.c,v 1.1 2004/12/30 22:44:01 lordjaxom Exp $
+ *  $Id: menu.c,v 1.2 2005/02/08 14:09:27 lordjaxom Exp $
  */
  
 #include <vdr/menuitems.h>
@@ -252,7 +252,7 @@ class cMenuWhatsOnItem : public cOsdItem {
 public:
   const cEvent *event;
   const cChannel *channel;
-  cMenuWhatsOnItem(const cEvent *Event, cChannel *Channel);
+  cMenuWhatsOnItem(const cEvent *Event, cChannel *Channel, bool Now = false);
 };
 #endif
 
