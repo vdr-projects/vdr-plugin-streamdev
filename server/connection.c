@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.c,v 1.2 2005/02/08 17:22:35 lordjaxom Exp $
+ *  $Id: connection.c,v 1.3 2005/03/24 21:31:38 lordjaxom Exp $
  */
  
 #include "server/connection.h"
@@ -130,10 +130,10 @@ cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority) {
 		// maybe a device would be free if THIS connection did turn off its streams?
 		Dprintf(" * trying again...\n");
 		const cChannel *current = Channels.GetByNumber(cDevice::CurrentChannel());
-		isyslog("streamdev-server: Detaching current receiver");
-		Detach();
+		//isyslog("streamdev-server: Detaching current receiver");
+		//Detach(); XXX+
 		device = cDevice::GetDevice(Channel, Priority);
-		Attach();
+		//Attach(); XXX+
 		Dprintf(" * Found following device: %p (%d)\n", device, 
 				device ? device->CardIndex() + 1 : 0);
 		if (device == cDevice::ActualDevice())

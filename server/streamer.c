@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.c,v 1.8 2005/02/11 17:02:22 lordjaxom Exp $
+ *  $Id: streamer.c,v 1.9 2005/03/24 21:31:38 lordjaxom Exp $
  */
  
 #include <vdr/ringbuffer.h>
@@ -11,6 +11,7 @@
 #include "server/suspend.h"
 #include "server/setup.h"
 #include "tools/socket.h"
+#include "tools/select.h"
 #include "common.h"
 
 // --- cStreamdevWriter -------------------------------------------------------
@@ -25,12 +26,14 @@ cStreamdevWriter::cStreamdevWriter(cTBSocket *Socket, cStreamdevStreamer *Stream
 
 cStreamdevWriter::~cStreamdevWriter()
 {
+	Dprintf("destructing writer\n");
 	m_Active = false;
 	Cancel(3);
 }
 
 void cStreamdevWriter::Action(void)
 {
+	cTBSelect sel;
 	Dprintf("Writer start\n");
 	int max = 0;
 	m_Active = true;
@@ -39,17 +42,28 @@ void cStreamdevWriter::Action(void)
 		uchar *block = m_Streamer->Get(count);
 
 		if (block) {
-			if (!m_Socket->TimedWrite(block, count, 2000)) {
+			sel.Clear();
+			sel.Add(*m_Socket, true);
+			if (sel.Select(500) == -1) {
 				esyslog("ERROR: streamdev-server: couldn't send data: %m");
 				break;
 			}
-			if (count > max)
-				max = count;
-			m_Streamer->Del(count);
+
+			if (sel.CanWrite(*m_Socket)) {
+				int written;
+				if ((written = m_Socket->Write(block, count)) == -1) {
+					esyslog("ERROR: streamdev-server: couldn't send data: %m");
+					break;
+				}
+				if (count > max)
+					max = count;
+				m_Streamer->Del(written);
+			}
 		}
 	}
 	m_Active = false;
 	Dprintf("Max. Transmit Blocksize was: %d\n", max);
+	m_Streamer->Stop();
 }
 
 // --- cStreamdevStreamer -----------------------------------------------------
@@ -70,9 +84,7 @@ cStreamdevStreamer::cStreamdevStreamer(const char *Name):
 cStreamdevStreamer::~cStreamdevStreamer() 
 {
 	Dprintf("Desctructing streamer\n");
-	Stop();
 	delete m_RingBuffer;
-	delete m_Writer;
 	delete m_SendBuffer;
 }
 
@@ -100,9 +112,11 @@ void cStreamdevStreamer::Stop(void)
 		m_Active = false;
 		Cancel(3);
 	}
-	Detach();
-	DELETENULL(m_Writer);
-	m_Running = false;
+	if (m_Running) {
+		Detach();
+		m_Running = false;
+		DELETENULL(m_Writer);
+	}
 }
 
 void cStreamdevStreamer::Action(void) 
