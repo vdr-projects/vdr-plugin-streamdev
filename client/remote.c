@@ -1,6 +1,8 @@
 /*
- *  $Id: remote.c,v 1.3 2005/02/08 17:22:35 lordjaxom Exp $
+ *  $Id: remote.c,v 1.4 2005/04/24 16:26:14 lordjaxom Exp $
  */
+
+#include <ctype.h>
  
 #include "client/remote.h"
 #include "client/device.h"

@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.5 2005/02/10 22:24:26 lordjaxom Exp $
+ *  $Id: connectionVTP.c,v 1.6 2005/04/24 16:26:14 lordjaxom Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -10,6 +10,7 @@
 #include <vdr/tools.h>
 #include <tools/select.h>
 #include <string.h>
+#include <ctype.h>
 #include <errno.h>
 #include <stdarg.h>
 

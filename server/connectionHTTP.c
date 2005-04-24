@@ -1,6 +1,8 @@
 /*
- *  $Id: connectionHTTP.c,v 1.7 2005/02/11 16:44:15 lordjaxom Exp $
+ *  $Id: connectionHTTP.c,v 1.8 2005/04/24 16:26:14 lordjaxom Exp $
  */
+
+#include <ctype.h>
  
 #include "server/connectionHTTP.h"
 #include "server/setup.h"
