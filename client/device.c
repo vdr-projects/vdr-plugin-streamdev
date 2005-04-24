@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.5 2005/02/08 17:22:35 lordjaxom Exp $
+ *  $Id: device.c,v 1.6 2005/04/24 16:21:59 lordjaxom Exp $
  */
  
 #include "client/device.h"
@@ -117,12 +117,13 @@ bool cStreamdevDevice::SetPid(cPidHandle *Handle, int Type, bool On) {
 
 bool cStreamdevDevice::OpenDvr(void) {
 	Dprintf("OpenDvr\n");
+	CloseDvr();
 	if (ClientSocket.CreateDataConnection(siLive)) {
-		m_Assembler = new cStreamdevAssembler(ClientSocket.DataSocket(siLive));
-		m_TSBuffer = new cTSBuffer(m_Assembler->ReadPipe(), MEGABYTE(2), 
-				CardIndex() + 1);
+		//m_Assembler = new cStreamdevAssembler(ClientSocket.DataSocket(siLive));
+		//m_TSBuffer = new cTSBuffer(m_Assembler->ReadPipe(), MEGABYTE(2), CardIndex() + 1);
+		m_TSBuffer = new cTSBuffer(*ClientSocket.DataSocket(siLive), MEGABYTE(2), CardIndex() + 1);
 		Dprintf("waiting\n");
-		m_Assembler->WaitForFill();
+		//m_Assembler->WaitForFill();
 		Dprintf("resuming\n");
 		return true;
 	}
@@ -132,9 +133,9 @@ bool cStreamdevDevice::OpenDvr(void) {
 void cStreamdevDevice::CloseDvr(void) {
 	Dprintf("CloseDvr\n");
 
-	ClientSocket.CloseDvr();
+	//DELETENULL(m_Assembler);
 	DELETENULL(m_TSBuffer);
-	DELETENULL(m_Assembler);
+	ClientSocket.CloseDvr();
 }
 
 bool cStreamdevDevice::GetTSPacket(uchar *&Data) {
@@ -143,26 +144,6 @@ bool cStreamdevDevice::GetTSPacket(uchar *&Data) {
 		return true;
 	}
 	return false;
-    /*int r;
-    while ((r = m_TSBuffer->Read()) >= 0) {
-      Data = m_TSBuffer->Get();
-#if VDRVERSNUM >= 10300 // --> TODO: no filter streaming yet
-			if (Data != NULL) {
-				u_short pid = (((u_char)Data[1] & PID_MASK_HI) << 8) | Data[2];
-				u_char tid = Data[3];
-				if (m_Filters->Matches(pid, tid)) {
-					m_Filters->Put(Data);
-					continue;
-				}
-			}
-#endif
-      return true;
-    } 
-		if (FATALERRNO) {
-      LOG_ERROR;
-    	return false;
-    }
-  	return true;*/
 }
 
 #if VDRVERSNUM >= 10300
