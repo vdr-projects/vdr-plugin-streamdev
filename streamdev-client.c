@@ -3,13 +3,13 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-client.c,v 1.1 2004/12/30 22:43:59 lordjaxom Exp $
+ * $Id: streamdev-client.c,v 1.2 2005/04/24 16:19:44 lordjaxom Exp $
  */
 
 #include "streamdev-client.h"
 #include "client/device.h"
 #include "client/setup.h"
-#include "client/menu.h"
+//#include "client/menu.h"
 #include "i18n.h"
 
 const char *cPluginStreamdevClient::DESCRIPTION = "VTP Streaming Client";
@@ -39,11 +39,13 @@ void cPluginStreamdevClient::Housekeeping(void) {
 }
 
 const char *cPluginStreamdevClient::MainMenuEntry(void) {
-	return StreamdevClientSetup.StartClient ? tr("Streaming Control") : NULL;
+	return NULL;
+	//return StreamdevClientSetup.StartClient ? tr("Streaming Control") : NULL;
 }
 
 cOsdObject *cPluginStreamdevClient::MainMenuAction(void) {
-	return StreamdevClientSetup.StartClient ? new cStreamdevMenu : NULL;
+	return NULL;
+	//return StreamdevClientSetup.StartClient ? new cStreamdevMenu : NULL;
 }
 
 cMenuSetupPage *cPluginStreamdevClient::SetupMenu(void) {
