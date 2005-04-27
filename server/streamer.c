@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.c,v 1.9 2005/03/24 21:31:38 lordjaxom Exp $
+ *  $Id: streamer.c,v 1.10 2005/04/27 17:55:43 lordjaxom Exp $
  */
  
 #include <vdr/ringbuffer.h>
@@ -73,8 +73,8 @@ cStreamdevStreamer::cStreamdevStreamer(const char *Name):
 		m_Active(false),
 		m_Running(false),
 		m_Writer(NULL),
-		m_RingBuffer(new cRingBufferLinear(STREAMERBUFSIZE, TS_SIZE * 2, true, 
-	                                       "streamdev-streamer")),
+		m_RingBuffer(new cRingBufferLinear(STREAMERBUFSIZE, TS_SIZE * 2,
+		             true, "streamdev-streamer")),
 		m_SendBuffer(new cRingBufferLinear(WRITERBUFSIZE, TS_SIZE * 2))
 {
 	m_RingBuffer->SetTimeouts(0, 100);
@@ -107,6 +107,7 @@ void cStreamdevStreamer::Activate(bool On)
 
 void cStreamdevStreamer::Stop(void) 
 {
+	Lock();
 	if (m_Active) {
 		Dprintf("stopping streamer\n");
 		m_Active = false;
@@ -117,6 +118,7 @@ void cStreamdevStreamer::Stop(void)
 		m_Running = false;
 		DELETENULL(m_Writer);
 	}
+	Unlock();
 }
 
 void cStreamdevStreamer::Action(void) 
