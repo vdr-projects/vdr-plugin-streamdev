@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.c,v 1.10 2005/04/27 17:55:43 lordjaxom Exp $
+ *  $Id: streamer.c,v 1.11 2005/04/27 19:43:09 lordjaxom Exp $
  */
  
 #include <vdr/ringbuffer.h>
@@ -63,7 +63,6 @@ void cStreamdevWriter::Action(void)
 	}
 	m_Active = false;
 	Dprintf("Max. Transmit Blocksize was: %d\n", max);
-	m_Streamer->Stop();
 }
 
 // --- cStreamdevStreamer -----------------------------------------------------
@@ -107,7 +106,6 @@ void cStreamdevStreamer::Activate(bool On)
 
 void cStreamdevStreamer::Stop(void) 
 {
-	Lock();
 	if (m_Active) {
 		Dprintf("stopping streamer\n");
 		m_Active = false;
@@ -118,7 +116,6 @@ void cStreamdevStreamer::Stop(void)
 		m_Running = false;
 		DELETENULL(m_Writer);
 	}
-	Unlock();
 }
 
 void cStreamdevStreamer::Action(void) 
