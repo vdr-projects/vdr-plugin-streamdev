@@ -1,5 +1,5 @@
 /*
- *  $Id: i18n.c,v 1.1 2004/12/30 22:43:58 lordjaxom Exp $
+ *  $Id: i18n.c,v 1.2 2005/04/28 20:55:43 lordjaxom Exp $
  */
  
 #include "i18n.h"
@@ -747,5 +747,25 @@ const tI18nPhrase Phrases[] = {
 		""                      // Russian
 #endif
 	},
+        {       "Bind to IP",           // English
+                "",// Deutsch
+                "",                                                                                     // Slovenski
+                "",                                                                                     // Italiano
+                "",                                                                                     // Nederlands
+                "",                                                                                     // Português
+                "",                                                                                     // Français
+                "",                                                                                     // Norsk
+                "Sido osoitteeseen",                                                                    // suomi
+                "",                                                                                     // Polski
+                "",                                                                                     // Español
+                "",                                                                                     // Ellinika
+                "",                                                                                     // Svenska
+                "",                                                                                     // Romaneste
+                "",                                                                                     // Magyar
+                "",                                                                                     // Catala
+#if VDRVERSNUM >= 10300
+                ""                      // Russian
+#endif
+        },
 	{ NULL }
 };
