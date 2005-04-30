@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.c,v 1.12 2005/04/30 14:59:56 lordjaxom Exp $
+ *  $Id: streamer.c,v 1.13 2005/04/30 19:41:08 lordjaxom Exp $
  */
  
 #include <vdr/ringbuffer.h>
@@ -64,9 +64,10 @@ void cStreamdevWriter::Action(void)
 
 				offset += written;
 				count -= written;
-				m_Streamer->Del(written);
-				if (count == 0)
+				if (count == 0) {
+					m_Streamer->Del(offset);
 					block = NULL;
+				}
 			}
 		}
 	}
