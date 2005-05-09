@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.c,v 1.4 2005/05/09 20:22:29 lordjaxom Exp $
+ *  $Id: connection.c,v 1.5 2005/05/09 20:30:38 lordjaxom Exp $
  */
  
 #include "server/connection.h"
@@ -9,6 +9,7 @@
 
 #include <vdr/tools.h>
 #include <string.h>
+#include <stdarg.h>
 #include <errno.h>
 
 cServerConnection::cServerConnection(const char *Protocol):
