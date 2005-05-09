@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.c,v 1.3 2005/03/24 21:31:38 lordjaxom Exp $
+ *  $Id: connection.c,v 1.4 2005/05/09 20:22:29 lordjaxom Exp $
  */
  
 #include "server/connection.h"
@@ -11,53 +11,79 @@
 #include <string.h>
 #include <errno.h>
 
-cServerConnection::cServerConnection(const char *Protocol) {
-	m_RdBytes = 0;
-	m_WrBytes = 0;
-	m_WrOffs = 0;
-	m_DeferClose = false;
-	m_Protocol = Protocol;
+cServerConnection::cServerConnection(const char *Protocol):
+		m_Protocol(Protocol),
+		m_DeferClose(false),
+		m_Pending(false),
+		m_ReadBytes(0),
+		m_WriteBytes(0),
+		m_WriteIndex(0)
+{
 }
 
-cServerConnection::~cServerConnection() {
+cServerConnection::~cServerConnection() 
+{
 }
 
-bool cServerConnection::CanAct(const cTBSelect &Select) {
-	if (Select.CanRead(*this)) {
-		int b;
-		if ((b = Read(m_RdBuf + m_RdBytes, sizeof(m_RdBuf) - m_RdBytes - 1)) < 0) {
-			esyslog("Streamdev: Read from client (%s) %s:%d failed: %s", m_Protocol,
-					RemoteIp().c_str(), RemotePort(), strerror(errno));
-			return false;
-		}
-
-		if (b == 0) {
-			isyslog("Streamdev: Client (%s) %s:%d closed connection", m_Protocol,
-					RemoteIp().c_str(), RemotePort());
-			return false;
-		}
-
-		m_RdBytes += b;
-		m_RdBuf[m_RdBytes] = '\0';
-		return ParseBuffer();
+bool cServerConnection::Read(void) 
+{
+	int b;
+	if ((b = cTBSocket::Read(m_ReadBuffer + m_ReadBytes,
+	                         sizeof(m_ReadBuffer) - m_ReadBytes - 1)) < 0) {
+		esyslog("ERROR: read from client (%s) %s:%d failed: %m",
+		        m_Protocol, RemoteIp().c_str(), RemotePort());
+		return false;
 	}
 
-	if (Select.CanWrite(*this)) {
-		int b;
-		if ((b = Write(m_WrBuf + m_WrOffs, m_WrBytes - m_WrOffs)) < 0) {
-			esyslog("Streamdev: Write to client (%s) %s:%d failed: %s", m_Protocol,
-					RemoteIp().c_str(), RemotePort(), strerror(errno));
-			return false;
-		}
-
-		m_WrOffs += b;
-		if (m_WrOffs == m_WrBytes) {
-			m_WrBytes = 0;
-			m_WrOffs = 0;
-		}
+	if (b == 0) {
+		isyslog("client (%s) %s:%d has closed connection",
+		        m_Protocol, RemoteIp().c_str(), RemotePort());
+		return false;
 	}
 
-	if (m_WrBytes == 0) {
+	m_ReadBytes += b;
+	m_ReadBuffer[m_ReadBytes] = '\0';
+
+	char *end;
+	bool result = true;
+	while ((end = strchr(m_ReadBuffer, '\012')) != NULL) {
+		*end = '\0';
+		if (end > m_ReadBuffer && *(end - 1) == '\015')
+			*(end - 1) = '\0';
+
+		if (!Command(m_ReadBuffer))
+			return false;
+
+		m_ReadBytes -= ++end - m_ReadBuffer;
+		if (m_ReadBytes > 0)
+			memmove(m_ReadBuffer, end, m_ReadBytes);
+	}
+
+	if (m_ReadBytes == sizeof(m_ReadBuffer) - 1) {
+		esyslog("ERROR: streamdev: input buffer overflow (%s) for %s:%d",
+		        m_Protocol, RemoteIp().c_str(), RemotePort());
+		return false;
+	}
+	
+	return result;
+}
+
+bool cServerConnection::Write(void) 
+{
+	int b;
+	if ((b = cTBSocket::Write(m_WriteBuffer + m_WriteIndex, 
+	                          m_WriteBytes - m_WriteIndex)) < 0) {
+		esyslog("ERROR: streamdev: write to client (%s) %s:%d failed: %m",
+		        m_Protocol, RemoteIp().c_str(), RemotePort());
+		return false;
+	}
+
+	m_WriteIndex += b;
+	if (m_WriteIndex == m_WriteBytes) {
+		m_WriteIndex = 0;
+		m_WriteBytes = 0;
+		if (m_Pending)
+			Command(NULL);
 		if (m_DeferClose)
 			return false;
 		Flushed();
@@ -65,42 +91,33 @@ bool cServerConnection::CanAct(const cTBSelect &Select) {
 	return true;
 }
 
-bool cServerConnection::ParseBuffer(void) {
-	char *ep;
-	bool res;
+bool cServerConnection::Respond(const char *Message, bool Last, ...) 
+{
+	char *buffer;
+	int length;
+	va_list ap;
+	va_start(ap, Last);
+	length = vasprintf(&buffer, Message, ap);
+	va_end(ap);
 
-	while ((ep = strchr(m_RdBuf, '\012')) != NULL) {
-		*ep = '\0';
-		if (ep > m_RdBuf && *(ep-1) == '\015')
-			*(ep-1) = '\0';
-
-		Dprintf("IN: |%s|\n", m_RdBuf);
-		res = Command(m_RdBuf);
-		m_RdBytes -= ++ep - m_RdBuf;
-		if (m_RdBytes > 0)
-			memmove(m_RdBuf, ep, m_RdBytes);
-		if (res == false)
-			return false;
-	}
-	return true;
-}
-
-bool cServerConnection::Respond(const std::string &Message) {
-	if (m_WrBytes + Message.size() + 2 > sizeof(m_WrBuf)) {
-		esyslog("Streamdev: Output buffer overflow (%s) for %s:%d", m_Protocol,
-		        RemoteIp().c_str(), RemotePort());
+	if (m_WriteBytes + length + 2 > sizeof(m_WriteBuffer)) {
+		esyslog("ERROR: streamdev: output buffer overflow (%s) for %s:%d", 
+		        m_Protocol, RemoteIp().c_str(), RemotePort());
 		return false;
 	}
-	Dprintf("OUT: |%s|\n", Message.c_str());
-	memcpy(m_WrBuf + m_WrBytes, Message.c_str(), Message.size());
+	Dprintf("OUT: |%s|\n", buffer);
+	memcpy(m_WriteBuffer + m_WriteBytes, buffer, length);
+	free(buffer);
 
-	m_WrBytes += Message.size();
-	m_WrBuf[m_WrBytes++] = '\015';
-	m_WrBuf[m_WrBytes++] = '\012';
+	m_WriteBytes += length;
+	m_WriteBuffer[m_WriteBytes++] = '\015';
+	m_WriteBuffer[m_WriteBytes++] = '\012';
+	m_Pending = !Last;
 	return true;
 }
 	
-cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority) {
+cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority) 
+{
 	cDevice *device = NULL;
 
 	/*Dprintf("+ Statistics:\n");

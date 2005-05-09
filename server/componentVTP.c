@@ -1,5 +1,5 @@
 /*
- *  $Id: componentVTP.c,v 1.1 2004/12/30 22:44:19 lordjaxom Exp $
+ *  $Id: componentVTP.c,v 1.2 2005/05/09 20:22:29 lordjaxom Exp $
  */
  
 #include "server/componentVTP.h"
@@ -7,9 +7,12 @@
 #include "server/setup.h"
 
 cComponentVTP::cComponentVTP(void): 
-		cServerComponent("VTP", StreamdevServerSetup.VTPBindIP,
-				StreamdevServerSetup.VTPServerPort) {
+		cServerComponent("VTP", StreamdevServerSetup.VTPBindIP, 
+		                 StreamdevServerSetup.VTPServerPort)
+{
 }
 
-cComponentVTP::~cComponentVTP() {
+cServerConnection *cComponentVTP::NewClient(void)
+{
+	return new cConnectionVTP;
 }

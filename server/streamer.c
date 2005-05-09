@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.c,v 1.13 2005/04/30 19:41:08 lordjaxom Exp $
+ *  $Id: streamer.c,v 1.14 2005/05/09 20:22:29 lordjaxom Exp $
  */
  
 #include <vdr/ringbuffer.h>
@@ -16,7 +16,8 @@
 
 // --- cStreamdevWriter -------------------------------------------------------
 
-cStreamdevWriter::cStreamdevWriter(cTBSocket *Socket, cStreamdevStreamer *Streamer):
+cStreamdevWriter::cStreamdevWriter(cTBSocket *Socket, 
+                                   cStreamdevStreamer *Streamer):
 		cThread("streamdev-writer"),
 		m_Streamer(Streamer),
 		m_Socket(Socket),
@@ -45,7 +46,7 @@ void cStreamdevWriter::Action(void)
 			offset = 0;
 		}
 
-		if (block) {
+		if (block != NULL) {
 			sel.Clear();
 			sel.Add(*m_Socket, true);
 			if (sel.Select(500) == -1) {
@@ -130,8 +131,6 @@ void cStreamdevStreamer::Stop(void)
 
 void cStreamdevStreamer::Action(void) 
 {
-	int max = 0;
-
 	m_Active = true;
 	while (m_Active) {
 		int got;

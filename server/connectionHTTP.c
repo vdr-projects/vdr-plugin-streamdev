@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.c,v 1.8 2005/04/24 16:26:14 lordjaxom Exp $
+ *  $Id: connectionHTTP.c,v 1.9 2005/05/09 20:22:29 lordjaxom Exp $
  */
 
 #include <ctype.h>
@@ -45,7 +45,8 @@ bool cConnectionHTTP::Command(char *Cmd)
 	return false; // ??? shouldn't happen
 }
 
-bool cConnectionHTTP::ProcessRequest(void) {
+bool cConnectionHTTP::ProcessRequest(void) 
+{
 	Dprintf("process\n");
 	if (m_Request.substr(0, 4) == "GET " && CmdGET(m_Request.substr(4))) {
 		switch (m_Job) {
@@ -71,7 +72,7 @@ bool cConnectionHTTP::ProcessRequest(void) {
 					if (m_StreamType == stES && (m_Apid != 0 || ISRADIO(m_Channel))) {
 						return Respond("HTTP/1.0 200 OK")
 						    && Respond("Content-Type: audio/mpeg")
-						    && Respond((std::string)"icy-name: " + m_Channel->Name())
+						    && Respond("icy-name: %s", true, m_Channel->Name())
 						    && Respond("");
 					} else {
 						return Respond("HTTP/1.0 200 OK")
@@ -90,7 +91,8 @@ bool cConnectionHTTP::ProcessRequest(void) {
 	return Respond("HTTP/1.0 400 Bad Request");
 }
 
-void cConnectionHTTP::Flushed(void) {
+void cConnectionHTTP::Flushed(void) 
+{
 	std::string line;
 
 	if (m_Status != hsBody)
@@ -132,7 +134,7 @@ void cConnectionHTTP::Flushed(void) {
 			}
 			line += "</li>";
 		}
-		if (!Respond(line))
+		if (!Respond(line.c_str()))
 			DeferClose();
 		m_ListChannel = Channels.Next(m_ListChannel);
 		break;
@@ -145,7 +147,8 @@ void cConnectionHTTP::Flushed(void) {
 	}
 }
 
-bool cConnectionHTTP::CmdGET(const std::string &Opts) {
+bool cConnectionHTTP::CmdGET(const std::string &Opts) 
+{
 	const char *sp = Opts.c_str(), *ptr = sp, *ep;
 	const cChannel *chan;
 	int apid = 0, pos;
@@ -193,33 +196,3 @@ bool cConnectionHTTP::CmdGET(const std::string &Opts) {
 	return true;
 }
 
-#if 0
-bool cHTTPConnection::Listing(void) {
-	cChannel *chan;
-	cTBString line;
-
-	Respond(200, "OK");
-	Respond("Content-Type: text/html");
-	Respond("");
-	Respond("<html><head><title>VDR Channel Listing</title></head>");
-	Respond("<body><ul>");
-
-	for (chan = Channels.First(); chan != NULL; chan = Channels.Next(chan)) {
-		if (chan->GroupSep() && !*chan->Name())
-			continue;
-
-		if (chan->GroupSep())
-			line.Format("<li>--- %s ---</li>", chan->Name());
-		else
-			line.Format("<li><a href=\"http://%s:%d/%s\">%s</a></li>", 
-				(const char*)m_Socket.LocalIp(), StreamdevServerSetup.HTTPServerPort, 
-				chan->GetChannelID().ToString(), chan->Name());
-		Respond(line);
-	}
-	
-	Respond("</ul></body></html>");
-
-	m_DeferClose = true;
-	return true;
-}
-#endif

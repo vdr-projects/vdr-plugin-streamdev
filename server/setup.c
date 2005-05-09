@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.c,v 1.1 2004/12/30 22:44:21 lordjaxom Exp $
+ *  $Id: setup.c,v 1.2 2005/05/09 20:22:29 lordjaxom Exp $
  */
  
 #include <vdr/menuitems.h>
@@ -72,7 +72,7 @@ void cStreamdevServerMenuSetupPage::Store(void) {
 			|| m_NewSetup.HTTPServerPort != StreamdevServerSetup.HTTPServerPort
 			|| strcmp(m_NewSetup.HTTPBindIP, StreamdevServerSetup.HTTPBindIP) != 0) {
 		restart = true;
-		cStreamdevServer::Exit();
+		cStreamdevServer::Destruct();
 	}
 	
 	SetupStore("MaxClients",      m_NewSetup.MaxClients);
@@ -89,6 +89,6 @@ void cStreamdevServerMenuSetupPage::Store(void) {
 	StreamdevServerSetup = m_NewSetup;
 
 	if (restart) 
-		cStreamdevServer::Init();
+		cStreamdevServer::Initialize();
 }
 

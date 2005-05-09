@@ -1,13 +1,11 @@
 /*
- *  $Id: connection.h,v 1.2 2005/02/08 17:22:35 lordjaxom Exp $
+ *  $Id: connection.h,v 1.3 2005/05/09 20:22:29 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVER_CONNECTION_H
 #define VDR_STREAMDEV_SERVER_CONNECTION_H
 
 #include "tools/socket.h"
-#include "tools/select.h"
-
 #include "common.h"
 
 class cChannel;
@@ -16,18 +14,32 @@ class cDevice;
 /* Basic capabilities of a straight text-based protocol, most functions
    virtual to support more complicated protocols */
 
-class cServerConnection: public cListObject, public cTBSocket {
+class cServerConnection: public cListObject, public cTBSocket 
+{
 private:
-	char m_RdBuf[8192];
-	uint m_RdBytes;
-	
-	char m_WrBuf[8192];
-	uint m_WrBytes;
-	uint m_WrOffs;
-
 	const char *m_Protocol;
+	bool        m_DeferClose;
+	bool        m_Pending;
 
-	bool m_DeferClose;
+	char        m_ReadBuffer[MAXPARSEBUFFER];
+	uint        m_ReadBytes;
+	
+	char        m_WriteBuffer[MAXPARSEBUFFER];
+	uint        m_WriteBytes;
+	uint        m_WriteIndex;
+
+protected:
+	/* Will be called when a command terminated by a newline has been 
+	   received */
+	virtual bool Command(char *Cmd) = 0;
+
+	/* Will put Message into the response queue, which will be sent in the next
+	   server cycle. Note that Message will be line-terminated by Respond. 
+	   Only one line at a time may be sent. If there are lines to follow, set
+	   Last to false. Command(NULL) will be called in the next cycle, so you can
+	   post the next line. */
+	virtual bool Respond(const char *Message, bool Last = true, ...)
+			__attribute__ ((format (printf, 2, 4)));
 
 public:
 	/* If you derive, specify a short string such as HTTP for Protocol, which
@@ -41,24 +53,21 @@ public:
 	/* Gets called if the client has been rejected by the core */
 	virtual void Reject(void) { DeferClose(); }
 
-	/* Adds itself to the Select object, if data can be received or if data is 
-	   to be sent. Override if necessary */
-	virtual void AddSelect(cTBSelect &Select) const;
+	/* Get the client socket's file number */
+	virtual int Socket(void) const { return (int)*this; }
 
-	/* Receives incoming data and calls ParseBuffer on it. Also writes queued
-	   output data if possible. Override if necessary */
-	virtual bool CanAct(const cTBSelect &Select);
+	/* Determine if there is data to send or any command pending */
+	virtual bool HasData(void) const;
 
-	/* Called by CanAct(), parses the input buffer for full lines (terminated 
-	   either by '\012' or '\015\012') and calls Command on them, if any */
-	virtual bool ParseBuffer(void);
+	/* Gets called by server when the socket can accept more data. Writes
+	   the buffer filled up by Respond(). Calls Command(NULL) if there is a
+	   command pending. Returns false in case of an error */
+	virtual bool Write(void);
 
-	/* Will be called when a command terminated by a newline has been received */
-	virtual bool Command(char *Cmd) = 0;
-
-	/* Will put Message into the response queue, which will be sent in the next
-	   server cycle. Note that Message will be line-terminated by Respond */
-	bool Respond(const std::string &Message);
+	/* Gets called by server when there is incoming data to read. Calls
+	   Command() for each line. Returns false in case of an error, or if
+	   the connection shall be closed and removed by the server */
+	virtual bool Read(void);
 
 	/* Will make the socket close after sending all queued output data */
 	void DeferClose(void) { m_DeferClose = true; }
@@ -73,15 +82,9 @@ public:
 	virtual void Attach(void) = 0;
 };
 
-class cServerConnections: public cList<cServerConnection> {
-};
-
-inline void cServerConnection::AddSelect(cTBSelect &Select) const {
-	if (m_WrBytes > 0) 
-		Select.Add(*this, true);
-		
-	if (m_WrBytes == 0 && m_RdBytes < sizeof(m_RdBuf) - 1) 
-		Select.Add(*this, false);
+inline bool cServerConnection::HasData(void) const
+{
+	return m_WriteBytes > 0 || m_Pending || m_DeferClose;
 }
 
 #endif // VDR_STREAMDEV_SERVER_CONNECTION_H

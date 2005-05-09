@@ -1,5 +1,5 @@
 /*
- *  $Id: component.h,v 1.1 2004/12/30 22:44:18 lordjaxom Exp $
+ *  $Id: component.h,v 1.2 2005/05/09 20:22:29 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVERS_COMPONENT_H
@@ -22,29 +22,30 @@ private:
 	const char *m_ListenIp;
 	uint m_ListenPort;
 
+protected:
+	/* Returns a new connection object for Accept() */
+	virtual cServerConnection *NewClient(void) = 0;
+
 public:
 	cServerComponent(const char *Protocol, const char *ListenIp, uint ListenPort);
 	virtual ~cServerComponent();
 
 	/* Starts listening on the specified Port, override if you want to do things
 	   different */
-	virtual bool Init(void);
+	virtual bool Initialize(void);
 
 	/* Stops listening, override if you want to do things different */
-	virtual void Exit(void);
+	virtual void Destruct(void);
+
+	/* Get the listening socket's file number */
+	virtual int Socket(void) const { return (int)m_Listen; }
 
 	/* Adds the listening socket to the Select object */
-	virtual void AddSelect(cTBSelect &Select) const { Select.Add(m_Listen); }
-	
-	/* Accepts the connection on a NewConnection() object and calls the 
+	virtual void Add(cTBSelect &Select) const { Select.Add(m_Listen); }
+
+	/* Accepts the connection on a NewClient() object and calls the 
 	   Welcome() on it, override if you want to do things different */
-	virtual cServerConnection *CanAct(const cTBSelect &Select);
-
-	/* Returns a new connection object for CanAct */
-	virtual cServerConnection *NewConnection(void) const = 0;
-};
-
-class cServerComponents: public cList<cServerComponent> {
+	virtual cServerConnection *Accept(void);
 };
 
 #endif // VDR_STREAMDEV_SERVERS_COMPONENT_H

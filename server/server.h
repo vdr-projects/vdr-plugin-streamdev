@@ -1,5 +1,5 @@
 /*
- *  $Id: server.h,v 1.1 2004/12/30 22:44:21 lordjaxom Exp $
+ *  $Id: server.h,v 1.2 2005/05/09 20:22:29 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVER_H
@@ -10,33 +10,36 @@
 #include "server/component.h"
 #include "server/connection.h"
 
+#define STREAMDEVHOSTSPATH (*AddDirectory(cPlugin::ConfigDirectory(), "streamdevhosts.conf"))
+
 class cStreamdevServer: public cThread {
 private:
 	bool m_Active;
 
-	cServerComponents m_Servers;
-	cServerConnections m_Clients;
-
-	static cStreamdevServer *m_Instance;
+	static cStreamdevServer         *m_Instance;
+	static cList<cServerComponent>   m_Servers;
+	static cList<cServerConnection>  m_Clients;
 
 protected:
+	void Stop(void);
+
 	virtual void Action(void);
 
-	void Stop(void);
+	static void Register(cServerComponent *Server);
 
 public:
 	cStreamdevServer(void);
 	virtual ~cStreamdevServer();
 
-	void Register(cServerComponent *Server);
-	
-	static void Init(void);
-	static void Exit(void);
+	static void Initialize(void);
+	static void Destruct(void);
 	static bool Active(void);
 };
 
-inline bool cStreamdevServer::Active(void) {
-	return m_Instance && m_Instance->m_Clients.Count() > 0;
+inline bool cStreamdevServer::Active(void) 
+{
+	return m_Instance != NULL 
+	    && m_Instance->m_Clients.Count() > 0;
 }
 
 extern cSVDRPhosts StreamdevHosts;
