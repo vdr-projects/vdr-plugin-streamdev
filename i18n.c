@@ -1,5 +1,5 @@
 /*
- *  $Id: i18n.c,v 1.2 2005/04/28 20:55:43 lordjaxom Exp $
+ *  $Id: i18n.c,v 1.3 2005/05/10 21:02:24 lordjaxom Exp $
  */
  
 #include "i18n.h"
@@ -756,6 +756,46 @@ const tI18nPhrase Phrases[] = {
                 "",                                                                                     // Français
                 "",                                                                                     // Norsk
                 "Sido osoitteeseen",                                                                    // suomi
+                "",                                                                                     // Polski
+                "",                                                                                     // Español
+                "",                                                                                     // Ellinika
+                "",                                                                                     // Svenska
+                "",                                                                                     // Romaneste
+                "",                                                                                     // Magyar
+                "",                                                                                     // Catala
+#if VDRVERSNUM >= 10300
+                ""                      // Russian
+#endif
+        },
+        {       "Remote Schedule",      // English
+                "",// Deutsch
+                "",                                                                                     // Slovenski
+                "",                                                                                     // Italiano
+                "",                                                                                     // Nederlands
+                "",                                                                                     // Português
+                "",                                                                                     // Français
+                "",                                                                                     // Norsk
+                "Etäkoneen ohjelmaopas",                                                                // suomi
+                "",                                                                                     // Polski
+                "",                                                                                     // Español
+                "",                                                                                     // Ellinika
+                "",                                                                                     // Svenska
+                "",                                                                                     // Romaneste
+                "",                                                                                     // Magyar
+                "",                                                                                     // Catala
+#if VDRVERSNUM >= 10300
+                ""                      // Russian
+#endif
+        },
+        {       "Filter Streaming",     // English
+                "",// Deutsch
+                "",                                                                                     // Slovenski
+                "",                                                                                     // Italiano
+                "",                                                                                     // Nederlands
+                "",                                                                                     // Português
+                "",                                                                                     // Français
+                "",                                                                                     // Norsk
+                "Suodatetun tiedon suoratoisto",                                                        // suomi
                 "",                                                                                     // Polski
                 "",                                                                                     // Español
                 "",                                                                                     // Ellinika
