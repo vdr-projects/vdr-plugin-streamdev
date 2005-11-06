@@ -1,5 +1,5 @@
 /*
- *  $Id: filter.c,v 1.2 2005/02/08 13:59:16 lordjaxom Exp $
+ *  $Id: filter.c,v 1.3 2005/11/06 16:43:58 lordjaxom Exp $
  */
 
 #include "client/filter.h"
@@ -8,6 +8,7 @@
 #include "common.h"
 
 #include <vdr/ringbuffer.h>
+#include <vdr/device.h>
 
 #if VDRVERSNUM >= 10300
 

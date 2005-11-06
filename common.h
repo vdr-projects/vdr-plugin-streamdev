@@ -1,5 +1,5 @@
 /*
- *  $Id: common.h,v 1.6 2005/05/09 20:22:29 lordjaxom Exp $
+ *  $Id: common.h,v 1.7 2005/11/06 16:43:58 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_COMMON_H
@@ -33,6 +33,10 @@
 #	define STATUS(s) Skins.Message(mtInfo, s)
 #	define ERROR(s) Skins.Message(mtStatus, s)
 #	define FLUSH() Skins.Flush()
+#endif
+
+#if VDRVERSNUM >= 10336
+#	define MAXPARSEBUFFER KILOBYTE(16)
 #endif
 
 /* Check if a channel is a radio station. */

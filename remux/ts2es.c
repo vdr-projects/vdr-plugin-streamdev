@@ -2,6 +2,7 @@
 #include "server/streamer.h"
 #include "libdvbmpeg/transform.h"
 #include "common.h"
+#include <vdr/device.h>
 
 // from VDR's remux.c
 #define MAXNONUSEFULDATA (10*1024*1024)

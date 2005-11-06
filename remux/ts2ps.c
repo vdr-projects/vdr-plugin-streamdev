@@ -1,6 +1,7 @@
 #include "remux/ts2ps.h"
 #include "server/streamer.h"
 #include <vdr/channels.h>
+#include <vdr/device.h>
 
 class cTS2PS {
 	friend void PutPES(uint8_t *Buffer, int Size, void *Data);
