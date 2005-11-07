@@ -1,5 +1,5 @@
 /*
- *  $Id: livefilter.h,v 1.1 2004/12/30 22:44:27 lordjaxom Exp $
+ *  $Id: livefilter.h,v 1.2 2005/11/07 19:28:41 lordjaxom Exp $
  */
 
 #ifndef VDR_STREAMEV_LIVEFILTER_H
@@ -10,6 +10,8 @@
 #	if VDRVERSNUM >= 10300
 
 #include <vdr/filter.h>
+
+class cStreamdevLiveStreamer;
 
 class cStreamdevLiveFilter: public cFilter {
 	friend class cStreamdevLiveStreamer;
