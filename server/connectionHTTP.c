@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.c,v 1.9 2005/05/09 20:22:29 lordjaxom Exp $
+ *  $Id: connectionHTTP.c,v 1.10 2006/01/26 19:40:18 lordjaxom Exp $
  */
 
 #include <ctype.h>
@@ -83,12 +83,14 @@ bool cConnectionHTTP::ProcessRequest(void)
 			}
 			DELETENULL(m_LiveStreamer);
 			DeferClose();
-			return Respond("HTTP/1.0 409 Channel not available");
+			return Respond("HTTP/1.0 409 Channel not available")
+				&& Respond("");
 		}
 	}
 
 	DeferClose();
-	return Respond("HTTP/1.0 400 Bad Request");
+	return Respond("HTTP/1.0 400 Bad Request")
+		&& Respond("");
 }
 
 void cConnectionHTTP::Flushed(void) 
