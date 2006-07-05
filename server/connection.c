@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.c,v 1.5 2005/05/09 20:30:38 lordjaxom Exp $
+ *  $Id: connection.c,v 1.6 2006/07/05 20:39:19 thomas Exp $
  */
  
 #include "server/connection.h"
@@ -149,9 +149,9 @@ cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority)
 		Dprintf(" * trying again...\n");
 		const cChannel *current = Channels.GetByNumber(cDevice::CurrentChannel());
 		//isyslog("streamdev-server: Detaching current receiver");
-		//Detach(); XXX+
+		Detach();
 		device = cDevice::GetDevice(Channel, Priority);
-		//Attach(); XXX+
+		Attach();
 		Dprintf(" * Found following device: %p (%d)\n", device, 
 				device ? device->CardIndex() + 1 : 0);
 		if (device == cDevice::ActualDevice())
