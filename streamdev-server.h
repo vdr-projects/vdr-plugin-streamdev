@@ -1,5 +1,5 @@
 /*
- *  $Id: streamdev-server.h,v 1.2 2005/05/09 20:22:29 lordjaxom Exp $
+ *  $Id: streamdev-server.h,v 1.3 2006/07/05 20:37:17 thomas Exp $
  */
  
 #ifndef VDR_STREAMDEVSERVER_H
@@ -21,7 +21,7 @@ public:
 	virtual const char *Description(void);
 	virtual bool Start(void);
 	virtual void Stop(void);
-	virtual bool Active(void);
+	virtual cString Active(void);
 	virtual const char *MainMenuEntry(void);
 	virtual cOsdObject *MainMenuAction(void);
 	virtual cMenuSetupPage *SetupMenu(void);
