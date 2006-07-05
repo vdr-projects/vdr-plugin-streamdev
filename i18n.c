@@ -1,5 +1,5 @@
 /*
- *  $Id: i18n.c,v 1.3 2005/05/10 21:02:24 lordjaxom Exp $
+ *  $Id: i18n.c,v 1.4 2006/07/05 20:36:11 thomas Exp $
  */
  
 #include "i18n.h"
@@ -796,6 +796,26 @@ const tI18nPhrase Phrases[] = {
                 "",                                                                                     // Français
                 "",                                                                                     // Norsk
                 "Suodatetun tiedon suoratoisto",                                                        // suomi
+                "",                                                                                     // Polski
+                "",                                                                                     // Español
+                "",                                                                                     // Ellinika
+                "",                                                                                     // Svenska
+                "",                                                                                     // Romaneste
+                "",                                                                                     // Magyar
+                "",                                                                                     // Catala
+#if VDRVERSNUM >= 10300
+                ""                      // Russian
+#endif
+        },
+        {       "Streaming active",     // English
+                "Streamen im Gange",// Deutsch
+                "",                                                                                     // Slovenski
+                "",                                                                                     // Italiano
+                "",                                                                                     // Nederlands
+                "",                                                                                     // Português
+                "",                                                                                     // Français
+                "",                                                                                     // Norsk
+                "",                                                        // suomi
                 "",                                                                                     // Polski
                 "",                                                                                     // Español
                 "",                                                                                     // Ellinika
