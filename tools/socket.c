@@ -29,23 +29,31 @@ bool cTBSocket::Connect(const std::string &Host, unsigned int Port) {
 	m_LocalAddr.sin_port   = 0;
 	m_LocalAddr.sin_addr.s_addr = INADDR_ANY;
 	if (::bind(socket, (struct sockaddr*)&m_LocalAddr, sizeof(m_LocalAddr)) 
-			== -1)
+			== -1) {
+		::close(socket);
 		return false;
+	}
 
 	m_RemoteAddr.sin_family = AF_INET;
 	m_RemoteAddr.sin_port   = htons(Port);
 	m_RemoteAddr.sin_addr.s_addr = inet_addr(Host.c_str());
 	if (::connect(socket, (struct sockaddr*)&m_RemoteAddr, 
-			sizeof(m_RemoteAddr)) == -1) 
+			sizeof(m_RemoteAddr)) == -1) {
+		::close(socket);
 		return false;
+	}
 
 	len = sizeof(struct sockaddr_in);
-	if (::getpeername(socket, (struct sockaddr*)&m_RemoteAddr, &len) == -1) 
+	if (::getpeername(socket, (struct sockaddr*)&m_RemoteAddr, &len) == -1) {
+		::close(socket);
 		return false;
+	}
 	
 	len = sizeof(struct sockaddr_in);
-	if (::getsockname(socket, (struct sockaddr*)&m_LocalAddr, &len) == -1) 
+	if (::getsockname(socket, (struct sockaddr*)&m_LocalAddr, &len) == -1) {
+		::close(socket);
 		return false;
+	}
 
 	return cTBSource::Open(socket);
 }
