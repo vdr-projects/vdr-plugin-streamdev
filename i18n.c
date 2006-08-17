@@ -1,5 +1,5 @@
 /*
- *  $Id: i18n.c,v 1.4 2006/07/05 20:36:11 thomas Exp $
+ *  $Id: i18n.c,v 1.5 2006/08/17 09:26:00 thomas Exp $
  */
  
 #include "i18n.h"
@@ -815,7 +815,7 @@ const tI18nPhrase Phrases[] = {
                 "",                                                                                     // Português
                 "",                                                                                     // Français
                 "",                                                                                     // Norsk
-                "",                                                        // suomi
+                "Suoratoistopalvelin aktiivinen", // suomi
                 "",                                                                                     // Polski
                 "",                                                                                     // Español
                 "",                                                                                     // Ellinika
