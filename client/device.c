@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.6 2005/04/24 16:21:59 lordjaxom Exp $
+ *  $Id: device.c,v 1.7 2006/09/14 10:43:10 schmirl Exp $
  */
  
 #include "client/device.h"
@@ -101,6 +101,7 @@ bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel,
 			&& TRANSPONDER(Channel, m_Channel))
 		return true;
 
+	DetachAllReceivers();
 	m_Channel = Channel;
 	bool r = ClientSocket.SetChannelDevice(m_Channel);
 	Dprintf("setchanneldevice r=%d\n", r);
