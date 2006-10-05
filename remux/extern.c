@@ -2,7 +2,9 @@
 #include "server/streamer.h"
 #include <vdr/tools.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <signal.h>
+#include <unistd.h>
 
 class cTSExt: public cThread {
 private:
@@ -38,11 +40,17 @@ cTSExt::cTSExt(cRingBufferLinear *ResultBuffer):
 
 	if (pipe(outpipe) == -1) {
 		LOG_ERROR_STR("pipe failed");
+		close(inpipe[0]);
+		close(inpipe[1]);
 		return;
 	}
 
 	if ((m_Process = fork()) == -1) {
 		LOG_ERROR_STR("fork failed");
+		close(inpipe[0]);
+		close(inpipe[1]);
+		close(outpipe[0]);
+		close(outpipe[1]);
 		return;
 	}
 
@@ -74,9 +82,18 @@ cTSExt::~cTSExt()
 {
 	m_Active = false;
 	Cancel(3);
-	close(m_Outpipe);
-	close(m_Inpipe);
-	kill(m_Process, SIGTERM);
+	if (m_Process > 0) {
+		close(m_Outpipe);
+		close(m_Inpipe);
+		kill(m_Process, SIGTERM);
+		for (int i = 0; waitpid(m_Process, NULL, WNOHANG) == 0; i++) {
+			if (i == 20) {
+				esyslog("streamdev-server: externremux process won't stop - killing it");
+				kill(m_Process, SIGKILL);
+			}
+			cCondWait::SleepMs(100);
+		}
+	}
 }
 
 void cTSExt::Action(void)
