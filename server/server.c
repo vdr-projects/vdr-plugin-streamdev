@@ -1,5 +1,5 @@
 /*
- *  $Id: server.c,v 1.3 2005/05/09 20:22:29 lordjaxom Exp $
+ *  $Id: server.c,v 1.4 2006/11/10 11:52:41 schmirl Exp $
  */
 
 #include "server/server.h"
@@ -91,7 +91,12 @@ void cStreamdevServer::Action(void)
 				select.Add(s->Socket(), true);
 		}
 
-		if (select.Select() < 0) {
+		int result;
+		while ((result = select.Select(100)) < 0 && errno == ETIMEDOUT) {
+			if (!m_Active) break;
+		}
+
+		if (result < 0) {
 			if (m_Active) // no exit was requested while polling
 				esyslog("fatal error, server exiting: %m");
 			break;
