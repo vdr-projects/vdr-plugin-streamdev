@@ -3,7 +3,7 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-server.c,v 1.3 2006/07/05 20:36:58 thomas Exp $
+ * $Id: streamdev-server.c,v 1.4 2006/11/24 11:45:36 schmirl Exp $
  */
 
 #include "streamdev-server.h"
@@ -59,7 +59,9 @@ cString cPluginStreamdevServer::Active(void)
 {
 	if (cStreamdevServer::Active())
 	{
-		return tr("Streaming active");
+		static const char *Message = NULL;
+		if (!Message) Message = tr("Streaming active");
+		return Message;
 	}
 	return NULL;
 }
