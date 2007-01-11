@@ -1,0 +1,88 @@
+# If you have two or more VDRs and you like them to mutually share
+# there DVB cards you might need to apply this patch first.
+#
+# This is a modified version of the patch for VDRs with BIGPATCH. 
+# Thanks to p_body@vdrportal.
+#
+# IMPORTANT: As this patch does not only modify streamdev-server but
+# also an exported method of VDR, you will need to
+#
+#         !!!!! RECOMPILE VDR AND ALL PLUGINS !!!!!
+#
+# Why do I need the patch?
+# --------------------------
+# Before switching channels VDR will consider all of its devices to
+# find the one with the least impact. This includes the device provided
+# by the streamdev-client plugin. Streamdev-client will forward the
+# request to its server which in turn checks all of its devices. Now if
+# the server is running streamdev-client, too, the request will again
+# be forwarded to its server and finally you will endup in a loop.
+#
+# What does the patch do?
+# -----------------------
+# The patch adds the additional parameter "bool DVBCardsOnly" to VDR's
+# device selection method cDevice::GetDevice(...). The parameter
+# defaults to false which gives you the standard behaviour of GetDevice.
+# When set to true, GetDevice will use only those devices with a card
+# index < MAXDVBDEVICES, so only real DVB cards will be considered.
+# Other devices like streamdev-client or DVB cards provided by plugin
+# (Hauppauge PVR) won't be used.
+#
+# Author: Frank Schmirler (http://vdr.schmirler.de)
+#
+--- device.h.orig	2006-11-15 12:01:34.000000000 +0100
++++ device.h	2006-11-15 12:02:15.000000000 +0100
+@@ -128,7 +128,7 @@
+          ///< Gets the device with the given Index.
+          ///< \param Index must be in the range 0..numDevices-1.
+          ///< \return A pointer to the device, or NULL if the Index was invalid.
+-  static cDevice *GetDevice(const cChannel *Channel, int Priority = -1, bool *NeedsDetachReceivers = NULL, bool LiveView = false);
++  static cDevice *GetDevice(const cChannel *Channel, int Priority = -1, bool *NeedsDetachReceivers = NULL, bool LiveView = false, bool DVBCardsOnly = false);
+          ///< Returns a device that is able to receive the given Channel at the
+          ///< given Priority, with the least impact on active recordings and
+          ///< live viewing.
+--- device.c.orig	2006-11-15 12:01:30.000000000 +0100
++++ device.c	2006-11-22 12:28:05.000000000 +0100
+@@ -8,6 +8,7 @@
+  */
+ 
+ #include "device.h"
++#include "dvbdevice.h"
+ #include <errno.h>
+ #include <sys/ioctl.h>
+ #include <sys/mman.h>
+@@ -278,11 +279,13 @@
+   return (0 <= Index && Index < numDevices) ? device[Index] : NULL;
+ }
+ 
+-cDevice *cDevice::GetDevice(const cChannel *Channel, int Priority, bool *NeedsDetachReceivers, bool LiveView)
++cDevice *cDevice::GetDevice(const cChannel *Channel, int Priority, bool *NeedsDetachReceivers, bool LiveView, bool DVBCardsOnly)
+ {
+   cDevice *d = NULL;
+   uint Impact = 0xFFFFFFFF; // we're looking for a device with the least impact
+   for (int i = 0; i < numDevices; i++) {
++      if (DVBCardsOnly && device[i]->CardIndex() >= MAXDVBDEVICES)
++         continue;
+       bool ndr;
+       if (device[i]->ProvidesChannel(Channel, Priority, &ndr)) { // this device is basicly able to do the job
+          // Put together an integer number that reflects the "impact" using
+--- PLUGINS/src/streamdev/server/connection.c.orig	2006-11-15 12:10:11.000000000 +0100
++++ PLUGINS/src/streamdev/server/connection.c	2006-11-15 12:10:59.000000000 +0100
+@@ -132,7 +132,7 @@
+ 	Dprintf(" * GetDevice(const cChannel*, int)\n");
+ 	Dprintf(" * -------------------------------\n");
+ 
+-	device = cDevice::GetDevice(Channel, Priority);
++	device = cDevice::GetDevice(Channel, Priority, NULL, NULL, true);
+ 
+ 	Dprintf(" * Found following device: %p (%d)\n", device, 
+ 			device ? device->CardIndex() + 1 : 0);
+@@ -150,7 +150,7 @@
+ 		const cChannel *current = Channels.GetByNumber(cDevice::CurrentChannel());
+ 		isyslog("streamdev-server: Detaching current receiver");
+ 		Detach();
+-		device = cDevice::GetDevice(Channel, Priority);
++		device = cDevice::GetDevice(Channel, Priority, NULL, NULL, true);
+ 		Attach();
+ 		Dprintf(" * Found following device: %p (%d)\n", device, 
+ 				device ? device->CardIndex() + 1 : 0);
