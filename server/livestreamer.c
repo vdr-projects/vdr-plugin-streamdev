@@ -8,9 +8,15 @@
 
 // --- cStreamdevLiveReceiver -------------------------------------------------
 
+#if VDRVERSNUM < 10500
 cStreamdevLiveReceiver::cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer, int Ca, 
                                                int Priority, const int *Pids):
 		cReceiver(Ca, Priority, 0, Pids),
+#else
+cStreamdevLiveReceiver::cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer, tChannelID ChannelID, 
+                                               int Priority, const int *Pids):
+		cReceiver(ChannelID, Priority, 0, Pids),
+#endif
 		m_Streamer(Streamer)
 {
 }
@@ -90,7 +96,11 @@ bool cStreamdevLiveStreamer::SetPid(int Pid, bool On)
 	DELETENULL(m_Receiver);
 	if (m_NumPids > 0) {
 		Dprintf("Creating Receiver to respect changed pids\n");
+#if VDRVERSNUM < 10500
 		m_Receiver = new cStreamdevLiveReceiver(this, m_Channel->Ca(), m_Priority, m_Pids);
+#else
+		m_Receiver = new cStreamdevLiveReceiver(this, m_Channel->GetChannelID(), m_Priority, m_Pids);
+#endif
 		if (IsRunning() && m_Device != NULL) {
 			Dprintf("Attaching new receiver\n");
 			Attach();

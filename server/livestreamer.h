@@ -26,7 +26,11 @@ protected:
 	virtual void Receive(uchar *Data, int Length);
 
 public:
+#if VDRVERSNUM < 10500
 	cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer, int Ca, int Priority, const int *Pids);
+#else
+	cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer, tChannelID ChannelID, int Priority, const int *Pids);
+#endif
 	virtual ~cStreamdevLiveReceiver();
 };
 
