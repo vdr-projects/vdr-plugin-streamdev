@@ -1,11 +1,12 @@
 /*
- *  $Id: socket.c,v 1.4 2005/02/08 17:22:35 lordjaxom Exp $
+ *  $Id: socket.c,v 1.5 2007/01/15 11:36:37 schmirl Exp $
  */
  
 #include <tools/select.h>
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #include "client/socket.h"
 #include "client/setup.h"
@@ -54,7 +55,7 @@ bool cClientSocket::Command(const std::string &Command, uint Expected, uint Time
 		return false;
 	}
 
-	uint64 elapsed = starttime.Elapsed();
+	uint64_t elapsed = starttime.Elapsed();
 	if (Expected != 0) { // XXX+ What if elapsed > TimeoutMs?
 		TimeoutMs -= elapsed;
 		return Expect(Expected, NULL, TimeoutMs);
