@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.7 2006/09/14 10:43:10 schmirl Exp $
+ *  $Id: device.c,v 1.8 2007/01/15 12:15:12 schmirl Exp $
  */
  
 #include "client/device.h"
@@ -101,7 +101,19 @@ bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel,
 			&& TRANSPONDER(Channel, m_Channel))
 		return true;
 
+#if VDRVERSNUM < 10338
+	DetachAll(pidHandles[ptAudio].pid);
+	DetachAll(pidHandles[ptVideo].pid);
+	DetachAll(pidHandles[ptPcr].pid);
+	DetachAll(pidHandles[ptTeletext].pid);
+	DelPid(pidHandles[ptAudio].pid);
+	DelPid(pidHandles[ptVideo].pid);
+	DelPid(pidHandles[ptPcr].pid, ptPcr);
+	DelPid(pidHandles[ptTeletext].pid);
+	DelPid(pidHandles[ptDolby].pid);
+#else
 	DetachAllReceivers();
+#endif
 	m_Channel = Channel;
 	bool r = ClientSocket.SetChannelDevice(m_Channel);
 	Dprintf("setchanneldevice r=%d\n", r);
