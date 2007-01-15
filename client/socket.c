@@ -1,5 +1,5 @@
 /*
- *  $Id: socket.c,v 1.5 2007/01/15 11:36:37 schmirl Exp $
+ *  $Id: socket.c,v 1.6 2007/01/15 11:41:46 schmirl Exp $
  */
  
 #include <tools/select.h>
@@ -7,6 +7,9 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <time.h>
+
+#define MINLOGREPEAT 10	//don't log connect failures too often (seconds)
 
 #include "client/socket.h"
 #include "client/setup.h"
@@ -111,9 +114,13 @@ bool cClientSocket::CheckConnection(void) {
 	}
 
 	if (!Connect(StreamdevClientSetup.RemoteIp, StreamdevClientSetup.RemotePort)){
-		esyslog("ERROR: Streamdev: Couldn't connect to %s:%d: %s", 
+	        static time_t lastTime = 0;
+		if (time(NULL) - lastTime > MINLOGREPEAT) {
+		    esyslog("ERROR: Streamdev: Couldn't connect to %s:%d: %s", 
 				(const char*)StreamdevClientSetup.RemoteIp,
 				StreamdevClientSetup.RemotePort, strerror(errno));
+		    lastTime = time(NULL);
+		}
 		return false;
 	}
 
