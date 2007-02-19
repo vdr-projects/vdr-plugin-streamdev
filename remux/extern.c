@@ -63,9 +63,9 @@ cTSExt::cTSExt(cRingBufferLinear *ResultBuffer):
 		dup2(outpipe[1], STDOUT_FILENO);
 		close(outpipe[0]);
 
-        int MaxPossibleFileDescriptors = getdtablesize();
-        for (int i = STDERR_FILENO + 1; i < MaxPossibleFileDescriptors; i++)
-            close(i); //close all dup'ed filedescriptors
+		int MaxPossibleFileDescriptors = getdtablesize();
+		for (int i = STDERR_FILENO + 1; i < MaxPossibleFileDescriptors; i++)
+			close(i); //close all dup'ed filedescriptors
 
 		//printf("starting externremux.sh\n");
 		execl("/bin/sh", "sh", "-c", g_ExternRemux, NULL);
