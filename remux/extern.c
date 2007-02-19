@@ -6,6 +6,8 @@
 #include <signal.h>
 #include <unistd.h>
 
+const char *g_ExternRemux = "/root/externremux.sh";
+
 class cTSExt: public cThread {
 private:
 	cRingBufferLinear *m_ResultBuffer;
@@ -65,9 +67,9 @@ cTSExt::cTSExt(cRingBufferLinear *ResultBuffer):
         for (int i = STDERR_FILENO + 1; i < MaxPossibleFileDescriptors; i++)
             close(i); //close all dup'ed filedescriptors
 
-		printf("starting externremux.sh\n");
-		execl("/bin/sh", "sh", "-c", "/root/externremux.sh", NULL);
-		printf("failed externremux.sh\n");
+		//printf("starting externremux.sh\n");
+		execl("/bin/sh", "sh", "-c", g_ExternRemux, NULL);
+		//printf("failed externremux.sh\n");
 		_exit(-1);
 	}
 

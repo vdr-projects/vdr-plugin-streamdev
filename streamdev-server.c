@@ -3,13 +3,15 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-server.c,v 1.4 2006/11/24 11:45:36 schmirl Exp $
+ * $Id: streamdev-server.c,v 1.5 2007/02/19 12:08:16 schmirl Exp $
  */
 
+#include <getopt.h>
 #include "streamdev-server.h"
 #include "server/setup.h"
 #include "server/server.h"
 #include "server/suspend.h"
+#include "remux/extern.h"
 #include "i18n.h"
 
 const char *cPluginStreamdevServer::DESCRIPTION = "VDR Streaming Server";
@@ -25,6 +27,33 @@ cPluginStreamdevServer::~cPluginStreamdevServer()
 const char *cPluginStreamdevServer::Description(void) 
 {
 	return tr(DESCRIPTION);
+}
+
+const char *cPluginStreamdevServer::CommandLineHelp(void)
+{
+	// return a string that describes all known command line options.
+	return "  -r <CMD>, --remux=<CMD>  Define an external command for remuxing.\n";
+}
+
+bool cPluginStreamdevServer::ProcessArgs(int argc, char *argv[])
+{
+	// implement command line argument processing here if applicable.
+	static const struct option long_options[] = {
+		{ "remux", required_argument, NULL, 'r' },
+		{ NULL, 0, NULL, 0 }
+	};
+
+	int c;
+	while((c = getopt_long(argc, argv, "r:", long_options, NULL)) != -1) {
+		switch (c) {
+			case 'r':
+				g_ExternRemux = optarg;
+				break;
+			default:
+				return false;
+		}
+	}
+	return true;
 }
 
 bool cPluginStreamdevServer::Start(void) 

@@ -1,5 +1,5 @@
 /*
- *  $Id: streamdev-server.h,v 1.3 2006/07/05 20:37:17 thomas Exp $
+ *  $Id: streamdev-server.h,v 1.4 2007/02/19 12:08:16 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEVSERVER_H
@@ -19,6 +19,8 @@ public:
 
 	virtual const char *Version(void) { return VERSION; }
 	virtual const char *Description(void);
+	virtual const char *CommandLineHelp(void);
+	virtual bool ProcessArgs(int argc, char *argv[]);
 	virtual bool Start(void);
 	virtual void Stop(void);
 	virtual cString Active(void);
