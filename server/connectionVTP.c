@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.7 2005/05/09 20:22:29 lordjaxom Exp $
+ *  $Id: connectionVTP.c,v 1.8 2007/03/02 15:27:07 schmirl Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -168,10 +168,17 @@ bool cLSTEHandler::Next(bool &Last)
 		if (m_Schedule != NULL) {
 			cChannel *channel = Channels.GetByChannelID(m_Schedule->ChannelID(),
 			                                            true);
-			m_State = Event;
-			return m_Client->Respond(-215, "C %s %s", 
+			if (channel != NULL) {
+				m_State = Event;
+				return m_Client->Respond(-215, "C %s %s", 
 			                         *channel->GetChannelID().ToString(),
 			                         channel->Name());
+			} else {
+				esyslog("ERROR: vdr streamdev: unable to find channel %s by ID",
+					         *m_Schedule->ChannelID().ToString());
+				m_State = EndChannel;
+				return Next(Last);
+			}
 		} else {
 			m_State = EndEPG;
 			return Next(Last);
@@ -796,7 +803,11 @@ bool cConnectionVTP::CmdLSTX(cHandler *&Handler, char *Option)
 		Handler = new cHandler(this, Option);
 	}
 
-	bool last, result = Handler->Next(last);
+	bool last, result = false;
+	if (Handler != NULL)
+		result = Handler->Next(last);
+	else
+		esyslog("ERROR: vdr streamdev: Handler in LSTX command is NULL");
 	if (!result || last)
 		DELETENULL(Handler);
 
