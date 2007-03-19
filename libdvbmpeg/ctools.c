@@ -2025,7 +2025,7 @@ void write_mpg(int fstart, uint64_t length, int fdin, int fdout)
 	fstat (fdout, &sb);
 	buf_size =  sb.st_blksize;
 
-	buf = (char *) alloca (buf_size + sizeof (int));
+	buf = (uint8_t *) alloca (buf_size + sizeof (int));
 	
 	lseek(fdin, fstart, SEEK_SET);
 
@@ -2208,7 +2208,7 @@ void cut_mpg(char *name, uint64_t size)
 
 
 
-void write_all (int fd, uint8_t *data, int length)
+void write_all (int fd, const char *data, int length)
 {
         int r;
 
@@ -2222,7 +2222,7 @@ void write_all (int fd, uint8_t *data, int length)
 
 
 
-void read_all (int fd, uint8_t *data, int length)
+void read_all (int fd, char *data, int length)
 {
         int c = 0;
 
@@ -2243,9 +2243,9 @@ void read_all (int fd, uint8_t *data, int length)
 
 
 
-char *url2host (uint8_t *url, char **name, uint32_t *ip, uint32_t *port)
+char *url2host (char *url, char **name, uint32_t *ip, uint32_t *port)
 {
-	uint8_t *murl;
+	char *murl;
 	struct hostent *hoste;
 	struct in_addr haddr;
 	int found_ip = 1;
