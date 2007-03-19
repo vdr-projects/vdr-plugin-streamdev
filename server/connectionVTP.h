@@ -11,6 +11,9 @@ class cLSTTHandler;
 
 class cConnectionVTP: public cServerConnection {
 	friend class cLSTEHandler;
+	// if your compiler doesn't understand the following statement
+	// (e.g. gcc 2.x), simply remove it and try again ;-)
+	using cServerConnection::Respond;
 
 private:
 	cTBSocket              *m_LiveSocket;
