@@ -119,7 +119,15 @@ void cTSExt::Action(void)
 			if (FD_ISSET(m_Outpipe, &rfds)) {
 				int result;
 				if ((result = m_ResultBuffer->Read(m_Outpipe)) == -1) {
-					LOG_ERROR_STR("read failed");
+					if (errno != EINTR) {
+						LOG_ERROR_STR("read failed");
+						m_Active = false;
+					}
+					break;
+				}
+				else if (result == 0) {
+					esyslog("streamdev-server: EOF reading from externremux");
+					m_Active = false;
 					break;
 				}
 			}
