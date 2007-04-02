@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.h,v 1.7 2005/03/12 12:54:19 lordjaxom Exp $
+ *  $Id: streamer.h,v 1.8 2007/04/02 10:32:34 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_STREAMER_H
@@ -29,6 +29,8 @@ protected:
 public:
 	cStreamdevWriter(cTBSocket *Socket, cStreamdevStreamer *Streamer);
 	virtual ~cStreamdevWriter();
+
+	bool IsActive(void) const { return m_Active; }
 };
 
 // --- cStreamdevStreamer -----------------------------------------------------
@@ -52,6 +54,7 @@ public:
 
 	virtual void Start(cTBSocket *Socket);
 	virtual void Stop(void);
+	bool Abort(void) const;
 
 	void Activate(bool On);
 	int Receive(uchar *Data, int Length) { return m_RingBuffer->Put(Data, Length); }
@@ -64,6 +67,11 @@ public:
 	virtual void Detach(void) {}
 	virtual void Attach(void) {}
 };
+
+inline bool cStreamdevStreamer::Abort(void) const
+{
+	return m_Active && !m_Writer->IsActive();
+}
 
 #endif // VDR_STREAMDEV_STREAMER_H
 

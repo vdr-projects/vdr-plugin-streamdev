@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.h,v 1.3 2005/05/09 20:22:29 lordjaxom Exp $
+ *  $Id: connection.h,v 1.4 2007/04/02 10:32:34 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVER_CONNECTION_H
@@ -68,6 +68,10 @@ public:
 	   Command() for each line. Returns false in case of an error, or if
 	   the connection shall be closed and removed by the server */
 	virtual bool Read(void);
+
+	/* Is polled regularely by the server. Returns true if the connection
+	   needs to be terminated. */
+	virtual bool Abort(void) const = 0;
 
 	/* Will make the socket close after sending all queued output data */
 	void DeferClose(void) { m_DeferClose = true; }

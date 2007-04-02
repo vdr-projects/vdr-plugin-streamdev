@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.h,v 1.3 2005/02/11 16:44:15 lordjaxom Exp $
+ *  $Id: connectionHTTP.h,v 1.4 2007/04/02 10:32:34 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVERS_CONNECTIONHTTP_H
@@ -52,7 +52,13 @@ public:
 	virtual bool Command(char *Cmd);
 	bool CmdGET(const std::string &Opts);
 
+	virtual bool Abort(void) const;
 	virtual void Flushed(void);
 };
+
+inline bool cConnectionHTTP::Abort(void) const
+{
+	return m_LiveStreamer && m_LiveStreamer->Abort();
+}
 
 #endif // VDR_STREAMDEV_SERVERS_CONNECTIONVTP_H

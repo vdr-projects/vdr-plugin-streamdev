@@ -2,9 +2,9 @@
 #define VDR_STREAMDEV_SERVERS_CONNECTIONVTP_H
 
 #include "server/connection.h"
+#include "server/livestreamer.h"
 
 class cTBSocket;
-class cStreamdevLiveStreamer;
 class cLSTEHandler;
 class cLSTCHandler;
 class cLSTTHandler;
@@ -39,6 +39,7 @@ public:
 	virtual void Welcome(void);
 	virtual void Reject(void);
 
+	virtual bool Abort(void) const;
 	virtual void Detach(void);
 	virtual void Attach(void);
 
@@ -71,5 +72,10 @@ public:
 	bool Respond(int Code, const char *Message, ...)
 			__attribute__ ((format (printf, 3, 4)));
 };
+
+inline bool cConnectionVTP::Abort(void) const
+{
+	return m_LiveStreamer && m_LiveStreamer->Abort();
+}
 
 #endif // VDR_STREAMDEV_SERVERS_CONNECTIONVTP_H
