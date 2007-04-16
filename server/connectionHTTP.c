@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.c,v 1.10 2006/01/26 19:40:18 lordjaxom Exp $
+ *  $Id: connectionHTTP.c,v 1.11 2007/04/16 11:01:02 schmirl Exp $
  */
 
 #include <ctype.h>
@@ -41,6 +41,8 @@ bool cConnectionHTTP::Command(char *Cmd)
 		}
 		Dprintf("header\n");
 		return true;
+	default:
+		break;
 	}
 	return false; // ??? shouldn't happen
 }
@@ -153,7 +155,7 @@ bool cConnectionHTTP::CmdGET(const std::string &Opts)
 {
 	const char *sp = Opts.c_str(), *ptr = sp, *ep;
 	const cChannel *chan;
-	int apid = 0, pos;
+	int apid = 0;
 
 	ptr = skipspace(ptr);
 	while (*ptr == '/')

@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.8 2007/03/02 15:27:07 schmirl Exp $
+ *  $Id: connectionVTP.c,v 1.9 2007/04/16 11:01:02 schmirl Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -153,8 +153,6 @@ cLSTEHandler::~cLSTEHandler()
 
 bool cLSTEHandler::Next(bool &Last)
 {
-	char *buffer;
-
 	if (m_Error != NULL) {
 		Last = true;
 		cString str(m_Error, true);
@@ -562,8 +560,6 @@ bool cConnectionVTP::Command(char *Cmd)
 
 bool cConnectionVTP::CmdCAPS(char *Opts) 
 {
-	char *buffer;
-
 	if (strcasecmp(Opts, "TS") == 0) {
 		m_NoTSPIDS = true;
 		return Respond(220, "Ignored, capability \"%s\" accepted for "
