@@ -1,5 +1,5 @@
 /*
- *  $Id: filter.c,v 1.7 2007/04/23 11:33:26 schmirl Exp $
+ *  $Id: filter.c,v 1.8 2007/04/23 12:00:27 schmirl Exp $
  */
 
 #include "client/filter.h"
@@ -79,19 +79,35 @@ bool cStreamdevFilter::PutSection(const uchar *Data, int Length) {
 	if (m_Used + Length >= (int)sizeof(m_Buffer)) {
 		esyslog("ERROR: Streamdev: Section handler buffer overflow (%d bytes lost)",
 				Length);
-		m_Used = 0;
+		Reset();
 		return true;
 	}
+
 	memcpy(m_Buffer + m_Used, Data, Length);
 	m_Used += Length;
-
 	if (m_Used > 3) {
 		int length = (((m_Buffer[1] & 0x0F) << 8) | m_Buffer[2]) + 3;
 		if (m_Used == length) {
-			if (write(m_Pipe[1], m_Buffer, length) < 0)
-				return false;
 			m_Used = 0;
+			if (write(m_Pipe[1], m_Buffer, length) < 0) {
+				if(errno == EAGAIN || errno == EWOULDBLOCK) 
+					dsyslog("cStreamdevFilter::PutSection socket overflow, "
+						"Pid %4d Tid %3d", m_Pid, m_Tid);
+
+				else
+					return false;
+			}
 		}
+
+		if (m_Used > length) {
+			dsyslog("cStreamdevFilter::PutSection: m_Used > length !  Pid %2d, Tid%2d "
+				"(len %3d, got %d/%d)", m_Pid, m_Tid, Length, m_Used, length);
+			if(Length < TS_SIZE-5) {
+				// TS packet not full -> this must be last TS packet of section data -> safe to reset now
+				Reset();
+			}
+		}
+
 	}
 	return true;
 }
