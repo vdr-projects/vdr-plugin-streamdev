@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.8 2007/01/15 12:15:12 schmirl Exp $
+ *  $Id: device.c,v 1.9 2007/04/23 11:42:16 schmirl Exp $
  */
  
 #include "client/device.h"
@@ -59,13 +59,22 @@ cStreamdevDevice::~cStreamdevDevice() {
 
 bool cStreamdevDevice::ProvidesSource(int Source) const {
 	Dprintf("ProvidesSource, Source=%d\n", Source);
-	return false;
+	return true;
 }
 
 bool cStreamdevDevice::ProvidesTransponder(const cChannel *Channel) const
 {
 	Dprintf("ProvidesTransponder\n");
-	return false;
+	return true;
+}
+
+bool cStreamdevDevice::IsTunedToTransponder(const cChannel *Channel)
+{
+	bool res = false;
+	if (ClientSocket.DataSocket(siLive) != NULL
+			&& TRANSPONDER(Channel, m_Channel))
+		res = true;
+	return res;
 }
 
 bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority, 

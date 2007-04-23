@@ -1,5 +1,5 @@
 /*
- *  $Id: device.h,v 1.3 2005/02/08 15:21:19 lordjaxom Exp $
+ *  $Id: device.h,v 1.4 2007/04/23 11:42:16 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_DEVICE_H
@@ -51,9 +51,10 @@ public:
 	virtual ~cStreamdevDevice();
 
 	virtual bool ProvidesSource(int Source) const;
-  virtual bool ProvidesTransponder(const cChannel *Channel) const;
+	virtual bool ProvidesTransponder(const cChannel *Channel) const;
 	virtual bool ProvidesChannel(const cChannel *Channel, int Priority = -1,
 			bool *NeedsDetachReceivers = NULL) const;
+	virtual bool IsTunedToTransponder(const cChannel *Channel);
 
 	static bool Init(void);
 	static bool ReInit(void);
