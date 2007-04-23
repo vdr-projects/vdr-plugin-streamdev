@@ -1,5 +1,5 @@
 /*
- *  $Id: filter.c,v 1.9 2007/04/23 12:01:33 schmirl Exp $
+ *  $Id: filter.c,v 1.10 2007/04/23 12:52:28 schmirl Exp $
  */
 
 #include "client/filter.h"
@@ -155,9 +155,43 @@ cStreamdevFilters::~cStreamdevFilters() {
 }
 
 int cStreamdevFilters::OpenFilter(u_short Pid, u_char Tid, u_char Mask) {
+	CarbageCollect();
+
 	cStreamdevFilter *f = new cStreamdevFilter(Pid, Tid, Mask);
+	int fh = f->ReadPipe();
+
+	Lock();
 	Add(f);
-	return f->ReadPipe();
+	Unlock();
+
+	return fh;
+}
+
+void cStreamdevFilters::CarbageCollect(void) {
+	LOCK_THREAD;
+	for (cStreamdevFilter *fi = First(); fi;) {
+		if (fi->IsClosed()) {
+			if (errno == ECONNREFUSED ||
+					errno == ECONNRESET ||
+					errno == EPIPE) {
+				ClientSocket.SetFilter(fi->Pid(), fi->Tid(), fi->Mask(), false);
+				Dprintf("cStreamdevFilters::CarbageCollector: filter closed: Pid %4d, Tid %3d, Mask %2x (%d filters left)",
+						(int)fi->Pid(), (int)fi->Tid(), fi->Mask(), Count()-1);
+
+				cStreamdevFilter *next = Prev(fi);
+				Del(fi);
+				fi = next ? Next(next) : First();
+			} else {
+				esyslog("cStreamdevFilters::CarbageCollector() error: "
+						"Pid %4d, Tid %3d, Mask %2x (%d filters left) failed",
+						(int)fi->Pid(), (int)fi->Tid(), fi->Mask(), Count()-1);
+				LOG_ERROR;
+				fi = Next(fi);
+			}
+		} else {
+			fi = Next(fi);
+		}
+	}
 }
 
 cStreamdevFilter *cStreamdevFilters::Matches(u_short Pid, u_char Tid) {

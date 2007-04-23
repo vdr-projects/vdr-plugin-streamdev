@@ -1,5 +1,5 @@
 /*
- *  $Id: filter.h,v 1.2 2007/04/23 11:23:15 schmirl Exp $
+ *  $Id: filter.h,v 1.3 2007/04/23 12:52:28 schmirl Exp $
  */
 
 #ifndef VDR_STREAMDEV_FILTER_H
@@ -23,6 +23,7 @@ private:
 
 protected:
 	virtual void Action(void);
+	void CarbageCollect(void);
 
 public:
 	cStreamdevFilters(void);
