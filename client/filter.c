@@ -1,5 +1,5 @@
 /*
- *  $Id: filter.c,v 1.8 2007/04/23 12:00:27 schmirl Exp $
+ *  $Id: filter.c,v 1.9 2007/04/23 12:01:33 schmirl Exp $
  */
 
 #include "client/filter.h"
@@ -52,16 +52,16 @@ cStreamdevFilter::cStreamdevFilter(u_short Pid, u_char Tid, u_char Mask) {
 #ifdef SOCK_SEQPACKET  
 	// SOCK_SEQPACKET (since kernel 2.6.4)
 	if (socketpair(AF_UNIX, SOCK_SEQPACKET, 0, m_Pipe) != 0) {
-	        esyslog("streamdev-client: socketpair(SOCK_SEQPACKET) failed: %m, trying SOCK_DGRAM");
+		esyslog("streamdev-client: socketpair(SOCK_SEQPACKET) failed: %m, trying SOCK_DGRAM");
 	}
 #endif
 	if (m_Pipe[0] < 0 && socketpair(AF_UNIX, SOCK_DGRAM, 0, m_Pipe) != 0) {
-	        esyslog("streamdev-client: couldn't open section filter socket: %m");
+		esyslog("streamdev-client: couldn't open section filter socket: %m");
 	} 
 
 	else if(fcntl(m_Pipe[0], F_SETFL, O_NONBLOCK) != 0 ||
 		fcntl(m_Pipe[1], F_SETFL, O_NONBLOCK) != 0) {
-	        esyslog("streamdev-client: couldn't set section filter socket to non-blocking mode: %m");
+		esyslog("streamdev-client: couldn't set section filter socket to non-blocking mode: %m");
 	}
 }
 
@@ -123,12 +123,12 @@ bool cStreamdevFilter::IsClosed(void) {
 
 	// Test if pipe/socket has been closed by writing empty section
 	if (write(m_Pipe[1], m_Buffer, 3) < 0 &&
-	    errno != EAGAIN &&  
-	    errno != EWOULDBLOCK) {
+			errno != EAGAIN &&  
+			errno != EWOULDBLOCK) {
 
 		if (errno != ECONNREFUSED &&
-		    errno != ECONNRESET &&
-		    errno != EPIPE)
+				errno != ECONNRESET &&
+				errno != EPIPE)
 			esyslog("cStreamdevFilter::IsClosed failed: %m");
 
 		return true;
