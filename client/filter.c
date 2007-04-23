@@ -1,5 +1,5 @@
 /*
- *  $Id: filter.c,v 1.3 2005/11/06 16:43:58 lordjaxom Exp $
+ *  $Id: filter.c,v 1.4 2007/04/23 11:23:15 schmirl Exp $
  */
 
 #include "client/filter.h"
@@ -7,10 +7,40 @@
 #include "tools/select.h"
 #include "common.h"
 
-#include <vdr/ringbuffer.h>
 #include <vdr/device.h>
 
 #if VDRVERSNUM >= 10300
+
+// --- cStreamdevFilter ------------------------------------------------------
+
+class cStreamdevFilter: public cListObject {
+private:
+	uchar              m_Buffer[4096];
+	int                m_Used;
+	int                m_Pipe[2];
+	u_short            m_Pid;
+	u_char             m_Tid;
+	u_char             m_Mask;
+
+public:
+	cStreamdevFilter(u_short Pid, u_char Tid, u_char Mask);
+	virtual ~cStreamdevFilter();
+
+	bool Matches(u_short Pid, u_char Tid);
+	bool PutSection(const uchar *Data, int Length);
+	int  ReadPipe(void) const { return m_Pipe[0]; }
+
+	bool IsClosed(void);
+	void Reset(void);
+
+	u_short Pid(void) const { return m_Pid; }
+	u_char Tid(void) const { return m_Tid; }
+	u_char Mask(void) const { return m_Mask; }
+};
+
+inline bool cStreamdevFilter::Matches(u_short Pid, u_char Tid) {
+	return m_Pid == Pid && m_Tid == (Tid & m_Mask);
+}
 
 cStreamdevFilter::cStreamdevFilter(u_short Pid, u_char Tid, u_char Mask) {
 	m_Used = 0;
@@ -52,6 +82,33 @@ bool cStreamdevFilter::PutSection(const uchar *Data, int Length) {
 	}
 	return true;
 }
+
+void cStreamdevFilter::Reset(void) {
+	if(m_Used)
+		dsyslog("cStreamdevFilter::Reset skipping %d bytes", m_Used);
+	m_Used = 0;
+}
+
+bool cStreamdevFilter::IsClosed(void) {
+	char m_Buffer[3] = {0,0,0}; /* tid 0, 0 bytes */
+
+	// Test if pipe/socket has been closed by writing empty section
+	if (write(m_Pipe[1], m_Buffer, 3) < 0 &&
+	    errno != EAGAIN &&  
+	    errno != EWOULDBLOCK) {
+
+		if (errno != ECONNREFUSED &&
+		    errno != ECONNRESET &&
+		    errno != EPIPE)
+			esyslog("cStreamdevFilter::TestPipe: failed: %m");
+
+		return true;
+	}
+
+	return false;
+}
+
+// --- cStreamdevFilters -----------------------------------------------------
 
 cStreamdevFilters::cStreamdevFilters(void):
 		cThread("streamdev-client: sections assembler") {
