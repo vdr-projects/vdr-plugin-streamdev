@@ -1,5 +1,5 @@
 /*
- *  $Id: filter.c,v 1.6 2007/04/23 11:30:55 schmirl Exp $
+ *  $Id: filter.c,v 1.7 2007/04/23 11:33:26 schmirl Exp $
  */
 
 #include "client/filter.h"
@@ -67,8 +67,10 @@ cStreamdevFilter::cStreamdevFilter(u_short Pid, u_char Tid, u_char Mask) {
 
 cStreamdevFilter::~cStreamdevFilter() {
 	Dprintf("~cStreamdevFilter %p\n", this);
-	if (m_Pipe[0] >= 0)
-		close(m_Pipe[0]);
+
+	// ownership of handle m_Pipe[0] has been transferred to VDR section handler
+	//if (m_Pipe[0] >= 0)
+	//	close(m_Pipe[0]);
 	if (m_Pipe[1] >= 0)
 		close(m_Pipe[1]);
 }
