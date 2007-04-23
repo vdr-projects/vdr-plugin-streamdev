@@ -12,27 +12,7 @@ class cTS2PSRemux;
 class cTS2ESRemux;
 class cExternRemux;
 class cRemux;
-
-// --- cStreamdevLiveReceiver -------------------------------------------------
-
-class cStreamdevLiveReceiver: public cReceiver {
-	friend class cStreamdevLiveStreamer;
-
-private:
-	cStreamdevLiveStreamer *m_Streamer;
-
-protected:
-	virtual void Activate(bool On);
-	virtual void Receive(uchar *Data, int Length);
-
-public:
-#if VDRVERSNUM < 10500
-	cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer, int Ca, int Priority, const int *Pids);
-#else
-	cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer, tChannelID ChannelID, int Priority, const int *Pids);
-#endif
-	virtual ~cStreamdevLiveReceiver();
-};
+class cStreamdevLiveReceiver;
 
 // --- cStreamdevLiveStreamer -------------------------------------------------
 
@@ -69,13 +49,5 @@ public:
 	// Statistical purposes:
 	virtual std::string Report(void);
 };
-
-// --- cStreamdevLiveReceiver reverse inlines ---------------------------------
-
-inline void cStreamdevLiveReceiver::Activate(bool On) 
-{ 
-	Dprintf("LiveReceiver->Activate(%d)\n", On);
-	m_Streamer->Activate(On); 
-}
 
 #endif // VDR_STREAMDEV_LIVESTREAMER_H

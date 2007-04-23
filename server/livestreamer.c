@@ -8,12 +8,31 @@
 
 // --- cStreamdevLiveReceiver -------------------------------------------------
 
+class cStreamdevLiveReceiver: public cReceiver {
+	friend class cStreamdevStreamer;
+
+private:
+	cStreamdevStreamer *m_Streamer;
+
+protected:
+	virtual void Activate(bool On);
+	virtual void Receive(uchar *Data, int Length);
+
+public:
 #if VDRVERSNUM < 10500
-cStreamdevLiveReceiver::cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer, int Ca, 
+	cStreamdevLiveReceiver(cStreamdevStreamer *Streamer, int Ca, int Priority, const int *Pids);
+#else
+	cStreamdevLiveReceiver(cStreamdevStreamer *Streamer, tChannelID ChannelID, int Priority, const int *Pids);
+#endif
+	virtual ~cStreamdevLiveReceiver();
+};
+
+#if VDRVERSNUM < 10500
+cStreamdevLiveReceiver::cStreamdevLiveReceiver(cStreamdevStreamer *Streamer, int Ca, 
                                                int Priority, const int *Pids):
 		cReceiver(Ca, Priority, 0, Pids),
 #else
-cStreamdevLiveReceiver::cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer, tChannelID ChannelID, 
+cStreamdevLiveReceiver::cStreamdevLiveReceiver(cStreamdevStreamer *Streamer, tChannelID ChannelID, 
                                                int Priority, const int *Pids):
 		cReceiver(ChannelID, Priority, 0, Pids),
 #endif
@@ -32,6 +51,13 @@ void cStreamdevLiveReceiver::Receive(uchar *Data, int Length) {
 	if (p != Length)
 		m_Streamer->ReportOverflow(Length - p);
 }
+
+inline void cStreamdevLiveReceiver::Activate(bool On) 
+{ 
+	Dprintf("LiveReceiver->Activate(%d)\n", On);
+	m_Streamer->Activate(On); 
+}
+
 
 // --- cStreamdevLiveStreamer -------------------------------------------------
 

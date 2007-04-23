@@ -1,18 +1,22 @@
 /*
- *  $Id: livefilter.c,v 1.2 2005/02/08 13:59:16 lordjaxom Exp $
+ *  $Id: livefilter.c,v 1.3 2007/04/23 15:44:55 schmirl Exp $
  */
 
 #include "server/livefilter.h"
-#include "server/livestreamer.h"
+#include "server/streamer.h"
 #include "common.h"
+
+#ifndef TS_SIZE
+#    define TS_SIZE          188
+#endif
+#ifndef TS_SYNC_BYTE
+#    define TS_SYNC_BYTE     0x47
+#endif
 
 #if VDRVERSNUM >= 10300
 
-cStreamdevLiveFilter::cStreamdevLiveFilter(cStreamdevLiveStreamer *Streamer) {
+cStreamdevLiveFilter::cStreamdevLiveFilter(cStreamdevStreamer *Streamer) {
 	m_Streamer = Streamer;
-}
-
-cStreamdevLiveFilter::~cStreamdevLiveFilter() {
 }
 
 void cStreamdevLiveFilter::Process(u_short Pid, u_char Tid, const u_char *Data, int Length) 
