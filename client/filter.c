@@ -1,5 +1,5 @@
 /*
- *  $Id: filter.c,v 1.4 2007/04/23 11:23:15 schmirl Exp $
+ *  $Id: filter.c,v 1.5 2007/04/23 11:25:59 schmirl Exp $
  */
 
 #include "client/filter.h"
@@ -47,10 +47,21 @@ cStreamdevFilter::cStreamdevFilter(u_short Pid, u_char Tid, u_char Mask) {
 	m_Pid  = Pid;
 	m_Tid  = Tid;
 	m_Mask = Mask;
+	m_Pipe[0] = m_Pipe[1] = -1;
 
-	if (pipe(m_Pipe) != 0 || fcntl(m_Pipe[0], F_SETFL, O_NONBLOCK) != 0) {
-		esyslog("streamev-client: coudln't open section filter pipe: %m");
-		m_Pipe[0] = m_Pipe[1] = -1;
+#ifdef SOCK_SEQPACKET  
+	// SOCK_SEQPACKET (since kernel 2.6.4)
+	if (socketpair(AF_UNIX, SOCK_SEQPACKET, 0, m_Pipe) != 0) {
+	        esyslog("streamev-client: socketpair(SOCK_SEQPACKET) failed: %m, trying SOCK_DGRAM");
+	}
+#endif
+	if (m_Pipe[0] < 0 && socketpair(AF_UNIX, SOCK_DGRAM, 0, m_Pipe) != 0) {
+	        esyslog("streamev-client: coudln't open section filter socket: %m");
+	} 
+
+	else if(fcntl(m_Pipe[0], F_SETFL, O_NONBLOCK) != 0 ||
+		fcntl(m_Pipe[1], F_SETFL, O_NONBLOCK) != 0) {
+	        esyslog("streamev-client: coudln't set section filter socket to non-blocking mode: %m");
 	}
 }
 
