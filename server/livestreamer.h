@@ -12,6 +12,7 @@ class cTS2PSRemux;
 class cTS2ESRemux;
 class cExternRemux;
 class cRemux;
+class cStreamdevPatFilter;
 class cStreamdevLiveReceiver;
 
 // --- cStreamdevLiveStreamer -------------------------------------------------
@@ -25,10 +26,14 @@ private:
 	const cChannel         *m_Channel;
 	cDevice                *m_Device;
 	cStreamdevLiveReceiver *m_Receiver;
+	cStreamdevPatFilter    *m_PatFilter;
 	cRemux                 *m_PESRemux;
 	cTS2ESRemux            *m_ESRemux;
 	cTS2PSRemux            *m_PSRemux;
 	cExternRemux           *m_ExtRemux;
+
+	void StartReceiver(void);
+	bool HasPid(int Pid);
 
 public:
 	cStreamdevLiveStreamer(int Priority);
@@ -36,6 +41,7 @@ public:
 
 	void SetDevice(cDevice *Device) { m_Device = Device; }
 	bool SetPid(int Pid, bool On);
+	bool SetPids(int Pid, const int *Pids1 = NULL, const int *Pids2 = NULL, const int *Pids3 = NULL);
 	bool SetChannel(const cChannel *Channel, eStreamType StreamType, int Apid = 0);
 	bool SetFilter(u_short Pid, u_char Tid, u_char Mask, bool On);
 	
