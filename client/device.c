@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.10 2007/04/24 10:43:40 schmirl Exp $
+ *  $Id: device.c,v 1.11 2007/04/24 10:46:21 schmirl Exp $
  */
  
 #include "client/device.h"
@@ -218,6 +218,30 @@ void cStreamdevDevice::CloseDvr(void) {
 bool cStreamdevDevice::GetTSPacket(uchar *&Data) {
 	if (m_TSBuffer) {
 		Data = m_TSBuffer->Get();
+#if 1 // TODO: this should be fixed in vdr cTSBuffer
+		// simple disconnect detection
+		static int m_TSFails = 0;
+		if (!Data) {
+			cPoller Poller(*ClientSocket.DataSocket(siLive));
+			errno = 0;
+			if (Poller.Poll() && !errno) {
+				char tmp[1];
+				if (recv(*ClientSocket.DataSocket(siLive), tmp, 1, MSG_PEEK) == 0 && !errno) {
+esyslog("cStreamDevice::GetTSPacket: GetChecked: NOTHING (%d)", m_TSFails);
+					m_TSFails++; 
+					if (m_TSFails > 10) {
+						isyslog("cStreamdevDevice::GetTSPacket(): disconnected");
+						m_Pids = 0;
+						CloseDvrInt();
+						m_TSFails = 0;
+						return false;
+					}
+					return true;
+				}
+			}
+			m_TSFails = 0;
+		}
+#endif
 		return true;
 	}
 	return false;
