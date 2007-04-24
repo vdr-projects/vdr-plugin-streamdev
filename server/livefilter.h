@@ -1,5 +1,5 @@
 /*
- *  $Id: livefilter.h,v 1.3 2007/04/23 15:44:55 schmirl Exp $
+ *  $Id: livefilter.h,v 1.4 2007/04/24 11:29:29 schmirl Exp $
  */
 
 #ifndef VDR_STREAMEV_LIVEFILTER_H
@@ -22,6 +22,13 @@ protected:
 
 public:
 	cStreamdevLiveFilter(cStreamdevStreamer *Streamer);
+
+	void Set(u_short Pid, u_char Tid, u_char Mask) {
+		cFilter::Set(Pid, Tid, Mask);
+	}
+	void Del(u_short Pid, u_char Tid, u_char Mask) {
+		cFilter::Del(Pid, Tid, Mask);
+	}
 };
 
 #	endif // VDRVERSNUM >= 10300
