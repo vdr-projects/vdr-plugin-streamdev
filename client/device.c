@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.9 2007/04/23 11:42:16 schmirl Exp $
+ *  $Id: device.c,v 1.10 2007/04/24 10:43:40 schmirl Exp $
  */
  
 #include "client/device.h"
@@ -42,6 +42,8 @@ cStreamdevDevice::cStreamdevDevice(void) {
 #endif
 
 	m_Device = this;
+	m_Pids = 0;
+	m_DvrClosed = true;
 
 	if (StreamdevClientSetup.SyncEPG)	
 		ClientSocket.SynchronizeEPG();
@@ -132,32 +134,85 @@ bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel,
 bool cStreamdevDevice::SetPid(cPidHandle *Handle, int Type, bool On) {
 	Dprintf("SetPid, Pid=%d, Type=%d, On=%d, used=%d\n", Handle->pid, Type, On,
 			Handle->used);
-	if (Handle->pid && (On || !Handle->used))
-		return ClientSocket.SetPid(Handle->pid, On);
-	return true;
+	LOCK_THREAD;
+
+	if (On && !m_TSBuffer) {
+		Dprintf("SetPid: no data connection -> OpenDvr()");
+		OpenDvrInt();
+	}
+
+	bool res = true; 
+	if (Handle->pid && (On || !Handle->used)) {
+		res = ClientSocket.SetPid(Handle->pid, On);
+
+		m_Pids += (!res) ? 0 : On ? 1 : -1;
+		if (m_Pids < 0) 
+			m_Pids = 0;
+
+		if(m_Pids < 1 && m_DvrClosed) { 
+			Dprintf("SetPid: 0 pids left -> CloseDvr()"); 
+			CloseDvrInt(); 
+		}
+	}
+
+	return res;
+}
+
+bool cStreamdevDevice::OpenDvrInt(void) {
+	Dprintf("OpenDvrInt\n");
+	LOCK_THREAD;
+
+	CloseDvrInt();
+	if (m_TSBuffer) {
+		Dprintf("cStreamdevDevice::OpenDvrInt(): DVR connection already open\n");
+		return true;
+	}
+
+	Dprintf("cStreamdevDevice::OpenDvrInt(): Connecting ...\n");
+	if (ClientSocket.CreateDataConnection(siLive)) {
+		m_TSBuffer = new cTSBuffer(*ClientSocket.DataSocket(siLive), MEGABYTE(2), CardIndex() + 1);
+		return true;
+	}
+	esyslog("cStreamdevDevice::OpenDvrInt(): DVR connection FAILED");
+	return false;
 }
 
 bool cStreamdevDevice::OpenDvr(void) {
 	Dprintf("OpenDvr\n");
-	CloseDvr();
-	if (ClientSocket.CreateDataConnection(siLive)) {
-		//m_Assembler = new cStreamdevAssembler(ClientSocket.DataSocket(siLive));
-		//m_TSBuffer = new cTSBuffer(m_Assembler->ReadPipe(), MEGABYTE(2), CardIndex() + 1);
-		m_TSBuffer = new cTSBuffer(*ClientSocket.DataSocket(siLive), MEGABYTE(2), CardIndex() + 1);
-		Dprintf("waiting\n");
-		//m_Assembler->WaitForFill();
-		Dprintf("resuming\n");
-		return true;
+	LOCK_THREAD;
+
+	m_DvrClosed = false;
+	return OpenDvrInt();
+}
+
+void cStreamdevDevice::CloseDvrInt(void) {
+	Dprintf("CloseDvrInt\n");
+	LOCK_THREAD;
+
+	if (ClientSocket.CheckConnection()) {
+		if (!m_DvrClosed) {
+			Dprintf("cStreamdevDevice::CloseDvrInt(): m_DvrClosed=false -> not closing yet\n");
+			return;
+		}
+		if (m_Pids > 0) {
+			Dprintf("cStreamdevDevice::CloseDvrInt(): %d active pids -> not closing yet\n", m_Pids);
+			return;
+		}
+	} else {
+		Dprintf("cStreamdevDevice::CloseDvrInt(): Control connection gone !\n");
 	}
-	return false;
+
+	Dprintf("cStreamdevDevice::CloseDvrInt(): Closing DVR connection\n");
+	DELETENULL(m_TSBuffer);
+	ClientSocket.CloseDvr();
 }
 
 void cStreamdevDevice::CloseDvr(void) {
 	Dprintf("CloseDvr\n");
+	LOCK_THREAD;
 
-	//DELETENULL(m_Assembler);
-	DELETENULL(m_TSBuffer);
-	ClientSocket.CloseDvr();
+	m_DvrClosed = true;
+	CloseDvrInt();
 }
 
 bool cStreamdevDevice::GetTSPacket(uchar *&Data) {

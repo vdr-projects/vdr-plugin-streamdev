@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.9 2007/04/16 11:01:02 schmirl Exp $
+ *  $Id: connectionVTP.c,v 1.10 2007/04/24 10:43:40 schmirl Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -632,6 +632,10 @@ bool cConnectionVTP::CmdPORT(char *Opts)
 
 	isyslog("Streamdev: Setting data connection to %s:%d", dataip, dataport);
 
+	if(m_LiveSocket && m_LiveStreamer)
+		m_LiveStreamer->Stop();
+	delete m_LiveSocket;
+	
 	m_LiveSocket = new cTBSocket(SOCK_STREAM);
 	if (!m_LiveSocket->Connect(dataip, dataport)) {
 		esyslog("ERROR: Streamdev: Couldn't open data connection to %s:%d: %s",
@@ -640,10 +644,10 @@ bool cConnectionVTP::CmdPORT(char *Opts)
 		return Respond(551, "Couldn't open data connection");
 	}
 
-	if (id == siLive)
+	if (m_LiveStreamer)
 		m_LiveStreamer->Start(m_LiveSocket);
 
-  return Respond(220, "Port command ok, data connection opened");
+	return Respond(220, "Port command ok, data connection opened");
 }
 
 bool cConnectionVTP::CmdTUNE(char *Opts) 
@@ -664,6 +668,8 @@ bool cConnectionVTP::CmdTUNE(char *Opts)
 	m_LiveStreamer = new cStreamdevLiveStreamer(1);
 	m_LiveStreamer->SetChannel(chan, m_NoTSPIDS ? stTS : stTSPIDS);
 	m_LiveStreamer->SetDevice(dev);
+	if(m_LiveSocket)
+		m_LiveStreamer->Start(m_LiveSocket);
 	
 	return Respond(220, "Channel tuned");
 }

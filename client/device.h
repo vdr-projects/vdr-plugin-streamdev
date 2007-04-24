@@ -1,5 +1,5 @@
 /*
- *  $Id: device.h,v 1.4 2007/04/23 11:42:16 schmirl Exp $
+ *  $Id: device.h,v 1.5 2007/04/24 10:43:40 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_DEVICE_H
@@ -25,8 +25,13 @@ private:
 #if VDRVERSNUM >= 10307
 	cStreamdevFilters   *m_Filters;
 #endif
+	int                  m_Pids;
+	bool                 m_DvrClosed;
 
 	static cStreamdevDevice *m_Device;
+
+	bool OpenDvrInt(void);
+	void CloseDvrInt(void);
 
 protected:
 	virtual bool SetChannelDevice(const cChannel *Channel, bool LiveView);
