@@ -42,7 +42,6 @@ public:
 	bool SetPid(int Pid, bool On);
 	bool SetPids(int Pid, const int *Pids1 = NULL, const int *Pids2 = NULL, const int *Pids3 = NULL);
 	bool SetChannel(const cChannel *Channel, eStreamType StreamType, int Apid = 0);
-	bool SetFilter(u_short Pid, u_char Tid, u_char Mask, bool On);
 	
 	virtual int Put(const uchar *Data, int Count);
 	virtual uchar *Get(int &Count);

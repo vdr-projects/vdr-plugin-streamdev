@@ -457,25 +457,6 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 	return false;
 }
 
-bool cStreamdevLiveStreamer::SetFilter(u_short Pid, u_char Tid, u_char Mask, bool On) 
-{
-#if 0
-	Dprintf("setting filter\n");
-	if (On) {
-		if (m_Filter == NULL) {
-			m_Filter = new cStreamdevLiveFilter(this);
-			Dprintf("attaching filter to device\n");
-			m_Device->AttachFilter(m_Filter);
-		}
-		m_Filter->Set(Pid, Tid, Mask);
-	} else if (m_Filter != NULL)
-		m_Filter->Del(Pid, Tid, Mask);
-	return true;
-#else
-	return false;
-#endif
-}
-
 int cStreamdevLiveStreamer::Put(const uchar *Data, int Count) 
 {
 	switch (m_StreamType) {
