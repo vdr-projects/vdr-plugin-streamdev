@@ -1,5 +1,5 @@
 /*
- *  $Id: socket.h,v 1.3 2005/02/08 17:22:35 lordjaxom Exp $
+ *  $Id: socket.h,v 1.4 2007/04/24 10:57:34 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_CLIENT_CONNECTION_H
@@ -47,6 +47,7 @@ public:
 	bool CheckConnection(void);
 	bool ProvidesChannel(const cChannel *Channel, int Priority);
 	bool CreateDataConnection(eSocketId Id);
+	bool CloseDataConnection(eSocketId Id);
 	bool SetChannelDevice(const cChannel *Channel);
 	bool SetPid(int Pid, bool On);
 #if VDRVERSNUM >= 10300
