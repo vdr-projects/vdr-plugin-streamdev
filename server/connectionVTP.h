@@ -2,9 +2,10 @@
 #define VDR_STREAMDEV_SERVERS_CONNECTIONVTP_H
 
 #include "server/connection.h"
-#include "server/livestreamer.h"
 
 class cTBSocket;
+class cStreamdevLiveStreamer;
+class cStreamdevFilterStreamer;
 class cLSTEHandler;
 class cLSTCHandler;
 class cLSTTHandler;
@@ -16,8 +17,10 @@ class cConnectionVTP: public cServerConnection {
 	using cServerConnection::Respond;
 
 private:
-	cTBSocket              *m_LiveSocket;
-	cStreamdevLiveStreamer *m_LiveStreamer;
+	cTBSocket                *m_LiveSocket;
+	cStreamdevLiveStreamer   *m_LiveStreamer;
+	cTBSocket                *m_FilterSocket;
+	cStreamdevFilterStreamer *m_FilterStreamer;
 
 	char                   *m_LastCommand;
 	bool                    m_NoTSPIDS;
@@ -53,8 +56,8 @@ public:
 	bool CmdADDF(char *Opts);
 	bool CmdDELF(char *Opts);
 	bool CmdABRT(char *Opts);
-	bool CmdQUIT(char *Opts);
-	bool CmdSUSP(char *Opts);
+	bool CmdQUIT(void);
+	bool CmdSUSP(void);
 
 	// Thread-safe implementations of SVDRP commands
 	bool CmdLSTE(char *Opts);
@@ -72,10 +75,5 @@ public:
 	bool Respond(int Code, const char *Message, ...)
 			__attribute__ ((format (printf, 3, 4)));
 };
-
-inline bool cConnectionVTP::Abort(void) const
-{
-	return m_LiveStreamer && m_LiveStreamer->Abort();
-}
 
 #endif // VDR_STREAMDEV_SERVERS_CONNECTIONVTP_H

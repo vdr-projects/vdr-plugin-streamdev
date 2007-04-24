@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.10 2007/04/24 10:43:40 schmirl Exp $
+ *  $Id: connectionVTP.c,v 1.11 2007/04/24 11:03:41 schmirl Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -466,6 +466,8 @@ cConnectionVTP::cConnectionVTP(void):
 		cServerConnection("VTP"),
 		m_LiveSocket(NULL),
 		m_LiveStreamer(NULL),
+		m_FilterSocket(NULL),
+		m_FilterStreamer(NULL),
 		m_LastCommand(NULL),
 		m_NoTSPIDS(false),
 		m_LSTEHandler(NULL),
@@ -483,6 +485,11 @@ cConnectionVTP::~cConnectionVTP()
 	delete m_LSTTHandler;
 	delete m_LSTCHandler;
 	delete m_LSTEHandler;
+}
+
+inline bool cConnectionVTP::Abort(void) const
+{
+	return m_LiveStreamer && m_LiveStreamer->Abort();
 }
 
 void cConnectionVTP::Welcome(void) 
@@ -547,8 +554,8 @@ bool cConnectionVTP::Command(char *Cmd)
 	else if (strcasecmp(Cmd, "ADDF") == 0) return CmdADDF(param);
 	else if (strcasecmp(Cmd, "DELF") == 0) return CmdDELF(param);
 	else if (strcasecmp(Cmd, "ABRT") == 0) return CmdABRT(param);
-	else if (strcasecmp(Cmd, "QUIT") == 0) return CmdQUIT(param);
-	else if (strcasecmp(Cmd, "SUSP") == 0) return CmdSUSP(param);
+	else if (strcasecmp(Cmd, "QUIT") == 0) return CmdQUIT();
+	else if (strcasecmp(Cmd, "SUSP") == 0) return CmdSUSP();
 	// Commands adopted from SVDRP
 	//else if (strcasecmp(Cmd, "DELR") == 0) return CmdDELR(param);
 	else if (strcasecmp(Cmd, "MODT") == 0) return CmdMODT(param);
@@ -777,13 +784,13 @@ bool cConnectionVTP::CmdABRT(char *Opts)
 	return Respond(220, "Data connection closed");
 }
 
-bool cConnectionVTP::CmdQUIT(char *Opts) 
+bool cConnectionVTP::CmdQUIT(void) 
 {
 	DeferClose();
 	return Respond(221, "Video Disk Recorder closing connection");
 }
 
-bool cConnectionVTP::CmdSUSP(char *Opts) 
+bool cConnectionVTP::CmdSUSP(void) 
 {
 	if (StreamdevServerSetup.SuspendMode == smAlways || cSuspendCtl::IsActive())
 		return Respond(220, "Server is suspended");
