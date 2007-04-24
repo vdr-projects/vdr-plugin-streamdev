@@ -1,5 +1,5 @@
 /*
- *  $Id: livefilter.c,v 1.3 2007/04/23 15:44:55 schmirl Exp $
+ *  $Id: livefilter.c,v 1.4 2007/04/24 11:06:12 schmirl Exp $
  */
 
 #include "server/livefilter.h"
@@ -28,7 +28,7 @@ void cStreamdevLiveFilter::Process(u_short Pid, u_char Tid, const u_char *Data, 
 	while (length > 0) {
 		int chunk = min(length, TS_SIZE - 5);
 		buffer[0] = TS_SYNC_BYTE;
-		buffer[1] = (Pid >> 8) & 0xff;
+		buffer[1] = ((Pid >> 8) & 0x3f) | (pos==0 ? 0x40 : 0); /* bit 6: payload unit start indicator (PUSI) */
 		buffer[2] = Pid & 0xff;
 		buffer[3] = Tid;
 		buffer[4] = (uchar)chunk;
