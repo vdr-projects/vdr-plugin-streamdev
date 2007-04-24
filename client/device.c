@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.11 2007/04/24 10:46:21 schmirl Exp $
+ *  $Id: device.c,v 1.12 2007/04/24 11:24:38 schmirl Exp $
  */
  
 #include "client/device.h"
@@ -250,11 +250,24 @@ esyslog("cStreamDevice::GetTSPacket: GetChecked: NOTHING (%d)", m_TSFails);
 #if VDRVERSNUM >= 10300
 int cStreamdevDevice::OpenFilter(u_short Pid, u_char Tid, u_char Mask) {
 	Dprintf("OpenFilter\n");
-	if (StreamdevClientSetup.StreamFilters 
-			&& ClientSocket.SetFilter(Pid, Tid, Mask, true)) {
-		return m_Filters->OpenFilter(Pid, Tid, Mask);
-	} else
+
+	if (!StreamdevClientSetup.StreamFilters)
 		return -1;
+
+
+	if (!ClientSocket.DataSocket(siLiveFilter)) {
+		if (ClientSocket.CreateDataConnection(siLiveFilter)) {
+			m_Filters->SetConnection(*ClientSocket.DataSocket(siLiveFilter));
+		} else {
+			isyslog("cStreamdevDevice::OpenFilter: connect failed: %m");
+			return -1;
+		}
+	}
+
+	if (ClientSocket.SetFilter(Pid, Tid, Mask, true))
+		return m_Filters->OpenFilter(Pid, Tid, Mask);
+
+	return -1;
 }
 #endif
 
