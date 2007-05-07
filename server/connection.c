@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.c,v 1.9 2007/05/07 11:43:23 schmirl Exp $
+ *  $Id: connection.c,v 1.10 2007/05/07 12:25:11 schmirl Exp $
  */
  
 #include "server/connection.h"
@@ -100,6 +100,12 @@ bool cServerConnection::Respond(const char *Message, bool Last, ...)
 	va_start(ap, Last);
 	length = vasprintf(&buffer, Message, ap);
 	va_end(ap);
+
+	if (length < 0) {
+		esyslog("ERROR: streamdev: buffer allocation failed (%s) for %s:%d",
+				m_Protocol, RemoteIp().c_str(), RemotePort());
+		return false;
+	}
 
 	if (m_WriteBytes + length + 2 > sizeof(m_WriteBuffer)) {
 		esyslog("ERROR: streamdev: output buffer overflow (%s) for %s:%d", 
