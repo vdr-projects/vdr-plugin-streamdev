@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.c,v 1.8 2007/01/15 12:00:19 schmirl Exp $
+ *  $Id: connection.c,v 1.9 2007/05/07 11:43:23 schmirl Exp $
  */
  
 #include "server/connection.h"
@@ -104,6 +104,7 @@ bool cServerConnection::Respond(const char *Message, bool Last, ...)
 	if (m_WriteBytes + length + 2 > sizeof(m_WriteBuffer)) {
 		esyslog("ERROR: streamdev: output buffer overflow (%s) for %s:%d", 
 		        m_Protocol, RemoteIp().c_str(), RemotePort());
+		free(buffer);
 		return false;
 	}
 	Dprintf("OUT: |%s|\n", buffer);
