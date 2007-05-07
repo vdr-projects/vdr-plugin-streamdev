@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.12 2007/04/24 11:24:38 schmirl Exp $
+ *  $Id: device.c,v 1.13 2007/05/07 12:18:18 schmirl Exp $
  */
  
 #include "client/device.h"
@@ -222,6 +222,10 @@ bool cStreamdevDevice::GetTSPacket(uchar *&Data) {
 		// simple disconnect detection
 		static int m_TSFails = 0;
 		if (!Data) {
+			LOCK_THREAD;
+			if(!ClientSocket.DataSocket(siLive)) {
+				return false; // triggers CloseDvr() + OpenDvr() in cDevice
+                        }
 			cPoller Poller(*ClientSocket.DataSocket(siLive));
 			errno = 0;
 			if (Poller.Poll() && !errno) {
@@ -278,11 +282,17 @@ bool cStreamdevDevice::Init(void) {
 }
 
 bool cStreamdevDevice::ReInit(void) {
+	if(m_Device) {
+		m_Device->Lock();
+		m_Device->m_Filters->SetConnection(-1);
+		m_Device->m_Pids = 0;
+	}
 	ClientSocket.Quit();
 	ClientSocket.Reset();
 	if (m_Device != NULL) {
-		DELETENULL(m_Device->m_TSBuffer);
+		//DELETENULL(m_Device->m_TSBuffer);
 		DELETENULL(m_Device->m_Assembler);
+		m_Device->Unlock();
 	}
 	return StreamdevClientSetup.StartClient ? Init() : true;
 }
