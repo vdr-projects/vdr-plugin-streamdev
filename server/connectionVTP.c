@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.13 2007/04/26 06:25:13 schmirl Exp $
+ *  $Id: connectionVTP.c,v 1.14 2007/05/09 09:12:42 schmirl Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -691,6 +691,8 @@ bool cConnectionVTP::CmdPORT(char *Opts)
 		return Respond(551, "Couldn't open data connection");
 	}
 
+	if (!m_LiveSocket->SetDSCP())
+		LOG_ERROR_STR("unable to set DSCP sockopt");
 	if (m_LiveStreamer)
 		m_LiveStreamer->Start(m_LiveSocket);
 

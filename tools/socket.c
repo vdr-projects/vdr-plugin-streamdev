@@ -6,6 +6,15 @@
 #include <errno.h>
 #include <fcntl.h>
 
+// default class: best effort
+#define DSCP_BE    0
+// gold class (video): assured forwarding 4 with lowest drop precedence
+#define DSCP_AF41 34 << 2
+// premium class (voip): expedited forwarding
+#define DSCP_EF   46 << 2
+// actual DSCP value used
+#define STREAMDEV_DSCP DSCP_AF41
+
 cTBSocket::cTBSocket(int Type) {
 	memset(&m_LocalAddr, 0, sizeof(m_LocalAddr));
 	memset(&m_RemoteAddr, 0, sizeof(m_RemoteAddr));
@@ -140,4 +149,9 @@ bool cTBSocket::Shutdown(int how) {
 		ERRNUL(EBADF);
 
 	return ::shutdown(*this, how) != -1;
+}
+
+bool cTBSocket::SetDSCP(void) {
+	int dscp = STREAMDEV_DSCP;
+	return ::setsockopt(*this, SOL_IP, IP_TOS, &dscp, sizeof(dscp)) != -1;
 }

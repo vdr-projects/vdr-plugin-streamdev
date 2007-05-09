@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.c,v 1.11 2007/04/16 11:01:02 schmirl Exp $
+ *  $Id: connectionHTTP.c,v 1.12 2007/05/09 09:12:42 schmirl Exp $
  */
 
 #include <ctype.h>
@@ -71,6 +71,8 @@ bool cConnectionHTTP::ProcessRequest(void)
 				device->SwitchChannel(m_Channel, false);
 				if (m_LiveStreamer->SetChannel(m_Channel, m_StreamType, m_Apid)) {
 					m_LiveStreamer->SetDevice(device);
+					if (!SetDSCP())
+						LOG_ERROR_STR("unable to set DSCP sockopt");
 					if (m_StreamType == stES && (m_Apid != 0 || ISRADIO(m_Channel))) {
 						return Respond("HTTP/1.0 200 OK")
 						    && Respond("Content-Type: audio/mpeg")

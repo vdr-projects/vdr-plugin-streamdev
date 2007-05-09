@@ -68,6 +68,9 @@ public:
 	   an appropriate value. */
 	virtual bool Accept(const cTBSocket &Listener);
 
+	/* Sets DSCP sockopt */
+	bool SetDSCP(void);
+
 	/* LocalPort() returns the port number this socket is connected to locally.
 	   The result is undefined for a non-open socket. */
 	int LocalPort(void) const { return ntohs(m_LocalAddr.sin_port); }
