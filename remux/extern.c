@@ -118,7 +118,12 @@ void cTSExt::Action(void)
 
 			if (FD_ISSET(m_Outpipe, &rfds)) {
 				int result;
-				if ((result = m_ResultBuffer->Read(m_Outpipe)) == -1) {
+				//Read returns 0 if buffer full or EOF
+				bool bufferFull = m_ResultBuffer->Free() <= 0; //Free may be < 0
+				while ((result = m_ResultBuffer->Read(m_Outpipe)) == 0 && bufferFull)
+					dsyslog("streamdev-server: buffer full while reading from externremux");
+
+				if (result == -1) {
 					if (errno != EINTR) {
 						LOG_ERROR_STR("read failed");
 						m_Active = false;
@@ -149,7 +154,7 @@ cExternRemux::cExternRemux(int VPid, const int *APids, const int *Dpids, const i
 		m_ResultBuffer(new cRingBufferLinear(WRITERBUFSIZE, TS_SIZE * 2)),
 		m_Remux(new cTSExt(m_ResultBuffer))
 {
-	m_ResultBuffer->SetTimeouts(0, 100);
+	m_ResultBuffer->SetTimeouts(500, 100);
 }
 
 cExternRemux::~cExternRemux()
