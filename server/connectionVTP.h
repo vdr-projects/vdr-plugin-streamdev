@@ -23,7 +23,7 @@ private:
 	cStreamdevFilterStreamer *m_FilterStreamer;
 
 	char                   *m_LastCommand;
-	bool                    m_NoTSPIDS;
+	eStreamType             m_StreamType;
 
 	// Members adopted for SVDRP
 	cRecordings Recordings;
