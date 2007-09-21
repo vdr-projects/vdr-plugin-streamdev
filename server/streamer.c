@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.c,v 1.15 2007/04/02 10:32:34 schmirl Exp $
+ *  $Id: streamer.c,v 1.16 2007/09/21 11:45:53 schmirl Exp $
  */
  
 #include <vdr/ringbuffer.h>
@@ -141,6 +141,8 @@ void cStreamdevStreamer::Action(void)
 			int count = Put(block, got);
 			if (count)
 				m_RingBuffer->Del(count);
+			else
+				cCondWait::SleepMs(100);
 		}
 	}
 }
