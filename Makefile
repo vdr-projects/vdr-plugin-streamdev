@@ -1,7 +1,7 @@
 #
 # Makefile for a Video Disk Recorder plugin
 #
-# $Id: Makefile,v 1.8 2007/04/16 11:01:02 schmirl Exp $
+# $Id: Makefile,v 1.9 2008/02/11 16:13:46 schmirl Exp $
 
 # The official name of this plugin.
 # This name will be used in the '-P...' option of VDR to load the plugin.
@@ -85,8 +85,10 @@ ifeq ($(shell test -f $(VDRDIR)/sections.c ; echo $$?),0)
   DEFINES += -DHAVE_AUTOPID
 endif
 
-libdvbmpeg/libdvbmpegtools.a: libdvbmpeg/*.c libdvbmpeg/*.cc libdvbmpeg/*.h libdvbmpeg/*.hh
-	make -C ./libdvbmpeg libdvbmpegtools.a
+### The main target:
+
+.PHONY: all dist clean
+all: libvdr-$(PLUGIN)-client.so libvdr-$(PLUGIN)-server.so
 
 ### Implicit rules:
 
@@ -113,7 +115,9 @@ endif
 
 ### Targets:
 
-all: libvdr-$(PLUGIN)-client.so libvdr-$(PLUGIN)-server.so
+libdvbmpeg/libdvbmpegtools.a: libdvbmpeg/*.c libdvbmpeg/*.cc libdvbmpeg/*.h libdvbmpeg/*.hh
+	make -C ./libdvbmpeg libdvbmpegtools.a
+
 
 libvdr-$(PLUGIN)-client.so: $(CLIENTOBJS) $(COMMONOBJS) libdvbmpeg/libdvbmpegtools.a
 libvdr-$(PLUGIN)-server.so: $(SERVEROBJS) $(COMMONOBJS) libdvbmpeg/libdvbmpegtools.a
