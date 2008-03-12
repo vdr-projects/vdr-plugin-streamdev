@@ -2060,7 +2060,11 @@ void split_mpg(char *name, uint64_t size)
 	if (break_up_filename(name,base_name,path,ext) < 0) exit(1);
 
 
+#ifdef __FreeBSD__
+	if ( (fdin = open(name, O_RDONLY)) < 0){
+#else
 	if ( (fdin = open(name, O_RDONLY|O_LARGEFILE)) < 0){
+#endif
 		fprintf(stderr,"Can't open %s\n",name);
 		exit(1);
 	}
@@ -2101,8 +2105,12 @@ void split_mpg(char *name, uint64_t size)
 		sprintf(new_name,"%s-%03d.%s",base_name,i,ext);
 		printf("writing %s\n",new_name);
 
+#ifdef __FreeBSD__
+		if ( (fdout = open(new_name,O_WRONLY|O_CREAT|O_TRUNC,
+#else
 		if ( (fdout = open(new_name,O_WRONLY|O_CREAT|O_TRUNC
 				   |O_LARGEFILE,
+#endif
 				   S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|
 				   S_IROTH|S_IWOTH)) < 0){
 			fprintf(stderr,"Can't open %s\n",new_name);
@@ -2114,8 +2122,12 @@ void split_mpg(char *name, uint64_t size)
 	sprintf(new_name,"%s-%03d.%s",base_name,i,ext);
 	printf("writing %s\n",new_name);
 
+#ifdef __FreeBSD__
+	if ( (fdout = open(new_name,O_WRONLY|O_CREAT|O_TRUNC,
+#else
 	if ( (fdout = open(new_name,O_WRONLY|O_CREAT|O_TRUNC
 			   |O_LARGEFILE,
+#endif
 			   S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|
 			   S_IROTH|S_IWOTH)) < 0){
 		fprintf(stderr,"Can't open %s\n",new_name);
@@ -2144,7 +2156,11 @@ void cut_mpg(char *name, uint64_t size)
 	if (break_up_filename(name,base_name,path,ext) < 0) exit(1);
 
 
+#ifdef __FreeBSD__
+	if ( (fdin = open(name, O_RDONLY)) < 0){
+#else
 	if ( (fdin = open(name, O_RDONLY|O_LARGEFILE)) < 0){
+#endif
 		fprintf(stderr,"Can't open %s\n",name);
 		exit(1);
 	}
@@ -2182,8 +2198,12 @@ void cut_mpg(char *name, uint64_t size)
 	sprintf(new_name,"%s-1.%s",base_name,ext);
 	printf("writing %s\n",new_name);
 
+#ifdef __FreeBSD__
+	if ( (fdout = open(new_name,O_WRONLY|O_CREAT|O_TRUNC,
+#else
 	if ( (fdout = open(new_name,O_WRONLY|O_CREAT|O_TRUNC
 			   |O_LARGEFILE,
+#endif
 			   S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|
 			   S_IROTH|S_IWOTH)) < 0){
 		fprintf(stderr,"Can't open %s\n",new_name);
@@ -2195,8 +2215,12 @@ void cut_mpg(char *name, uint64_t size)
 	sprintf(new_name,"%s-2.%s",base_name,ext);
 	printf("writing %s\n",new_name);
 
+#ifdef __FreeBSD__
+	if ( (fdout = open(new_name,O_WRONLY|O_CREAT|O_TRUNC,
+#else
 	if ( (fdout = open(new_name,O_WRONLY|O_CREAT|O_TRUNC
 			   |O_LARGEFILE,
+#endif
 			   S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|
 			   S_IROTH|S_IWOTH)) < 0){
 		fprintf(stderr,"Can't open %s\n",new_name);

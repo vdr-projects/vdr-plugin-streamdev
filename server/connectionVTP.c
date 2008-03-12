@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.15 2007/09/21 12:45:31 schmirl Exp $
+ *  $Id: connectionVTP.c,v 1.16 2008/03/12 09:36:27 schmirl Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -186,7 +186,11 @@ bool cLSTEHandler::Next(bool &Last)
 	case Event:
 		if (m_Event != NULL) {
 			m_State = Title;
+#ifdef __FreeBSD__
+			return m_Client->Respond(-215, "E %u %d %d %X", m_Event->EventID(),
+#else
 			return m_Client->Respond(-215, "E %u %ld %d %X", m_Event->EventID(),
+#endif
 			                         m_Event->StartTime(), m_Event->Duration(), 
 			                         m_Event->TableID());
 		} else {
@@ -225,7 +229,11 @@ bool cLSTEHandler::Next(bool &Last)
 	case Vps:
 		m_State = EndEvent;
 		if (m_Event->Vps())
+#ifdef __FreeBSD__
+			return m_Client->Respond(-215, "V %d", m_Event->Vps());
+#else
 			return m_Client->Respond(-215, "V %ld", m_Event->Vps());
+#endif
 		else
 			return Next(Last);
 		break;

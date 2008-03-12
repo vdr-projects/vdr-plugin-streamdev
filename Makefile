@@ -1,7 +1,7 @@
 #
 # Makefile for a Video Disk Recorder plugin
 #
-# $Id: Makefile,v 1.9 2008/02/11 16:13:46 schmirl Exp $
+# $Id: Makefile,v 1.10 2008/03/12 09:36:27 schmirl Exp $
 
 # The official name of this plugin.
 # This name will be used in the '-P...' option of VDR to load the plugin.
@@ -116,7 +116,7 @@ endif
 ### Targets:
 
 libdvbmpeg/libdvbmpegtools.a: libdvbmpeg/*.c libdvbmpeg/*.cc libdvbmpeg/*.h libdvbmpeg/*.hh
-	make -C ./libdvbmpeg libdvbmpegtools.a
+	$(MAKE) -C ./libdvbmpeg libdvbmpegtools.a
 
 
 libvdr-$(PLUGIN)-client.so: $(CLIENTOBJS) $(COMMONOBJS) libdvbmpeg/libdvbmpegtools.a
@@ -136,4 +136,4 @@ dist: clean
 
 clean:
 	@-rm -f $(COMMONOBJS) $(CLIENTOBJS) $(SERVEROBJS) $(DEPFILE) *.so *.tgz core* *~
-	make -C ./libdvbmpeg clean
+	$(MAKE) -C ./libdvbmpeg clean

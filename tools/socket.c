@@ -153,5 +153,5 @@ bool cTBSocket::Shutdown(int how) {
 
 bool cTBSocket::SetDSCP(void) {
 	int dscp = STREAMDEV_DSCP;
-	return ::setsockopt(*this, SOL_IP, IP_TOS, &dscp, sizeof(dscp)) != -1;
+	return ::setsockopt(*this, IPPROTO_IP, IP_TOS, &dscp, sizeof(dscp)) != -1;
 }
