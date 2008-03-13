@@ -1,5 +1,5 @@
 /*
- *  $Id: socket.c,v 1.8 2007/04/24 10:57:34 schmirl Exp $
+ *  $Id: socket.c,v 1.9 2008/03/13 16:01:17 schmirl Exp $
  */
  
 #include <tools/select.h>
@@ -140,8 +140,14 @@ bool cClientSocket::CheckConnection(void) {
 		return false;
 	}
 
-	isyslog("Streamdev: Connected to server %s:%d using capabilities TSPIDS",
-	        RemoteIp().c_str(), RemotePort());
+	const char *Filters = "";
+#if VDRVERSNUM >= 10300
+	if(Command("CAPS FILTERS", 220))
+		Filters = ",FILTERS";
+#endif
+
+	isyslog("Streamdev: Connected to server %s:%d using capabilities TSPIDS%s",
+	        RemoteIp().c_str(), RemotePort(), Filters);
 	return true;
 }
 
