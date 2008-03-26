@@ -1,21 +1,70 @@
 Special thanks go to the following persons (if you think your name is missing
-here, please send an email to sascha@akv-soft.de):
+here, please send an email to vdrdev@schmirler.de):
+
+Sascha Volkenandt, the original author,
+  for this great plugin
 
 The Metzler Brothers
-  because I took a whole lot of code from their libdvbmpeg package
+  as a lot of code has been taken from their libdvbmpeg package
 
 Angelus (DOm)
   for providing italian language texts
-	for reporting problems with the Elchi-Patch
+  for reporting problems with the Elchi-Patch
 
 Michal
   for sending a patch to select the HTTP streamtype via remote
 
 Rolf Ahrenberg
   for providing finnish language texts
+  for adding externremux.sh commandline parameter
+  for silencing compiler warnings
+  for adding PAT, PMT, PCR and EIT to HTTP TS streams
+  for fixing a memory leak in buffer overflow situations
+  for adding a return code check to vasprintf()
+  for suggesting a fix of the Makefile's default target
+  for a TS PAT repacker based on Petri Laine's VDR TS recording patch
 
 Rantanen Teemu
   for providing vdr-incompletesections.diff
 
 Thomas Keil
-	for providing vdr-localchannelprovide.diff
+  for providing vdr-localchannelprovide.diff
+  for maintaining the plugin for a while
+
+Artur Skawina
+  for fixing an fd leak 
+
+Norad
+  for reporting a problem terminated externremux.sh children
+
+Udo Richter
+  for fixing streamdev-server shutdown
+  for speeding up cPluginStreamdevServer::Active()
+  for adapting to VDR 1.5.0 API
+
+greenman
+  for reporting that the log could get flooded on connection failures.
+
+Petri Hintukainen
+  for making section filtering work
+  for fixing a segfault with VDR 1.5
+  for fixing high CPU load when data stream is disconnected
+  for adding PAT, PMT and PCR to HTTP TS streams
+  for fixing a segfault / deadlock when shutting down
+  for fixing compiler warnings
+
+ollo
+  for suggesting support for WMM capable WLAN accesspoints
+ 
+vdr-freak
+  for reporting connection aborts when externremux ringbuffer is full
+
+alexw
+  for reporting client reconnect problems after a server restart
+  for a workaround for tuning problems with 1.5.x clients
+
+Olli Lammi
+  for fixing a busy wait when client isn't accepting data fast enough
+
+Joerg Pulz
+  for his FreeBSD compatibility patch
