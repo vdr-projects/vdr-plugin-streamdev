@@ -154,7 +154,15 @@ PS     Program Stream (SVCD, DVD like stream)
 ES     Elementary Stream (only Video, if available, otherwise only Audio)
 EXTERN Pass stream through external script (e.g. for converting with mencoder)
 
-If you leave the default port (3000), you can access the streams like this:
+Assuming that you leave the default port (3000), point your web browser to
+
+http://hostname:3000/
+
+You will be presented a menu with links to various channel lists, including M3U
+playlist formats.
+
+If you don't want to use the HTML menu or the M3U playlists, you can access the
+streams directly like this:
 
 http://hostname:3000/3
 http://hostname:3000/S19.2E-0-12480-898
@@ -172,6 +180,11 @@ the ES format explicitly if you want to listen to radio channels. Play them
 back i.e. with mpg123.
 
 mpg123 http://hostname:3000/ES/200
+
+With 'EXTERN' you can also add a parameter which is passed as argument to the
+externremux script.
+
+http://hostname:3000/EXTERN;some_parameter/3
 
 3.2 Usage VDR-to-VDR server:
 ----------------------------

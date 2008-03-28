@@ -1,6 +1,11 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- added possibility to pass parameter to externremux.sh (thanks to Rolf
+  Ahrenberg)
+- use HTTP host header in absolute URLs for DNAT / reverse proxy support
+- rewrite of the HTTP menu part
+- added M3U playlists (thanks to Petri Hinutkainen)
 - enable section filtering only with compatible clients (thanks to Petri
   Hintukainen)
 - fixed compiler warning

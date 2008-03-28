@@ -3,6 +3,7 @@
 
 #include "remux/tsremux.h"
 #include <vdr/ringbuffer.h>
+#include <string>
 
 extern const char *g_ExternRemux;
 
@@ -14,7 +15,7 @@ private:
 	cTSExt            *m_Remux;
 
 public:
-	cExternRemux(int VPid, const int *APids, const int *Dpids, const int *SPids);
+	cExternRemux(int VPid, const int *APids, const int *Dpids, const int *SPids, std::string Parameter);
 	virtual ~cExternRemux();
 	
 	int Put(const uchar *Data, int Count);

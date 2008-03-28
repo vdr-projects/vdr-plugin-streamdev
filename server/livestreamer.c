@@ -323,9 +323,10 @@ void cStreamdevPatFilter::Process(u_short Pid, u_char Tid, const u_char *Data, i
 
 // --- cStreamdevLiveStreamer -------------------------------------------------
 
-cStreamdevLiveStreamer::cStreamdevLiveStreamer(int Priority):
+cStreamdevLiveStreamer::cStreamdevLiveStreamer(int Priority, std::string Parameter):
 		cStreamdevStreamer("streamdev-livestreaming"),
 		m_Priority(Priority),
+		m_Parameter(Parameter),
 		m_NumPids(0),
 		m_StreamType(stTSPIDS),
 		m_Channel(NULL),
@@ -488,7 +489,7 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 
 	case stExtern:
 		m_ExtRemux = new cExternRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(),
-		                              m_Channel->Spids());
+		                              m_Channel->Spids(), m_Parameter);
 		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 
 	case stTSPIDS:

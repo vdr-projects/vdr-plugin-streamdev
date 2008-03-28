@@ -23,6 +23,7 @@ Rolf Ahrenberg
   for adding a return code check to vasprintf()
   for suggesting a fix of the Makefile's default target
   for a TS PAT repacker based on Petri Laine's VDR TS recording patch
+  for making it possible to pass parameters to externremux.sh
 
 Rantanen Teemu
   for providing vdr-incompletesections.diff
@@ -52,6 +53,7 @@ Petri Hintukainen
   for adding PAT, PMT and PCR to HTTP TS streams
   for fixing a segfault / deadlock when shutting down
   for fixing compiler warnings
+  for adding M3U playlists
 
 ollo
   for suggesting support for WMM capable WLAN accesspoints
