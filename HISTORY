@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+2008-03-31: Version 0.3.4
+
 - added possibility to pass parameter to externremux.sh (thanks to Rolf
   Ahrenberg)
 - use HTTP host header in absolute URLs for DNAT / reverse proxy support
