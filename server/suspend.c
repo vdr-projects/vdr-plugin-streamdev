@@ -1,5 +1,5 @@
 /*
- *  $Id: suspend.c,v 1.1 2004/12/30 22:44:21 lordjaxom Exp $
+ *  $Id: suspend.c,v 1.2 2008/04/07 14:27:31 schmirl Exp $
  */
  
 #include "server/suspend.h"
@@ -7,9 +7,7 @@
 #include "common.h"
 
 cSuspendLive::cSuspendLive(void)
-#if VDRVERSNUM >= 10300
 		: cThread("Streamdev: server suspend")
-#endif
 {
 }
 
@@ -33,19 +31,11 @@ void cSuspendLive::Stop(void) {
 }
 
 void cSuspendLive::Action(void) {
-#if VDRVERSNUM < 10300
-	isyslog("Streamdev: Suspend Live thread started (pid = %d)", getpid());
-#endif
-
 	m_Active = true;
 	while (m_Active) {
 		DeviceStillPicture(suspend_mpg, sizeof(suspend_mpg));
 		usleep(100000);
 	}
-
-#if VDRVERSNUM < 10300
-	isyslog("Streamdev: Suspend Live thread stopped");
-#endif
 }
 
 bool cSuspendCtl::m_Active = false;

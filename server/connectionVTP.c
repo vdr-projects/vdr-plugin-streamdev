@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.17 2008/03/13 16:01:18 schmirl Exp $
+ *  $Id: connectionVTP.c,v 1.18 2008/04/07 14:27:30 schmirl Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -605,7 +605,6 @@ bool cConnectionVTP::CmdCAPS(char *Opts)
 		return Respond(220, "Capability \"%s\" accepted", Opts);
 	}
 
-#if VDRVERSNUM >= 10300
 	//
 	// Deliver section filters data in separate, channel-independent data stream
 	//
@@ -613,7 +612,6 @@ bool cConnectionVTP::CmdCAPS(char *Opts)
 		m_FiltersSupport = true;
 		return Respond(220, "Capability \"%s\" accepted", Opts);
 	}
-#endif
 
 	return Respond(561, "Capability \"%s\" not known", Opts);
 }
@@ -648,13 +646,8 @@ bool cConnectionVTP::CmdPORT(char *Opts)
 	if (ep == Opts || !isspace(*ep))
 		return Respond(500, "Use: PORT Id Destination");
 	
-#if VDRVERSNUM >= 10300
 	if (id != siLive && id != siLiveFilter)
 		return Respond(501, "Wrong connection id %d", id);
-#else
-	if (id != siLive)
-		return Respond(501, "Wrong connection id %d", id);
-#endif
 	
 	Opts = skipspace(ep);
 	n = 0;
@@ -681,7 +674,6 @@ bool cConnectionVTP::CmdPORT(char *Opts)
 
 	isyslog("Streamdev: Setting data connection to %s:%d", dataip, dataport);
 
-#if VDRVERSNUM >= 10300
 	if (id == siLiveFilter) {
 		m_FiltersSupport = true;
 		if(m_FilterStreamer)
@@ -703,7 +695,6 @@ bool cConnectionVTP::CmdPORT(char *Opts)
 
 		return Respond(220, "Port command ok, data connection opened");
 	}
-#endif
 
 	if(m_LiveSocket && m_LiveStreamer)
 		m_LiveStreamer->Stop();
@@ -746,14 +737,12 @@ bool cConnectionVTP::CmdTUNE(char *Opts)
 	if(m_LiveSocket)
 		m_LiveStreamer->Start(m_LiveSocket);
 	
-#if VDRVERSNUM >= 10300
 	if(m_FiltersSupport) {
 		if(!m_FilterStreamer)
 			m_FilterStreamer = new cStreamdevFilterStreamer;
 		m_FilterStreamer->SetDevice(dev);
 		//m_FilterStreamer->SetChannel(chan);
 	}
-#endif
 
 	return Respond(220, "Channel tuned");
 }
@@ -788,7 +777,6 @@ bool cConnectionVTP::CmdDELP(char *Opts)
 
 bool cConnectionVTP::CmdADDF(char *Opts) 
 {
-#if VDRVERSNUM >= 10300
 	int pid, tid, mask;
 	char *ep;
 
@@ -810,14 +798,10 @@ bool cConnectionVTP::CmdADDF(char *Opts)
 	return m_FilterStreamer->SetFilter(pid, tid, mask, true)
 			? Respond(220, "Filter %d transferring", pid)
 			: Respond(560, "Filter %d not available", pid);
-#else
-	return Respond(500, "ADDF known but unimplemented with VDR < 1.3.0");
-#endif
 }
 
 bool cConnectionVTP::CmdDELF(char *Opts) 
 {
-#if VDRVERSNUM >= 10307
 	int pid, tid, mask;
 	char *ep;
 	
@@ -838,9 +822,6 @@ bool cConnectionVTP::CmdDELF(char *Opts)
 
 	m_FilterStreamer->SetFilter(pid, tid, mask, false);
 	return Respond(220, "Filter %d stopped", pid);
-#else
-	return Respond(500, "DELF known but unimplemented with VDR < 1.3.0");
-#endif
 }
 
 bool cConnectionVTP::CmdABRT(char *Opts) 
@@ -857,12 +838,10 @@ bool cConnectionVTP::CmdABRT(char *Opts)
 		DELETENULL(m_LiveStreamer); 
 		DELETENULL(m_LiveSocket);
 		break;
-#if VDRVERSNUM >= 10300
 	case siLiveFilter:
 		DELETENULL(m_FilterStreamer);
 		DELETENULL(m_FilterSocket);
 		break;
-#endif
 	default:
 		return Respond(501, "Wrong connection id %d", id);
 		break;

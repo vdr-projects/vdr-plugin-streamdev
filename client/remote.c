@@ -1,5 +1,5 @@
 /*
- *  $Id: remote.c,v 1.4 2005/04/24 16:26:14 lordjaxom Exp $
+ *  $Id: remote.c,v 1.5 2008/04/07 14:27:28 schmirl Exp $
  */
 
 #include <ctype.h>
@@ -196,16 +196,6 @@ cRemoteTimer::cRemoteTimer(const char *Text) {
 	m_IsValid = true;
 }
 
-#if VDRVERSNUM < 10300
-cRemoteTimer::cRemoteTimer(const cEventInfo *EventInfo) {
-	time_t tstart = EventInfo->GetTime();
-	time_t tstop = tstart + EventInfo->GetDuration() + Setup.MarginStop * 60;
-	tstart -= Setup.MarginStart * 60;
-	struct tm tm_r;
-	struct tm *time = localtime_r(&tstart, &tm_r);
-	const char *title = EventInfo->GetTitle();
-	cChannel *channel = Channels.GetByChannelID(EventInfo->GetChannelID(), true);
-#else
 cRemoteTimer::cRemoteTimer(const cEvent *Event) {
 	time_t tstart = Event->StartTime();
 	time_t tstop = tstart + Event->Duration() + Setup.MarginStop * 60;
@@ -214,7 +204,6 @@ cRemoteTimer::cRemoteTimer(const cEvent *Event) {
 	struct tm *time = localtime_r(&tstart, &tm_r);
 	const char *title = Event->Title();
 	cChannel *channel = Channels.GetByChannelID(Event->ChannelID(), true);
-#endif
 
 	m_IsValid   = true;
 	m_Index     = -1;

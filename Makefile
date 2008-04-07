@@ -1,7 +1,7 @@
 #
 # Makefile for a Video Disk Recorder plugin
 #
-# $Id: Makefile,v 1.12 2008/03/31 10:34:26 schmirl Exp $
+# $Id: Makefile,v 1.13 2008/04/07 14:27:27 schmirl Exp $
 
 # The official name of this plugin.
 # This name will be used in the '-P...' option of VDR to load the plugin.
@@ -16,11 +16,10 @@ VERSION = $(shell grep 'const char \*VERSION *=' common.c | awk '{ print $$5 }' 
 ### The C++ compiler and options:
 
 CXX      ?= g++
-CXXFLAGS ?= -fPIC -Wall -Woverloaded-virtual
+CXXFLAGS ?= -fPIC -g -O2 -Wall -Woverloaded-virtual -Wno-parentheses
 
 ### The directory environment:
 
-DVBDIR = ../../../../DVB
 VDRDIR = ../../..
 LIBDIR = ../../lib
 TMPDIR = /tmp
@@ -40,7 +39,7 @@ PACKAGE = vdr-$(ARCHIVE)
 
 ### Includes and Defines (add further entries here):
 
-INCLUDES += -I$(VDRDIR)/include -I$(DVBDIR)/include -I.
+INCLUDES += -I$(VDRDIR)/include -I.
 
 DEFINES += -D_GNU_SOURCE
 
@@ -67,22 +66,6 @@ SERVEROBJS = $(PLUGIN)-server.o \
 	
 ifdef DEBUG
 	DEFINES += -DDEBUG
-	CXXFLAGS += -g
-else
-	CXXFLAGS += -O2
-endif
-
-ifeq ($(shell test -f $(VDRDIR)/fontsym.h ; echo $$?),0)
-  DEFINES += -DHAVE_BEAUTYPATCH
-endif
-
-ifeq ($(shell test -f $(VDRDIR)/fontsym.c ; echo $$?),0)
-  DEFINES += -DHAVE_BEAUTYPATCH
-endif
-
-# HAVE_AUTOPID only applies if VDRVERSNUM < 10300
-ifeq ($(shell test -f $(VDRDIR)/sections.c ; echo $$?),0)
-  DEFINES += -DHAVE_AUTOPID
 endif
 
 ### The main target:
@@ -97,7 +80,7 @@ all: libvdr-$(PLUGIN)-client.so libvdr-$(PLUGIN)-server.so
 
 # Dependencies:
 
-MAKEDEP = g++ -MM -MG
+MAKEDEP = $(CXX) -MM -MG
 DEPFILE = .dependencies
 ifdef GCC3
 $(DEPFILE): Makefile
@@ -117,7 +100,6 @@ endif
 
 libdvbmpeg/libdvbmpegtools.a: libdvbmpeg/*.c libdvbmpeg/*.cc libdvbmpeg/*.h libdvbmpeg/*.hh
 	$(MAKE) -C ./libdvbmpeg libdvbmpegtools.a
-
 
 libvdr-$(PLUGIN)-client.so: $(CLIENTOBJS) $(COMMONOBJS) libdvbmpeg/libdvbmpegtools.a
 libvdr-$(PLUGIN)-server.so: $(SERVEROBJS) $(COMMONOBJS) libdvbmpeg/libdvbmpegtools.a

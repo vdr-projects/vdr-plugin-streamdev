@@ -1,5 +1,5 @@
 /*
- *  $Id: remote.h,v 1.2 2005/02/08 17:22:35 lordjaxom Exp $
+ *  $Id: remote.h,v 1.3 2008/04/07 14:27:28 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_REMOTE_H
@@ -8,11 +8,7 @@
 #include <vdr/config.h>
 #include <string>
 
-#if VDRVERSNUM < 10300
-class cEventInfo;
-#else
 class cEvent;
-#endif
 class cChannel;
 
 class cRemoteRecording: public cListObject {
@@ -76,11 +72,7 @@ private:
 
 public:
 	cRemoteTimer(const char *Text);
-#if VDRVERSNUM < 10300
-	cRemoteTimer(const cEventInfo *EventInfo);
-#else
 	cRemoteTimer(const cEvent *Event);
-#endif
 	cRemoteTimer(void);
 	~cRemoteTimer();
 

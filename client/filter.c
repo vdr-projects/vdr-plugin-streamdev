@@ -1,5 +1,5 @@
 /*
- *  $Id: filter.c,v 1.11 2007/04/24 11:23:16 schmirl Exp $
+ *  $Id: filter.c,v 1.12 2008/04/07 14:27:28 schmirl Exp $
  */
 
 #include "client/filter.h"
@@ -8,8 +8,6 @@
 #include "common.h"
 
 #include <vdr/device.h>
-
-#if VDRVERSNUM >= 10300
 
 // --- cStreamdevFilter ------------------------------------------------------
 
@@ -290,5 +288,3 @@ void cStreamdevFilters::Action(void) {
 	DELETENULL(m_TSBuffer);
 	dsyslog("StreamdevFilters::Action() ended");
 }
-
-#endif // VDRVERSNUM >= 10300

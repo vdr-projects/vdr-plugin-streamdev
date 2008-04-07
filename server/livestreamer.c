@@ -618,7 +618,6 @@ std::string cStreamdevLiveStreamer::Report(void)
 
 // --- cStreamdevFilterStreamer -------------------------------------------------
 
-#if VDRVERSNUM >= 10300
 cStreamdevFilterStreamer::cStreamdevFilterStreamer():
 		cStreamdevStreamer("streamdev-filterstreaming"),
 		m_Device(NULL),
@@ -720,5 +719,3 @@ void cStreamdevFilterStreamer::ChannelSwitch(const cDevice *Device, int ChannelN
 	}
 }
 #endif
-
-#endif // if VDRVERSNUM >= 10300

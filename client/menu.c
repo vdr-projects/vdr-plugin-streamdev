@@ -1,5 +1,5 @@
 /*
- *  $Id: menu.c,v 1.4 2005/03/12 12:54:19 lordjaxom Exp $
+ *  $Id: menu.c,v 1.5 2008/04/07 14:27:28 schmirl Exp $
  */
  
 #include <vdr/menuitems.h>
@@ -53,54 +53,6 @@ void cStreamdevMenu::SuspendServer(void) {
 		ERROR(tr("Couldn't suspend Server!"));
 }
 
-#if VDRVERSNUM < 10307
-// --- cMenuEditChanItem -----------------------------------------------------
-
-class cMenuEditChanItem : public cMenuEditIntItem {
-protected:
-  virtual void Set(void);
-public:
-  cMenuEditChanItem(const char *Name, int *Value);
-  virtual eOSState ProcessKey(eKeys Key);
-  };
-
-// --- cMenuEditDateItem -----------------------------------------------------
-
-class cMenuEditDateItem : public cMenuEditItem {
-protected:
-  time_t *value;
-  virtual void Set(void);
-public:
-  cMenuEditDateItem(const char *Name, time_t *Value);
-  virtual eOSState ProcessKey(eKeys Key);
-  };
-
-// --- cMenuEditDayItem ------------------------------------------------------
-
-class cMenuEditDayItem : public cMenuEditIntItem {
-protected:
-  static int days[];
-  int d;
-  virtual void Set(void);
-public:
-  cMenuEditDayItem(const char *Name, int *Value);
-  virtual eOSState ProcessKey(eKeys Key);
-  };
-
-// --- cMenuEditTimeItem -----------------------------------------------------
-
-class cMenuEditTimeItem : public cMenuEditItem {
-protected:
-  int *value;
-  int hh, mm;
-  int pos;
-  virtual void Set(void);
-public:
-  cMenuEditTimeItem(const char *Name, int *Value);
-  virtual eOSState ProcessKey(eKeys Key);
-  };
-#endif // VDRVERSNUM < 10307
-
 // --- cStreamdevMenuEditTimer -----------------------------------------------
 
 class cStreamdevMenuEditTimer : public cOsdMenu {
@@ -132,18 +84,12 @@ cStreamdevMenuEditTimer::cStreamdevMenuEditTimer(cRemoteTimer *Timer, bool New):
     if (New)
       m_Data.m_Active = 1;
     m_Channel = m_Data.Channel()->Number();
-#if VDRVERSNUM < 10300
-    Add(new cMenuEditBoolItem(tr("Active"),       &m_Data.m_Active));
-#else
 		Add(new cMenuEditBitItem( tr("Active"),       &m_Data.m_Active, tfActive));
-#endif
     Add(new cMenuEditChanItem(tr("Channel"),      &m_Channel));
     Add(new cMenuEditDayItem( tr("Day"),          &m_Data.m_Day));
     Add(new cMenuEditTimeItem(tr("Start"),        &m_Data.m_Start));
     Add(new cMenuEditTimeItem(tr("Stop"),         &m_Data.m_Stop));
-#if VDRVERSNUM >= 10300
 		Add(new cMenuEditBitItem( tr("VPS"),          &m_Data.m_Active, tfVps));
-#endif
     Add(new cMenuEditIntItem( tr("Priority"),     &m_Data.m_Priority, 0, 
 				MAXPRIORITY));
     Add(new cMenuEditIntItem( tr("Lifetime"),     &m_Data.m_Lifetime, 0, 
@@ -227,54 +173,15 @@ eOSState cStreamdevMenuEditTimer::ProcessKey(eKeys Key) {
 
 // --- cMenuWhatsOnItem ------------------------------------------------------
 
-#if VDRVERSNUM < 10300
-class cMenuWhatsOnItem : public cOsdItem {
-public:
-  const cEventInfo *eventInfo;
-#	ifdef HAVE_BEAUTYPATCH
-  cMenuWhatsOnItem(const cEventInfo *EventInfo, bool ShowProgressBar);
-  ~cMenuWhatsOnItem();
-  virtual void Display(int Offset= -1, eDvbColor FgColor = clrWhite, eDvbColor BgColor = clrBackground);
-protected:
-  cBitmap *progressBar;
-  bool showProgressBar;
-  float percent;
-private:
-  void DrawProgressBar(eDvbColor FgColor, eDvbColor BgColor);
-#	else
-  cMenuWhatsOnItem(const cEventInfo *EventInfo);
-#	endif
-};
-#else
 class cMenuWhatsOnItem : public cOsdItem {
 public:
   const cEvent *event;
   const cChannel *channel;
   cMenuWhatsOnItem(const cEvent *Event, cChannel *Channel); //, bool Now = false);
 };
-#endif
 
 // --- cMenuEvent ------------------------------------------------------------
 
-#if VDRVERSNUM < 10300
-class cMenuEvent : public cOsdMenu {
-private:
-  const cEventInfo *eventInfo;
-public:
-  cMenuEvent(const cEventInfo *EventInfo, bool CanSwitch = false);
-  cMenuEvent(bool Now);
-  virtual eOSState ProcessKey(eKeys Key);
-};
-#elif VDRVERSNUM < 10307
-class cMenuEvent : public cOsdMenu {
-private:
-  const cEvent *event;
-public:
-  cMenuEvent(const cEvent *Event, bool CanSwitch = false);
-  cMenuEvent(bool Now);
-  virtual eOSState ProcessKey(eKeys Key);
-};
-#else
 class cMenuEvent : public cOsdMenu {
 private:
   const cEvent *event;
@@ -283,58 +190,16 @@ public:
   virtual void Display(void);
   virtual eOSState ProcessKey(eKeys Key);
 };
-#endif
 
 // --- cStreamdevMenuWhatsOn -------------------------------------------------
 
 int cStreamdevMenuWhatsOn::m_CurrentChannel = 0;
-#if VDRVERSNUM < 10300
-const cEventInfo *cStreamdevMenuWhatsOn::m_ScheduleEventInfo = NULL;
-#else
 const cEvent *cStreamdevMenuWhatsOn::m_ScheduleEventInfo = NULL;
-#endif
-
-#if VDRVERSNUM < 10300
-static int CompareEventChannel(const void *p1, const void *p2) {
-  return (int)((*(const cEventInfo**)p1)->GetChannelNumber() 
-			- (*(const cEventInfo**)p2)->GetChannelNumber());
-}
-#endif
 
 cStreamdevMenuWhatsOn::cStreamdevMenuWhatsOn(const cSchedules *Schedules,
 		bool Now, int CurrentChannel):
 		cOsdMenu(Now ? tr("What's on now?") : tr("What's on next?"), CHNUMWIDTH, 
 				7, 6) {
-#if VDRVERSNUM < 10300
-	const cSchedule *Schedule = Schedules->First();
-	const cEventInfo **pArray = NULL;
-	int num = 0;
-
-	while (Schedule) {
-		pArray=(const cEventInfo**)realloc(pArray, (num + 1) * sizeof(cEventInfo*));
-		pArray[num] = Now ? Schedule->GetPresentEvent() 
-				: Schedule->GetFollowingEvent();
-		if (pArray[num]) {
-			cChannel *channel
-					= Channels.GetByChannelID(pArray[num]->GetChannelID(), true);
-			if (channel)
-				pArray[num++]->SetChannelNumber(channel->Number());
-		}
-		Schedule = Schedules->Next(Schedule);
-	}
-
-	qsort(pArray, num, sizeof(cEventInfo*), CompareEventChannel);
-	for (int a = 0; a < num; ++a) {
-		int channelnr = pArray[a]->GetChannelNumber();
-#	ifdef HAVE_BEAUTYPATCH
-		Add(new cMenuWhatsOnItem(pArray[a],Now), channelnr == CurrentChannel);
-#	else
-		Add(new cMenuWhatsOnItem(pArray[a]), channelnr == CurrentChannel);
-#	endif
-	}
-
-	free(pArray);
-#else
   for (cChannel *Channel = Channels.First(); Channel; 
 			Channel = Channels.Next(Channel)) {
   	if (!Channel->GroupSep()) {
@@ -349,35 +214,22 @@ cStreamdevMenuWhatsOn::cStreamdevMenuWhatsOn(const cSchedules *Schedules,
       }
     }
   }
-#endif
 	m_CurrentChannel = CurrentChannel;
 	SetHelp(Count() ? tr("Record") : NULL, Now ? tr("Next") : tr("Now"), 
 			tr("Schedule"), tr("Switch"));
 }
 
-#if VDRVERSNUM < 10300
-const cEventInfo *cStreamdevMenuWhatsOn::ScheduleEventInfo(void) {
-	const cEventInfo *ei = m_ScheduleEventInfo;
-	m_ScheduleEventInfo = NULL;
-	return ei;
-}
-#else
 const cEvent *cStreamdevMenuWhatsOn::ScheduleEventInfo(void) {
 	const cEvent *ei = m_ScheduleEventInfo;
 	m_ScheduleEventInfo = NULL;
 	return ei;
 }
-#endif
 
 eOSState cStreamdevMenuWhatsOn::Switch(void) {
 	cMenuWhatsOnItem *item = (cMenuWhatsOnItem*)Get(Current());
 	if (item) {
 		cChannel *channel 
-#if VDRVERSNUM < 10300
-				= Channels.GetByChannelID(item->eventInfo->GetChannelID(), true);
-#else
 				= Channels.GetByChannelID(item->event->ChannelID(), true);
-#endif
 		if (channel && cDevice::PrimaryDevice()->SwitchChannel(channel, true))
 			return osEnd;
 	}
@@ -389,11 +241,7 @@ eOSState cStreamdevMenuWhatsOn::Record(void) {
 	cMenuWhatsOnItem *item = (cMenuWhatsOnItem*)Get(Current());
 	if (item) {
 		cRemoteTimer *timer 
-#if VDRVERSNUM < 10300
-				= new cRemoteTimer(item->eventInfo);
-#else
 				= new cRemoteTimer(item->event);
-#endif
 		return AddSubMenu(new cStreamdevMenuEditTimer(timer));
 		// Load remote timers and see if timer exists before editing
 	}
@@ -414,13 +262,8 @@ eOSState cStreamdevMenuWhatsOn::ProcessKey(eKeys Key) {
 			{
 				cMenuWhatsOnItem *mi = (cMenuWhatsOnItem*)Get(Current());
 				if (mi) {
-#if VDRVERSNUM < 10300
-					m_ScheduleEventInfo = mi->eventInfo;
-					m_CurrentChannel = mi->eventInfo->GetChannelNumber();
-#else
 					m_ScheduleEventInfo = mi->event;
 					m_CurrentChannel = mi->channel->Number();
-#endif
 				}
 			}
 			break;
@@ -430,13 +273,8 @@ eOSState cStreamdevMenuWhatsOn::ProcessKey(eKeys Key) {
 
 		case kOk:
 			if (Count())
-#if VDRVERSNUM < 10300
-				return AddSubMenu(new cMenuEvent(
-						((cMenuWhatsOnItem*)Get(Current()))->eventInfo, true));
-#else
 				return AddSubMenu(new cMenuEvent(
 						((cMenuWhatsOnItem*)Get(Current()))->event, true));
-#endif
 			break;
 
 		default:
@@ -448,28 +286,16 @@ eOSState cStreamdevMenuWhatsOn::ProcessKey(eKeys Key) {
 
 // --- cMenuScheduleItem -----------------------------------------------------
 
-#if VDRVERSNUM < 10300
-class cMenuScheduleItem : public cOsdItem {
-public:
-  const cEventInfo *eventInfo;
-  cMenuScheduleItem(const cEventInfo *EventInfo);
-};
-#else
 class cMenuScheduleItem : public cOsdItem {
 public:
   const cEvent *event;
   cMenuScheduleItem(const cEvent *Event);
 };
-#endif
 
 // --- cStreamdevMenuSchedule ------------------------------------------------
 
 cStreamdevMenuSchedule::cStreamdevMenuSchedule(void):
-#if VDRVERSNUM < 10300
-		cOsdMenu("", 6, 6)
-#else
 		cOsdMenu("", 7, 6, 4)
-#endif
 {
 	m_Now          = false;
 	m_Next         = false;
@@ -478,11 +304,7 @@ cStreamdevMenuSchedule::cStreamdevMenuSchedule(void):
 
 	cChannel *channel = Channels.GetByNumber(cDevice::CurrentChannel());
 	if (channel) {
-#if VDRVERSNUM < 10300
-		m_Schedules = cSIProcessor::Schedules(m_Lock);
-#else
 		m_Schedules = cSchedules::Schedules(m_Lock);
-#endif
 		PrepareSchedule(channel);
 		SetHelp(Count() ? tr("Record") : NULL, tr("Now"), tr("Next"));
 	}
@@ -491,46 +313,7 @@ cStreamdevMenuSchedule::cStreamdevMenuSchedule(void):
 cStreamdevMenuSchedule::~cStreamdevMenuSchedule() {
 }
 
-#if VDRVERSNUM < 10307
-static int CompareEventTime(const void *p1, const void *p2) {
-#if VDRVERSNUM < 10300
-  return (int)((*(cEventInfo **)p1)->GetTime() 
-			- (*(cEventInfo **)p2)->GetTime());
-#else
-  return (int)((*(cEvent**)p1)->StartTime() 
-			- (*(cEvent**)p2)->StartTime());
-#endif
-}
-#endif
-
 void cStreamdevMenuSchedule::PrepareSchedule(cChannel *Channel) {
-#if VDRVERSNUM < 10300
-	cTBString buffer;
-	Clear();
-	buffer.Format(tr("Schedule - %s"), Channel->Name());
-	SetTitle(buffer);
-	if (m_Schedules) {
-		const cSchedule *Schedule=m_Schedules->GetSchedule(Channel->GetChannelID());
-		if (Schedule) {
-			int num = Schedule->NumEvents();
-			const cEventInfo **pArray = MALLOC(const cEventInfo*, num);
-			if (pArray) {
-				time_t now = time(NULL);
-				int numreal = 0;
-				for (int a = 0; a < num; ++a) {
-					const cEventInfo *EventInfo = Schedule->GetEventNumber(a);
-					if (EventInfo->GetTime() + EventInfo->GetDuration() > now)
-						pArray[numreal++] = EventInfo;
-				}
-
-				qsort(pArray, numreal, sizeof(cEventInfo*), CompareEventTime);
-				for (int a = 0; a < numreal; ++a)
-					Add(new cMenuScheduleItem(pArray[a]));
-				free(pArray);
-			}
-		}
-	}
-#else
 	Clear();
   char *buffer = NULL;
   asprintf(&buffer, tr("Schedule - %s"), Channel->Name());
@@ -547,7 +330,6 @@ void cStreamdevMenuSchedule::PrepareSchedule(cChannel *Channel) {
             }
         }
      }
-#endif
 }
 
 eOSState cStreamdevMenuSchedule::Switch(void) {
@@ -563,11 +345,7 @@ eOSState cStreamdevMenuSchedule::Record(void) {
 	cMenuScheduleItem *item = (cMenuScheduleItem*)Get(Current());
 	if (item) {
 		cRemoteTimer *timer 
-#if VDRVERSNUM < 10300
-				= new cRemoteTimer(item->eventInfo);
-#else
 				= new cRemoteTimer(item->event);
-#endif
 		return AddSubMenu(new cStreamdevMenuEditTimer(timer));
 		// Load remote timers and see if timer exists before editing
 	}
@@ -588,14 +366,8 @@ eOSState cStreamdevMenuSchedule::ProcessKey(eKeys Key) {
 					int channelnr = 0;
 					if (Count()) {
 						cChannel *channel 
-#if VDRVERSNUM < 10300
-								= Channels.GetByChannelID(
-								((cMenuScheduleItem*)Get(Current()))->eventInfo->GetChannelID(),
-								true);
-#else
 								= Channels.GetByChannelID(
 								((cMenuScheduleItem*)Get(Current()))->event->ChannelID(), true);
-#endif
 						if (channel)
 							channelnr = channel->Number();
 					}
@@ -622,13 +394,8 @@ eOSState cStreamdevMenuSchedule::ProcessKey(eKeys Key) {
 
 		case kOk:
 			if (Count())
-#if VDRVERSNUM < 10300
-				return AddSubMenu(new cMenuEvent(
-						((cMenuScheduleItem*)Get(Current()))->eventInfo, m_OtherChannel));
-#else
 				return AddSubMenu(new cMenuEvent(
 						((cMenuScheduleItem*)Get(Current()))->event, m_OtherChannel));
-#endif
 			break;
 
 		default:
@@ -637,19 +404,11 @@ eOSState cStreamdevMenuSchedule::ProcessKey(eKeys Key) {
 	} else if (!HasSubMenu()) {
 		m_Now = false;
 		m_Next = false;
-#if VDRVERSNUM < 10300
-		const cEventInfo *ei 
-#else
 		const cEvent *ei
-#endif
 				= cStreamdevMenuWhatsOn::ScheduleEventInfo();
 		if (ei) {
 			cChannel *channel 
-#if VDRVERSNUM < 10300
-					= Channels.GetByChannelID(ei->GetChannelID(), true);
-#else
 					= Channels.GetByChannelID(ei->ChannelID(), true);
-#endif
 			if (channel) {
 				PrepareSchedule(channel);
 				if (channel->Number() != cDevice::CurrentChannel()) {
@@ -753,10 +512,8 @@ cStreamdevMenuRecordings::cStreamdevMenuRecordings(const char *Base, int Level,
 			return;
 	}
 
-#if VDRVERSNUM >= 10307
 	STATUS(NULL);
 	FLUSH();
-#endif
 
 	SetHelpKeys();
 }

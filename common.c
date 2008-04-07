@@ -1,5 +1,5 @@
 /*
- *  $Id: common.c,v 1.6 2008/03/31 10:34:26 schmirl Exp $
+ *  $Id: common.c,v 1.7 2008/04/07 14:27:27 schmirl Exp $
  */
  
 #include <vdr/channels.h>
@@ -11,7 +11,7 @@
 
 using namespace std;
 
-const char *VERSION = "0.3.4-CVS";
+const char *VERSION = "0.4.0-pre";
 
 const char *StreamTypes[st_Count] = {
 	"TS",
@@ -113,16 +113,7 @@ void cStreamdevMenuSetupPage::AddCategory(const char *Title) {
 
   cOsdItem *item = new cOsdItem(buffer);
   free(buffer);
-
-#if VDRVERSNUM < 10307
-#	ifdef HAVE_BEAUTYPATCH
-  item->SetColor(clrScrolLine, clrBackground);
-#	else
-  item->SetColor(clrCyan, clrBackground);
-#	endif
-#else
-	item->SetSelectable(false);
-#endif
+  item->SetSelectable(false);
   Add(item);
 }
 	

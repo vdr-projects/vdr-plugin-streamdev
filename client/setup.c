@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.c,v 1.2 2005/02/08 15:34:38 lordjaxom Exp $
+ *  $Id: setup.c,v 1.3 2008/04/07 14:27:28 schmirl Exp $
  */
  
 #include <vdr/menuitems.h>
@@ -13,9 +13,7 @@ cStreamdevClientSetup StreamdevClientSetup;
 cStreamdevClientSetup::cStreamdevClientSetup(void) {
 	StartClient   = false;
 	RemotePort    = 2004;
-#if VDRVERSNUM >= 10300
 	StreamFilters = false;
-#endif
 	SyncEPG       = false;
 	strcpy(RemoteIp, "");
 }
@@ -29,9 +27,7 @@ bool cStreamdevClientSetup::SetupParse(const char *Name, const char *Value) {
 			strcpy(RemoteIp, Value);
 	}
 	else if (strcmp(Name, "RemotePort") == 0)    RemotePort = atoi(Value);
-#if VDRVERSNUM >= 10300
 	else if (strcmp(Name, "StreamFilters") == 0) StreamFilters = atoi(Value);
-#endif
 	else if (strcmp(Name, "SyncEPG") == 0)       SyncEPG = atoi(Value);
 	else return false;
 	return true;
@@ -43,9 +39,7 @@ cStreamdevClientMenuSetupPage::cStreamdevClientMenuSetupPage(void) {
 	AddBoolEdit (tr("Start Client"),       m_NewSetup.StartClient);
 	AddIpEdit   (tr("Remote IP"),          m_NewSetup.RemoteIp);
 	AddShortEdit(tr("Remote Port"),        m_NewSetup.RemotePort);
-#if VDRVERSNUM >= 10300
 	AddBoolEdit (tr("Filter Streaming"),   m_NewSetup.StreamFilters);
-#endif
 	AddBoolEdit (tr("Synchronize EPG"),    m_NewSetup.SyncEPG);
 	SetCurrent(Get(0));
 }
@@ -67,9 +61,7 @@ void cStreamdevClientMenuSetupPage::Store(void) {
 	else
 		SetupStore("RemoteIp",    m_NewSetup.RemoteIp);
 	SetupStore("RemotePort",    m_NewSetup.RemotePort);
-#if VDRVERSNUM >= 10300
 	SetupStore("StreamFilters", m_NewSetup.StreamFilters);
-#endif
 	SetupStore("SyncEPG",       m_NewSetup.SyncEPG);
 
 	StreamdevClientSetup = m_NewSetup;

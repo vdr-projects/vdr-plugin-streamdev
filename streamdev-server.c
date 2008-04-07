@@ -3,7 +3,7 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-server.c,v 1.6 2007/04/16 11:01:02 schmirl Exp $
+ * $Id: streamdev-server.c,v 1.7 2008/04/07 14:27:27 schmirl Exp $
  */
 
 #include <getopt.h>
@@ -13,6 +13,10 @@
 #include "server/suspend.h"
 #include "remux/extern.h"
 #include "i18n.h"
+
+#if VDRVERSNUM < 10400
+#error "VDR-1.4.0 or greater is required"
+#endif
 
 const char *cPluginStreamdevServer::DESCRIPTION = "VDR Streaming Server";
 

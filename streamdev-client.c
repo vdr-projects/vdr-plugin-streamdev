@@ -3,7 +3,7 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-client.c,v 1.2 2005/04/24 16:19:44 lordjaxom Exp $
+ * $Id: streamdev-client.c,v 1.3 2008/04/07 14:27:27 schmirl Exp $
  */
 
 #include "streamdev-client.h"
@@ -11,6 +11,10 @@
 #include "client/setup.h"
 //#include "client/menu.h"
 #include "i18n.h"
+
+#if VDRVERSNUM < 10400
+#error "VDR-1.4.0 or greater is required"
+#endif
 
 const char *cPluginStreamdevClient::DESCRIPTION = "VTP Streaming Client";
 

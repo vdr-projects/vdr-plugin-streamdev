@@ -1,5 +1,5 @@
 /*
- *  $Id: socket.c,v 1.9 2008/03/13 16:01:17 schmirl Exp $
+ *  $Id: socket.c,v 1.10 2008/04/07 14:27:28 schmirl Exp $
  */
  
 #include <tools/select.h>
@@ -141,10 +141,8 @@ bool cClientSocket::CheckConnection(void) {
 	}
 
 	const char *Filters = "";
-#if VDRVERSNUM >= 10300
 	if(Command("CAPS FILTERS", 220))
 		Filters = ",FILTERS";
-#endif
 
 	isyslog("Streamdev: Connected to server %s:%d using capabilities TSPIDS%s",
 	        RemoteIp().c_str(), RemotePort(), Filters);
@@ -270,7 +268,6 @@ bool cClientSocket::SetPid(int Pid, bool On) {
 	return true;
 }
 
-#if VDRVERSNUM >= 10300
 bool cClientSocket::SetFilter(ushort Pid, uchar Tid, uchar Mask, bool On) {
 	if (!CheckConnection()) return false;
 
@@ -286,7 +283,6 @@ bool cClientSocket::SetFilter(ushort Pid, uchar Tid, uchar Mask, bool On) {
 	}
 	return true;
 }
-#endif
 
 bool cClientSocket::CloseDvr(void) {
 	if (!CheckConnection()) return false;
@@ -342,11 +338,7 @@ bool cClientSocket::SynchronizeEPG(void) {
 
 	rewind(epgfd);
 	if (cSchedules::Read(epgfd))
-#if VDRVERSNUM < 10300
-		cSIProcessor::TriggerDump();
-#else
 		cSchedules::Cleanup(true);
-#endif
 	else {
 		esyslog("ERROR: Streamdev: Parsing EPG data failed");
 		fclose(epgfd);

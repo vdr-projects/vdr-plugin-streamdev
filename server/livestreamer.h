@@ -58,8 +58,6 @@ public:
 
 // --- cStreamdevFilterStreamer -------------------------------------------------
 
-#  if VDRVERSNUM >= 10300
-
 //#include <vdr/status.h>
 
 class cStreamdevLiveFilter;
@@ -84,7 +82,5 @@ public:
 	// cStatus message handlers
 	//virtual void ChannelSwitch(const cDevice *Device, int ChannelNumber);
 };
-
-#  endif // if VDRVERSNUM >= 10300
 
 #endif // VDR_STREAMDEV_LIVESTREAMER_H

@@ -1,5 +1,5 @@
 /*
- *  $Id: menu.h,v 1.1 2004/12/30 22:44:02 lordjaxom Exp $
+ *  $Id: menu.h,v 1.2 2008/04/07 14:27:28 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_MENU_H
@@ -42,11 +42,7 @@ private:
 	bool              m_Next;
 	int               m_OtherChannel;
 	const cSchedules *m_Schedules;
-#if VDRVERSNUM < 10300
-	cMutexLock        m_Lock;
-#else
 	cSchedulesLock    m_Lock;
-#endif
 
 protected:
 	void PrepareSchedule(cChannel *Channel);
@@ -66,11 +62,7 @@ public:
 class cStreamdevMenuWhatsOn: public cOsdMenu {
 private:
 	static int               m_CurrentChannel;
-#if VDRVERSNUM < 10300
-	static const cEventInfo *m_ScheduleEventInfo;
-#else
 	static const cEvent     *m_ScheduleEventInfo;
-#endif
 
 protected:
 	eOSState Switch(void);
@@ -82,11 +74,7 @@ public:
 
 	static int CurrentChannel(void) { return m_CurrentChannel; }
 	static void SetCurrentChannel(int Channel) { m_CurrentChannel = Channel; }
-#if VDRVERSNUM < 10300
-	static const cEventInfo *ScheduleEventInfo(void);
-#else
 	static const cEvent *ScheduleEventInfo(void);
-#endif
 
 	virtual eOSState ProcessKey(eKeys Key);
 };

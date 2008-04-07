@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.15 2007/12/12 12:22:45 schmirl Exp $
+ *  $Id: device.c,v 1.16 2008/04/07 14:27:28 schmirl Exp $
  */
  
 #include "client/device.h"
@@ -28,18 +28,9 @@ cStreamdevDevice::cStreamdevDevice(void) {
 	m_TSBuffer   = NULL;
 	m_Assembler  = NULL;
 
-#if VDRVERSNUM < 10300
-#	if defined(HAVE_AUTOPID)
-	(void)new cSIProcessor(new cSectionsScanner(""));
-#	else
-	(void)new cSIProcessor("");
-# endif
-	cSIProcessor::Read();
-#else
 	m_Filters    = new cStreamdevFilters;
 	StartSectionHandler();
 	cSchedules::Read();
-#endif
 
 	m_Device = this;
 	m_Pids = 0;
@@ -61,9 +52,7 @@ cStreamdevDevice::~cStreamdevDevice() {
 
 	Cancel(3);
 
-#if VDRVERSNUM >= 10300
 	DELETENULL(m_Filters);
-#endif
 	DELETENULL(m_TSBuffer);
 	delete m_Assembler;
 }
@@ -121,19 +110,7 @@ bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel,
 			&& TRANSPONDER(Channel, m_Channel))
 		return true;
 
-#if VDRVERSNUM < 10338
-	DetachAll(pidHandles[ptAudio].pid);
-	DetachAll(pidHandles[ptVideo].pid);
-	DetachAll(pidHandles[ptPcr].pid);
-	DetachAll(pidHandles[ptTeletext].pid);
-	DelPid(pidHandles[ptAudio].pid);
-	DelPid(pidHandles[ptVideo].pid);
-	DelPid(pidHandles[ptPcr].pid, ptPcr);
-	DelPid(pidHandles[ptTeletext].pid);
-	DelPid(pidHandles[ptDolby].pid);
-#else
 	DetachAllReceivers();
-#endif
 	m_Channel = Channel;
 	bool r = ClientSocket.SetChannelDevice(m_Channel);
 	Dprintf("setchanneldevice r=%d\n", r);
@@ -268,7 +245,6 @@ esyslog("cStreamDevice::GetTSPacket: GetChecked: NOTHING (%d)", m_TSFails);
 	return false;
 }
 
-#if VDRVERSNUM >= 10300
 int cStreamdevDevice::OpenFilter(u_short Pid, u_char Tid, u_char Mask) {
 	Dprintf("OpenFilter\n");
 
@@ -290,7 +266,6 @@ int cStreamdevDevice::OpenFilter(u_short Pid, u_char Tid, u_char Mask) {
 
 	return -1;
 }
-#endif
 
 bool cStreamdevDevice::Init(void) {
 	if (m_Device == NULL && StreamdevClientSetup.StartClient)

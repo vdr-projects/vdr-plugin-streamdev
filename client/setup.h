@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.h,v 1.2 2005/02/08 15:34:38 lordjaxom Exp $
+ *  $Id: setup.h,v 1.3 2008/04/07 14:27:28 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SETUPCLIENT_H
@@ -15,9 +15,7 @@ struct cStreamdevClientSetup {
 	int  StartClient;
 	char RemoteIp[20];
 	int  RemotePort;
-#if VDRVERSNUM >= 10300
 	int  StreamFilters;
-#endif
 	int  SyncEPG;
 };
 

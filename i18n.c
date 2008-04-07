@@ -1,5 +1,5 @@
 /*
- *  $Id: i18n.c,v 1.5 2006/08/17 09:26:00 thomas Exp $
+ *  $Id: i18n.c,v 1.6 2008/04/07 14:27:27 schmirl Exp $
  */
  
 #include "i18n.h"
@@ -23,9 +23,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"VTP Streaming Client",	// English
 		"VTP Streaming Client",	// Deutsch
@@ -43,9 +41,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Start VDR-to-VDR Server",// English
 		"VDR-zu-VDR Server starten",// Deutsch
@@ -63,9 +59,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Start HTTP Server",		// English
 		"HTTP Server starten",	// Deutsch
@@ -83,9 +77,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"HTTP Streamtype",		  // English
 		"HTTP Streamtyp",	      // Deutsch
@@ -103,9 +95,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Start Client",					// English
 		"Client starten",				// Deutsch
@@ -123,9 +113,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"VDR-to-VDR Server Port",// English
 		"Port des VDR-zu-VDR Servers",// Deutsch
@@ -143,9 +131,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"HTTP Server Port",			// English
 		"Port des HTTP Servers",// Deutsch
@@ -163,9 +149,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Maximum Number of Clients",// English
 		"Maximalanzahl an Clients",// Deutsch
@@ -183,9 +167,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Remote IP",						// English
 		"IP der Gegenseite",		// Deutsch
@@ -203,9 +185,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Remote Port",					// English
 		"Port der Gegenseite",	// Deutsch
@@ -223,9 +203,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Remote Streamtype",		// English
 		"Streamtyp von Gegenseite",// Deutsch
@@ -243,9 +221,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Common Settings",		  // English
 		"Allgemeines",          // Deutsch
@@ -263,9 +239,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"VDR-to-VDR Server",		// English
 		"VDR-zu-VDR Server",    // Deutsch
@@ -283,9 +257,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"HTTP Server",		      // English
 		"HTTP Server",          // Deutsch
@@ -303,9 +275,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"VDR-to-VDR Client",		// English
 		"VDR-zu-VDR Client",    // Deutsch
@@ -323,9 +293,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Please restart VDR to activate changes",// English
 		"Bitte starten Sie für die Änderungen VDR neu",// Deutsch
@@ -343,9 +311,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Synchronize EPG",			// English
 		"EPG synchronisieren",	// Deutsch
@@ -363,9 +329,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Suspend Live TV",			// English
 		"Live-TV pausieren",		// Deutsch
@@ -383,9 +347,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Suspend behaviour",		// English
 		"Pausierverhalten",			// Deutsch
@@ -403,9 +365,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Offer suspend mode",		// English
 		"Pausieren anbieten",		// Deutsch
@@ -423,9 +383,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Always suspended",			// English
 		"Immer pausiert",				// Deutsch
@@ -443,9 +401,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Never suspended",			// English
 		"Nie pausiert",					// Deutsch
@@ -463,9 +419,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Streaming Control",		// English
 		"Streamkontrolle",			// Deutsch
@@ -483,9 +437,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Fetching recordings...",// English
 		"Hole Aufnahmen...",		// Deutsch
@@ -503,9 +455,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Remote Recordings",		// English
 		"Entfernte Aufnahmen",	// Deutsch
@@ -523,9 +473,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Remote Timers",				// English
 		"Entfernte Timer",			// Deutsch
@@ -543,9 +491,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Suspend Server",				// English
 		"Server pausieren",			// Deutsch
@@ -563,9 +509,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Server is suspended",	// English
 		"Server ist pausiert",	// Deutsch
@@ -583,9 +527,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Couldn't suspend Server!",// English
 		"Konnte Server nicht pausieren!",// Deutsch
@@ -603,9 +545,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Edit remote timer",		// English
 		"Entfernten Timer editieren",// Deutsch
@@ -623,9 +563,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Timers not in sync! Try again...",// Englisch
 		"Timer nicht synchron! Bitte wiederholen...",//Deutsch
@@ -643,9 +581,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Couldn't save timer! Try again...",// English
 		"Konnte Timer nicht speichern! Bitte wiederholen...",// Deutsch
@@ -663,9 +599,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Couldn't delete timer! Try again...",// English
 		"Konnte Timer nicht löschen! Bitte wiederholen...",// Deutsch
@@ -683,9 +617,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Server error! Try again...",// English
 		"Serverfehler! Bitte wiederholen...",// Deutsch
@@ -703,9 +635,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"MultiPID Streaming",		// English
 		"Multiple PIDs streamen",// Deutsch
@@ -723,9 +653,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
 	{	"Client may suspend",		// English
 		"Client darf pausieren",// Deutsch
@@ -743,9 +671,7 @@ const tI18nPhrase Phrases[] = {
 		"",											// Romaneste
 		"",											// Magyar
 		"",											// Catala
-#if VDRVERSNUM >= 10300
 		""                      // Russian
-#endif
 	},
         {       "Bind to IP",           // English
                 "",// Deutsch
@@ -763,9 +689,7 @@ const tI18nPhrase Phrases[] = {
                 "",                                                                                     // Romaneste
                 "",                                                                                     // Magyar
                 "",                                                                                     // Catala
-#if VDRVERSNUM >= 10300
                 ""                      // Russian
-#endif
         },
         {       "Remote Schedule",      // English
                 "",// Deutsch
@@ -783,9 +707,7 @@ const tI18nPhrase Phrases[] = {
                 "",                                                                                     // Romaneste
                 "",                                                                                     // Magyar
                 "",                                                                                     // Catala
-#if VDRVERSNUM >= 10300
                 ""                      // Russian
-#endif
         },
         {       "Filter Streaming",     // English
                 "",// Deutsch
@@ -803,9 +725,7 @@ const tI18nPhrase Phrases[] = {
                 "",                                                                                     // Romaneste
                 "",                                                                                     // Magyar
                 "",                                                                                     // Catala
-#if VDRVERSNUM >= 10300
                 ""                      // Russian
-#endif
         },
         {       "Streaming active",     // English
                 "Streamen im Gange",// Deutsch
@@ -823,9 +743,7 @@ const tI18nPhrase Phrases[] = {
                 "",                                                                                     // Romaneste
                 "",                                                                                     // Magyar
                 "",                                                                                     // Catala
-#if VDRVERSNUM >= 10300
                 ""                      // Russian
-#endif
         },
 	{ NULL }
 };

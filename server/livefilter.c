@@ -1,5 +1,5 @@
 /*
- *  $Id: livefilter.c,v 1.4 2007/04/24 11:06:12 schmirl Exp $
+ *  $Id: livefilter.c,v 1.5 2008/04/07 14:27:31 schmirl Exp $
  */
 
 #include "server/livefilter.h"
@@ -12,8 +12,6 @@
 #ifndef TS_SYNC_BYTE
 #    define TS_SYNC_BYTE     0x47
 #endif
-
-#if VDRVERSNUM >= 10300
 
 cStreamdevLiveFilter::cStreamdevLiveFilter(cStreamdevStreamer *Streamer) {
 	m_Streamer = Streamer;
@@ -41,5 +39,3 @@ void cStreamdevLiveFilter::Process(u_short Pid, u_char Tid, const u_char *Data, 
 			m_Streamer->ReportOverflow(TS_SIZE - p);
 	}
 }
-
-#endif // VDRVERSNUM >= 10300

@@ -1,5 +1,5 @@
 /*
- *  $Id: device.h,v 1.5 2007/04/24 10:43:40 schmirl Exp $
+ *  $Id: device.h,v 1.6 2008/04/07 14:27:28 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_DEVICE_H
@@ -22,9 +22,7 @@ private:
 	const cChannel      *m_Channel;
 	cTSBuffer           *m_TSBuffer;
 	cStreamdevAssembler *m_Assembler;
-#if VDRVERSNUM >= 10307
 	cStreamdevFilters   *m_Filters;
-#endif
 	int                  m_Pids;
 	bool                 m_DvrClosed;
 
@@ -47,9 +45,7 @@ protected:
 	virtual void CloseDvr(void);
 	virtual bool GetTSPacket(uchar *&Data);
 
-#if VDRVERSNUM >= 10300
 	virtual int OpenFilter(u_short Pid, u_char Tid, u_char Mask);
-#endif
 
 public:
 	cStreamdevDevice(void);

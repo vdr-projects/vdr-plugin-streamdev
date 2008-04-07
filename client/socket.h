@@ -1,5 +1,5 @@
 /*
- *  $Id: socket.h,v 1.4 2007/04/24 10:57:34 schmirl Exp $
+ *  $Id: socket.h,v 1.5 2008/04/07 14:27:28 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_CLIENT_CONNECTION_H
@@ -50,9 +50,7 @@ public:
 	bool CloseDataConnection(eSocketId Id);
 	bool SetChannelDevice(const cChannel *Channel);
 	bool SetPid(int Pid, bool On);
-#if VDRVERSNUM >= 10300
 	bool SetFilter(ushort Pid, uchar Tid, uchar Mask, bool On);
-#endif
 	bool CloseDvr(void);
 	bool SynchronizeEPG(void);
 	bool LoadRecordings(cRemoteRecordings &Recordings);

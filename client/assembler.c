@@ -1,5 +1,5 @@
 /*
- *  $Id: assembler.c,v 1.2 2005/01/25 14:14:43 lordjaxom Exp $
+ *  $Id: assembler.c,v 1.3 2008/04/07 14:27:28 schmirl Exp $
  */
 
 #include "client/assembler.h"
@@ -15,9 +15,7 @@
 #include <unistd.h>
 
 cStreamdevAssembler::cStreamdevAssembler(cTBSocket *Socket)
-#if VDRVERSNUM >= 10300
 		:cThread("Streamdev: UDP-TS Assembler")
-#endif
 {
 	m_Socket = Socket;
 	if (pipe(m_Pipe) != 0) {
@@ -49,11 +47,6 @@ void cStreamdevAssembler::Action(void) {
 	const int rbmargin = TS_SIZE * 2;
 	const int rbminfill = rbmargin * 50;
 	cRingBufferLinear ringbuf(rbsize, rbmargin, true);
-
-#if VDRVERSNUM < 10300
-	isyslog("streamdev-client: UDP-TS Assembler thread started (pid=%d)", 
-			getpid());
-#endif
 
 	m_Mutex.Lock();
 
@@ -113,10 +106,6 @@ void cStreamdevAssembler::Action(void) {
 			}
 		}
 	}
-
-#if VDRVERSNUM < 10300
-	isyslog("streamdev-client: UDP-TS Assembler thread stopped", getpid());
-#endif
 }
 
 void cStreamdevAssembler::WaitForFill(void) {
