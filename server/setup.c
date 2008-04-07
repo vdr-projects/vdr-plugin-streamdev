@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.c,v 1.2 2005/05/09 20:22:29 lordjaxom Exp $
+ *  $Id: setup.c,v 1.3 2008/04/07 14:50:33 schmirl Exp $
  */
  
 #include <vdr/menuitems.h>
@@ -17,7 +17,7 @@ cStreamdevServerSetup::cStreamdevServerSetup(void) {
 	StartHTTPServer = true;
 	HTTPServerPort  = 3000;
 	HTTPStreamType  = stPES;
-	SuspendMode     = smOffer;
+	SuspendMode     = smAlways;
 	AllowSuspend    = false;
 	strcpy(VTPBindIP, "0.0.0.0");
 	strcpy(HTTPBindIP, "0.0.0.0");

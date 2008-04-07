@@ -24,6 +24,7 @@ Rolf Ahrenberg
   for suggesting a fix of the Makefile's default target
   for a TS PAT repacker based on Petri Laine's VDR TS recording patch
   for making it possible to pass parameters to externremux.sh
+  for removing pre VDR 1.4 legacy code
 
 Rantanen Teemu
   for providing vdr-incompletesections.diff
@@ -70,3 +71,6 @@ Olli Lammi
 
 Joerg Pulz
   for his FreeBSD compatibility patch
+
+tobi
+  for pointing to unused files in the libdvbmpeg directory

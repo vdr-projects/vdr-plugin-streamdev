@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.17 2008/04/07 14:40:39 schmirl Exp $
+ *  $Id: device.c,v 1.18 2008/04/07 14:50:32 schmirl Exp $
  */
  
 #include "client/device.h"
@@ -28,6 +28,7 @@ cStreamdevDevice::cStreamdevDevice(void) {
 
 	m_Filters    = new cStreamdevFilters;
 	StartSectionHandler();
+	isyslog("streamdev-client: got device number %d", CardIndex() + 1);
 
 	m_Device = this;
 	m_Pids = 0;
@@ -78,6 +79,10 @@ bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority,
 	bool res = false;
 	bool prio = Priority < 0 || Priority > this->Priority();
 	bool ndr = false;
+
+	if (!StreamdevClientSetup.StartClient)
+		return false;
+
 	Dprintf("ProvidesChannel, Channel=%s, Prio=%d\n", Channel->Name(), Priority);
 
 	if (ClientSocket.DataSocket(siLive) != NULL 

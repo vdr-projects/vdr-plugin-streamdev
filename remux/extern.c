@@ -1,4 +1,5 @@
 #include "remux/extern.h"
+#include "server/server.h"
 #include "server/streamer.h"
 #include <vdr/tools.h>
 #include <sys/types.h>
@@ -6,7 +7,7 @@
 #include <signal.h>
 #include <unistd.h>
 
-const char *g_ExternRemux = "/root/externremux.sh";
+const char *g_ExternRemux = EXTERNREMUXPATH;
 
 class cTSExt: public cThread {
 private:

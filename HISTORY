@@ -1,6 +1,22 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+2008-04-07: Branched v0_4
+
+- changed location of streamdevhosts.conf to VDRCONFDIR/plugins/streamdev
+- changed externremux.sh's default location to VDRCONFDIR/plugins/streamdev
+- added sample externremux.sh from http://www.vdr-wiki.de/
+- stop providing channels after client has been disabled at runtime
+- added logging of the client device's card index
+- changed default suspend mode to "Always suspended"
+- added "Hide Mainmenu Entry" setup option on client
+- resurrected clients "Suspend Server" menu item as its mainmenu entry
+- dropped unused code for remote timers/recordings on client side
+- dropped unused files client/{assembler,menu,remote}.[hc]
+- dropped unused files in libdvbmpeg (reported by tobi)
+- dropped patches for pre VDR 1.4
+- removed legacy code for pre VDR 1.4 (thanks to Rolf Ahrenberg)
+
 2008-03-31: Version 0.3.4
 
 - added possibility to pass parameter to externremux.sh (thanks to Rolf

@@ -3,7 +3,7 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-client.c,v 1.4 2008/04/07 14:40:39 schmirl Exp $
+ * $Id: streamdev-client.c,v 1.5 2008/04/07 14:50:32 schmirl Exp $
  */
 
 #include "streamdev-client.h"
@@ -42,7 +42,7 @@ void cPluginStreamdevClient::Housekeeping(void) {
 }
 
 const char *cPluginStreamdevClient::MainMenuEntry(void) {
-	return StreamdevClientSetup.StartClient ? tr("Suspend Server") : NULL;
+	return StreamdevClientSetup.StartClient && !StreamdevClientSetup.HideMenuEntry ? tr("Suspend Server") : NULL;
 }
 
 cOsdObject *cPluginStreamdevClient::MainMenuAction(void) {
