@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.18 2008/04/07 14:50:32 schmirl Exp $
+ *  $Id: device.c,v 1.18.2.1 2008/04/07 15:07:39 schmirl Exp $
  */
  
 #include "client/device.h"
@@ -54,6 +54,12 @@ cStreamdevDevice::~cStreamdevDevice() {
 	DELETENULL(m_TSBuffer);
 }
 
+int cStreamdevDevice::ProvidesCa(const cChannel *Channel) const
+{
+	// Encrypted is acceptable for now. Will ask the server later.
+	return Channel->Ca() <= CA_DVB_MAX ? cDevice::ProvidesCa(Channel) : 1;
+}
+
 bool cStreamdevDevice::ProvidesSource(int Source) const {
 	Dprintf("ProvidesSource, Source=%d\n", Source);
 	return true;
@@ -88,7 +94,7 @@ bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority,
 	if (ClientSocket.DataSocket(siLive) != NULL 
 			&& TRANSPONDER(Channel, m_Channel))
 		res = true;
-	else {
+	else if (ProvidesCa(Channel)) {
 		res = prio && ClientSocket.ProvidesChannel(Channel, Priority);
 		ndr = true;
 	}
