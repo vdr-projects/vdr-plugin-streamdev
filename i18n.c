@@ -1,5 +1,5 @@
 /*
- *  $Id: i18n.c,v 1.6 2008/04/07 14:27:27 schmirl Exp $
+ *  $Id: i18n.c,v 1.7 2008/04/07 14:40:39 schmirl Exp $
  */
  
 #include "i18n.h"
@@ -421,78 +421,6 @@ const tI18nPhrase Phrases[] = {
 		"",											// Catala
 		""                      // Russian
 	},
-	{	"Streaming Control",		// English
-		"Streamkontrolle",			// Deutsch
-		"",											// Slovenski
-		"",											// Italiano
-		"",											// Nederlands
-		"",											// Português
-		"",											// Français
-		"",											// Norsk
-		"Suoratoiston hallinta",								// suomi
-		"",											// Polski
-		"",											// Español
-		"",											// Ellinika
-		"",											// Svenska
-		"",											// Romaneste
-		"",											// Magyar
-		"",											// Catala
-		""                      // Russian
-	},
-	{	"Fetching recordings...",// English
-		"Hole Aufnahmen...",		// Deutsch
-		"",											// Slovenski
-		"",											// Italiano
-		"",											// Nederlands
-		"",											// Português
-		"",											// Français
-		"",											// Norsk
-		"Haetaan tallenteita...",								// suomi
-		"",											// Polski
-		"",											// Español
-		"",											// Ellinika
-		"",											// Svenska
-		"",											// Romaneste
-		"",											// Magyar
-		"",											// Catala
-		""                      // Russian
-	},
-	{	"Remote Recordings",		// English
-		"Entfernte Aufnahmen",	// Deutsch
-		"",											// Slovenski
-		"",											// Italiano
-		"",											// Nederlands
-		"",											// Português
-		"",											// Français
-		"",											// Norsk
-		"Etätallenteet",									// suomi
-		"",											// Polski
-		"",											// Español
-		"",											// Ellinika
-		"",											// Svenska
-		"",											// Romaneste
-		"",											// Magyar
-		"",											// Catala
-		""                      // Russian
-	},
-	{	"Remote Timers",				// English
-		"Entfernte Timer",			// Deutsch
-		"",											// Slovenski
-		"",											// Italiano
-		"",											// Nederlands
-		"",											// Português
-		"",											// Français
-		"",											// Norsk
-		"Etäajastimet",										// suomi
-		"",											// Polski
-		"",											// Español
-		"",											// Ellinika
-		"",											// Svenska
-		"",											// Romaneste
-		"",											// Magyar
-		"",											// Catala
-		""                      // Russian
-	},
 	{	"Suspend Server",				// English
 		"Server pausieren",			// Deutsch
 		"",											// Slovenski
@@ -547,114 +475,6 @@ const tI18nPhrase Phrases[] = {
 		"",											// Catala
 		""                      // Russian
 	},
-	{	"Edit remote timer",		// English
-		"Entfernten Timer editieren",// Deutsch
-		"",											// Slovenski
-		"",											// Italiano
-		"",											// Nederlands
-		"",											// Português
-		"",											// Français
-		"",											// Norsk
-		"Muokkaa etäajastinta",									// suomi
-		"",											// Polski
-		"",											// Español
-		"",											// Ellinika
-		"",											// Svenska
-		"",											// Romaneste
-		"",											// Magyar
-		"",											// Catala
-		""                      // Russian
-	},
-	{	"Timers not in sync! Try again...",// Englisch
-		"Timer nicht synchron! Bitte wiederholen...",//Deutsch
-		"",											// Slovenski
-		"",											// Italiano
-		"",											// Nederlands
-		"",											// Português
-		"",											// Français
-		"",											// Norsk
-		"Ajastimet eivät täsmää! Yritä uudelleen...",						// suomi
-		"",											// Polski
-		"",											// Español
-		"",											// Ellinika
-		"",											// Svenska
-		"",											// Romaneste
-		"",											// Magyar
-		"",											// Catala
-		""                      // Russian
-	},
-	{	"Couldn't save timer! Try again...",// English
-		"Konnte Timer nicht speichern! Bitte wiederholen...",// Deutsch
-		"",											// Slovenski
-		"",											// Italiano
-		"",											// Nederlands
-		"",											// Português
-		"",											// Français
-		"",											// Norsk
-		"Ajastimen tallennus epäonnistui! Yritä uudelleen...",					// suomi
-		"",											// Polski
-		"",											// Español
-		"",											// Ellinika
-		"",											// Svenska
-		"",											// Romaneste
-		"",											// Magyar
-		"",											// Catala
-		""                      // Russian
-	},
-	{	"Couldn't delete timer! Try again...",// English
-		"Konnte Timer nicht löschen! Bitte wiederholen...",// Deutsch
-		"",											// Slovenski
-		"",											// Italiano
-		"",											// Nederlands
-		"",											// Português
-		"",											// Français
-		"",											// Norsk
-		"Ajastimen poistaminen epäonnistui! Yritä uudelleen...",				// suomi
-		"",											// Polski
-		"",											// Español
-		"",											// Ellinika
-		"",											// Svenska
-		"",											// Romaneste
-		"",											// Magyar
-		"",											// Catala
-		""                      // Russian
-	},
-	{	"Server error! Try again...",// English
-		"Serverfehler! Bitte wiederholen...",// Deutsch
-		"",											// Slovenski
-		"",											// Italiano
-		"",											// Nederlands
-		"",											// Português
-		"",											// Français
-		"",											// Norsk
-		"Palvelimessa virhe! Yritä uudelleen...",						// suomi
-		"",											// Polski
-		"",											// Español
-		"",											// Ellinika
-		"",											// Svenska
-		"",											// Romaneste
-		"",											// Magyar
-		"",											// Catala
-		""                      // Russian
-	},
-	{	"MultiPID Streaming",		// English
-		"Multiple PIDs streamen",// Deutsch
-		"",											// Slovenski
-		"",											// Italiano
-		"",											// Nederlands
-		"",											// Português
-		"",											// Français
-		"",											// Norsk
-		"Usean PID:in suoratoisto",								// suomi
-		"",											// Polski
-		"",											// Español
-		"",											// Ellinika
-		"",											// Svenska
-		"",											// Romaneste
-		"",											// Magyar
-		"",											// Catala
-		""                      // Russian
-	},
 	{	"Client may suspend",		// English
 		"Client darf pausieren",// Deutsch
 		"",											// Slovenski
@@ -682,24 +502,6 @@ const tI18nPhrase Phrases[] = {
                 "",                                                                                     // Français
                 "",                                                                                     // Norsk
                 "Sido osoitteeseen",                                                                    // suomi
-                "",                                                                                     // Polski
-                "",                                                                                     // Español
-                "",                                                                                     // Ellinika
-                "",                                                                                     // Svenska
-                "",                                                                                     // Romaneste
-                "",                                                                                     // Magyar
-                "",                                                                                     // Catala
-                ""                      // Russian
-        },
-        {       "Remote Schedule",      // English
-                "",// Deutsch
-                "",                                                                                     // Slovenski
-                "",                                                                                     // Italiano
-                "",                                                                                     // Nederlands
-                "",                                                                                     // Português
-                "",                                                                                     // Français
-                "",                                                                                     // Norsk
-                "Etäkoneen ohjelmaopas",                                                                // suomi
                 "",                                                                                     // Polski
                 "",                                                                                     // Español
                 "",                                                                                     // Ellinika

@@ -3,13 +3,12 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-client.c,v 1.3 2008/04/07 14:27:27 schmirl Exp $
+ * $Id: streamdev-client.c,v 1.4 2008/04/07 14:40:39 schmirl Exp $
  */
 
 #include "streamdev-client.h"
 #include "client/device.h"
 #include "client/setup.h"
-//#include "client/menu.h"
 #include "i18n.h"
 
 #if VDRVERSNUM < 10400
@@ -43,13 +42,15 @@ void cPluginStreamdevClient::Housekeeping(void) {
 }
 
 const char *cPluginStreamdevClient::MainMenuEntry(void) {
-	return NULL;
-	//return StreamdevClientSetup.StartClient ? tr("Streaming Control") : NULL;
+	return StreamdevClientSetup.StartClient ? tr("Suspend Server") : NULL;
 }
 
 cOsdObject *cPluginStreamdevClient::MainMenuAction(void) {
+	if (ClientSocket.SuspendServer())
+		Skins.Message(mtInfo, tr("Server is suspended"));
+	else
+		Skins.Message(mtError, tr("Couldn't suspend Server!"));
 	return NULL;
-	//return StreamdevClientSetup.StartClient ? new cStreamdevMenu : NULL;
 }
 
 cMenuSetupPage *cPluginStreamdevClient::SetupMenu(void) {

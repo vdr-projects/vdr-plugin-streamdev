@@ -1,5 +1,5 @@
 /*
- *  $Id: common.h,v 1.10 2008/04/07 14:27:27 schmirl Exp $
+ *  $Id: common.h,v 1.11 2008/04/07 14:40:39 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_COMMON_H
@@ -24,11 +24,6 @@
 #endif
 
 #	define TRANSPONDER(c1, c2) (c1->Transponder() == c2->Transponder())
-
-#	define INFO(s) Skins.Message(mtInfo, s)
-#	define STATUS(s) Skins.Message(mtInfo, s)
-#	define ERROR(s) Skins.Message(mtStatus, s)
-#	define FLUSH() Skins.Flush()
 
 #	define MAXPARSEBUFFER KILOBYTE(16)
 

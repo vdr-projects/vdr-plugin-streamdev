@@ -1,10 +1,9 @@
 /*
- *  $Id: device.c,v 1.16 2008/04/07 14:27:28 schmirl Exp $
+ *  $Id: device.c,v 1.17 2008/04/07 14:40:39 schmirl Exp $
  */
  
 #include "client/device.h"
 #include "client/setup.h"
-#include "client/assembler.h"
 #include "client/filter.h"
 
 #include "tools/select.h"
@@ -26,11 +25,9 @@ cStreamdevDevice *cStreamdevDevice::m_Device = NULL;
 cStreamdevDevice::cStreamdevDevice(void) {
 	m_Channel    = NULL;
 	m_TSBuffer   = NULL;
-	m_Assembler  = NULL;
 
 	m_Filters    = new cStreamdevFilters;
 	StartSectionHandler();
-	cSchedules::Read();
 
 	m_Device = this;
 	m_Pids = 0;
@@ -54,7 +51,6 @@ cStreamdevDevice::~cStreamdevDevice() {
 
 	DELETENULL(m_Filters);
 	DELETENULL(m_TSBuffer);
-	delete m_Assembler;
 }
 
 bool cStreamdevDevice::ProvidesSource(int Source) const {
@@ -283,7 +279,6 @@ bool cStreamdevDevice::ReInit(void) {
 	ClientSocket.Reset();
 	if (m_Device != NULL) {
 		//DELETENULL(m_Device->m_TSBuffer);
-		DELETENULL(m_Device->m_Assembler);
 		m_Device->Unlock();
 	}
 	return StreamdevClientSetup.StartClient ? Init() : true;

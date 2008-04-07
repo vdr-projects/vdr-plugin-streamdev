@@ -1,5 +1,5 @@
 /*
- *  $Id: socket.h,v 1.5 2008/04/07 14:27:28 schmirl Exp $
+ *  $Id: socket.h,v 1.6 2008/04/07 14:40:40 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_CLIENT_CONNECTION_H
@@ -13,10 +13,6 @@
 
 #define CMD_LOCK cMutexLock CmdLock((cMutex*)&m_Mutex)
 
-class cRemoteRecordings;
-class cRemoteRecording;
-class cRemoteTimers;
-class cRemoteTimer;
 class cPES2TSRemux;
 
 class cClientSocket: public cTBSocket {
@@ -53,13 +49,6 @@ public:
 	bool SetFilter(ushort Pid, uchar Tid, uchar Mask, bool On);
 	bool CloseDvr(void);
 	bool SynchronizeEPG(void);
-	bool LoadRecordings(cRemoteRecordings &Recordings);
-	bool StartReplay(const char *Filename);
-	bool AbortReplay(void);
-	bool DeleteRecording(cRemoteRecording *Recording);
-	bool LoadTimers(cRemoteTimers &Timers);
-	bool SaveTimer(cRemoteTimer *Old, cRemoteTimer &New);
-	bool DeleteTimer(cRemoteTimer *Timer);
 	bool SuspendServer(void);
 	bool Quit(void);
 

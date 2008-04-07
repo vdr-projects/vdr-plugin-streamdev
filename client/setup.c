@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.c,v 1.3 2008/04/07 14:27:28 schmirl Exp $
+ *  $Id: setup.c,v 1.4 2008/04/07 14:40:40 schmirl Exp $
  */
  
 #include <vdr/menuitems.h>
@@ -52,7 +52,7 @@ void cStreamdevClientMenuSetupPage::Store(void) {
 		if (m_NewSetup.StartClient)
 			cStreamdevDevice::Init();
 		else
-			INFO(tr("Please restart VDR to activate changes"));
+			Skins.Message(mtInfo, tr("Please restart VDR to activate changes"));
 	}
 
 	SetupStore("StartClient", m_NewSetup.StartClient);

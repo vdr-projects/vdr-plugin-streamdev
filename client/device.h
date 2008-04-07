@@ -1,5 +1,5 @@
 /*
- *  $Id: device.h,v 1.6 2008/04/07 14:27:28 schmirl Exp $
+ *  $Id: device.h,v 1.7 2008/04/07 14:40:39 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_DEVICE_H
@@ -8,7 +8,6 @@
 #include <vdr/device.h>
 
 #include "client/socket.h"
-#include "client/assembler.h"
 #include "client/filter.h"
 
 class cTBString;
@@ -21,7 +20,6 @@ class cStreamdevDevice: public cDevice {
 private:
 	const cChannel      *m_Channel;
 	cTSBuffer           *m_TSBuffer;
-	cStreamdevAssembler *m_Assembler;
 	cStreamdevFilters   *m_Filters;
 	int                  m_Pids;
 	bool                 m_DvrClosed;
