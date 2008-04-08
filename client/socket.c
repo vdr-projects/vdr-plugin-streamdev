@@ -1,5 +1,5 @@
 /*
- *  $Id: socket.c,v 1.11 2008/04/07 14:40:40 schmirl Exp $
+ *  $Id: socket.c,v 1.12 2008/04/08 14:18:16 schmirl Exp $
  */
  
 #include <tools/select.h>
@@ -14,7 +14,6 @@
 #include "client/socket.h"
 #include "client/setup.h"
 #include "common.h"
-#include "i18n.h"
 
 cClientSocket ClientSocket;
 

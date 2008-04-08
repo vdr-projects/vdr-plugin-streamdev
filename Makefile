@@ -1,7 +1,7 @@
 #
 # Makefile for a Video Disk Recorder plugin
 #
-# $Id: Makefile,v 1.15 2008/04/07 14:50:32 schmirl Exp $
+# $Id: Makefile,v 1.16 2008/04/08 14:18:15 schmirl Exp $
 
 # The official name of this plugin.
 # This name will be used in the '-P...' option of VDR to load the plugin.
@@ -45,7 +45,7 @@ DEFINES += -D_GNU_SOURCE -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
 
 ### The object files (add further files here):
 
-COMMONOBJS = common.o i18n.o \
+COMMONOBJS = common.o \
 	\
 	tools/source.o tools/select.o tools/socket.o tools/tools.o
 
@@ -70,8 +70,8 @@ endif
 
 ### The main target:
 
-.PHONY: all dist clean
-all: libvdr-$(PLUGIN)-client.so libvdr-$(PLUGIN)-server.so
+.PHONY: all i18n dist clean
+all: libvdr-$(PLUGIN)-client.so libvdr-$(PLUGIN)-server.so i18n
 
 ### Implicit rules:
 
@@ -96,6 +96,30 @@ endif
 
 -include $(DEPFILE)
 
+### Internationalization (I18N):
+
+PODIR     = po
+LOCALEDIR = $(VDRDIR)/locale
+I18Npo    = $(wildcard $(PODIR)/*.po)
+I18Nmsgs  = $(addprefix $(LOCALEDIR)/, $(addsuffix /LC_MESSAGES/vdr-$(PLUGIN).mo, $(notdir $(foreach file, $(I18Npo), $(basename $(file))))))
+I18Npot   = $(PODIR)/$(PLUGIN).pot
+
+%.mo: %.po
+	msgfmt -c -o $@ $<
+
+$(I18Npot): $(CLIENTOBJS:%.o=%.c) $(SERVEROBJS:%.o=%.c) $(COMMONOBJS:%.o=%.c)
+	xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --msgid-bugs-address='<http://www.vdr-developer.org/mantisbt/>' -o $@ $^
+
+%.po: $(I18Npot)
+	msgmerge -U --no-wrap --no-location --backup=none -q $@ $<
+	@touch $@
+
+$(I18Nmsgs): $(LOCALEDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
+	@mkdir -p $(dir $@)
+	cp $< $@
+
+i18n: $(I18Nmsgs)
+
 ### Targets:
 
 libdvbmpeg/libdvbmpegtools.a: libdvbmpeg/*.c libdvbmpeg/*.h
@@ -117,5 +141,5 @@ dist: clean
 	@echo Distribution package created as $(PACKAGE).tgz
 
 clean:
-	@-rm -f $(COMMONOBJS) $(CLIENTOBJS) $(SERVEROBJS) $(DEPFILE) *.so *.tgz core* *~
+	@-rm -f $(COMMONOBJS) $(CLIENTOBJS) $(SERVEROBJS) $(DEPFILE) $(PODIR)/*.mo $(PODIR)/*.pot *.so *.tgz core* *~
 	$(MAKE) -C ./libdvbmpeg clean

@@ -1,5 +1,5 @@
 /*
- *  $Id: common.c,v 1.7 2008/04/07 14:27:27 schmirl Exp $
+ *  $Id: common.c,v 1.8 2008/04/08 14:18:15 schmirl Exp $
  */
  
 #include <vdr/channels.h>
@@ -7,11 +7,10 @@
 
 #include "common.h"
 #include "tools/select.h"
-#include "i18n.h"
 
 using namespace std;
 
-const char *VERSION = "0.4.0-pre";
+const char *VERSION = "0.5.0-pre";
 
 const char *StreamTypes[st_Count] = {
 	"TS",
@@ -23,9 +22,9 @@ const char *StreamTypes[st_Count] = {
 };
 
 const char *SuspendModes[sm_Count] = {
-	"Offer suspend mode",
-	"Always suspended",
-	"Never suspended"
+	trNOOP("Offer suspend mode"),
+	trNOOP("Always suspended"),
+	trNOOP("Never suspended")
 };
 
 const char IpCharacters[] = "0123456789.";

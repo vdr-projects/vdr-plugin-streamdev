@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.18 2008/04/07 14:50:32 schmirl Exp $
+ *  $Id: device.c,v 1.19 2008/04/08 14:18:16 schmirl Exp $
  */
  
 #include "client/device.h"
@@ -190,16 +190,11 @@ void cStreamdevDevice::CloseDvrInt(void) {
 	}
 
 	Dprintf("cStreamdevDevice::CloseDvrInt(): Closing DVR connection\n");
-#if VDRVERSNUM < 10500
-	DELETENULL(m_TSBuffer);
-	ClientSocket.CloseDvr();
-#else
 	// Hack for VDR 1.5.x clients (sometimes sending ABRT after TUNE)
 	// TODO: Find a clean solution to fix this
 	ClientSocket.SetChannelDevice(m_Channel);
 	ClientSocket.CloseDvr();
 	DELETENULL(m_TSBuffer);
-#endif
 }
 
 void cStreamdevDevice::CloseDvr(void) {

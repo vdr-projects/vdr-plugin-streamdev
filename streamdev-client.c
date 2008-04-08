@@ -3,19 +3,18 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-client.c,v 1.5 2008/04/07 14:50:32 schmirl Exp $
+ * $Id: streamdev-client.c,v 1.6 2008/04/08 14:18:15 schmirl Exp $
  */
 
 #include "streamdev-client.h"
 #include "client/device.h"
 #include "client/setup.h"
-#include "i18n.h"
 
-#if VDRVERSNUM < 10400
-#error "VDR-1.4.0 or greater is required"
+#if !defined(APIVERSNUM) || APIVERSNUM < 10509
+#error "VDR-1.5.9 API version or greater is required!"
 #endif
 
-const char *cPluginStreamdevClient::DESCRIPTION = "VTP Streaming Client";
+const char *cPluginStreamdevClient::DESCRIPTION = trNOOP("VTP Streaming Client");
 
 cPluginStreamdevClient::cPluginStreamdevClient(void) {
 }
@@ -28,12 +27,9 @@ const char *cPluginStreamdevClient::Description(void) {
 }
 
 bool cPluginStreamdevClient::Start(void) {
-	i18n_name = Name();
-	RegisterI18n(Phrases);
-
+	I18nRegister(PLUGIN_NAME_I18N);
 	cStreamdevDevice::Init();
-
-  return true;
+	return true;
 }
 
 void cPluginStreamdevClient::Housekeeping(void) {

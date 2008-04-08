@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.c,v 1.10 2007/05/07 12:25:11 schmirl Exp $
+ *  $Id: connection.c,v 1.11 2008/04/08 14:18:18 schmirl Exp $
  */
  
 #include "server/connection.h"
@@ -139,11 +139,7 @@ cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority)
 	Dprintf(" * GetDevice(const cChannel*, int)\n");
 	Dprintf(" * -------------------------------\n");
 
-#if VDRVERSNUM < 10500
-	device = cDevice::GetDevice(Channel, Priority);
-#else
 	device = cDevice::GetDevice(Channel, Priority, false);
-#endif
 
 	Dprintf(" * Found following device: %p (%d)\n", device, 
 			device ? device->CardIndex() + 1 : 0);
@@ -161,11 +157,7 @@ cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority)
 		const cChannel *current = Channels.GetByNumber(cDevice::CurrentChannel());
 		isyslog("streamdev-server: Detaching current receiver");
 		Detach();
-#if VDRVERSNUM < 10500
-		device = cDevice::GetDevice(Channel, Priority);
-#else
 		device = cDevice::GetDevice(Channel, Priority, false);
-#endif
 		Attach();
 		Dprintf(" * Found following device: %p (%d)\n", device, 
 				device ? device->CardIndex() + 1 : 0);

@@ -15,8 +15,8 @@ Contents:
 
 1.   Description
 2.   Installation
-2.1  VDR 1.3.X and older
-2.2  VDR 1.4.X and above
+2.1  VDR 1.4.x and older
+2.2  VDR 1.6.0 and above
 2.3  Updating from streamdev 0.3.x
 3.   Usage
 3.1  Usage HTTP server
@@ -96,13 +96,14 @@ location with the -r parameter. The VDR commandline would then include a
 as otherwise -r will be passed to VDR and not to streamdev.
 
 
-2.1 VDR 1.3.X and older:
+2.1 VDR 1.4.x and older:
 ------------------------
 
-This version is not compatible to VDR releases older than 1.4.0. You will
-probably need one of the streamdev-0.3.x releases.
+This version is not compatible to VDR releases older than 1.5.9. Take one of
+the streamdev-0.4.x releases if you are running at least VDR 1.4.x. For older
+VDRs you will probably need one of the streamdev-0.3.x releases.
 
-2.2 VDR 1.4.X and above:
+2.2 VDR 1.6.0 and above:
 ------------------------
 
 cd vdr-1.X.X/PLUGINS/src
@@ -319,3 +320,29 @@ priority than the actual channel switch. The later always uses priority 0.
 Usually a channel switch for live TV has priority 0 anyway, so it is not a
 problem here. However timers usually have a higher priority. Either avoid
 client side recordings or set the priority of client side timers to 0.
+
+* There have been reports that channel switching with VDR 1.5.x/1.6.x clients
+sometimes fails. Current version includes a workaround which seems to work, but
+YMMV ;)
+
+* Viewing encrypted channels became an issue with VDR's new CAM handling code.
+Streamdev doesn't provide a (dummy) CAM, so out of the box, VDR won't ever try
+to receive encrypted channels from streamdev. Pick one of the following
+solutions to work around the problem:
+
+1. Force VDR to use streamdev. Open the channels menu on the client (or edit its
+channels.conf if you know how to do this) and set the CA field of all channels
+that only the server can decrypt to streamdev's device index. Usually streamdev
+will get number 9 or 10. Streamdev logs the actual device number when starting
+up. So please consider the logs for the correct value. Remember to fill in
+hexadecimal values if you are using an editor to modify your channels.conf
+(number 10 becomes an "a", number 11 a "b", ...).
+
+2. Turn encrypted channels into Free-to-Air channels on the client. Again,
+either enter the channels menu or edit the client's channels.conf. You will
+also have to disable automatic channel updates on the client or (if streamdev
+is the only DVB source) disable streamdev's filter streaming feature. Otherwise
+VDR will revert the channel into an encrypted one.
+
+3. Apply the patch "patches/vdr-1.6.0-ignore_missing_cam.diff" to your
+client VDR.

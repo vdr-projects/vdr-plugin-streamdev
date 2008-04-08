@@ -1,0 +1,100 @@
+# VDR streamdev plugin language source file.
+# Copyright (C) 2008 streamdev development team. See http://streamdev.vdr-developer.org
+# This file is distributed under the same license as the VDR streamdev package.
+# Frank Schmirler <vdrdev@schmirler.de>, 2008
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: streamdev 0.5.0\n"
+"Report-Msgid-Bugs-To: <http://www.vdr-developer.org/mantisbt/>\n"
+"POT-Creation-Date: 2008-04-01 17:05+0200\n"
+"PO-Revision-Date: 2008-03-30 02:11+0200\n"
+"Last-Translator: Frank Schmirler <vdrdev@schmirler.de>\n"
+"Language-Team: <vdr@linuxtv.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-15\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "VTP Streaming Client"
+msgstr "VTP Streaming Client"
+
+msgid "Suspend Server"
+msgstr "Server pausieren"
+
+msgid "Server is suspended"
+msgstr "Server ist pausiert"
+
+msgid "Couldn't suspend Server!"
+msgstr "Konnte Server nicht pausieren!"
+
+msgid "Start Client"
+msgstr "Client starten"
+
+msgid "Remote IP"
+msgstr "IP der Gegenseite"
+
+msgid "Remote Port"
+msgstr "Port der Gegenseite"
+
+msgid "Filter Streaming"
+msgstr "Metainformationen streamen"
+
+msgid "Synchronize EPG"
+msgstr "EPG synchronisieren"
+
+msgid "Hide Mainmenu Entry"
+msgstr "Hauptmenüeintrag verstecken"
+
+msgid "VDR Streaming Server"
+msgstr "VDR Streaming Server"
+
+msgid "Streaming active"
+msgstr "Streamen im Gange"
+
+msgid "Suspend Live TV"
+msgstr "Live-TV pausieren"
+
+msgid "Common Settings"
+msgstr "Allgemeines"
+
+msgid "Maximum Number of Clients"
+msgstr "Maximalanzahl an Clients"
+
+msgid "Suspend behaviour"
+msgstr "Pausierverhalten"
+
+msgid "Client may suspend"
+msgstr "Client darf pausieren"
+
+msgid "VDR-to-VDR Server"
+msgstr "VDR-zu-VDR Server"
+
+msgid "Start VDR-to-VDR Server"
+msgstr "VDR-zu-VDR Server starten"
+
+msgid "VDR-to-VDR Server Port"
+msgstr "Port des VDR-zu-VDR Servers"
+
+msgid "Bind to IP"
+msgstr "An bestimmte IP binden"
+
+msgid "HTTP Server"
+msgstr "HTTP Server"
+
+msgid "Start HTTP Server"
+msgstr "HTTP Server starten"
+
+msgid "HTTP Server Port"
+msgstr "Port des HTTP Servers"
+
+msgid "HTTP Streamtype"
+msgstr "HTTP Streamtyp"
+
+msgid "Offer suspend mode"
+msgstr "Pausieren anbieten"
+
+msgid "Always suspended"
+msgstr "Immer pausiert"
+
+msgid "Never suspended"
+msgstr "Nie pausiert"

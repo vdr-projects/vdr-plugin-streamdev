@@ -3,7 +3,7 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-server.c,v 1.7 2008/04/07 14:27:27 schmirl Exp $
+ * $Id: streamdev-server.c,v 1.8 2008/04/08 14:18:15 schmirl Exp $
  */
 
 #include <getopt.h>
@@ -12,13 +12,12 @@
 #include "server/server.h"
 #include "server/suspend.h"
 #include "remux/extern.h"
-#include "i18n.h"
 
-#if VDRVERSNUM < 10400
-#error "VDR-1.4.0 or greater is required"
+#if !defined(APIVERSNUM) || APIVERSNUM < 10509
+#error "VDR-1.5.9 API version or greater is required!"
 #endif
 
-const char *cPluginStreamdevServer::DESCRIPTION = "VDR Streaming Server";
+const char *cPluginStreamdevServer::DESCRIPTION = trNOOP("VDR Streaming Server");
 
 cPluginStreamdevServer::cPluginStreamdevServer(void) 
 {
@@ -62,9 +61,7 @@ bool cPluginStreamdevServer::ProcessArgs(int argc, char *argv[])
 
 bool cPluginStreamdevServer::Start(void) 
 {
-	i18n_name = Name();
-	RegisterI18n(Phrases);
-
+	I18nRegister(PLUGIN_NAME_I18N);
 	if (!StreamdevHosts.Load(STREAMDEVHOSTSPATH, true, true)) {
 		esyslog("streamdev-server: error while loading %s", STREAMDEVHOSTSPATH);
 		fprintf(stderr, "streamdev-server: error while loading %s\n", STREAMDEVHOSTSPATH);

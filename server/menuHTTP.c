@@ -364,10 +364,8 @@ std::string cHtmlChannelList::ItemText()
 
 // ******************** cM3uChannelList ******************
 cM3uChannelList::cM3uChannelList(cChannelIterator *Iterator, const char* Base)
-: cChannelList(Iterator)
-#if defined(APIVERSNUM) && APIVERSNUM >= 10503
-  , m_IConv(cCharSetConv::SystemCharacterTable(), "UTF-8")
-#endif
+: cChannelList(Iterator),
+  m_IConv(cCharSetConv::SystemCharacterTable(), "UTF-8")
 {
 	base = strdup(Base);
 	m3uState = msFirst;
@@ -398,11 +396,7 @@ std::string cM3uChannelList::Next()
 		return "";
 	}
 
-#if defined(APIVERSNUM) && APIVERSNUM >= 10503
 	std::string name = (std::string) m_IConv.Convert(channel->Name());
-#else
-	std::string name = channel->Name();
-#endif
 
 	if (channel->GroupSep())
 	{

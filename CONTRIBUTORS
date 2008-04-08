@@ -25,6 +25,7 @@ Rolf Ahrenberg
   for a TS PAT repacker based on Petri Laine's VDR TS recording patch
   for making it possible to pass parameters to externremux.sh
   for removing pre VDR 1.4 legacy code
+  for adding gettext support
 
 Rantanen Teemu
   for providing vdr-incompletesections.diff

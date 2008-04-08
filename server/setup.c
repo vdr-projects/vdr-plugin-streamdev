@@ -1,12 +1,11 @@
 /*
- *  $Id: setup.c,v 1.3 2008/04/07 14:50:33 schmirl Exp $
+ *  $Id: setup.c,v 1.4 2008/04/08 14:18:18 schmirl Exp $
  */
  
 #include <vdr/menuitems.h>
 
 #include "server/setup.h"
 #include "server/server.h"
-#include "i18n.h"
 
 cStreamdevServerSetup StreamdevServerSetup;
 

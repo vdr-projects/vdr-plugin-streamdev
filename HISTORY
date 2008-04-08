@@ -1,6 +1,11 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- added gettext support (thanks to Rolf Ahrenberg)
+- added vdr-1.6.0-ignore_missing_cam patch
+- dropped obsolete respect_ca patch
+- removed legacy code for < VDR 1.5.9 (thanks to Rolf Ahrenberg)
+
 2008-04-07: Branched v0_4
 
 - changed location of streamdevhosts.conf to VDRCONFDIR/plugins/streamdev
