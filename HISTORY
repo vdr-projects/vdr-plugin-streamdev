@@ -1,6 +1,9 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- updated Italian translation (thanks to Diego Pierotto)
+- removed some unused translations
+- added missing German translations
 - applied and removed respect_ca patch
 
 2008-04-07: Branched v0_4

@@ -1,5 +1,5 @@
 /*
- *  $Id: i18n.c,v 1.8 2008/04/07 14:50:32 schmirl Exp $
+ *  $Id: i18n.c,v 1.8.2.1 2008/04/14 07:12:34 schmirl Exp $
  */
  
 #include "i18n.h"
@@ -10,7 +10,7 @@ const tI18nPhrase Phrases[] = {
 	{	"VDR Streaming Server",		// English
 		"VDR Streaming Server",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Server trasmissione VDR",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -35,7 +35,7 @@ const tI18nPhrase Phrases[] = {
 	{	"VTP Streaming Client",		// English
 		"VTP Streaming Client",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Client trasmissione VTP",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -60,7 +60,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Start VDR-to-VDR Server",		// English
 		"VDR-zu-VDR Server starten",		// Deutsch
 		"",		// Slovenski
-		"Avvia il Server VDR-toVDR",		// Italiano
+		"Avvia Server VDR-a-VDR",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -85,7 +85,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Start HTTP Server",		// English
 		"HTTP Server starten",		// Deutsch
 		"",		// Slovenski
-		"Avvia il Server HTTP",		// Italiano
+		"Avvia Server HTTP",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -110,7 +110,7 @@ const tI18nPhrase Phrases[] = {
 	{	"HTTP Streamtype",		// English
 		"HTTP Streamtyp",		// Deutsch
 		"",		// Slovenski
-		"Tipo di Stream HTTP",		// Italiano
+		"Tipo flusso HTTP",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -135,7 +135,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Start Client",		// English
 		"Client starten",		// Deutsch
 		"",		// Slovenski
-		"Avvia il Client",		// Italiano
+		"Avvia Client",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -160,7 +160,7 @@ const tI18nPhrase Phrases[] = {
 	{	"VDR-to-VDR Server Port",		// English
 		"Port des VDR-zu-VDR Servers",		// Deutsch
 		"",		// Slovenski
-		"Porta del Server VDR-to-VDR",		// Italiano
+		"Porta Server VDR-a-VDR",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -185,7 +185,7 @@ const tI18nPhrase Phrases[] = {
 	{	"HTTP Server Port",		// English
 		"Port des HTTP Servers",		// Deutsch
 		"",		// Slovenski
-		"Porta del Server HTTP",		// Italiano
+		"Porta Server HTTP",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -210,7 +210,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Maximum Number of Clients",		// English
 		"Maximalanzahl an Clients",		// Deutsch
 		"",		// Slovenski
-		"Numero Massimo di Client",		// Italiano
+		"Numero massimo di Client",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -260,7 +260,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Remote Port",		// English
 		"Port der Gegenseite",		// Deutsch
 		"",		// Slovenski
-		"Porta del Server Remoto",		// Italiano
+		"Porta Server Remoto",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -282,35 +282,10 @@ const tI18nPhrase Phrases[] = {
 		"",		// Türkçe
 #endif
 	},
-	{	"Remote Streamtype",		// English
-		"Streamtyp von Gegenseite",		// Deutsch
-		"",		// Slovenski
-		"Tipo di Stream",		// Italiano (oppure Flusso ?)
-		"",		// Nederlands
-		"",		// Português
-		"",		// Français
-		"",		// Norsk
-		"Etäkoneen lähetysmuoto",		// suomi
-		"",		// Polski
-		"",		// Español
-		"",		// Ellinika
-		"",		// Svenska
-		"",		// Romaneste
-		"",		// Magyar
-		"",		// Catala
-		"",		// Russian
-		"",		// Hrvatski
-		"",		// Eesti
-		"",		// Dansk
-		"",		// Czech
-#if VDRVERSNUM >= 10502
-		"",		// Türkçe
-#endif
-	},
 	{	"Common Settings",		// English
 		"Allgemeines",		// Deutsch
 		"",		// Slovenski
-		"Settaggi Comuni",		// Italiano
+		"Impostazioni comuni",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -335,7 +310,7 @@ const tI18nPhrase Phrases[] = {
 	{	"VDR-to-VDR Server",		// English
 		"VDR-zu-VDR Server",		// Deutsch
 		"",		// Slovenski
-		"Server VDR-to-VDR",		// Italiano
+		"Server VDR-a-VDR",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -382,60 +357,10 @@ const tI18nPhrase Phrases[] = {
 		"",		// Türkçe
 #endif
 	},
-	{	"VDR-to-VDR Client",		// English
-		"VDR-zu-VDR Client",		// Deutsch
-		"",		// Slovenski
-		"Client VDR-to-VDR",		// Italiano
-		"",		// Nederlands
-		"",		// Português
-		"",		// Français
-		"",		// Norsk
-		"VDR-asiakas",		// suomi
-		"",		// Polski
-		"",		// Español
-		"",		// Ellinika
-		"",		// Svenska
-		"",		// Romaneste
-		"",		// Magyar
-		"",		// Catala
-		"",		// Russian
-		"",		// Hrvatski
-		"",		// Eesti
-		"",		// Dansk
-		"",		// Czech
-#if VDRVERSNUM >= 10502
-		"",		// Türkçe
-#endif
-	},
-	{	"Please restart VDR to activate changes",		// English
-		"Bitte starten Sie für die Änderungen VDR neu",		// Deutsch
-		"",		// Slovenski
-		"Riavviare VDR per attivare i cambiamenti",		// Italiano
-		"",		// Nederlands
-		"",		// Português
-		"",		// Français
-		"",		// Norsk
-		"Aktivoi muutokset käynnistämällä VDR uudelleen",		// suomi
-		"",		// Polski
-		"",		// Español
-		"",		// Ellinika
-		"",		// Svenska
-		"",		// Romaneste
-		"",		// Magyar
-		"",		// Catala
-		"",		// Russian
-		"",		// Hrvatski
-		"",		// Eesti
-		"",		// Dansk
-		"",		// Czech
-#if VDRVERSNUM >= 10502
-		"",		// Türkçe
-#endif
-	},
 	{	"Synchronize EPG",		// English
 		"EPG synchronisieren",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Sincronizza EPG",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -460,7 +385,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Suspend Live TV",		// English
 		"Live-TV pausieren",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Sospendi TV dal vivo",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -485,7 +410,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Suspend behaviour",		// English
 		"Pausierverhalten",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Tipo sospensione",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -510,7 +435,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Offer suspend mode",		// English
 		"Pausieren anbieten",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Offri mod. sospensione",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -535,7 +460,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Always suspended",		// English
 		"Immer pausiert",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Sempre sospeso",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -560,7 +485,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Never suspended",		// English
 		"Nie pausiert",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Mai sospeso",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -585,7 +510,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Suspend Server",		// English
 		"Server pausieren",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Sospendi Server",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -610,7 +535,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Server is suspended",		// English
 		"Server ist pausiert",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Server sospeso",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -635,7 +560,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Couldn't suspend Server!",		// English
 		"Konnte Server nicht pausieren!",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Impossibile sospendere il server!",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -660,7 +585,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Client may suspend",		// English
 		"Client darf pausieren",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Permetti sospensione al Client",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -683,9 +608,9 @@ const tI18nPhrase Phrases[] = {
 #endif
 	},
 	{	"Bind to IP",		// English
-		"",		// Deutsch
+		"Binde an IP",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"IP associati",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -708,9 +633,9 @@ const tI18nPhrase Phrases[] = {
 #endif
         },
 	{	"Filter Streaming",		// English
-		"",		// Deutsch
+		"Filter-Daten streamen",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Filtra trasmissione",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -735,7 +660,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Streaming active",		// English
 		"Streamen im Gange",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Trasmissione attiva",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -760,7 +685,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Hide Mainmenu Entry",		// English
 		"Hauptmenüeintrag verstecken",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Nascondi voce menu principale",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
