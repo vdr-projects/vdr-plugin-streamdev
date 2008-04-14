@@ -1,5 +1,5 @@
 /*
- *  $Id: i18n.c,v 1.8.2.1 2008/04/14 07:12:34 schmirl Exp $
+ *  $Id: i18n.c,v 1.8.2.2 2008/04/14 13:42:50 schmirl Exp $
  */
  
 #include "i18n.h"
@@ -13,7 +13,7 @@ const tI18nPhrase Phrases[] = {
 		"Server trasmissione VDR",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Serveur de streaming VDR",		// Français
 		"",		// Norsk
 		"VDR-suoratoistopalvelin",		// suomi
 		"",		// Polski
@@ -38,7 +38,7 @@ const tI18nPhrase Phrases[] = {
 		"Client trasmissione VTP",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Client de streaming VTP",		// Français
 		"",		// Norsk
 		"VTP-suoratoistoasiakas ",		// suomi
 		"",		// Polski
@@ -63,7 +63,7 @@ const tI18nPhrase Phrases[] = {
 		"Avvia Server VDR-a-VDR",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Démarrer le serveur VDR-to-VDR",		// Français
 		"",		// Norsk
 		"Käynnistä VDR-palvelin",		// suomi
 		"",		// Polski
@@ -88,7 +88,7 @@ const tI18nPhrase Phrases[] = {
 		"Avvia Server HTTP",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Démarrer le serveur HTTP",		// Français
 		"",		// Norsk
 		"Käynnistä HTTP-palvelin",		// suomi
 		"",		// Polski
@@ -113,7 +113,7 @@ const tI18nPhrase Phrases[] = {
 		"Tipo flusso HTTP",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Type de Streaming HTTP",		// Français
 		"",		// Norsk
 		"HTTP-lähetysmuoto",		// Suomi
 		"",		// Polski
@@ -138,7 +138,7 @@ const tI18nPhrase Phrases[] = {
 		"Avvia Client",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Démarrage du client",		// Français
 		"",		// Norsk
 		"Käynnistä VDR-asiakas",		// suomi
 		"",		// Polski
@@ -163,7 +163,7 @@ const tI18nPhrase Phrases[] = {
 		"Porta Server VDR-a-VDR",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Port du serveur VDR-to-VDR",		// Français
 		"",		// Norsk
 		"VDR-palvelimen portti",		// Suomi
 		"",		// Polski
@@ -188,7 +188,7 @@ const tI18nPhrase Phrases[] = {
 		"Porta Server HTTP",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Port du serveur HTTP",		// Français
 		"",		// Norsk
 		"HTTP-palvelimen portti",		// suomi
 		"",		// Polski
@@ -213,7 +213,7 @@ const tI18nPhrase Phrases[] = {
 		"Numero massimo di Client",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Nombre maximun de clients",		// Français
 		"",		// Norsk
 		"Suurin sallittu asiakkaiden määrä",		// suomi
 		"",		// Polski
@@ -238,7 +238,7 @@ const tI18nPhrase Phrases[] = {
 		"Indirizzo IP del Server",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Adresse IP du serveur",		// Français
 		"",		// Norsk
 		"Etäkoneen IP-osoite",		// suomi
 		"",		// Polski
@@ -263,7 +263,7 @@ const tI18nPhrase Phrases[] = {
 		"Porta Server Remoto",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Port du serveur",		// Français
 		"",		// Norsk
 		"Etäkoneen portti",		// suomi
 		"",		// Polski
@@ -288,7 +288,7 @@ const tI18nPhrase Phrases[] = {
 		"Impostazioni comuni",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Paramètres communs",		// Français
 		"",		// Norsk
 		"Yleiset asetukset",		// suomi
 		"",		// Polski
@@ -313,7 +313,7 @@ const tI18nPhrase Phrases[] = {
 		"Server VDR-a-VDR",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"VDR-to-VDR Serveur",		// Français
 		"",		// Norsk
 		"VDR-palvelin",		// suomi
 		"",		// Polski
@@ -338,7 +338,7 @@ const tI18nPhrase Phrases[] = {
 		"Server HTTP",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Serveur HTTP",		// Français
 		"",		// Norsk
 		"HTTP-palvelin",		// suomi
 		"",		// Polski
@@ -363,7 +363,7 @@ const tI18nPhrase Phrases[] = {
 		"Sincronizza EPG",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Synchroniser l'EPG",		// Français
 		"",		// Norsk
 		"Päivitä ohjelmaopas",		// suomi
 		"",		// Polski
@@ -388,7 +388,7 @@ const tI18nPhrase Phrases[] = {
 		"Sospendi TV dal vivo",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Suspendre Live TV",		// Français
 		"",		// Norsk
 		"Pysäytä suora TV-lähetys",		// suomi
 		"",		// Polski
@@ -413,7 +413,7 @@ const tI18nPhrase Phrases[] = {
 		"Tipo sospensione",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Suspendre",		// Français
 		"",		// Norsk
 		"Pysäytystoiminto",		// suomi
 		"",		// Polski
@@ -438,7 +438,7 @@ const tI18nPhrase Phrases[] = {
 		"Offri mod. sospensione",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Offrir le mode suspendre",		// Français
 		"",		// Norsk
 		"tyrkytä",		// suomi
 		"",		// Polski
@@ -463,7 +463,7 @@ const tI18nPhrase Phrases[] = {
 		"Sempre sospeso",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Toujours suspendre",		// Français
 		"",		// Norsk
 		"aina",		// suomi
 		"",		// Polski
@@ -488,7 +488,7 @@ const tI18nPhrase Phrases[] = {
 		"Mai sospeso",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Jamais suspendre",		// Français
 		"",		// Norsk
 		"ei koskaan",		// suomi
 		"",		// Polski
@@ -513,7 +513,7 @@ const tI18nPhrase Phrases[] = {
 		"Sospendi Server",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Suspendre le serveur",		// Français
 		"",		// Norsk
 		"Pysäytä palvelin",		// suomi
 		"",		// Polski
@@ -538,7 +538,7 @@ const tI18nPhrase Phrases[] = {
 		"Server sospeso",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Le serveur est suspendu",		// Français
 		"",		// Norsk
 		"Palvelin on pysäytetty",		// suomi
 		"",		// Polski
@@ -563,7 +563,7 @@ const tI18nPhrase Phrases[] = {
 		"Impossibile sospendere il server!",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Impossible de suspendre le serveur!",		// Français
 		"",		// Norsk
 		"Palvelinta ei onnistuttu pysäyttämään!",		// suomi
 		"",		// Polski
@@ -588,7 +588,7 @@ const tI18nPhrase Phrases[] = {
 		"Permetti sospensione al Client",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Le client peut suspendre",		// Français
 		"",		// Norsk
 		"Asiakas saa pysäyttää palvelimen",		// suomi
 		"",		// Polski
@@ -613,7 +613,7 @@ const tI18nPhrase Phrases[] = {
 		"IP associati",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Attacher aux IP",		// Français
 		"",		// Norsk
 		"Sido osoitteeseen",		// suomi
 		"",		// Polski
@@ -638,7 +638,7 @@ const tI18nPhrase Phrases[] = {
 		"Filtra trasmissione",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Filtre streaming",		// Français
 		"",		// Norsk
 		"Suodatetun tiedon suoratoisto",		// suomi
 		"",		// Polski
@@ -663,7 +663,7 @@ const tI18nPhrase Phrases[] = {
 		"Trasmissione attiva",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Streaming actif",		// Français
 		"",		// Norsk
 		"Suoratoistopalvelin aktiivinen",		// suomi
 		"",		// Polski
@@ -688,7 +688,7 @@ const tI18nPhrase Phrases[] = {
 		"Nascondi voce menu principale",		// Italiano
 		"",		// Nederlands
 		"",		// Português
-		"",		// Français
+		"Masquer dans le menu principal",		// Français
 		"",		// Norsk
 		"Piilota valinta päävalikosta",		// suomi
 		"",		// Polski
