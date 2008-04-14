@@ -37,7 +37,7 @@ msgid "Remote Port"
 msgstr "Port der Gegenseite"
 
 msgid "Filter Streaming"
-msgstr "Metainformationen streamen"
+msgstr "Filter-Daten streamen"
 
 msgid "Synchronize EPG"
 msgstr "EPG synchronisieren"
@@ -76,7 +76,7 @@ msgid "VDR-to-VDR Server Port"
 msgstr "Port des VDR-zu-VDR Servers"
 
 msgid "Bind to IP"
-msgstr "An bestimmte IP binden"
+msgstr "Binde an IP"
 
 msgid "HTTP Server"
 msgstr "HTTP Server"
