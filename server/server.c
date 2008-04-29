@@ -1,5 +1,5 @@
 /*
- *  $Id: server.c,v 1.5 2007/04/02 10:32:34 schmirl Exp $
+ *  $Id: server.c,v 1.6 2008/04/29 07:00:54 schmirl Exp $
  */
 
 #include "server/server.h"
@@ -13,6 +13,7 @@
 #include <errno.h>
 
 cSVDRPhosts StreamdevHosts;
+char *opt_remux = NULL;
 
 cStreamdevServer         *cStreamdevServer::m_Instance = NULL;
 cList<cServerComponent>   cStreamdevServer::m_Servers;

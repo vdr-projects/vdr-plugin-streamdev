@@ -7,8 +7,6 @@
 #include <signal.h>
 #include <unistd.h>
 
-const char *g_ExternRemux = EXTERNREMUXPATH;
-
 class cTSExt: public cThread {
 private:
 	cRingBufferLinear *m_ResultBuffer;
@@ -68,7 +66,7 @@ cTSExt::cTSExt(cRingBufferLinear *ResultBuffer, std::string Parameter):
 		for (int i = STDERR_FILENO + 1; i < MaxPossibleFileDescriptors; i++)
 			close(i); //close all dup'ed filedescriptors
 
-		std::string cmd = std::string(g_ExternRemux) + " " + Parameter;
+		std::string cmd = std::string(opt_remux) + " " + Parameter;
 		execl("/bin/sh", "sh", "-c", cmd.c_str(), NULL);
 		_exit(-1);
 	}

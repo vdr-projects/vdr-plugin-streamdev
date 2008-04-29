@@ -3,7 +3,7 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-server.c,v 1.8 2008/04/08 14:18:15 schmirl Exp $
+ * $Id: streamdev-server.c,v 1.9 2008/04/29 07:00:53 schmirl Exp $
  */
 
 #include <getopt.h>
@@ -25,6 +25,7 @@ cPluginStreamdevServer::cPluginStreamdevServer(void)
 
 cPluginStreamdevServer::~cPluginStreamdevServer() 
 {
+	free(opt_remux);
 }
 
 const char *cPluginStreamdevServer::Description(void) 
@@ -50,7 +51,9 @@ bool cPluginStreamdevServer::ProcessArgs(int argc, char *argv[])
 	while((c = getopt_long(argc, argv, "r:", long_options, NULL)) != -1) {
 		switch (c) {
 			case 'r':
-				g_ExternRemux = optarg;
+				if (opt_remux)
+				    free(opt_remux);
+				opt_remux = strdup(optarg);
 				break;
 			default:
 				return false;
@@ -74,6 +77,8 @@ bool cPluginStreamdevServer::Start(void)
 		}
 		return false;
 	}
+	if (!opt_remux)
+		opt_remux = strdup(DEFAULT_EXTERNREMUX);
 
 	cStreamdevServer::Initialize();
 
