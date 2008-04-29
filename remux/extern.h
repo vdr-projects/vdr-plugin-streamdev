@@ -5,8 +5,6 @@
 #include <vdr/ringbuffer.h>
 #include <string>
 
-extern const char *g_ExternRemux;
-
 class cTSExt;
 
 class cExternRemux: public cTSRemux {

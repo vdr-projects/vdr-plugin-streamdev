@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- fixed assignment of externremux.sh's default location (reported by plautze)
 - added French translation (thanks to micky979)
 - updated Italian translation (thanks to Diego Pierotto)
 - removed some unused translations
