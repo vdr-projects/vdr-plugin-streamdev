@@ -1,5 +1,5 @@
 /*
- *  $Id: i18n.c,v 1.8.2.2 2008/04/14 13:42:50 schmirl Exp $
+ *  $Id: i18n.c,v 1.8.2.3 2008/06/26 14:17:10 schmirl Exp $
  */
  
 #include "i18n.h"
@@ -23,7 +23,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"VDR Streaming сервер",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -48,7 +48,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"VTP Streaming клиент",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -73,7 +73,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Старт VDR-to-VDR сервер",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -98,7 +98,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Старт HTTP сервера",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -123,7 +123,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Тип HTTP потока",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -148,7 +148,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Старт клиента",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -173,7 +173,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"VDR-to-VDR порт сервера",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -198,7 +198,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"HTTP сервер Порт",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -223,7 +223,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Макс. количество клиентов",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -248,7 +248,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Удаленный IP",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -273,7 +273,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Удаленный порт",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -298,7 +298,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Настройки",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -323,7 +323,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"VDR-to-VDR сервер",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -348,7 +348,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"HTTP сервер",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -373,7 +373,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Синхронизация EPG",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -398,7 +398,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Остановка Live TV",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -423,7 +423,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Поведение остановки",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -448,7 +448,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Предлагать остановку",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -473,7 +473,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Всегда остановлен",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -498,7 +498,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Никогда не остановлен",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -523,7 +523,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Остановить сервер",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -548,7 +548,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Сервер остановлен",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -573,7 +573,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"не могу остановить сервер",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -598,7 +598,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Клиент может останавливать",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -623,7 +623,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Присоединиться к IP",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -648,7 +648,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Фильтр потока",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -673,7 +673,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Стриминг активен",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
@@ -698,7 +698,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Romaneste
 		"",		// Magyar
 		"",		// Catala
-		"",		// Russian
+		"Спрятать в главном меню",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
