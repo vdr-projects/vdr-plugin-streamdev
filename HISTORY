@@ -1,9 +1,10 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- added Russian translation (thanks to Oleg Roitburd)
 - fixed assignment of externremux.sh's default location (reported by plautze)
-- added french translations (thanks to micky979)
-- added italian translations (thanks to Diego Pierotto)
+- added French translation (thanks to micky979)
+- added Italian translation (thanks to Diego Pierotto)
 - added gettext support (thanks to Rolf Ahrenberg)
 - added vdr-1.6.0-ignore_missing_cam patch
 - dropped obsolete respect_ca patch
