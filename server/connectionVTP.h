@@ -12,9 +12,9 @@ class cLSTTHandler;
 
 class cConnectionVTP: public cServerConnection {
 	friend class cLSTEHandler;
-	// if your compiler doesn't understand the following statement
-	// (e.g. gcc 2.x), simply remove it and try again ;-)
+#if !defined __GNUC__ || __GNUC__ >= 3
 	using cServerConnection::Respond;
+#endif
 
 private:
 	cTBSocket                *m_LiveSocket;
