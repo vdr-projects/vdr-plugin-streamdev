@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- added preprocessor directive for ancient gcc
 - added Russian translation (thanks to Oleg Roitburd)
 - fixed assignment of externremux.sh's default location (reported by plautze)
 - added French translation (thanks to micky979)
