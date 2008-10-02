@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- fixed problem when switching from one encrypted channel to an other
+  (reported by Tiroler@vdrportal, initial bugfix by pixelpeter@vdrportal)
 - added preprocessor directive for ancient gcc
 - added Russian translation (thanks to Oleg Roitburd)
 - fixed assignment of externremux.sh's default location (reported by plautze)
