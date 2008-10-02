@@ -81,3 +81,12 @@ Diego Pierotto
  
 micky979
   for providing french language texts
+
+Tiroler
+  for reporting a problem when switching between encrypted channels
+
+Pixelpeter
+  for an initial fix to the "switching between ecncrypted channels" problem
+
+Anssi Hannula
+  for the vdr-1.6.0-ignore_missing_cam.diff patch
