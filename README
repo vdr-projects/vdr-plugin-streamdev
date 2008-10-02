@@ -344,5 +344,9 @@ also have to disable automatic channel updates on the client or (if streamdev
 is the only DVB source) disable streamdev's filter streaming feature. Otherwise
 VDR will revert the channel into an encrypted one.
 
-3. Apply the patch "patches/vdr-1.6.0-ignore_missing_cam.diff" to your
-client VDR.
+3. Apply either patch "patches/vdr-1.6.0-intcamdevices.patch" or patch
+"patches/vdr-1.6.0-ignore_missing_cam.diff" to your client VDR. Intcamdevices
+is the clean solution. But as it modifies the VDR API, so you will need to
+recompile all of your plugins. The ignore_missing_cam patch is trivial, no need
+to recompile other plugins. However it is not suitable for clients with a DVB
+card of their own.

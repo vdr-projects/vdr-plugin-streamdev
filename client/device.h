@@ -1,5 +1,5 @@
 /*
- *  $Id: device.h,v 1.7 2008/04/07 14:40:39 schmirl Exp $
+ *  $Id: device.h,v 1.8 2008/10/02 07:14:47 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_DEVICE_H
@@ -49,6 +49,7 @@ public:
 	cStreamdevDevice(void);
 	virtual ~cStreamdevDevice();
 
+	virtual bool HasInternalCam(void) { return true; }
 	virtual bool ProvidesSource(int Source) const;
 	virtual bool ProvidesTransponder(const cChannel *Channel) const;
 	virtual bool ProvidesChannel(const cChannel *Channel, int Priority = -1,
