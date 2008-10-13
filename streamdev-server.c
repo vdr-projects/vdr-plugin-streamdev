@@ -3,15 +3,15 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-server.c,v 1.9 2008/04/29 07:00:53 schmirl Exp $
+ * $Id: streamdev-server.c,v 1.10 2008/10/13 11:30:05 schmirl Exp $
  */
 
 #include <getopt.h>
+#include "remux/extern.h"
 #include "streamdev-server.h"
 #include "server/setup.h"
 #include "server/server.h"
 #include "server/suspend.h"
-#include "remux/extern.h"
 
 #if !defined(APIVERSNUM) || APIVERSNUM < 10509
 #error "VDR-1.5.9 API version or greater is required!"

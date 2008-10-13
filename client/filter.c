@@ -1,5 +1,5 @@
 /*
- *  $Id: filter.c,v 1.12 2008/04/07 14:27:28 schmirl Exp $
+ *  $Id: filter.c,v 1.13 2008/10/13 11:30:06 schmirl Exp $
  */
 
 #include "client/filter.h"
@@ -9,6 +9,7 @@
 
 #include <vdr/device.h>
 
+#define PID_MASK_HI 0x1F
 // --- cStreamdevFilter ------------------------------------------------------
 
 class cStreamdevFilter: public cListObject {
