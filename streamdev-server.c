@@ -3,10 +3,11 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-server.c,v 1.10 2008/10/13 11:30:05 schmirl Exp $
+ * $Id: streamdev-server.c,v 1.11 2008/10/14 11:05:47 schmirl Exp $
  */
 
 #include <getopt.h>
+#include <vdr/tools.h>
 #include "remux/extern.h"
 #include "streamdev-server.h"
 #include "server/setup.h"
@@ -25,6 +26,7 @@ cPluginStreamdevServer::cPluginStreamdevServer(void)
 
 cPluginStreamdevServer::~cPluginStreamdevServer() 
 {
+	free(opt_auth);
 	free(opt_remux);
 }
 
@@ -36,20 +38,35 @@ const char *cPluginStreamdevServer::Description(void)
 const char *cPluginStreamdevServer::CommandLineHelp(void)
 {
 	// return a string that describes all known command line options.
-	return "  -r <CMD>, --remux=<CMD>  Define an external command for remuxing.\n";
+	return
+		"  -a <LOGIN:PASSWORD>, --auth=<LOGIN:PASSWORD>  Credentials for HTTP authentication.\n"
+		"  -r <CMD>, --remux=<CMD>  Define an external command for remuxing.\n"
+		;
 }
 
 bool cPluginStreamdevServer::ProcessArgs(int argc, char *argv[])
 {
 	// implement command line argument processing here if applicable.
 	static const struct option long_options[] = {
+		{ "auth", required_argument, NULL, 'a' },
 		{ "remux", required_argument, NULL, 'r' },
 		{ NULL, 0, NULL, 0 }
 	};
 
 	int c;
-	while((c = getopt_long(argc, argv, "r:", long_options, NULL)) != -1) {
+	while((c = getopt_long(argc, argv, "a:r:", long_options, NULL)) != -1) {
 		switch (c) {
+			case 'a':
+				{
+					if (opt_auth)
+						free(opt_auth);
+					int l = strlen(optarg);
+					cBase64Encoder Base64((uchar*) optarg, l,  l * 4 / 3 + 3);
+					const char *s = Base64.NextLine();
+					if (s)
+						opt_auth = strdup(s);
+				}
+				break;
 			case 'r':
 				if (opt_remux)
 				    free(opt_remux);

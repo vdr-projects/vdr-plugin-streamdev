@@ -1,11 +1,12 @@
 /*
- *  $Id: connectionHTTP.c,v 1.13 2008/03/28 15:11:40 schmirl Exp $
+ *  $Id: connectionHTTP.c,v 1.14 2008/10/14 11:05:47 schmirl Exp $
  */
 
 #include <ctype.h>
  
 #include "server/connectionHTTP.h"
 #include "server/menuHTTP.h"
+#include "server/server.h"
 #include "server/setup.h"
 
 cConnectionHTTP::cConnectionHTTP(void): 
@@ -26,6 +27,11 @@ cConnectionHTTP::~cConnectionHTTP()
 	delete m_LiveStreamer;
 }
 
+bool cConnectionHTTP::CanAuthenticate(void)
+{
+	return opt_auth != NULL;
+}
+
 bool cConnectionHTTP::Command(char *Cmd) 
 {
 	Dprintf("command %s\n", Cmd);
@@ -44,6 +50,15 @@ bool cConnectionHTTP::Command(char *Cmd)
 		if (strncasecmp(Cmd, "Host:", 5) == 0) {
 			Dprintf("Host-Header\n");
 			m_Host = (std::string) skipspace(Cmd + 5);
+			return true;
+		}
+		else if (strncasecmp(Cmd, "Authorization:", 14) == 0) {
+			Cmd = skipspace(Cmd + 14);
+			if (strncasecmp(Cmd, "Basic", 5) == 0) {
+				Dprintf("'Authorization Basic'-Header\n");
+				m_Authorization = (std::string) skipspace(Cmd + 5);
+				return true;
+			}
 		}
 		Dprintf("header\n");
 		return true;
@@ -56,6 +71,16 @@ bool cConnectionHTTP::Command(char *Cmd)
 bool cConnectionHTTP::ProcessRequest(void) 
 {
 	Dprintf("process\n");
+	if (!StreamdevHosts.Acceptable(RemoteIpAddr()))
+	{
+		if (!opt_auth || m_Authorization.empty() || m_Authorization.compare(opt_auth) != 0) {
+			isyslog("streamdev-server: HTTP authorization required");
+			DeferClose();
+			return Respond("HTTP/1.0 401 Authorization Required")
+				&& Respond("WWW-authenticate: basic Realm=\"Streamdev-Server\")")
+				&& Respond("");
+		}
+	}
 	if (m_Request.substr(0, 4) == "GET " && CmdGET(m_Request.substr(4))) {
 		switch (m_Job) {
 		case hjListing:

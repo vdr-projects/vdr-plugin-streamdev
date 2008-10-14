@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.h,v 1.5 2007/04/16 11:01:02 schmirl Exp $
+ *  $Id: connection.h,v 1.6 2008/10/14 11:05:47 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVER_CONNECTION_H
@@ -46,6 +46,9 @@ public:
 	   will be displayed in error messages */
 	cServerConnection(const char *Protocol);
 	virtual ~cServerConnection();
+
+	/* If true, any client IP will be accepted */
+	virtual bool CanAuthenticate(void) { return false; }
 
 	/* Gets called if the client has been accepted by the core */
 	virtual void Welcome(void) { }

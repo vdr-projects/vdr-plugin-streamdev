@@ -118,16 +118,20 @@ make [options, if necessary] plugins
 ----------------------------------
 
 Starting with streamdev 0.4.0, all additional files are kept in a directory
-called "streamdev" inside VDR's plugin config directory. This affects in
-particular the file "streamdevhosts.conf". You will have to move it to its
-new location:
+called "streamdev" inside VDR's plugin config directory. It is the new default
+location of externremux.sh and the new place where streamdev-server expects the
+file "streamdevhosts.conf". You will have to move this file to its new location:
 
 mv VDRCONFDIR/plugins/streamdevhosts.conf VDRCONFDIR/plugins/streamdev/
 
 (Directory VDRCONFDIR/plugins/streamdev already exists, as you copied the
 whole folder from the sources directory as suggested above, right?)
 
-The new default location for externremux.sh is also in this directory.
+Now check the contents of streamdevhosts.conf. Does it contain a "0.0.0.0/0"
+entry? If your VDR machine is connected to the Internet, this line gives
+*anyone* full access to streamdev, unless you took some other measures to
+prevent this (e.g. firewall). You might want to remove this line and enable
+HTTP authentication instead.
 
 
 3. Usage:
@@ -204,6 +208,18 @@ With 'EXTERN' you can also add a parameter which is passed as argument to the
 externremux script.
 
 http://hostname:3000/EXTERN;some_parameter/3
+
+If you want to access streamdev's HTTP server from the Internet, do *not* grant
+access for anyone by allowing any IP in "streamdevhosts.conf". Instead, pass the
+"-a" commandline option to streamdev-server. It takes a username and a password
+as argument. Clients with an IP not accepted by "streamdevhosts.conf" will then
+have to login. The VDR commandline will have to look like this:
+
+vdr ... -P 'streamdev-server -a vdr:secret' ...
+
+Note the single quotes, as otherwise "-a" will be passed to VDR and not to
+streamdev-server. The login ("vdr" in the example above) doesn't have to exist
+as a system account.
 
 3.2 Usage VDR-to-VDR server:
 ----------------------------
