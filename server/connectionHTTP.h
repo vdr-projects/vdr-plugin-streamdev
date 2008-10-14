@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.h,v 1.5 2008/03/28 15:11:40 schmirl Exp $
+ *  $Id: connectionHTTP.h,v 1.5.2.1 2008/10/14 11:05:59 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVERS_CONNECTIONHTTP_H
@@ -30,6 +30,7 @@ private:
 
 	std::string                       m_Request;
 	std::string                       m_Host;
+	std::string                       m_Authorization;
 	//std::map<std::string,std::string> m_Headers; TODO: later?
 	eHTTPStatus                       m_Status;
 	eHTTPJob                          m_Job;
@@ -51,6 +52,8 @@ public:
 
 	virtual void Attach(void) { if (m_LiveStreamer != NULL) m_LiveStreamer->Attach(); }
 	virtual void Detach(void) { if (m_LiveStreamer != NULL) m_LiveStreamer->Detach(); }
+
+	virtual bool CanAuthenticate(void);
 
 	virtual bool Command(char *Cmd);
 	bool CmdGET(const std::string &Opts);

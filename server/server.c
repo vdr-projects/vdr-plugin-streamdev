@@ -1,5 +1,5 @@
 /*
- *  $Id: server.c,v 1.5.2.1 2008/04/29 07:01:00 schmirl Exp $
+ *  $Id: server.c,v 1.5.2.2 2008/10/14 11:05:59 schmirl Exp $
  */
 
 #include "server/server.h"
@@ -13,6 +13,7 @@
 #include <errno.h>
 
 cSVDRPhosts StreamdevHosts;
+char *opt_auth = NULL;
 char *opt_remux = NULL;
 
 cStreamdevServer         *cStreamdevServer::m_Instance = NULL;
@@ -122,7 +123,7 @@ void cStreamdevServer::Action(void)
 					esyslog("streamdev: too many clients, rejecting %s:%d",
 					        client->RemoteIp().c_str(), client->RemotePort());
 					client->Reject();
-				} else if (!StreamdevHosts.Acceptable(client->RemoteIpAddr())) {
+				} else if (!client->CanAuthenticate() && !StreamdevHosts.Acceptable(client->RemoteIpAddr())) {
 					esyslog("streamdev: client %s:%d not allowed to connect",
 					        client->RemoteIp().c_str(), client->RemotePort());
 					client->Reject();
