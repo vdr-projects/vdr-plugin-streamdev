@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.c,v 1.16 2007/09/21 11:45:53 schmirl Exp $
+ *  $Id: streamer.c,v 1.17 2008/10/22 11:59:32 schmirl Exp $
  */
  
 #include <vdr/ringbuffer.h>
@@ -20,16 +20,15 @@ cStreamdevWriter::cStreamdevWriter(cTBSocket *Socket,
                                    cStreamdevStreamer *Streamer):
 		cThread("streamdev-writer"),
 		m_Streamer(Streamer),
-		m_Socket(Socket),
-		m_Active(false)
+		m_Socket(Socket)
 {
 }
 
 cStreamdevWriter::~cStreamdevWriter()
 {
 	Dprintf("destructing writer\n");
-	m_Active = false;
-	Cancel(3);
+	if (Running())
+		Cancel(3);
 }
 
 void cStreamdevWriter::Action(void)
@@ -39,11 +38,10 @@ void cStreamdevWriter::Action(void)
 	int max = 0;
 	uchar *block = NULL;
 	int count, offset = 0;
-	m_Active = true;
 
 	sel.Clear();
 	sel.Add(*m_Socket, true);
-	while (m_Active) {
+	while (Running()) {
 		if (block == NULL) {
 			block = m_Streamer->Get(count);
 			offset = 0;
@@ -73,7 +71,6 @@ void cStreamdevWriter::Action(void)
 			}
 		}
 	}
-	m_Active = false;
 	Dprintf("Max. Transmit Blocksize was: %d\n", max);
 }
 
@@ -81,7 +78,6 @@ void cStreamdevWriter::Action(void)
 
 cStreamdevStreamer::cStreamdevStreamer(const char *Name):
 		cThread(Name),
-		m_Active(false),
 		m_Running(false),
 		m_Writer(NULL),
 		m_RingBuffer(new cRingBufferLinear(STREAMERBUFSIZE, TS_SIZE * 2,
@@ -109,7 +105,7 @@ void cStreamdevStreamer::Start(cTBSocket *Socket)
 
 void cStreamdevStreamer::Activate(bool On) 
 {
-	if (On && !m_Active) {
+	if (On && !Active()) {
 		Dprintf("activate streamer\n");
 		m_Writer->Start();
 		cThread::Start();
@@ -118,9 +114,8 @@ void cStreamdevStreamer::Activate(bool On)
 
 void cStreamdevStreamer::Stop(void) 
 {
-	if (m_Active) {
+	if (Running()) {
 		Dprintf("stopping streamer\n");
-		m_Active = false;
 		Cancel(3);
 	}
 	if (m_Running) {
@@ -132,8 +127,7 @@ void cStreamdevStreamer::Stop(void)
 
 void cStreamdevStreamer::Action(void) 
 {
-	m_Active = true;
-	while (m_Active) {
+	while (Running()) {
 		int got;
 		uchar *block = m_RingBuffer->Get(got);
 
