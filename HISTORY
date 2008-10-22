@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- fixed output format of some debug messages (thanks to Rolf Ahrenberg)
 - added HTTP authentication
 - compatibility for VDR 1.7.1 (thanks to Udo Richter)
 - added vdr-1.6.0-intcamdevices.patch (thanks to Anssi Hannula)

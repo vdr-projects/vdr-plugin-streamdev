@@ -26,6 +26,7 @@ Rolf Ahrenberg
   for making it possible to pass parameters to externremux.sh
   for removing pre VDR 1.4 legacy code
   for adding gettext support
+  for fixing output format of some debug messages
 
 Rantanen Teemu
   for providing vdr-incompletesections.diff
