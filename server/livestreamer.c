@@ -86,7 +86,7 @@ public:
 
 cStreamdevPatFilter::cStreamdevPatFilter(cStreamdevLiveStreamer *Streamer, const cChannel *Channel)
 {
-	Dprintf("cStreamdevPatFilter(\"%s\")", Channel->Name());
+	Dprintf("cStreamdevPatFilter(\"%s\")\n", Channel->Name());
 	assert(Streamer);
 	m_Channel = Channel;
 	m_Streamer = Streamer;
@@ -145,7 +145,7 @@ int cStreamdevPatFilter::GetPid(SI::PMT::Stream& stream)
 	case 0x10: // ISO/IEC 14496-2 Visual (MPEG-4)
 	case 0x11: // ISO/IEC 14496-3 Audio with LATM transport syntax
 	case 0x1b: // ISO/IEC 14496-10 Video (MPEG-4 part 10/AVC, aka H.264)
-		Dprintf("cStreamdevPatFilter PMT scanner adding PID %d (%s)",
+		Dprintf("cStreamdevPatFilter PMT scanner adding PID %d (%s)\n",
 			stream.getPid(), psStreamTypes[stream.getStreamType()]);
 		return stream.getPid();
 	case 0x05: // ISO/IEC 13818-1 private sections
@@ -153,19 +153,19 @@ int cStreamdevPatFilter::GetPid(SI::PMT::Stream& stream)
 		for (SI::Loop::Iterator it; (d = stream.streamDescriptors.getNext(it)); ) {
 			switch (d->getDescriptorTag()) {
 			case SI::AC3DescriptorTag:
-				Dprintf("cStreamdevPatFilter PMT scanner: adding PID %d (%s) %s", 
+				Dprintf("cStreamdevPatFilter PMT scanner: adding PID %d (%s) %s\n",
 					stream.getPid(), psStreamTypes[stream.getStreamType()], "AC3");
 				return stream.getPid();
 			case SI::TeletextDescriptorTag:
-				Dprintf("cStreamdevPatFilter PMT scanner: adding PID %d (%s) %s", 
+				Dprintf("cStreamdevPatFilter PMT scanner: adding PID %d (%s) %s\n",
 					stream.getPid(), psStreamTypes[stream.getStreamType()], "Teletext");
 				return stream.getPid();
 			case SI::SubtitlingDescriptorTag:
-				Dprintf("cStreamdevPatFilter PMT scanner: adding PID %d (%s) %s", 
+				Dprintf("cStreamdevPatFilter PMT scanner: adding PID %d (%s) %s\n",
 					stream.getPid(), psStreamTypes[stream.getStreamType()], "DVBSUB");
 				return stream.getPid();
 			default:
-				Dprintf("cStreamdevPatFilter PMT scanner: NOT adding PID %d (%s) %s", 
+				Dprintf("cStreamdevPatFilter PMT scanner: NOT adding PID %d (%s) %s\n",
 					stream.getPid(), psStreamTypes[stream.getStreamType()], "UNKNOWN");
 				break;
 			}
@@ -210,7 +210,7 @@ int cStreamdevPatFilter::GetPid(SI::PMT::Stream& stream)
 				return stream.getPid();
 			}
 		}
-		Dprintf("cStreamdevPatFilter PMT scanner: NOT adding PID %d (%s) %s",
+		Dprintf("cStreamdevPatFilter PMT scanner: NOT adding PID %d (%s) %s\n",
 			stream.getPid(), psStreamTypes[stream.getStreamType()<0x1c?stream.getStreamType():0], "UNKNOWN");
 		break;
 	}
@@ -230,7 +230,7 @@ void cStreamdevPatFilter::Process(u_short Pid, u_char Tid, const u_char *Data, i
 					const cChannel *Channel =  Channels.GetByServiceID(Source(), Transponder(), assoc.getServiceId());
 					if (Channel && (Channel == m_Channel)) {
 						if (0 != (pmtPid = assoc.getPid())) {
-							Dprintf("cStreamdevPatFilter: PMT pid for channel %s: %d", Channel->Name(), pmtPid);
+							Dprintf("cStreamdevPatFilter: PMT pid for channel %s: %d\n", Channel->Name(), pmtPid);
 							pmtSid = assoc.getServiceId();
 							if (Length < TS_SIZE-5) {
 								// repack PAT to TS frame and send to client
@@ -295,7 +295,7 @@ void cStreamdevPatFilter::Process(u_short Pid, u_char Tid, const u_char *Data, i
 			return; // skip broken PMT records
 		if (pmtVersion != -1) {
 			if (pmtVersion != pmt.getVersionNumber()) {
-				Dprintf("cStreamdevPatFilter: PMT version changed, detaching all pids");
+				Dprintf("cStreamdevPatFilter: PMT version changed, detaching all pids\n");
 				Del(pmtPid, 0x02);
 				pmtPid = 0; // this triggers PAT scan
 			}

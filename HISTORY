@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- fixed output format of some debug messages (thanks to Rolf Ahrenberg)
 - added HTTP authentication
 - added preprocessor directive for ancient gcc
 - added Russian translation (thanks to Oleg Roitburd)
