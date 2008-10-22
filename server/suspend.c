@@ -1,5 +1,5 @@
 /*
- *  $Id: suspend.c,v 1.2 2008/04/07 14:27:31 schmirl Exp $
+ *  $Id: suspend.c,v 1.2.2.1 2008/10/22 11:59:37 schmirl Exp $
  */
  
 #include "server/suspend.h"
@@ -12,6 +12,7 @@ cSuspendLive::cSuspendLive(void)
 }
 
 cSuspendLive::~cSuspendLive() {
+	Stop();
 	Detach();
 }
 
@@ -24,17 +25,14 @@ void cSuspendLive::Activate(bool On) {
 }
 
 void cSuspendLive::Stop(void) {
-	if (m_Active) {
-		m_Active = false;
+	if (Running())
 		Cancel(3);
-	}
 }
 
 void cSuspendLive::Action(void) {
-	m_Active = true;
-	while (m_Active) {
+	while (Running()) {
 		DeviceStillPicture(suspend_mpg, sizeof(suspend_mpg));
-		usleep(100000);
+		cCondWait::SleepMs(100);
 	}
 }
 
@@ -51,7 +49,7 @@ cSuspendCtl::~cSuspendCtl() {
 }
 
 eOSState cSuspendCtl::ProcessKey(eKeys Key) {
-	if (!m_Suspend->IsActive() || Key == kBack) {
+	if (!m_Suspend->Active() || Key == kBack) {
 		DELETENULL(m_Suspend);
 		return osEnd;
 	}

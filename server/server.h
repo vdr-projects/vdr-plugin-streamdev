@@ -1,5 +1,5 @@
 /*
- *  $Id: server.h,v 1.3.2.2 2008/10/14 11:05:59 schmirl Exp $
+ *  $Id: server.h,v 1.3.2.3 2008/10/22 11:59:37 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVER_H
@@ -18,8 +18,6 @@ extern char *opt_remux;
 
 class cStreamdevServer: public cThread {
 private:
-	bool m_Active;
-
 	static cStreamdevServer         *m_Instance;
 	static cList<cServerComponent>   m_Servers;
 	static cList<cServerConnection>  m_Clients;

@@ -1,5 +1,5 @@
 /*
- *  $Id: server.c,v 1.5.2.2 2008/10/14 11:05:59 schmirl Exp $
+ *  $Id: server.c,v 1.5.2.3 2008/10/22 11:59:37 schmirl Exp $
  */
 
 #include "server/server.h"
@@ -21,8 +21,7 @@ cList<cServerComponent>   cStreamdevServer::m_Servers;
 cList<cServerConnection>  cStreamdevServer::m_Clients;
 
 cStreamdevServer::cStreamdevServer(void):
-		cThread("streamdev server"),
-		m_Active(false)
+		cThread("streamdev server")
 {
 	Start();
 }
@@ -49,10 +48,8 @@ void cStreamdevServer::Destruct(void)
 
 void cStreamdevServer::Stop(void) 
 {
-	if (m_Active) {
-		m_Active = false;
+	if (Running())
 		Cancel(3);
-	}
 }
 
 void cStreamdevServer::Register(cServerComponent *Server) 
@@ -62,8 +59,6 @@ void cStreamdevServer::Register(cServerComponent *Server)
 
 void cStreamdevServer::Action(void) 
 {
-	m_Active = true;
-
 	/* Initialize Server components, deleting those that failed */
 	for (cServerComponent *c = m_Servers.First(); c;) {
 		cServerComponent *next = m_Servers.Next(c);
@@ -74,11 +69,15 @@ void cStreamdevServer::Action(void)
 			
 	if (m_Servers.Count() == 0) {
 		esyslog("ERROR: no streamdev server activated, exiting");
-		m_Active = false;
+#if VDRVERSNUM > 10403
+		Cancel(-1);
+#else
+		return;
+#endif
 	}
 
 	cTBSelect select;
-	while (m_Active) {
+	while (Running()) {
 		select.Clear();
 
 		/* Ask all Server components to register to the selector */
@@ -104,9 +103,9 @@ void cStreamdevServer::Action(void)
 						sel = 0;
 				}
 			}
-		} while (sel < 0 && errno == ETIMEDOUT && m_Active);
+		} while (sel < 0 && errno == ETIMEDOUT && Running());
 
-		if (!m_Active)
+		if (!Running())
 			break;
 		if (sel < 0) {
 			esyslog("fatal error, server exiting: %m");
@@ -166,6 +165,4 @@ void cStreamdevServer::Action(void)
 		c->Destruct();
 		m_Servers.Del(c);
 	}
-
-	m_Active = false;
 }

@@ -1,6 +1,8 @@
-VDR Plugin 'streamdev' Revision History
+eDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- use cThread::Running()/Active() instead of private members (thanks to
+  Rolf Ahrenberg)
 - fixed output format of some debug messages (thanks to Rolf Ahrenberg)
 - added HTTP authentication
 - added preprocessor directive for ancient gcc
