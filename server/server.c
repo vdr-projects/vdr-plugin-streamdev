@@ -1,5 +1,5 @@
 /*
- *  $Id: server.c,v 1.8 2008/10/22 11:59:32 schmirl Exp $
+ *  $Id: server.c,v 1.9 2008/10/31 12:19:57 schmirl Exp $
  */
 
 #include "server/server.h"
@@ -112,6 +112,8 @@ void cStreamdevServer::Action(void)
 		for (cServerComponent *c = m_Servers.First(); c; c = m_Servers.Next(c)){
 			if (sel && select.CanRead(c->Socket())) {
 				cServerConnection *client = c->Accept();
+				if (!client)
+					continue;
 				m_Clients.Add(client);
 
 				if (m_Clients.Count() > StreamdevServerSetup.MaxClients) {

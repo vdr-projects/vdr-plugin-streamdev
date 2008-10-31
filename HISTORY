@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- fixed null pointer in server.c when cConnection::Accept() failes
 - consider Pids from channels.conf when HTTP TS streaming. Section filtering
   is an optional feature for VDR devices, so we must not rely on the PMT
   alone (pointed out by wirbel@vdrportal)
