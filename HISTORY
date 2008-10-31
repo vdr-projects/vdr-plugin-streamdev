@@ -1,6 +1,9 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- consider Pids from channels.conf when HTTP TS streaming. Section filtering
+  is an optional feature for VDR devices, so we must not rely on the PMT
+  alone (pointed out by wirbel@vdrportal)
 - improved externremux script termination (thanks to Rolf Ahrenberg)
 - use cThread::Running()/Active() instead of private members (thanks to
   Rolf Ahrenberg)

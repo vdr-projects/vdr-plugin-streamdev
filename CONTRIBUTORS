@@ -94,3 +94,6 @@ Pixelpeter
 
 Anssi Hannula
   for the vdr-1.6.0-ignore_missing_cam.diff patch
+
+wirbel
+  for pointing out that section filtering is optional for VDR devices

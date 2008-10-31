@@ -470,6 +470,10 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 			Detach();
 			DELETENULL(m_PatFilter);
 		}
+		// Set pids from cChannel
+		SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
+		if (m_Channel->Vpid() != m_Channel->Ppid())
+			SetPid(m_Channel->Ppid(), true);
 		// Set pids from PMT
 		m_PatFilter = new cStreamdevPatFilter(this, m_Channel);
 		return true;
