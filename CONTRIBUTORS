@@ -27,6 +27,7 @@ Rolf Ahrenberg
   for removing pre VDR 1.4 legacy code
   for fixing output format of some debug messages
   for replacing private members by cThread::Running()/Active()
+  for improving externremux script termination
 
 Rantanen Teemu
   for providing vdr-incompletesections.diff
