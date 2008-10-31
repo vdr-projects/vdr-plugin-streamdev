@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- improved externremux script termination (thanks to Rolf Ahrenberg)
 - use cThread::Running()/Active() instead of private members (thanks to
   Rolf Ahrenberg)
 - fixed output format of some debug messages (thanks to Rolf Ahrenberg)

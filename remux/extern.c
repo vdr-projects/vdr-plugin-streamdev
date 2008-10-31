@@ -27,7 +27,7 @@ public:
 cTSExt::cTSExt(cRingBufferLinear *ResultBuffer, std::string Parameter):
 		m_ResultBuffer(ResultBuffer),
 		m_Active(false),
-		m_Process(0),
+		m_Process(-1),
 		m_Inpipe(0),
 		m_Outpipe(0)
 {
@@ -67,8 +67,12 @@ cTSExt::cTSExt(cRingBufferLinear *ResultBuffer, std::string Parameter):
 			close(i); //close all dup'ed filedescriptors
 
 		std::string cmd = std::string(opt_remux) + " " + Parameter;
-		execl("/bin/sh", "sh", "-c", cmd.c_str(), NULL);
-		_exit(-1);
+		if (execl("/bin/sh", "sh", "-c", cmd.c_str(), NULL) == -1) {
+			esyslog("streamdev-server: externremux script '%s' execution failed: %m", cmd.c_str());
+			_exit(-1);
+		}
+		// should never be reached
+		_exit(0);
 	}
 
 	close(inpipe[0]);
@@ -83,16 +87,31 @@ cTSExt::~cTSExt()
 	m_Active = false;
 	Cancel(3);
 	if (m_Process > 0) {
+		// close pipes
 		close(m_Outpipe);
 		close(m_Inpipe);
-		kill(m_Process, SIGTERM);
-		for (int i = 0; waitpid(m_Process, NULL, WNOHANG) == 0; i++) {
-			if (i == 20) {
-				esyslog("streamdev-server: externremux process won't stop - killing it");
-				kill(m_Process, SIGKILL);
-			}
-			cCondWait::SleepMs(100);
+		// signal and wait for termination
+		if (kill(m_Process, SIGINT) < 0) {
+			esyslog("streamdev-server: externremux SIGINT failed: %m");
 		}
+		else {
+			int i = 0;
+			int retval;
+			while ((retval = waitpid(m_Process, NULL, WNOHANG)) == 0) {
+
+				if ((++i % 20) == 0) {
+					esyslog("streamdev-server: externremux process won't stop - killing it");
+					kill(m_Process, SIGKILL);
+				}
+				cCondWait::SleepMs(100);
+			}
+
+			if (retval < 0)
+				esyslog("streamdev-server: externremux process waitpid failed: %m");
+			else
+				Dprintf("streamdev-server: externremux child (%d) exited as expected\n", m_Process);
+		}
+		m_Process = -1;
 	}
 }
 

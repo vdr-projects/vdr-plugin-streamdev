@@ -28,6 +28,7 @@ Rolf Ahrenberg
   for adding gettext support
   for fixing output format of some debug messages
   for replacing private members by cThread::Running()/Active()
+  for improving externremux script termination
 
 Rantanen Teemu
   for providing vdr-incompletesections.diff
