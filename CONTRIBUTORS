@@ -29,6 +29,7 @@ Rolf Ahrenberg
   for fixing output format of some debug messages
   for replacing private members by cThread::Running()/Active()
   for improving externremux script termination
+  for fixing PAT repacker version field
 
 Rantanen Teemu
   for providing vdr-incompletesections.diff
@@ -97,3 +98,6 @@ Anssi Hannula
 
 wirbel
   for pointing out that section filtering is optional for VDR devices
+
+Jori Hamalainen
+  for extensive testing while making stream compatible to Network Media Tank
