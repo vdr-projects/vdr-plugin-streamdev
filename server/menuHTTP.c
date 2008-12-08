@@ -112,10 +112,10 @@ const cChannel* cChannelList::GetGroup(int Index)
 
 // ******************** cHtmlChannelList ******************
 const char* cHtmlChannelList::menu =
-	"[<a href=\"/\">Home</a> (<a href=\"all.html\">no script</a>)] "
-	"[<a href=\"tree.html\">Tree View</a>] "
-	"[<a href=\"groups.html\">Groups</a> (<a href=\"groups.m3u\">Playlist</a>)] "
-	"[<a href=\"channels.html\">Channels</a> (<a href=\"channels.m3u\">Playlist</a>)] ";
+	"[<a href=\"/\">Home</a> (<a href=\"all.html\" tvid=\"RED\">no script</a>)] "
+	"[<a href=\"tree.html\" tvid=\"GREEN\">Tree View</a>] "
+	"[<a href=\"groups.html\" tvid=\"YELLOW\">Groups</a> (<a href=\"groups.m3u\">Playlist</a>)] "
+	"[<a href=\"channels.html\" tvid=\"BLUE\">Channels</a> (<a href=\"channels.m3u\">Playlist</a>)] ";
 
 const char* cHtmlChannelList::css =
 	"<style type=\"text/css\">\n"
@@ -336,9 +336,24 @@ std::string cHtmlChannelList::GroupTitle()
 std::string cHtmlChannelList::ItemText()
 {
 	std::string line;
+	std::string suffix;
+
+	switch (streamType) {
+		case stTS: suffix = (std::string) ".ts"; break;
+		case stPS: suffix = (std::string) ".vob"; break;
+		// for Network Media Tank
+		case stPES: suffix = (std::string) ".vdr"; break; 
+		default: suffix = "";
+	}
 	line += (std::string) "<li value=\"" + (const char*) itoa(current->Number()) + "\">";
-	line += (std::string) "<a href=\"" + (std::string) current->GetChannelID().ToString() + "\">" +
-		current->Name() + "</a>";
+	line += (std::string) "<a href=\"" + (std::string) current->GetChannelID().ToString() + suffix + "\"";
+
+	// for Network Media Tank
+	line += (std::string) " vod ";
+	if (current->Number() < 1000)
+	    line += (std::string) " tvid=\"" + (const char*) itoa(current->Number()) + "\""; 
+
+	line += (std::string) ">" + current->Name() + "</a>";
 
 	int count = 0;
 	for (int i = 0; current->Apid(i) != 0; ++i, ++count)
@@ -351,11 +366,11 @@ std::string cHtmlChannelList::ItemText()
 		int index = 1;
 		for (int i = 0; current->Apid(i) != 0; ++i, ++index) {
 			line += (std::string) " <a href=\"" + (std::string) current->GetChannelID().ToString() +
-					"+" + (const char*)itoa(index) + "\" class=\"apid\">" + current->Alang(i) + "</a>";
+					"+" + (const char*)itoa(index) + suffix + "\" class=\"apid\" vod>" + current->Alang(i) + "</a>";
 			}
 		for (int i = 0; current->Dpid(i) != 0; ++i, ++index) {
 			line += (std::string) " <a href=\"" + (std::string) current->GetChannelID().ToString() +
-					"+" + (const char*)itoa(index) + "\" class=\"dpid\">" + current->Dlang(i) + "</a>";
+					"+" + (const char*)itoa(index) + suffix + "\" class=\"dpid\" vod>" + current->Dlang(i) + "</a>";
 			}
 	}
 	line += "</li>";

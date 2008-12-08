@@ -1,6 +1,8 @@
 eDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- added Network Media Tank browser support to HTML pages (thanks to Jori
+  Hamalainen)
 - minor fixes of PAT repacker
 - repack and send every PAT packet we receive
 - fixed null pointer in server.c when cConnection::Accept() failes
