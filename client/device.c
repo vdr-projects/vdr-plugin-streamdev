@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.20 2008/10/02 06:56:36 schmirl Exp $
+ *  $Id: device.c,v 1.21 2009/01/14 07:35:51 schmirl Exp $
  */
  
 #include "client/device.h"
@@ -107,10 +107,12 @@ bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel,
 	if (LiveView)
 		return false;
 
+#if 0
 	if (ClientSocket.DataSocket(siLive) != NULL 
 			&& TRANSPONDER(Channel, m_Channel)
 			&& Channel->Ca() < CA_ENCRYPTED_MIN)
 		return true;
+#endif
 
 	DetachAllReceivers();
 	m_Channel = Channel;
