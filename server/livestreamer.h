@@ -10,7 +10,9 @@
 class cTS2PSRemux;
 class cTS2ESRemux;
 class cExternRemux;
+#if APIVERSNUM < 10703
 class cRemux;
+#endif
 class cStreamdevPatFilter;
 class cStreamdevLiveReceiver;
 
@@ -27,7 +29,9 @@ private:
 	cDevice                *m_Device;
 	cStreamdevLiveReceiver *m_Receiver;
 	cStreamdevPatFilter    *m_PatFilter;
+#if APIVERSNUM < 10703
 	cRemux                 *m_PESRemux;
+#endif
 	cTS2ESRemux            *m_ESRemux;
 	cTS2PSRemux            *m_PSRemux;
 	cExternRemux           *m_ExtRemux;

@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- disabled PES for VDR 1.7.3+
 - added Network Media Tank browser support to HTML pages (thanks to Jori
   Hamalainen)
 - minor fixes of PAT repacker

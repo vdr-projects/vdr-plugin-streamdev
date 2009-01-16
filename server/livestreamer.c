@@ -329,7 +329,9 @@ cStreamdevLiveStreamer::cStreamdevLiveStreamer(int Priority, std::string Paramet
 		m_Device(NULL),
 		m_Receiver(NULL),
 		m_PatFilter(NULL),
+#if APIVERSNUM < 10703
 		m_PESRemux(NULL),
+#endif
 		m_ESRemux(NULL),
 		m_PSRemux(NULL),
 		m_ExtRemux(NULL)
@@ -345,7 +347,9 @@ cStreamdevLiveStreamer::~cStreamdevLiveStreamer()
 		DELETENULL(m_PatFilter);
 	}
 	DELETENULL(m_Receiver);
+#if APIVERSNUM < 10703
 	delete m_PESRemux;
+#endif
 	delete m_ESRemux;
 	delete m_PSRemux;
 	delete m_ExtRemux;
@@ -459,10 +463,12 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 			return SetPids(pid);
 		}
 
+#if APIVERSNUM < 10703
 	case stPES: 
 		m_PESRemux = new cRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(), 
 								m_Channel->Spids(), false);
 		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
+#endif
 
 	case stPS:  
 		m_PSRemux = new cTS2PSRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(),
@@ -502,8 +508,10 @@ int cStreamdevLiveStreamer::Put(const uchar *Data, int Count)
 	case stTSPIDS:
 		return cStreamdevStreamer::Put(Data, Count);
 
+#if APIVERSNUM < 10703
 	case stPES:
 		return m_PESRemux->Put(Data, Count);
+#endif
 
 	case stES:
 		return m_ESRemux->Put(Data, Count);
@@ -526,8 +534,10 @@ uchar *cStreamdevLiveStreamer::Get(int &Count)
 	case stTSPIDS:
 		return cStreamdevStreamer::Get(Count);
 
+#if APIVERSNUM < 10703
 	case stPES:
 		return m_PESRemux->Get(Count);
+#endif
 	
 	case stES:
 		return m_ESRemux->Get(Count);
@@ -551,9 +561,11 @@ void cStreamdevLiveStreamer::Del(int Count)
 		cStreamdevStreamer::Del(Count);
 		break;
 
+#if APIVERSNUM < 10703
 	case stPES:
 		m_PESRemux->Del(Count);
 		break;
+#endif
 	
 	case stES:
 		m_ESRemux->Del(Count);

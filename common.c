@@ -1,5 +1,5 @@
 /*
- *  $Id: common.c,v 1.8 2008/04/08 14:18:15 schmirl Exp $
+ *  $Id: common.c,v 1.9 2009/01/16 11:35:43 schmirl Exp $
  */
  
 #include <vdr/channels.h>
@@ -14,7 +14,9 @@ const char *VERSION = "0.5.0-pre";
 
 const char *StreamTypes[st_Count] = {
 	"TS",
+#if APIVERSNUM < 10703
 	"PES",
+#endif
 	"PS",
 	"ES",
 	"Extern",

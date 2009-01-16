@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.c,v 1.14 2008/10/14 11:05:47 schmirl Exp $
+ *  $Id: connectionHTTP.c,v 1.15 2009/01/16 11:35:44 schmirl Exp $
  */
 
 #include <ctype.h>
@@ -208,8 +208,10 @@ bool cConnectionHTTP::CmdGET(const std::string &Opts)
 	const char* pType = type.c_str();
 	if (strcasecmp(pType, "PS") == 0) {
 		m_StreamType = stPS;
+#if APIVERSNUM < 10703
 	} else if (strcasecmp(pType, "PES") == 0) {
 		m_StreamType = stPES;
+#endif
 	} else if (strcasecmp(pType, "TS") == 0) {
 		m_StreamType = stTS;
 	} else if (strcasecmp(pType, "ES") == 0) {
@@ -261,7 +263,9 @@ bool cConnectionHTTP::CmdGET(const std::string &Opts)
 				{
 					case stTS:	base += "TS/"; break;
 					case stPS:	base += "PS/"; break;
+#if APIVERSNUM < 10703
 					case stPES:	base += "PES/"; break;
+#endif
 					case stES:	base += "ES/"; break;
 					case stExtern:	base += "Extern/"; break;
 					default:	break;

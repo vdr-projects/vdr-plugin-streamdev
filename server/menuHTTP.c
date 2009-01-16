@@ -201,8 +201,10 @@ std::string cHtmlChannelList::StreamTypeMenu()
 			(std::string) "[<a href=\"/TS/" + self + "\">TS</a>] ");
 	typeMenu += (streamType == stPS ? (std::string) "[PS] " :
 			(std::string) "[<a href=\"/PS/" + self + "\">PS</a>] ");
+#if APIVERSNUM < 10703
 	typeMenu += (streamType == stPES ? (std::string) "[PES] " :
 			(std::string) "[<a href=\"/PES/" + self + "\">PES</a>] ");
+#endif
 	typeMenu += (streamType == stES ? (std::string) "[ES] " :
 			(std::string) "[<a href=\"/ES/" + self + "\">ES</a>] ");
 	typeMenu += (streamType == stExtern ? (std::string) "[Extern] " :
@@ -341,8 +343,10 @@ std::string cHtmlChannelList::ItemText()
 	switch (streamType) {
 		case stTS: suffix = (std::string) ".ts"; break;
 		case stPS: suffix = (std::string) ".vob"; break;
+#if APIVERSNUM < 10703
 		// for Network Media Tank
 		case stPES: suffix = (std::string) ".vdr"; break; 
+#endif
 		default: suffix = "";
 	}
 	line += (std::string) "<li value=\"" + (const char*) itoa(current->Number()) + "\">";
