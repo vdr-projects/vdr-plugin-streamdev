@@ -275,7 +275,7 @@ With "Filter Streaming" enabled, the client will receive meta information like
 EPG data and service information, just as if the client had its own DVB card.
 Link channels and even a client-side EPG scan have been reported to work.
 
-The last parameter, "Synchronize EPG", will have the client synchronize it's 
+The next parameter, "Synchronize EPG", will have the client synchronize it's 
 program table with the server every now and then, but not regularly. This 
 happens when starting the client, and everytime VDR does its housekeeping 
 tasks. The only thing that's guaranteed is, that there will be a minimum 
@@ -283,6 +283,16 @@ interval of ten seconds between each EPG synchronization. With "Filter
 Streaming" this option has been obsoleted. If you still need to synchronize
 EPG as additional information is available from the server, you should use the
 epgsync-plugin instead (http://vdr.schmirler.de).
+
+Finally with the maximum and minimum priority, you can keep VDR from considering
+streamdev in certain cases. If for instance you have a streamdev client with its
+own DVB card, VDR would normally use streamdev for recording. If this is not
+what you want, you could set the maximum priority to 0. As recordings usually
+have a much higher priority (default 50), streamdev is now no longer used for
+recordings. The two parameters define the inclusive range of priorities for
+which streamdev will accept to tune. Setting the minimum priority to a higher
+value than the maximum, you will get two ranges: "up to maximum" and "minimum
+and above".
 
 4. Other useful Plugins:
 ------------------------

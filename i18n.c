@@ -1,5 +1,5 @@
 /*
- *  $Id: i18n.c,v 1.8.2.3 2008/06/26 14:17:10 schmirl Exp $
+ *  $Id: i18n.c,v 1.8.2.4 2009/01/29 07:49:04 schmirl Exp $
  */
  
 #include "i18n.h"
@@ -374,6 +374,56 @@ const tI18nPhrase Phrases[] = {
 		"",		// Magyar
 		"",		// Catala
 		"ÁØÝåàÞÝØ×ÐæØï EPG",		// Russian
+		"",		// Hrvatski
+		"",		// Eesti
+		"",		// Dansk
+		"",		// Czech
+#if VDRVERSNUM >= 10502
+		"",		// Türkçe
+#endif
+	},
+	{	"Minimum Priority",		// English
+		"Minimale Priorität",		// Deutsch
+		"",		// Slovenski
+		"",		// Italiano
+		"",		// Nederlands
+		"",		// Português
+		"",		// Français
+		"",		// Norsk
+		"",		// suomi
+		"",		// Polski
+		"",		// Español
+		"",		// Ellinika
+		"",		// Svenska
+		"",		// Romaneste
+		"",		// Magyar
+		"",		// Catala
+		"",		// Russian
+		"",		// Hrvatski
+		"",		// Eesti
+		"",		// Dansk
+		"",		// Czech
+#if VDRVERSNUM >= 10502
+		"",		// Türkçe
+#endif
+	},
+	{	"Maximum Priority",		// English
+		"Maximale Priorität",		// Deutsch
+		"",		// Slovenski
+		"",		// Italiano
+		"",		// Nederlands
+		"",		// Português
+		"",		// Français
+		"",		// Norsk
+		"",		// suomi
+		"",		// Polski
+		"",		// Español
+		"",		// Ellinika
+		"",		// Svenska
+		"",		// Romaneste
+		"",		// Magyar
+		"",		// Catala
+		"",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk

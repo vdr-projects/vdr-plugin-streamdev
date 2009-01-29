@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.18.2.1 2008/04/07 15:07:39 schmirl Exp $
+ *  $Id: device.c,v 1.18.2.2 2009/01/29 07:49:05 schmirl Exp $
  */
  
 #include "client/device.h"
@@ -90,6 +90,19 @@ bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority,
 		return false;
 
 	Dprintf("ProvidesChannel, Channel=%s, Prio=%d\n", Channel->Name(), Priority);
+
+	if (StreamdevClientSetup.MinPriority <= StreamdevClientSetup.MaxPriority)
+	{
+		if (Priority < StreamdevClientSetup.MinPriority ||
+				Priority > StreamdevClientSetup.MaxPriority)
+			return false;
+	}
+	else
+	{
+		if (Priority < StreamdevClientSetup.MinPriority &&
+				Priority > StreamdevClientSetup.MaxPriority)
+			return false;
+	}
 
 	if (ClientSocket.DataSocket(siLive) != NULL 
 			&& TRANSPONDER(Channel, m_Channel))
