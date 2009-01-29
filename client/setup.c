@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.c,v 1.6 2008/04/08 14:18:16 schmirl Exp $
+ *  $Id: setup.c,v 1.7 2009/01/29 07:48:59 schmirl Exp $
  */
  
 #include <vdr/menuitems.h>
@@ -15,6 +15,8 @@ cStreamdevClientSetup::cStreamdevClientSetup(void) {
 	StreamFilters = false;
 	SyncEPG       = false;
 	HideMenuEntry = false;
+	MinPriority   = -1;
+	MaxPriority   = MAXPRIORITY;
 	strcpy(RemoteIp, "");
 }
 
@@ -30,6 +32,8 @@ bool cStreamdevClientSetup::SetupParse(const char *Name, const char *Value) {
 	else if (strcmp(Name, "StreamFilters") == 0) StreamFilters = atoi(Value);
 	else if (strcmp(Name, "SyncEPG") == 0)       SyncEPG = atoi(Value);
 	else if (strcmp(Name, "HideMenuEntry") == 0) HideMenuEntry = atoi(Value);
+	else if (strcmp(Name, "MinPriority") == 0) HideMenuEntry = atoi(Value);
+	else if (strcmp(Name, "MaxPriority") == 0) HideMenuEntry = atoi(Value);
 	else return false;
 	return true;
 }
@@ -43,6 +47,8 @@ cStreamdevClientMenuSetupPage::cStreamdevClientMenuSetupPage(void) {
 	AddShortEdit(tr("Remote Port"),        m_NewSetup.RemotePort);
 	AddBoolEdit (tr("Filter Streaming"),   m_NewSetup.StreamFilters);
 	AddBoolEdit (tr("Synchronize EPG"),    m_NewSetup.SyncEPG);
+	AddRangeEdit (tr("Minimum Priority"),  m_NewSetup.MinPriority, -1, MAXPRIORITY);
+	AddRangeEdit (tr("Maximum Priority"),  m_NewSetup.MaxPriority, -1, MAXPRIORITY);
 	SetCurrent(Get(0));
 }
 
@@ -64,6 +70,8 @@ void cStreamdevClientMenuSetupPage::Store(void) {
 	SetupStore("StreamFilters", m_NewSetup.StreamFilters);
 	SetupStore("SyncEPG",       m_NewSetup.SyncEPG);
 	SetupStore("HideMenuEntry", m_NewSetup.HideMenuEntry);
+	SetupStore("MinPriority",   m_NewSetup.MinPriority);
+	SetupStore("MaxPriority",   m_NewSetup.MaxPriority);
 
 	StreamdevClientSetup = m_NewSetup;
 

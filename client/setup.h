@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.h,v 1.4 2008/04/07 14:50:32 schmirl Exp $
+ *  $Id: setup.h,v 1.5 2009/01/29 07:48:59 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SETUPCLIENT_H
@@ -18,6 +18,8 @@ struct cStreamdevClientSetup {
 	int  StreamFilters;
 	int  SyncEPG;
 	int  HideMenuEntry;
+	int  MinPriority;
+	int  MaxPriority;
 };
 
 extern cStreamdevClientSetup StreamdevClientSetup;

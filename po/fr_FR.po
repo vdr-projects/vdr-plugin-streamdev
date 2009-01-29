@@ -42,6 +42,12 @@ msgstr "Filtre streaming"
 msgid "Synchronize EPG"
 msgstr "Synchroniser l'EPG"
 
+msgid "Minimum Priority"
+msgstr ""
+
+msgid "Maximum Priority"
+msgstr ""
+
 msgid "Hide Mainmenu Entry"
 msgstr "Masquer dans le menu principal"
 

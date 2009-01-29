@@ -47,6 +47,12 @@ msgstr "Filtra trasmissione"
 msgid "Synchronize EPG"
 msgstr "Sincronizza EPG"
 
+msgid "Minimum Priority"
+msgstr ""
+
+msgid "Maximum Priority"
+msgstr ""
+
 msgid "VDR Streaming Server"
 msgstr "Server trasmissione VDR"
 

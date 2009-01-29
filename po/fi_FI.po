@@ -42,6 +42,12 @@ msgstr "Suodatetun tiedon suoratoisto"
 msgid "Synchronize EPG"
 msgstr "P‰ivit‰ ohjelmaopas"
 
+msgid "Minimum Priority"
+msgstr ""
+
+msgid "Maximum Priority"
+msgstr ""
+
 msgid "Hide Mainmenu Entry"
 msgstr "Piilota valinta p‰‰valikosta"
 
