@@ -1,5 +1,5 @@
 /*
- *  $Id: i18n.c,v 1.8.2.4 2009/01/29 07:49:04 schmirl Exp $
+ *  $Id: i18n.c,v 1.8.2.5 2009/02/02 11:53:05 schmirl Exp $
  */
  
 #include "i18n.h"
@@ -390,7 +390,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Português
 		"",		// Français
 		"",		// Norsk
-		"",		// suomi
+		"Pienin prioriteetti",		// suomi
 		"",		// Polski
 		"",		// Español
 		"",		// Ellinika
@@ -415,7 +415,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Português
 		"",		// Français
 		"",		// Norsk
-		"",		// suomi
+		"Suurin prioriteetti",		// suomi
 		"",		// Polski
 		"",		// Español
 		"",		// Ellinika

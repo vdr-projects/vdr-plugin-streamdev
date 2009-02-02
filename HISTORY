@@ -1,6 +1,7 @@
 eDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- updated Finnish translation (thanks to Rolf Ahrenberg)
 - added Min/MaxPriority parameters. Can be used to keep client VDR from
   using streamdev e.g. when recording
 - added Network Media Tank browser support to HTML pages (thanks to Jori
