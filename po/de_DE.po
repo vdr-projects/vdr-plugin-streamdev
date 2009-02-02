@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: streamdev 0.5.0\n"
 "Report-Msgid-Bugs-To: <http://www.vdr-developer.org/mantisbt/>\n"
-"POT-Creation-Date: 2008-04-01 17:05+0200\n"
+"POT-Creation-Date: 2009-01-31 13:34+0200\n"
 "PO-Revision-Date: 2008-03-30 02:11+0200\n"
 "Last-Translator: Frank Schmirler <vdrdev@schmirler.de>\n"
 "Language-Team: <vdr@linuxtv.org>\n"
@@ -26,6 +26,9 @@ msgstr "Server ist pausiert"
 
 msgid "Couldn't suspend Server!"
 msgstr "Konnte Server nicht pausieren!"
+
+msgid "Hide Mainmenu Entry"
+msgstr "Hauptmenüeintrag verstecken"
 
 msgid "Start Client"
 msgstr "Client starten"
@@ -47,9 +50,6 @@ msgstr "Minimale Priorität"
 
 msgid "Maximum Priority"
 msgstr "Maximale Priorität"
-
-msgid "Hide Mainmenu Entry"
-msgstr "Hauptmenüeintrag verstecken"
 
 msgid "VDR Streaming Server"
 msgstr "VDR Streaming Server"

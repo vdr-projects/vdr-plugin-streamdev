@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: streamdev 0.5.0\n"
 "Report-Msgid-Bugs-To: <http://www.vdr-developer.org/mantisbt/>\n"
-"POT-Creation-Date: 2008-04-01 17:05+0200\n"
+"POT-Creation-Date: 2009-01-31 13:34+0200\n"
 "PO-Revision-Date: 2008-03-30 02:11+0200\n"
 "Last-Translator: Rolf Ahrenberg <rahrenbe@cc.hut.fi>\n"
 "Language-Team: <vdr@linuxtv.org>\n"
@@ -27,6 +27,9 @@ msgstr "Palvelin on pys‰ytetty"
 msgid "Couldn't suspend Server!"
 msgstr "Palvelinta ei onnistuttu pys‰ytt‰m‰‰n!"
 
+msgid "Hide Mainmenu Entry"
+msgstr "Piilota valinta p‰‰valikosta"
+
 msgid "Start Client"
 msgstr "K‰ynnist‰ VDR-asiakas"
 
@@ -43,13 +46,10 @@ msgid "Synchronize EPG"
 msgstr "P‰ivit‰ ohjelmaopas"
 
 msgid "Minimum Priority"
-msgstr ""
+msgstr "Pienin prioriteetti"
 
 msgid "Maximum Priority"
-msgstr ""
-
-msgid "Hide Mainmenu Entry"
-msgstr "Piilota valinta p‰‰valikosta"
+msgstr "Suurin prioriteetti"
 
 msgid "VDR Streaming Server"
 msgstr "VDR-suoratoistopalvelin"
