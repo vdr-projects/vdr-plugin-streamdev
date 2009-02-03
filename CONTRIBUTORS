@@ -103,5 +103,8 @@ Jori Hamalainen
   for extensive testing while making stream compatible to Network Media Tank
   for adding Network Media Tank browser support to HTML pages
 
- owagner
+owagner
   for pointing out a problem with the encrypted channel switching fix
+
+Joachim König-Baltes
+  for fixing Min/MaxPriority parsing

@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.c,v 1.7 2009/01/29 07:48:59 schmirl Exp $
+ *  $Id: setup.c,v 1.8 2009/02/03 10:26:21 schmirl Exp $
  */
  
 #include <vdr/menuitems.h>
@@ -32,8 +32,8 @@ bool cStreamdevClientSetup::SetupParse(const char *Name, const char *Value) {
 	else if (strcmp(Name, "StreamFilters") == 0) StreamFilters = atoi(Value);
 	else if (strcmp(Name, "SyncEPG") == 0)       SyncEPG = atoi(Value);
 	else if (strcmp(Name, "HideMenuEntry") == 0) HideMenuEntry = atoi(Value);
-	else if (strcmp(Name, "MinPriority") == 0) HideMenuEntry = atoi(Value);
-	else if (strcmp(Name, "MaxPriority") == 0) HideMenuEntry = atoi(Value);
+	else if (strcmp(Name, "MinPriority") == 0)   MinPriority = atoi(Value);
+	else if (strcmp(Name, "MaxPriority") == 0)   MaxPriority = atoi(Value);
 	else return false;
 	return true;
 }
