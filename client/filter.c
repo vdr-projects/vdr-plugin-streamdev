@@ -1,5 +1,5 @@
 /*
- *  $Id: filter.c,v 1.13 2008/10/13 11:30:06 schmirl Exp $
+ *  $Id: filter.c,v 1.14 2009/02/13 13:02:39 schmirl Exp $
  */
 
 #include "client/filter.h"
@@ -227,6 +227,7 @@ void cStreamdevFilters::Action(void) {
 			u_short pid = (((u_short)block[1] & PID_MASK_HI) << 8) | block[2];
 			u_char tid = block[3];
 			bool Pusi = block[1] & 0x40;
+			// proprietary extension
 			int len = block[4];
 #if 0
 			if (block[1] == 0xff &&
