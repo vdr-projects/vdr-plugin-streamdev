@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.c,v 1.13.2.1 2008/10/14 11:05:59 schmirl Exp $
+ *  $Id: connectionHTTP.c,v 1.13.2.2 2009/02/13 07:02:26 schmirl Exp $
  */
 
 #include <ctype.h>
@@ -63,6 +63,9 @@ bool cConnectionHTTP::Command(char *Cmd)
 		Dprintf("header\n");
 		return true;
 	default:
+		// skip additional blank lines
+		if (*Cmd == '\0')
+			return true;
 		break;
 	}
 	return false; // ??? shouldn't happen
