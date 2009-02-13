@@ -1,5 +1,5 @@
 /*
- *  $Id: livefilter.c,v 1.5.2.1 2009/02/13 10:39:42 schmirl Exp $
+ *  $Id: livefilter.c,v 1.5.2.2 2009/02/13 13:02:34 schmirl Exp $
  */
 
 #include "server/livefilter.h"
@@ -26,6 +26,7 @@ void cStreamdevLiveFilter::Process(u_short Pid, u_char Tid, const u_char *Data, 
 		buffer[1] = ((Pid >> 8) & 0x3f) | (pos==0 ? 0x40 : 0); /* bit 6: payload unit start indicator (PUSI) */
 		buffer[2] = Pid & 0xff;
 		buffer[3] = Tid;
+		// this makes it a proprietary stream
 		buffer[4] = (uchar)chunk;
 		memcpy(buffer + 5, Data + pos, chunk);
 		length -= chunk;
