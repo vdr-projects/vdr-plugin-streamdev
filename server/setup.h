@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.h,v 1.1 2004/12/30 22:44:21 lordjaxom Exp $
+ *  $Id: setup.h,v 1.2 2009/02/13 10:39:22 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SETUPSERVER_H
@@ -20,6 +20,10 @@ struct cStreamdevServerSetup {
 	int HTTPServerPort;
 	int HTTPStreamType;
 	char HTTPBindIP[20];
+	int StartIGMPServer;
+	int IGMPClientPort;
+	int IGMPStreamType;
+	char IGMPBindIP[20];
 	int SuspendMode;
 	int AllowSuspend;
 };

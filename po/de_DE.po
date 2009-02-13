@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: streamdev 0.5.0\n"
 "Report-Msgid-Bugs-To: <http://www.vdr-developer.org/mantisbt/>\n"
-"POT-Creation-Date: 2009-01-31 13:34+0200\n"
+"POT-Creation-Date: 2009-02-13 11:53+0100\n"
 "PO-Revision-Date: 2008-03-30 02:11+0200\n"
 "Last-Translator: Frank Schmirler <vdrdev@schmirler.de>\n"
 "Language-Team: <vdr@linuxtv.org>\n"
@@ -95,6 +95,18 @@ msgstr "Port des HTTP Servers"
 
 msgid "HTTP Streamtype"
 msgstr "HTTP Streamtyp"
+
+msgid "Multicast Streaming Server"
+msgstr "Multicast Streaming Server"
+
+msgid "Start IGMP Server"
+msgstr "IGMP Server starten"
+
+msgid "Multicast Client Port"
+msgstr "Port des Multicast Clients"
+
+msgid "Multicast Streamtype"
+msgstr "Multicast Streamtyp"
 
 msgid "Offer suspend mode"
 msgstr "Pausieren anbieten"

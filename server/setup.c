@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.c,v 1.5 2009/01/16 11:35:44 schmirl Exp $
+ *  $Id: setup.c,v 1.6 2009/02/13 10:39:22 schmirl Exp $
  */
  
 #include <vdr/menuitems.h>
@@ -16,10 +16,14 @@ cStreamdevServerSetup::cStreamdevServerSetup(void) {
 	StartHTTPServer = true;
 	HTTPServerPort  = 3000;
 	HTTPStreamType  = stTS;
+	StartIGMPServer = false;
+	IGMPClientPort  = 1234;
+	IGMPStreamType  = stTS;
 	SuspendMode     = smAlways;
 	AllowSuspend    = false;
 	strcpy(VTPBindIP, "0.0.0.0");
 	strcpy(HTTPBindIP, "0.0.0.0");
+	strcpy(IGMPBindIP, "0.0.0.0");
 }
 
 bool cStreamdevServerSetup::SetupParse(const char *Name, const char *Value) {
@@ -31,6 +35,10 @@ bool cStreamdevServerSetup::SetupParse(const char *Name, const char *Value) {
 	else if (strcmp(Name, "HTTPServerPort") == 0)  HTTPServerPort  = atoi(Value);
 	else if (strcmp(Name, "HTTPStreamType") == 0)  HTTPStreamType  = atoi(Value);
 	else if (strcmp(Name, "HTTPBindIP") == 0)      strcpy(HTTPBindIP, Value);
+	else if (strcmp(Name, "StartIGMPServer") == 0) StartIGMPServer = atoi(Value);
+	else if (strcmp(Name, "IGMPClientPort") == 0)  IGMPClientPort  = atoi(Value);
+	else if (strcmp(Name, "IGMPStreamType") == 0)  IGMPStreamType  = atoi(Value);
+	else if (strcmp(Name, "IGMPBindIP") == 0)      strcpy(IGMPBindIP, Value);
 	else if (strcmp(Name, "SuspendMode") == 0)     SuspendMode     = atoi(Value);
 	else if (strcmp(Name, "AllowSuspend") == 0)    AllowSuspend    = atoi(Value);
 	else return false;
@@ -55,7 +63,11 @@ cStreamdevServerMenuSetupPage::cStreamdevServerMenuSetupPage(void) {
 	AddShortEdit(tr("HTTP Server Port"),          m_NewSetup.HTTPServerPort);
 	AddTypeEdit (tr("HTTP Streamtype"),           m_NewSetup.HTTPStreamType);
 	AddIpEdit   (tr("Bind to IP"),                m_NewSetup.HTTPBindIP);
-	
+	AddCategory (tr("Multicast Streaming Server"));
+	AddBoolEdit (tr("Start IGMP Server"),         m_NewSetup.StartIGMPServer);
+	AddShortEdit(tr("Multicast Client Port"),     m_NewSetup.IGMPClientPort);
+	AddTypeEdit (tr("Multicast Streamtype"),      m_NewSetup.IGMPStreamType);
+	AddIpEdit   (tr("Bind to IP"),                m_NewSetup.IGMPBindIP);
 	SetCurrent(Get(1));
 }
 
@@ -69,7 +81,10 @@ void cStreamdevServerMenuSetupPage::Store(void) {
 			|| strcmp(m_NewSetup.VTPBindIP, StreamdevServerSetup.VTPBindIP) != 0
 			|| m_NewSetup.StartHTTPServer != StreamdevServerSetup.StartHTTPServer
 			|| m_NewSetup.HTTPServerPort != StreamdevServerSetup.HTTPServerPort
-			|| strcmp(m_NewSetup.HTTPBindIP, StreamdevServerSetup.HTTPBindIP) != 0) {
+			|| strcmp(m_NewSetup.HTTPBindIP, StreamdevServerSetup.HTTPBindIP) != 0
+			|| m_NewSetup.StartIGMPServer != StreamdevServerSetup.StartIGMPServer
+			|| m_NewSetup.IGMPClientPort != StreamdevServerSetup.IGMPClientPort
+			|| strcmp(m_NewSetup.IGMPBindIP, StreamdevServerSetup.IGMPBindIP) != 0) {
 		restart = true;
 		cStreamdevServer::Destruct();
 	}
@@ -82,6 +97,10 @@ void cStreamdevServerMenuSetupPage::Store(void) {
 	SetupStore("HTTPServerPort",  m_NewSetup.HTTPServerPort);
 	SetupStore("HTTPStreamType",  m_NewSetup.HTTPStreamType);
 	SetupStore("HTTPBindIP",      m_NewSetup.HTTPBindIP);
+	SetupStore("StartIGMPServer", m_NewSetup.StartIGMPServer);
+	SetupStore("IGMPClientPort",  m_NewSetup.IGMPClientPort);
+	SetupStore("IGMPStreamType",  m_NewSetup.IGMPStreamType);
+	SetupStore("IGMPBindIP",      m_NewSetup.IGMPBindIP);
 	SetupStore("SuspendMode",     m_NewSetup.SuspendMode);
 	SetupStore("AllowSuspend",    m_NewSetup.AllowSuspend);
 

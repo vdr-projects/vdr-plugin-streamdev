@@ -1,14 +1,11 @@
 /*
- *  $Id: livefilter.c,v 1.5 2008/04/07 14:27:31 schmirl Exp $
+ *  $Id: livefilter.c,v 1.6 2009/02/13 10:39:22 schmirl Exp $
  */
 
 #include "server/livefilter.h"
 #include "server/streamer.h"
 #include "common.h"
 
-#ifndef TS_SIZE
-#    define TS_SIZE          188
-#endif
 #ifndef TS_SYNC_BYTE
 #    define TS_SYNC_BYTE     0x47
 #endif

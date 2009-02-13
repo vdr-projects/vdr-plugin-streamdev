@@ -1,5 +1,6 @@
 #include "tools/socket.h"
 
+#include <vdr/tools.h>
 #include <string.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -15,10 +16,11 @@
 // actual DSCP value used
 #define STREAMDEV_DSCP DSCP_AF41
 
-cTBSocket::cTBSocket(int Type) {
+cTBSocket::cTBSocket(int Type, int Protocol) {
 	memset(&m_LocalAddr, 0, sizeof(m_LocalAddr));
 	memset(&m_RemoteAddr, 0, sizeof(m_RemoteAddr));
 	m_Type = Type;
+	m_Protocol = Protocol;
 }
 
 cTBSocket::~cTBSocket() {
@@ -31,7 +33,7 @@ bool cTBSocket::Connect(const std::string &Host, unsigned int Port) {
 
 	if (IsOpen()) Close();
 		
-	if ((socket = ::socket(PF_INET, m_Type, IPPROTO_IP)) == -1)
+	if ((socket = ::socket(PF_INET, m_Type, m_Protocol)) == -1)
 		return false;
 
 	m_LocalAddr.sin_family = AF_INET;
@@ -52,10 +54,12 @@ bool cTBSocket::Connect(const std::string &Host, unsigned int Port) {
 		return false;
 	}
 
-	len = sizeof(struct sockaddr_in);
-	if (::getpeername(socket, (struct sockaddr*)&m_RemoteAddr, &len) == -1) {
-		::close(socket);
-		return false;
+	if (m_Type == SOCK_STREAM) {
+		len = sizeof(struct sockaddr_in);
+		if (::getpeername(socket, (struct sockaddr*)&m_RemoteAddr, &len) == -1) {
+			::close(socket);
+			return false;
+		}
 	}
 	
 	len = sizeof(struct sockaddr_in);
@@ -64,7 +68,11 @@ bool cTBSocket::Connect(const std::string &Host, unsigned int Port) {
 		return false;
 	}
 
-	return cTBSource::Open(socket);
+	if (!cTBSource::Open(socket)) {
+		::close(socket);
+		return false;
+	}
+	return true;
 }
 
 bool cTBSocket::Listen(const std::string &Ip, unsigned int Port, int BackLog) {
@@ -74,7 +82,7 @@ bool cTBSocket::Listen(const std::string &Ip, unsigned int Port, int BackLog) {
 
 	if (IsOpen()) Close();
 	
-	if ((socket = ::socket(PF_INET, m_Type, IPPROTO_IP)) == -1)
+	if ((socket = ::socket(PF_INET, m_Type, m_Protocol)) == -1)
 		return false;
 
 	val = 1;

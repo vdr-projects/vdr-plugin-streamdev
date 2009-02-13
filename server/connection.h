@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.h,v 1.6 2008/10/14 11:05:47 schmirl Exp $
+ *  $Id: connection.h,v 1.7 2009/02/13 10:39:22 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVER_CONNECTION_H
@@ -44,7 +44,7 @@ protected:
 public:
 	/* If you derive, specify a short string such as HTTP for Protocol, which
 	   will be displayed in error messages */
-	cServerConnection(const char *Protocol);
+	cServerConnection(const char *Protocol, int Type = SOCK_STREAM);
 	virtual ~cServerConnection();
 
 	/* If true, any client IP will be accepted */

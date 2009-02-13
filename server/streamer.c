@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.c,v 1.17 2008/10/22 11:59:32 schmirl Exp $
+ *  $Id: streamer.c,v 1.18 2009/02/13 10:39:22 schmirl Exp $
  */
  
 #include <vdr/ringbuffer.h>
@@ -55,16 +55,33 @@ void cStreamdevWriter::Action(void)
 
 			if (sel.CanWrite(*m_Socket)) {
 				int written;
-				if ((written = m_Socket->Write(block + offset, count)) == -1) {
-					esyslog("ERROR: streamdev-server: couldn't send data: %m");
+				int pkgsize = count;
+				// SOCK_DGRAM indicates multicast
+				if (m_Socket->Type() == SOCK_DGRAM) {
+					// don't fragment multicast packets
+					// max. payload on standard local ethernet is 1416 to 1456 bytes
+					// and some STBs expect complete TS packets
+					// so let's always limit to 7 * TS_SIZE = 1316
+					if (pkgsize > 7 * TS_SIZE)
+						pkgsize = 7 * TS_SIZE;
+					else
+						pkgsize -= pkgsize % TS_SIZE;
+				}
+				if ((written = m_Socket->Write(block + offset, pkgsize)) == -1) {
+					esyslog("ERROR: streamdev-server: couldn't send %d bytes: %m", pkgsize);
 					break;
 				}
+
+				// statistics
 				if (count > max)
 					max = count;
 
 				offset += written;
 				count -= written;
-				if (count == 0) {
+
+				// less than one TS packet left:
+				// delete what we've written so far and get next chunk
+				if (count < TS_SIZE) {
 					m_Streamer->Del(offset);
 					block = NULL;
 				}

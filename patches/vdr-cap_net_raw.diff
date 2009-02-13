@@ -1,0 +1,11 @@
+--- vdr.c.orig	2009-02-13 09:45:55.000000000 +0100
++++ vdr.c	2009-02-13 09:46:24.000000000 +0100
+@@ -115,7 +115,7 @@
+ static bool SetCapSysTime(void)
+ {
+   // drop all capabilities except cap_sys_time
+-  cap_t caps = cap_from_text("= cap_sys_time=ep");
++  cap_t caps = cap_from_text("= cap_sys_time,cap_net_raw=ep");
+   if (!caps) {
+      fprintf(stderr, "vdr: cap_from_text failed: %s\n", strerror(errno));
+      return false;

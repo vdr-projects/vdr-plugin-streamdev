@@ -108,3 +108,6 @@ owagner
 
 Joachim König-Baltes
   for fixing Min/MaxPriority parsing
+
+Artem Makhutov
+  for suggesting and heavy testing IGMP based multicast streaming

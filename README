@@ -20,8 +20,9 @@ Contents:
 2.3  Updating from streamdev 0.3.x
 3.   Usage
 3.1  Usage HTTP server
-3.2  Usage VDR-to-VDR server
-3.3  Usage VDR-to-VDR client
+3.2  Usage IGMP multicast server
+3.3  Usage VDR-to-VDR server
+3.4  Usage VDR-to-VDR client
 4.   Other useful Plugins
 4.1  Plugins for VDR-to-VDR clients
 4.2  Plugins for Server
@@ -221,7 +222,66 @@ Note the single quotes, as otherwise "-a" will be passed to VDR and not to
 streamdev-server. The login ("vdr" in the example above) doesn't have to exist
 as a system account.
 
-3.2 Usage VDR-to-VDR server:
+3.2 Usage IGMP multicast server:
+--------------------------------
+
+IGMP based multicast streaming is often used by settop boxes to receive IP TV.
+Streamdev's multicast server allows you to feed live TV from VDR to such a
+settop box. VLC is known to work well if you look for a software client.
+
+The advantage of multicasting is that the actual stream is sent out only once,
+regardless of how many clients want to receive it. The downside is, that you
+cannot simply multicast across network boundaries. You need multicast routers.
+For multicast streaming over the public Internet you would even need to register
+for your own IP range. So don't even think of multicasting via Internet with
+streamdev! Streamdev will send the stream only to one local ethernet segment and
+all clients must be connected to this same segment. There must not be a router
+inbetween. Also note that the client must not run on the streamdev-server
+machine.
+
+Each channel is offered on a different multicast IP. Channel 1 is available from
+multicast IP 239.255.0.1, channel 2 from 239.255.0.2 and so on. The upper limit
+is 239.255.254.255 which corresponds to channel 65279 (239.255.255.0/24 is
+reserved according to RFC-2365).
+
+Before you can use streamdev's multicast server, you might need to patch VDR.
+Binding an IGMP socket is a privileged operation, so you must start VDR as root.
+If you pass the -u option to VDR, it will drop almost all priviledges before
+streamdev is even loaded. Apply vdr-cap_net_raw.diff to keep VDR from dropping
+the CAP_NET_RAW capability required to bind the IGMP socket. The patch is part
+of streamdev's source distribution. Check the patches subdirectory. There's no
+need to patch VDR if it is kept running as root (not recommended).
+
+The multicast server is disabled by default. Enter the streamdev-server setup
+menu to enable it and - IMPORTANT - bind the multicast server to the IP of your
+VDR server's LAN ethernet card. The multicast server will refuse to start with
+the default bind adresse "0.0.0.0".
+
+Now edit your streamdevhosts.conf. To allow streaming of all channels, it must
+contain "239.255.0.0/16". Note that you cannot limit connections by client IP
+here. You can however restrict which channels are allowed to be multicasted.
+Enter individual multicast IPs instead of "239.255.0.0/16".
+
+By default, the linux kernel will refuse to join more than 20 multicast groups.
+You might want to increase this up to "number_of_channels + 1". Note that it's
+"number_of_channels", not "maximum_channel_number".
+
+  #First 100 channels:
+  bash# sysctl -w sys.net.ipv4.igmp_max_memberships=101
+
+  #All channels:
+  bash# COUNT=$(grep -c '^[^:]' PATH_TO_YOUR/channels.conf)
+  bash# sysctl -w sys.net.ipv4.igmp_max_memberships=$COUNT
+
+A multicast server never knows how many clients are actually receiving a stream.
+If a client signals that it leaves a multicast group, the server has to query
+for other listeners before it can stop the stream. This may delay zapping from
+one transponder to an other. The client will probably requests the new channel
+before the previous stream has been stopped. If there's no free DVB card, VDR
+won't be able to fulfill the request until a DVB card becomes available and the
+client resends the request.
+
+3.3 Usage VDR-to-VDR server:
 ----------------------------
 
 You can activate the VDR-to-VDR server part in the PlugIn's Setup Menu. It is
@@ -230,7 +290,7 @@ port where you want the server to listen for incoming connections. The server
 will be activated when you push the OK button inside the setup menu, so there's
 no need to restart VDR.
 
-3.3 Usage VDR-to-VDR client:
+3.4 Usage VDR-to-VDR client:
 ----------------------------
 
 Streamdev-client adds a "Suspend Server" item to VDR's mainmenu. With the
