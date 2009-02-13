@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.c,v 1.10 2007/05/07 12:25:11 schmirl Exp $
+ *  $Id: connection.c,v 1.10.2.1 2009/02/13 10:39:42 schmirl Exp $
  */
  
 #include "server/connection.h"
@@ -12,7 +12,8 @@
 #include <stdarg.h>
 #include <errno.h>
 
-cServerConnection::cServerConnection(const char *Protocol):
+cServerConnection::cServerConnection(const char *Protocol, int Type):
+		cTBSocket(Type),
 		m_Protocol(Protocol),
 		m_DeferClose(false),
 		m_Pending(false),

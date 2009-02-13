@@ -1,5 +1,5 @@
 /*
- *  $Id: i18n.c,v 1.8.2.5 2009/02/02 11:53:05 schmirl Exp $
+ *  $Id: i18n.c,v 1.8.2.6 2009/02/13 10:39:40 schmirl Exp $
  */
  
 #include "i18n.h"
@@ -749,6 +749,106 @@ const tI18nPhrase Phrases[] = {
 		"",		// Magyar
 		"",		// Catala
 		"ÁßàïâÐâì Ò ÓÛÐÒÝÞÜ ÜÕÝî",		// Russian
+		"",		// Hrvatski
+		"",		// Eesti
+		"",		// Dansk
+		"",		// Czech
+#if VDRVERSNUM >= 10502
+		"",		// Türkçe
+#endif
+	},
+	{	"Multicast Streaming Server",		// English
+		"Multicast Streaming Server",		// Deutsch
+		"",		// Slovenski
+		"",		// Italiano
+		"",		// Nederlands
+		"",		// Português
+		"",		// Français
+		"",		// Norsk
+		"",		// suomi
+		"",		// Polski
+		"",		// Español
+		"",		// Ellinika
+		"",		// Svenska
+		"",		// Romaneste
+		"",		// Magyar
+		"",		// Catala
+		"",		// Russian
+		"",		// Hrvatski
+		"",		// Eesti
+		"",		// Dansk
+		"",		// Czech
+#if VDRVERSNUM >= 10502
+		"",		// Türkçe
+#endif
+	},
+	{	"Start IGMP Server",		// English
+		"IGMP Server starten",		// Deutsch
+		"",		// Slovenski
+		"",		// Italiano
+		"",		// Nederlands
+		"",		// Português
+		"",		// Français
+		"",		// Norsk
+		"",		// suomi
+		"",		// Polski
+		"",		// Español
+		"",		// Ellinika
+		"",		// Svenska
+		"",		// Romaneste
+		"",		// Magyar
+		"",		// Catala
+		"",		// Russian
+		"",		// Hrvatski
+		"",		// Eesti
+		"",		// Dansk
+		"",		// Czech
+#if VDRVERSNUM >= 10502
+		"",		// Türkçe
+#endif
+	},
+	{	"Multicast Client Port",		// English
+		"Port des Multicast Clients",		// Deutsch
+		"",		// Slovenski
+		"",		// Italiano
+		"",		// Nederlands
+		"",		// Português
+		"",		// Français
+		"",		// Norsk
+		"",		// suomi
+		"",		// Polski
+		"",		// Español
+		"",		// Ellinika
+		"",		// Svenska
+		"",		// Romaneste
+		"",		// Magyar
+		"",		// Catala
+		"",		// Russian
+		"",		// Hrvatski
+		"",		// Eesti
+		"",		// Dansk
+		"",		// Czech
+#if VDRVERSNUM >= 10502
+		"",		// Türkçe
+#endif
+	},
+	{	"Multicast Streamtype",		// English
+		"Multicast Streamtyp",		// Deutsch
+		"",		// Slovenski
+		"",		// Italiano
+		"",		// Nederlands
+		"",		// Português
+		"",		// Français
+		"",		// Norsk
+		"",		// suomi
+		"",		// Polski
+		"",		// Español
+		"",		// Ellinika
+		"",		// Svenska
+		"",		// Romaneste
+		"",		// Magyar
+		"",		// Catala
+		"",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk

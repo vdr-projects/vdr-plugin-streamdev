@@ -1,10 +1,11 @@
 /*
- *  $Id: server.c,v 1.5.2.4 2008/10/31 12:20:06 schmirl Exp $
+ *  $Id: server.c,v 1.5.2.5 2009/02/13 10:39:42 schmirl Exp $
  */
 
 #include "server/server.h"
 #include "server/componentVTP.h"
 #include "server/componentHTTP.h"
+#include "server/componentIGMP.h"
 #include "server/setup.h"
 
 #include <vdr/tools.h>
@@ -36,6 +37,12 @@ void cStreamdevServer::Initialize(void)
 	if (m_Instance == NULL) {
 		if (StreamdevServerSetup.StartVTPServer)  Register(new cComponentVTP);
 		if (StreamdevServerSetup.StartHTTPServer) Register(new cComponentHTTP);
+		if (StreamdevServerSetup.StartIGMPServer) {
+			if (strcmp(StreamdevServerSetup.IGMPBindIP, "0.0.0.0") == 0)
+				esyslog("streamdev-server: Not starting IGMP. IGMP must be bound to a local IP");
+			else
+				Register(new cComponentIGMP);
+		}
 
 		m_Instance = new cStreamdevServer;
 	}

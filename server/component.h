@@ -1,5 +1,5 @@
 /*
- *  $Id: component.h,v 1.2 2005/05/09 20:22:29 lordjaxom Exp $
+ *  $Id: component.h,v 1.2.2.1 2009/02/13 10:39:42 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVERS_COMPONENT_H
@@ -17,8 +17,8 @@ class cServerConnection;
 
 class cServerComponent: public cListObject {
 private:
-	cTBSocket m_Listen;
 	const char *m_Protocol;
+	cTBSocket m_Listen;
 	const char *m_ListenIp;
 	uint m_ListenPort;
 
@@ -27,7 +27,7 @@ protected:
 	virtual cServerConnection *NewClient(void) = 0;
 
 public:
-	cServerComponent(const char *Protocol, const char *ListenIp, uint ListenPort);
+	cServerComponent(const char *Protocol, const char *ListenIp, uint ListenPort, int Type = SOCK_STREAM, int IpProto = 0);
 	virtual ~cServerComponent();
 
 	/* Starts listening on the specified Port, override if you want to do things
