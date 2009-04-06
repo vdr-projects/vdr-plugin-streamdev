@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.22 2009/01/29 07:48:58 schmirl Exp $
+ *  $Id: device.c,v 1.23 2009/04/06 06:48:59 schmirl Exp $
  */
  
 #include "client/device.h"
@@ -50,6 +50,9 @@ cStreamdevDevice::~cStreamdevDevice() {
 
 	Cancel(3);
 
+#if APIVERSNUM >= 10515
+	StopSectionHandler();
+#endif
 	DELETENULL(m_Filters);
 	DELETENULL(m_TSBuffer);
 }

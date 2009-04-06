@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- added missing call to StopSectionHandler which could cause crashes when
+  shutting down VDR
 - added IGMP based multicast streaming
 - ignore trailing blank lines in HTTP requests
 - fixed parsing Min/MaxPriority from config (thanks to Joachim König-Baltes)
