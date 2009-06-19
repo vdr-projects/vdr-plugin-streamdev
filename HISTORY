@@ -1,6 +1,20 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- added namespace to remuxers
+- increased WRITERBUFSIZE - buffer was too small for high bandwidth content
+- removed cStreamdevStreamer::m_Running
+- eliminated potential busy waits in remuxers
+- updated cTSRemux static helpers to code of their VDR 1.6.0 counterparts
+- re-enabled PES vor VDR 1.7.3+. Streamdev now uses a copy of VDR 1.6.0's
+  cRemux for TS to PES remuxing.
+- make sure that only complete TS packets are written to ringbuffers
+- use signaling instead of sleeps when writing to ringbuffers
+- optimized cStreamdevPatFilter PAT packet initialization
+- fixed cStreamdevPatFilter not processing PATs with length > TS_SIZE - 5
+- use a small ringbuffer for cStreamdevPatFilter instead of writing to
+  cStreamdevStreamers SendBuffer as two threads mustn't write to the same
+  ringbuffer
 - added missing call to StopSectionHandler which could cause crashes when
   shutting down VDR
 - added IGMP based multicast streaming

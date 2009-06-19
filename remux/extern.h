@@ -5,6 +5,8 @@
 #include <vdr/ringbuffer.h>
 #include <string>
 
+namespace Streamdev {
+
 class cTSExt;
 
 class cExternRemux: public cTSRemux {
@@ -20,5 +22,7 @@ public:
 	uchar *Get(int &Count) { return m_ResultBuffer->Get(Count); }
 	void Del(int Count) { m_ResultBuffer->Del(Count); }
 };
+
+} // namespace Streamdev
 
 #endif // VDR_STREAMDEV_EXTERNREMUX_H

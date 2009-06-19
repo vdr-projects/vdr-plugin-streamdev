@@ -4,6 +4,7 @@
 #include <libsi/descriptor.h>
 
 #include "remux/ts2ps.h"
+#include "remux/ts2pes.h"
 #include "remux/ts2es.h"
 #include "remux/extern.h"
 
@@ -13,7 +14,7 @@
 #include "server/livefilter.h"
 #include "common.h"
 
-#define TSPATREPACKER
+using namespace Streamdev;
 
 // --- cStreamdevLiveReceiver -------------------------------------------------
 
@@ -64,6 +65,8 @@ private:
 	int    pmtPid;
 	int    pmtSid;
 	int    pmtVersion;
+	uchar  tspat_buf[TS_SIZE];
+	cStreamdevBuffer siBuffer;
 
 	const cChannel *m_Channel;
 	cStreamdevLiveStreamer *m_Streamer;
@@ -73,9 +76,11 @@ private:
 	int GetPid(SI::PMT::Stream& stream);
 public:
 	cStreamdevPatFilter(cStreamdevLiveStreamer *Streamer, const cChannel *Channel);
+	uchar* Get(int &Count) { return siBuffer.Get(Count); }
+	void Del(int Count) { return siBuffer.Del(Count); }
 };
 
-cStreamdevPatFilter::cStreamdevPatFilter(cStreamdevLiveStreamer *Streamer, const cChannel *Channel)
+cStreamdevPatFilter::cStreamdevPatFilter(cStreamdevLiveStreamer *Streamer, const cChannel *Channel): siBuffer(10 * TS_SIZE, TS_SIZE)
 {
 	Dprintf("cStreamdevPatFilter(\"%s\")\n", Channel->Name());
 	assert(Streamer);
@@ -85,6 +90,29 @@ cStreamdevPatFilter::cStreamdevPatFilter(cStreamdevLiveStreamer *Streamer, const
 	pmtSid = 0;
 	pmtVersion = -1;
 	Set(0x00, 0x00);  // PAT
+	// initialize PAT buffer. Only some values are dynamic (see comments)
+	memset(tspat_buf, 0xff, TS_SIZE);
+	tspat_buf[0] = TS_SYNC_BYTE;          // Transport packet header sunchronization byte (1000011 = 0x47h)
+	tspat_buf[1] = 0x40;                  // Set payload unit start indicator bit
+	tspat_buf[2] = 0x0;                   // PID
+	tspat_buf[3] = 0x10;                  // Set payload flag, DYNAMIC: Continuity counter
+	tspat_buf[4] = 0x0;                   // SI pointer field
+	tspat_buf[5] = 0x0;                   // PAT table id
+	tspat_buf[6] = 0xb0;                  // Section syntax indicator bit and reserved bits set
+	tspat_buf[7] = 12 + 1;                // Section length (12 bit): PAT_TABLE_LEN + 1
+	tspat_buf[8] = 0;                     // DYNAMIC: Transport stream ID (bits 8-15)
+	tspat_buf[9] = 0;                     // DYNAMIC: Transport stream ID (bits 0-7)
+	tspat_buf[10] = 0xc0;                 // Reserved, DYNAMIC: Version number, DYNAMIC: Current next indicator
+	tspat_buf[11] = 0x0;                  // Section number
+	tspat_buf[12] = 0x0;                  // Last section number
+	tspat_buf[13] = 0;                    // DYNAMIC: Program number (bits 8-15)
+	tspat_buf[14] = 0;                    // DYNAMIC: Program number (bits 0-7)
+	tspat_buf[15] = 0xe0;                 // Reserved, DYNAMIC: Network ID (bits 8-12)
+	tspat_buf[16] = 0;                    // DYNAMIC: Network ID (bits 0-7)
+	tspat_buf[17] = 0;                    // DYNAMIC: Checksum
+	tspat_buf[18] = 0;                    // DYNAMIC: Checksum
+	tspat_buf[19] = 0;                    // DYNAMIC: Checksum
+	tspat_buf[20] = 0;                    // DYNAMIC: Checksum
 }
 
 static const char * const psStreamTypes[] = {
@@ -224,54 +252,37 @@ void cStreamdevPatFilter::Process(u_short Pid, u_char Tid, const u_char *Data, i
 						if (0 != (pmtPid = assoc.getPid())) {
 							Dprintf("cStreamdevPatFilter: PMT pid for channel %s: %d\n", Channel->Name(), pmtPid);
 							pmtSid = assoc.getServiceId();
-							if (Length < TS_SIZE-5) {
-								// repack PAT to TS frame and send to client
-#ifndef TSPATREPACKER
-								uint8_t pat_ts[TS_SIZE] = {TS_SYNC_BYTE, 0x40 /* pusi=1 */, 0 /* pid=0 */, 0x10 /* adaption=1 */, 0 /* pointer */};
-								memcpy(pat_ts + 5, Data, Length);
-								m_Streamer->Put(pat_ts, TS_SIZE);
-#else
-								int ts_id;
-								unsigned int crc, i, len;
-								uint8_t *tmp, tspat_buf[TS_SIZE];
-								static uint8_t ccounter = 0;
-								ccounter = (ccounter + 1) % 16;
-								memset(tspat_buf, 0xff, TS_SIZE);
-								ts_id = Channel->Tid();               // Get transport stream id of the channel
-								tspat_buf[0] = TS_SYNC_BYTE;          // Transport packet header sunchronization byte (1000011 = 0x47h)
-								tspat_buf[1] = 0x40;                  // Set payload unit start indicator bit
-								tspat_buf[2] = 0x0;                   // PID
-								tspat_buf[3] = 0x10 | ccounter;       // Set payload flag, Continuity counter
-								tspat_buf[4] = 0x0;                   // SI pointer field
-								tspat_buf[5] = 0x0;                   // PAT table id
-								tspat_buf[6] = 0xb0;                  // Section syntax indicator bit and reserved bits set
-								tspat_buf[7] = 12 + 1;                // Section length (12 bit): PAT_TABLE_LEN + 1
-								tspat_buf[8] = (ts_id >> 8);          // Transport stream ID (bits 8-15)
-								tspat_buf[9] = (ts_id & 0xff);        // Transport stream ID (bits 0-7)
-								tspat_buf[10] = 0xc0 | ((pat.getVersionNumber() << 1) & 0x3e) |
-									pat.getCurrentNextIndicator();// Version number, Current next indicator
-								tspat_buf[11] = 0x0;                  // Section number
-								tspat_buf[12] = 0x0;                  // Last section number
-								tspat_buf[13] = (pmtSid >> 8);        // Program number (bits 8-15)
-								tspat_buf[14] = (pmtSid & 0xff);      // Program number (bits 0-7)
-								tspat_buf[15] = 0xe0 | (pmtPid >> 8); // Network ID (bits 8-12)
-								tspat_buf[16] = (pmtPid & 0xff);      // Network ID (bits 0-7)
-								crc = 0xffffffff;
-								len = 12;                             // PAT_TABLE_LEN
-								tmp = &tspat_buf[4 + 1];              // TS_HDR_LEN + 1
-								while (len--) {
-									crc ^= *tmp++ << 24;
-									for (i = 0; i < 8; i++)
-										crc = (crc << 1) ^ ((crc & 0x80000000) ? 0x04c11db7 : 0); // CRC32POLY
-								}
-								tspat_buf[17] = crc >> 24 & 0xff;     // Checksum
-								tspat_buf[18] = crc >> 16 & 0xff;     // Checksum
-								tspat_buf[19] = crc >>  8 & 0xff;     // Checksum
-								tspat_buf[20] = crc & 0xff;           // Checksum
-								m_Streamer->Put(tspat_buf, TS_SIZE);
-#endif
-							} else 
-								isyslog("cStreamdevPatFilter: PAT size %d too large to fit in one TS", Length);
+							// repack PAT to TS frame and send to client
+							int ts_id;
+							unsigned int crc, i, len;
+							uint8_t *tmp;
+							static uint8_t ccounter = 0;
+							ccounter = (ccounter + 1) % 16;
+							ts_id = Channel->Tid();               // Get transport stream id of the channel
+							tspat_buf[3] = 0x10 | ccounter;       // Set payload flag, Continuity counter
+							tspat_buf[8] = (ts_id >> 8);          // Transport stream ID (bits 8-15)
+							tspat_buf[9] = (ts_id & 0xff);        // Transport stream ID (bits 0-7)
+							tspat_buf[10] = 0xc0 | ((pat.getVersionNumber() << 1) & 0x3e) |
+								pat.getCurrentNextIndicator();// Version number, Current next indicator
+							tspat_buf[13] = (pmtSid >> 8);        // Program number (bits 8-15)
+							tspat_buf[14] = (pmtSid & 0xff);      // Program number (bits 0-7)
+							tspat_buf[15] = 0xe0 | (pmtPid >> 8); // Network ID (bits 8-12)
+							tspat_buf[16] = (pmtPid & 0xff);      // Network ID (bits 0-7)
+							crc = 0xffffffff;
+							len = 12;                             // PAT_TABLE_LEN
+							tmp = &tspat_buf[4 + 1];              // TS_HDR_LEN + 1
+							while (len--) {
+								crc ^= *tmp++ << 24;
+								for (i = 0; i < 8; i++)
+									crc = (crc << 1) ^ ((crc & 0x80000000) ? 0x04c11db7 : 0); // CRC32POLY
+							}
+							tspat_buf[17] = crc >> 24 & 0xff;     // Checksum
+							tspat_buf[18] = crc >> 16 & 0xff;     // Checksum
+							tspat_buf[19] = crc >>  8 & 0xff;     // Checksum
+							tspat_buf[20] = crc & 0xff;           // Checksum
+							int written = siBuffer.PutTS(tspat_buf, TS_SIZE);
+							if (written != TS_SIZE)
+								siBuffer.ReportOverflow(TS_SIZE - written);
 							if (pmtPid != prevPmtPid) {
 								m_Streamer->SetPids(pmtPid);
 								Add(pmtPid, 0x02);
@@ -292,7 +303,7 @@ void cStreamdevPatFilter::Process(u_short Pid, u_char Tid, const u_char *Data, i
 		if (pmtVersion != -1) {
 			if (pmtVersion != pmt.getVersionNumber()) {
 				Dprintf("cStreamdevPatFilter: PMT version changed, detaching all pids\n");
-				Del(pmtPid, 0x02);
+				cFilter::Del(pmtPid, 0x02);
 				pmtPid = 0; // this triggers PAT scan
 			}
 			return;
@@ -329,9 +340,7 @@ cStreamdevLiveStreamer::cStreamdevLiveStreamer(int Priority, std::string Paramet
 		m_Device(NULL),
 		m_Receiver(NULL),
 		m_PatFilter(NULL),
-#if APIVERSNUM < 10703
 		m_PESRemux(NULL),
-#endif
 		m_ESRemux(NULL),
 		m_PSRemux(NULL),
 		m_ExtRemux(NULL)
@@ -347,9 +356,7 @@ cStreamdevLiveStreamer::~cStreamdevLiveStreamer()
 		DELETENULL(m_PatFilter);
 	}
 	DELETENULL(m_Receiver);
-#if APIVERSNUM < 10703
 	delete m_PESRemux;
-#endif
 	delete m_ESRemux;
 	delete m_PSRemux;
 	delete m_ExtRemux;
@@ -463,12 +470,10 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 			return SetPids(pid);
 		}
 
-#if APIVERSNUM < 10703
 	case stPES: 
-		m_PESRemux = new cRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(), 
-								m_Channel->Spids(), false);
+		m_PESRemux = new cTS2PESRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(), 
+								m_Channel->Spids());
 		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
-#endif
 
 	case stPS:  
 		m_PSRemux = new cTS2PSRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(),
@@ -505,13 +510,22 @@ int cStreamdevLiveStreamer::Put(const uchar *Data, int Count)
 {
 	switch (m_StreamType) {
 	case stTS:
+		// insert si data
+		if (m_PatFilter) {
+			int got;
+			uchar *si = m_PatFilter->Get(got);
+			if (si) {
+				int count = cStreamdevStreamer::Put(si, got);
+				if (count)
+					m_PatFilter->Del(count);
+			}
+		}
+		// fall through
 	case stTSPIDS:
 		return cStreamdevStreamer::Put(Data, Count);
 
-#if APIVERSNUM < 10703
 	case stPES:
 		return m_PESRemux->Put(Data, Count);
-#endif
 
 	case stES:
 		return m_ESRemux->Put(Data, Count);
@@ -534,10 +548,8 @@ uchar *cStreamdevLiveStreamer::Get(int &Count)
 	case stTSPIDS:
 		return cStreamdevStreamer::Get(Count);
 
-#if APIVERSNUM < 10703
 	case stPES:
 		return m_PESRemux->Get(Count);
-#endif
 	
 	case stES:
 		return m_ESRemux->Get(Count);
@@ -561,11 +573,9 @@ void cStreamdevLiveStreamer::Del(int Count)
 		cStreamdevStreamer::Del(Count);
 		break;
 
-#if APIVERSNUM < 10703
 	case stPES:
 		m_PESRemux->Del(Count);
 		break;
-#endif
 	
 	case stES:
 		m_ESRemux->Del(Count);

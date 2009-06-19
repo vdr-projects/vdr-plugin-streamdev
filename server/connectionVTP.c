@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.19 2009/01/16 11:35:44 schmirl Exp $
+ *  $Id: connectionVTP.c,v 1.20 2009/06/19 06:32:45 schmirl Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -595,12 +595,10 @@ bool cConnectionVTP::CmdCAPS(char *Opts)
 		return Respond(220, "Capability \"%s\" accepted", Opts);
 	}
 
-#if APIVERSNUM < 10703
 	if (strcasecmp(Opts, "PES") == 0) {
 		m_StreamType = stPES;
 		return Respond(220, "Capability \"%s\" accepted", Opts);
 	}
-#endif
 
 	if (strcasecmp(Opts, "EXTERN") == 0) {
 		m_StreamType = stExtern;

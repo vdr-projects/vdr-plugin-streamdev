@@ -7,6 +7,8 @@
 #include <signal.h>
 #include <unistd.h>
 
+namespace Streamdev {
+
 class cTSExt: public cThread {
 private:
 	cRingBufferLinear *m_ResultBuffer;
@@ -23,6 +25,9 @@ public:
 
 	void Put(const uchar *Data, int Count);
 };
+
+} // namespace Streamdev
+using namespace Streamdev;
 
 cTSExt::cTSExt(cRingBufferLinear *ResultBuffer, std::string Parameter):
 		m_ResultBuffer(ResultBuffer),

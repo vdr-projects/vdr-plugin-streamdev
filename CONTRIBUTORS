@@ -1,6 +1,10 @@
 Special thanks go to the following persons (if you think your name is missing
 here, please send an email to vdrdev@schmirler.de):
 
+Klaus Schmidinger
+  for VDR as a whole
+  for permission to use VDR 1.6.0 cRemux code for PES remuxing
+
 Sascha Volkenandt, the original author,
   for this great plugin
 
@@ -74,6 +78,7 @@ alexw
 
 Olli Lammi
   for fixing a busy wait when client isn't accepting data fast enough
+  for suggesting signaling instead of sleeping when writing to buffers
 
 Joerg Pulz
   for his FreeBSD compatibility patch
