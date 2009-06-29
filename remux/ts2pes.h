@@ -4,7 +4,7 @@
  * This file is based on a copy of remux.h from Klaus Schmidinger's
  * VDR, version 1.6.0.
  *
- * $Id: ts2pes.h,v 1.1 2009/06/19 06:32:40 schmirl Exp $
+ * $Id: ts2pes.h,v 1.2 2009/06/29 06:23:33 schmirl Exp $
  */
 
 #ifndef VDR_STREAMDEV_TS2PES_H
@@ -24,7 +24,7 @@ private:
   bool noVideo;
   bool synced;
   int skipped;
-  Streamdev::cTS2PES *ts2pes[MAXTRACKS];
+  cTS2PES *ts2pes[MAXTRACKS];
   int numTracks;
   cStreamdevBuffer *resultBuffer;
   int resultSkipped;
