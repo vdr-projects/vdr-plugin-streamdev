@@ -106,7 +106,7 @@
 
 
 #define MAX_PLENGTH 0xFFFF
-#define MMAX_PLENGTH (8*MAX_PLENGTH)
+#define MMAX_PLENGTH (64*MAX_PLENGTH)
 
 #ifdef __cplusplus
 extern "C" {

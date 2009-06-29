@@ -3,7 +3,7 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-server.c,v 1.7.2.2 2008/10/14 11:05:57 schmirl Exp $
+ * $Id: streamdev-server.c,v 1.7.2.3 2009/06/29 06:25:27 schmirl Exp $
  */
 
 #include <getopt.h>
@@ -12,7 +12,6 @@
 #include "server/setup.h"
 #include "server/server.h"
 #include "server/suspend.h"
-#include "remux/extern.h"
 #include "i18n.h"
 
 #if VDRVERSNUM < 10400

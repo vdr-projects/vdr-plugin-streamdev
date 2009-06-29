@@ -3,6 +3,8 @@
 #include <vdr/channels.h>
 #include <vdr/device.h>
 
+namespace Streamdev {
+
 class cTS2PS {
 	friend void PutPES(uint8_t *Buffer, int Size, void *Data);
 
@@ -27,6 +29,9 @@ void PutPES(uint8_t *Buffer, int Size, void *Data)
 	if (n != Size)
 		esyslog("ERROR: result buffer overflow, dropped %d out of %d byte", Size - n, Size);
 }
+
+} // namespace Streamdev
+using namespace Streamdev;
 
 cTS2PS::cTS2PS(cRingBufferLinear *ResultBuffer, int Pid, uint8_t AudioCid)
 {
@@ -74,13 +79,13 @@ void cTS2PS::PutTSPacket(const uint8_t *Buffer)
 
 cTS2PSRemux::cTS2PSRemux(int VPid, const int *APids, const int *DPids, const int *SPids):
 		m_NumTracks(0),
-		m_ResultBuffer(new cRingBufferLinear(WRITERBUFSIZE, IPACKS)),
+		m_ResultBuffer(new cStreamdevBuffer(WRITERBUFSIZE, IPACKS)),
 		m_ResultSkipped(0),
 		m_Skipped(0),
 		m_Synced(false),
 		m_IsRadio(VPid == 0 || VPid == 1 || VPid == 0x1FFF)
 {
-	m_ResultBuffer->SetTimeouts(0, 100);
+	m_ResultBuffer->SetTimeouts(100, 100);
 
 	if (VPid)
 		m_Remux[m_NumTracks++] = new cTS2PS(m_ResultBuffer, VPid);
@@ -124,8 +129,10 @@ int cTS2PSRemux::Put(const uchar *Data, int Count)
 			break;
 		if (Data[i] != TS_SYNC_BYTE)
 			break;
-		if (m_ResultBuffer->Free() < 2 * IPACKS)
+		if (m_ResultBuffer->Free() < 2 * IPACKS) {
+			m_ResultBuffer->WaitForPut();
 			break; // A cTS2PS might write one full packet and also a small rest
+		}
 		int pid = GetPid(Data + i + 1);
 		if (Data[i + 3] & 0x10) { // got payload
 			for (int t = 0; t < m_NumTracks; t++) {
