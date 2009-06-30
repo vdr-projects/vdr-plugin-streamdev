@@ -14,6 +14,10 @@ namespace Streamdev {
 
 class cTSRemux {
 public:
+	virtual int Put(const uchar *Data, int Count) = 0;
+	virtual uchar *Get(int &Count) = 0;
+	virtual void Del(int Count) = 0;
+
 	static void SetBrokenLink(uchar *Data, int Length);
 	static int GetPid(const uchar *Data);
 	static int GetPacketLength(const uchar *Data, int Count, int Offset);

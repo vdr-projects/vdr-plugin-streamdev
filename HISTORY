@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- now there's a common baseclass for all remuxers, make use of it
 - added namespace to remuxers
 - increased WRITERBUFSIZE - buffer was too small for high bandwidth content
 - removed cStreamdevStreamer::m_Running
