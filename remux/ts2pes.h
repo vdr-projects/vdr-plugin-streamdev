@@ -4,7 +4,7 @@
  * This file is based on a copy of remux.h from Klaus Schmidinger's
  * VDR, version 1.6.0.
  *
- * $Id: ts2pes.h,v 1.2 2009/06/29 06:23:33 schmirl Exp $
+ * $Id: ts2pes.h,v 1.3 2009/06/30 06:04:33 schmirl Exp $
  */
 
 #ifndef VDR_STREAMDEV_TS2PES_H
@@ -38,11 +38,9 @@ public:
   int Put(const uchar *Data, int Count);
        ///< Puts at most Count bytes of Data into the remuxer.
        ///< \return Returns the number of bytes actually consumed from Data.
-  uchar *Get(int &Count, uchar *PictureType = NULL);
+  uchar *Get(int &Count);
        ///< Gets all currently available data from the remuxer.
        ///< \return Count contains the number of bytes the result points to, and
-       ///< PictureType (if not NULL) will contain one of NO_PICTURE, I_FRAME, P_FRAME
-       ///< or B_FRAME.
   void Del(int Count);
        ///< Deletes Count bytes from the remuxer. Count must be the number returned
        ///< from a previous call to Get(). Several calls to Del() with fractions of

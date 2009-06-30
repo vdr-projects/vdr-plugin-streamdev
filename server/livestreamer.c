@@ -340,10 +340,7 @@ cStreamdevLiveStreamer::cStreamdevLiveStreamer(int Priority, std::string Paramet
 		m_Device(NULL),
 		m_Receiver(NULL),
 		m_PatFilter(NULL),
-		m_PESRemux(NULL),
-		m_ESRemux(NULL),
-		m_PSRemux(NULL),
-		m_ExtRemux(NULL)
+		m_Remux(NULL)
 {
 }
 
@@ -356,10 +353,7 @@ cStreamdevLiveStreamer::~cStreamdevLiveStreamer()
 		DELETENULL(m_PatFilter);
 	}
 	DELETENULL(m_Receiver);
-	delete m_PESRemux;
-	delete m_ESRemux;
-	delete m_PSRemux;
-	delete m_ExtRemux;
+	delete m_Remux;
 }
 
 bool cStreamdevLiveStreamer::HasPid(int Pid) 
@@ -466,17 +460,17 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 			int pid = ISRADIO(m_Channel) ? m_Channel->Apid(0) : m_Channel->Vpid();
 			if (Apid != 0)
 				pid = Apid;
-			m_ESRemux = new cTS2ESRemux(pid);
+			m_Remux = new cTS2ESRemux(pid);
 			return SetPids(pid);
 		}
 
 	case stPES: 
-		m_PESRemux = new cTS2PESRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(), 
+		m_Remux = new cTS2PESRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(), 
 								m_Channel->Spids());
 		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 
 	case stPS:  
-		m_PSRemux = new cTS2PSRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(),
+		m_Remux = new cTS2PSRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(),
 		                            m_Channel->Spids());
 		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 
@@ -495,7 +489,7 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 		return true;
 
 	case stExtern:
-		m_ExtRemux = new cExternRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(),
+		m_Remux = new cExternRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(),
 		                              m_Channel->Spids(), m_Parameter);
 		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 
@@ -508,87 +502,39 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 
 int cStreamdevLiveStreamer::Put(const uchar *Data, int Count) 
 {
-	switch (m_StreamType) {
-	case stTS:
-		// insert si data
-		if (m_PatFilter) {
-			int got;
-			uchar *si = m_PatFilter->Get(got);
-			if (si) {
-				int count = cStreamdevStreamer::Put(si, got);
-				if (count)
-					m_PatFilter->Del(count);
-			}
+	// insert si data
+	if (m_PatFilter) {
+		int siCount;
+		uchar *siData = m_PatFilter->Get(siCount);
+		if (siData) {
+			if (m_Remux)
+				siCount = m_Remux->Put(siData, siCount);
+			else
+				siCount = cStreamdevStreamer::Put(siData, siCount);
+			if (siCount)
+				m_PatFilter->Del(siCount);
 		}
-		// fall through
-	case stTSPIDS:
-		return cStreamdevStreamer::Put(Data, Count);
-
-	case stPES:
-		return m_PESRemux->Put(Data, Count);
-
-	case stES:
-		return m_ESRemux->Put(Data, Count);
-
-	case stPS:
-		return m_PSRemux->Put(Data, Count);
-
-	case stExtern:
-		return m_ExtRemux->Put(Data, Count);
-
-	default: // shouldn't happen???
-		return 0;
 	}
+	if (m_Remux)
+		return m_Remux->Put(Data, Count);
+	else
+		return cStreamdevStreamer::Put(Data, Count);
 }
 
 uchar *cStreamdevLiveStreamer::Get(int &Count)
 {
-	switch (m_StreamType) {
-	case stTS:
-	case stTSPIDS:
+	if (m_Remux)
+		return m_Remux->Get(Count);
+	else
 		return cStreamdevStreamer::Get(Count);
-
-	case stPES:
-		return m_PESRemux->Get(Count);
-	
-	case stES:
-		return m_ESRemux->Get(Count);
-
-	case stPS:
-		return m_PSRemux->Get(Count);
-
-	case stExtern:
-		return m_ExtRemux->Get(Count);
-
-	default: // shouldn't happen???
-		return 0;
-	}
 }
 
 void cStreamdevLiveStreamer::Del(int Count)
 {
-	switch (m_StreamType) {
-	case stTS:
-	case stTSPIDS:
+	if (m_Remux)
+		m_Remux->Del(Count);
+	else
 		cStreamdevStreamer::Del(Count);
-		break;
-
-	case stPES:
-		m_PESRemux->Del(Count);
-		break;
-	
-	case stES:
-		m_ESRemux->Del(Count);
-		break;
-
-	case stPS:
-		m_PSRemux->Del(Count);
-		break;
-
-	case stExtern:
-		m_ExtRemux->Del(Count);
-		break;
-	}
 }
 	
 void cStreamdevLiveStreamer::Attach(void) 

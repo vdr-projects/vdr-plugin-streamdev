@@ -10,7 +10,7 @@
  * The cRepacker family's code was originally written by Reinhard Nissl <rnissl@gmx.de>,
  * and adapted to the VDR coding style by Klaus.Schmidinger@cadsoft.de.
  *
- * $Id: ts2pes.c,v 1.1 2009/06/19 06:32:40 schmirl Exp $
+ * $Id: ts2pes.c,v 1.2 2009/06/30 06:04:33 schmirl Exp $
  */
 
 #include "remux/ts2pes.h"
@@ -1931,7 +1931,7 @@ int cTS2PESRemux::Put(const uchar *Data, int Count)
   return used;
 }
 
-uchar *cTS2PESRemux::Get(int &Count, uchar *PictureType)
+uchar *cTS2PESRemux::Get(int &Count)
 {
   // Remove any previously skipped data from the result buffer:
 
@@ -1940,17 +1940,7 @@ uchar *cTS2PESRemux::Get(int &Count, uchar *PictureType)
      resultSkipped = 0;
      }
 
-#if 0
-  // Test recording without determining the real frame borders:
-  if (PictureType)
-     *PictureType = I_FRAME;
-  return resultBuffer->Get(Count);
-#endif
-
   // Check for frame borders:
-
-  if (PictureType)
-     *PictureType = NO_PICTURE;
 
   Count = 0;
   uchar *resultData = NULL;
@@ -1972,8 +1962,6 @@ uchar *cTS2PESRemux::Get(int &Count, uchar *PictureType)
                      }
                   else if (!synced) {
                      if (pt == I_FRAME) {
-                        if (PictureType)
-                           *PictureType = pt;
                         resultSkipped = i; // will drop everything before this position
                         cTSRemux::SetBrokenLink(data + i, l);
                         synced = true;
@@ -1981,8 +1969,6 @@ uchar *cTS2PESRemux::Get(int &Count, uchar *PictureType)
                      }
                   else if (Count)
                      return resultData;
-                  else if (PictureType)
-                     *PictureType = pt;
                   }
                }
             else { //if (AUDIO_STREAM_S <= StreamType && StreamType <= AUDIO_STREAM_E || StreamType == PRIVATE_STREAM1) {
@@ -1991,15 +1977,11 @@ uchar *cTS2PESRemux::Get(int &Count, uchar *PictureType)
                   return resultData;
                if (noVideo) {
                   if (!synced) {
-                     if (PictureType)
-                        *PictureType = I_FRAME;
                      resultSkipped = i; // will drop everything before this position
                      synced = true;
                      }
                   else if (Count)
                      return resultData;
-                  else if (PictureType)
-                     *PictureType = I_FRAME;
                   }
                }
             if (synced) {

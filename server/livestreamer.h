@@ -5,13 +5,11 @@
 #include <vdr/receiver.h>
 
 #include "server/streamer.h"
+#include "remux/tsremux.h"
 #include "common.h"
 
 namespace Streamdev {
-	class cTS2PSRemux;
-	class cTS2ESRemux;
-	class cExternRemux;
-	class cTS2PESRemux;
+	class cTSRemux;
 }
 class cStreamdevPatFilter;
 class cStreamdevLiveReceiver;
@@ -29,10 +27,7 @@ private:
 	cDevice                *m_Device;
 	cStreamdevLiveReceiver *m_Receiver;
 	cStreamdevPatFilter    *m_PatFilter;
-	Streamdev::cTS2PESRemux *m_PESRemux;
-	Streamdev::cTS2ESRemux  *m_ESRemux;
-	Streamdev::cTS2PSRemux  *m_PSRemux;
-	Streamdev::cExternRemux *m_ExtRemux;
+	Streamdev::cTSRemux    *m_Remux;
 
 	void StartReceiver(void);
 	bool HasPid(int Pid);
