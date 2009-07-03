@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- silenced format mismatch warning on 64bit OS
 - added XBMC support by extending VTP capabilities (thanks to Alwin Esch)
 - now there's a common baseclass for all remuxers, make use of it
 - added cDevice::NumProvidedSystems() which was introduced in VDR 1.7.0
