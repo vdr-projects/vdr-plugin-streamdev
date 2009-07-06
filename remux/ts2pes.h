@@ -4,7 +4,7 @@
  * This file is based on a copy of remux.h from Klaus Schmidinger's
  * VDR, version 1.6.0.
  *
- * $Id: ts2pes.h,v 1.3 2009/06/30 06:04:33 schmirl Exp $
+ * $Id: ts2pes.h,v 1.4 2009/07/06 06:11:11 schmirl Exp $
  */
 
 #ifndef VDR_STREAMDEV_TS2PES_H
@@ -34,7 +34,7 @@ public:
        ///< APids, DPids and SPids are pointers to zero terminated lists of audio,
        ///< dolby and subtitle PIDs (the pointers may be NULL if there is no such
        ///< PID).
-  ~cTS2PESRemux();
+  virtual ~cTS2PESRemux();
   int Put(const uchar *Data, int Count);
        ///< Puts at most Count bytes of Data into the remuxer.
        ///< \return Returns the number of bytes actually consumed from Data.
