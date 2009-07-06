@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- fixed missing virtual for cTS2PESRemux destructor
 - silenced format mismatch warning on 64bit OS
 - now there's a common baseclass for all remuxers, make use of it
 - added namespace to remuxers
