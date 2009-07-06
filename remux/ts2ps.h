@@ -1,5 +1,5 @@
-#ifndef VDR_STREAMDEV_TS2PESREMUX_H
-#define VDR_STREAMDEV_TS2PESREMUX_H
+#ifndef VDR_STREAMDEV_TS2PSREMUX_H
+#define VDR_STREAMDEV_TS2PSREMUX_H
 
 #include "remux/tsremux.h"
 #include "server/streamer.h"
@@ -29,4 +29,4 @@ public:
 
 } // namespace Streamdev
 
-#endif // VDR_STREAMDEV_TS2PESREMUX_H
+#endif // VDR_STREAMDEV_TS2PSREMUX_H
