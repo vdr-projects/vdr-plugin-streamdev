@@ -6,9 +6,6 @@
 
 // Picture types:
 #define NO_PICTURE 0
-#define I_FRAME    1
-#define P_FRAME    2
-#define B_FRAME    3
 
 namespace Streamdev {
 

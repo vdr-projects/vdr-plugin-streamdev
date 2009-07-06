@@ -5,7 +5,6 @@
 #include <vdr/receiver.h>
 
 #include "server/streamer.h"
-#include "remux/tsremux.h"
 #include "common.h"
 
 namespace Streamdev {

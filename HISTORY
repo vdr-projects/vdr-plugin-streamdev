@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- removed redefinitions in includes - caused problems in older compilers
 - fixed ts2ps.h defines
 - fixed missing virtual for cTS2PESRemux destructor
 - silenced format mismatch warning on 64bit OS
