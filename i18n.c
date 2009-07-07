@@ -1,5 +1,5 @@
 /*
- *  $Id: i18n.c,v 1.8.2.6 2009/02/13 10:39:40 schmirl Exp $
+ *  $Id: i18n.c,v 1.8.2.7 2009/07/07 10:50:13 schmirl Exp $
  */
  
 #include "i18n.h"
@@ -765,7 +765,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Português
 		"",		// Français
 		"",		// Norsk
-		"",		// suomi
+		"Multicast-suoratoistopalvelin",		// suomi
 		"",		// Polski
 		"",		// Español
 		"",		// Ellinika
@@ -790,7 +790,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Português
 		"",		// Français
 		"",		// Norsk
-		"",		// suomi
+		"Käynnistä IGMP-palvelin",		// suomi
 		"",		// Polski
 		"",		// Español
 		"",		// Ellinika
@@ -815,7 +815,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Português
 		"",		// Français
 		"",		// Norsk
-		"",		// suomi
+		"Multicast-portti",		// suomi
 		"",		// Polski
 		"",		// Español
 		"",		// Ellinika
@@ -840,7 +840,7 @@ const tI18nPhrase Phrases[] = {
 		"",		// Português
 		"",		// Français
 		"",		// Norsk
-		"",		// suomi
+		"Multicast-lähetysmuoto",		// suomi
 		"",		// Polski
 		"",		// Español
 		"",		// Ellinika
