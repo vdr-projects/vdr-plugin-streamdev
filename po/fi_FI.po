@@ -97,16 +97,16 @@ msgid "HTTP Streamtype"
 msgstr "HTTP-lähetysmuoto"
 
 msgid "Multicast Streaming Server"
-msgstr ""
+msgstr "Multicast-suoratoistopalvelin"
 
 msgid "Start IGMP Server"
-msgstr ""
+msgstr "Käynnistä IGMP-palvelin"
 
 msgid "Multicast Client Port"
-msgstr ""
+msgstr "Multicast-portti"
 
 msgid "Multicast Streamtype"
-msgstr ""
+msgstr "Multicast-lähetysmuoto"
 
 msgid "Offer suspend mode"
 msgstr "tyrkytä"
