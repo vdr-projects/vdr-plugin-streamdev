@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.22 2009/07/02 06:03:51 schmirl Exp $
+ *  $Id: connectionVTP.c,v 1.23 2009/07/17 06:21:24 schmirl Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -215,7 +215,7 @@ bool cLSTEHandler::Next(bool &Last)
 		Last = true;
 		cString str(m_Error, true);
 		m_Error = NULL;
-		return m_Client->Respond(m_Errno, *str);
+		return m_Client->Respond(m_Errno, "%s", *str);
 	}
 
 	Last = false;
@@ -429,7 +429,7 @@ bool cLSTCHandler::Next(bool &Last)
 		Last = true;
 		cString str(m_Error, true);
 		m_Error = NULL;
-		return m_Client->Respond(m_Errno, *str);
+		return m_Client->Respond(m_Errno, "%s", *str);
 	}
 
 	int number;
@@ -525,7 +525,7 @@ bool cLSTTHandler::Next(bool &Last)
 		Last = true;
 		cString str(m_Error, true);
 		m_Error = NULL;
-		return m_Client->Respond(m_Errno, *str);
+		return m_Client->Respond(m_Errno, "%s", *str);
 	}
 
 	bool result;
@@ -626,7 +626,7 @@ bool cLSTRHandler::Next(bool &Last)
 		Last = true;
 		cString str(m_Error, true);
 		m_Error = NULL;
-		return m_Client->Respond(m_Errno, *str);
+		return m_Client->Respond(m_Errno, "%s", *str);
 	}
 	
 	if (m_Info) {

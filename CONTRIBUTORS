@@ -101,6 +101,7 @@ Pixelpeter
 
 Anssi Hannula
   for the vdr-1.6.0-ignore_missing_cam.diff patch
+  for fixing insecure format strings in LSTX handlers 
 
 wirbel
   for pointing out that section filtering is optional for VDR devices
