@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- fixed insecure format strings in LSTX handlers (thanks to Anssi Hannula)
 - updated Finish translation (thanks to Rolf Ahrenberg)
 - removed redefinitions in includes - caused problems in older compilers
 - fixed ts2ps.h defines

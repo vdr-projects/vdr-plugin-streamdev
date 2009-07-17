@@ -90,6 +90,9 @@ Diego Pierotto
 micky979
   for providing French language texts
 
+Anssi Hannula
+  for fixing insecure format strings in LSTX handlers
+
 wirbel
   for pointing out that section filtering is optional for VDR devices
 
