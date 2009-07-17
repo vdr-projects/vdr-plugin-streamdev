@@ -100,7 +100,7 @@ Pixelpeter
   for an initial fix to the "switching between ecncrypted channels" problem
 
 Anssi Hannula
-  for the vdr-1.6.0-ignore_missing_cam.diff patch
+  for the vdr-1.6.0-intcamdevices patch
   for fixing insecure format strings in LSTX handlers 
 
 wirbel
