@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- enable PatFilter for externremux, so VLC can be used as remuxer or client
 - fixed insecure format strings in LSTX handlers (thanks to Anssi Hannula)
 - updated Finish translation (thanks to Rolf Ahrenberg)
 - removed redefinitions in includes - caused problems in older compilers

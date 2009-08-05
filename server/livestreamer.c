@@ -474,6 +474,10 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 		                            m_Channel->Spids());
 		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 
+	case stExtern:
+		m_Remux = new cExternRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(),
+		                              m_Channel->Spids(), m_Parameter);
+		// fall through
 	case stTS:
 		// This should never happen, but ...
 		if (m_PatFilter) {
@@ -487,11 +491,6 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 		// Set pids from PMT
 		m_PatFilter = new cStreamdevPatFilter(this, m_Channel);
 		return true;
-
-	case stExtern:
-		m_Remux = new cExternRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(),
-		                              m_Channel->Spids(), m_Parameter);
-		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 
 	case stTSPIDS:
 		Dprintf("pid streaming mode\n");
