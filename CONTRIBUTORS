@@ -112,6 +112,7 @@ Jori Hamalainen
 
 owagner
   for pointing out a problem with the encrypted channel switching fix
+  for suggesting use of SO_KEEPALIVE socket option to detect dead sockets
 
 Joachim König-Baltes
   for fixing Min/MaxPriority parsing

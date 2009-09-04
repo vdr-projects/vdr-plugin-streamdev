@@ -124,6 +124,10 @@ bool cTBSocket::Accept(const cTBSocket &Listener) {
 	if (::getsockname(socket, (struct sockaddr*)&m_LocalAddr, &addrlen) == -1)
 		return false;
 	
+	int sol=1;
+	// Ignore possible errors here, proceed as usual
+	::setsockopt(socket, SOL_SOCKET, SO_KEEPALIVE, &sol, sizeof(sol)); 
+
 	if (!cTBSource::Open(socket))
 		return false;
 	
