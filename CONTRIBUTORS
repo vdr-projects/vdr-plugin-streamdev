@@ -100,6 +100,9 @@ Jori Hamalainen
   for extensive testing while making stream compatible to Network Media Tank
   for adding Network Media Tank browser support to HTML pages
 
+owagner
+  for suggesting use of SO_KEEPALIVE socket option to detect dead sockets
+
 Joachim König-Baltes
   for fixing Min/MaxPriority parsing
 
