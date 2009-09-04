@@ -265,11 +265,11 @@ You might want to increase this up to "number_of_channels + 1". Note that it's
 "number_of_channels", not "maximum_channel_number".
 
   #First 100 channels:
-  bash# sysctl -w sys.net.ipv4.igmp_max_memberships=101
+  bash# sysctl -w net.ipv4.igmp_max_memberships=101
 
   #All channels:
   bash# COUNT=$(grep -c '^[^:]' PATH_TO_YOUR/channels.conf)
-  bash# sysctl -w sys.net.ipv4.igmp_max_memberships=$COUNT
+  bash# sysctl -w net.ipv4.igmp_max_memberships=$COUNT
 
 A multicast server never knows how many clients are actually receiving a stream.
 If a client signals that it leaves a multicast group, the server has to query
