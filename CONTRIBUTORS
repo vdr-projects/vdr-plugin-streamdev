@@ -35,6 +35,7 @@ Rolf Ahrenberg
   for improving externremux script termination
   for fixing PAT repacker version field
   for improving LIMIKUUTIO and PARENTALRATING patch detection
+  for suggesting to include the charset in HTTP replies
 
 Rantanen Teemu
   for providing vdr-incompletesections.diff
