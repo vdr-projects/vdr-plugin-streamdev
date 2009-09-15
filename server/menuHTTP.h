@@ -113,7 +113,12 @@ class cHtmlChannelList: public cChannelList
 		std::string ItemText();
 		std::string PageBottom();
 	public:
-		virtual std::string HttpHeader() { return cChannelList::HttpHeader() + "Content-type: text/html\r\n\r\n"; }
+		virtual std::string HttpHeader() {
+			return cChannelList::HttpHeader()
+				+ "Content-type: text/html; charset="
+				+ I18nCharSets()[Setup.OSDLanguage]
+				+ "\r\n";
+		}
 		virtual bool HasNext();
 		virtual std::string Next();
 		cHtmlChannelList(cChannelIterator *Iterator, eStreamType StreamType, const char *Self, const char *GroupTarget);
@@ -130,7 +135,16 @@ class cM3uChannelList: public cChannelList
 		cCharSetConv m_IConv;
 #endif
 	public:
-		virtual std::string HttpHeader() { return cChannelList::HttpHeader() + "Content-type: audio/x-mpegurl\r\n"; };
+		virtual std::string HttpHeader() {
+			return cChannelList::HttpHeader()
+				+ "Content-type: audio/x-mpegurl; charset="
+#if defined(APIVERSNUM) && APIVERSNUM >= 10503
+				+ "UTF-8"
+#else
+				+ I18nCharSets()[Setup.OSDLanguage]
+#endif
+				+ "\r\n";
+		}
 		virtual bool HasNext();
 		virtual std::string Next();
 		cM3uChannelList(cChannelIterator *Iterator, const char* Base);

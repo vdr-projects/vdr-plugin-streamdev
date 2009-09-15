@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- report charset in HTTP replies (suggested by Rolf Ahrenberg)
 - use SO_KEEPALIVE option on all sockets do detect dead sockets (thanks to
   owagner)
 - enable PatFilter for externremux, so VLC can be used as remuxer or client
