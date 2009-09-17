@@ -116,7 +116,11 @@ class cHtmlChannelList: public cChannelList
 		virtual std::string HttpHeader() {
 			return cChannelList::HttpHeader()
 				+ "Content-type: text/html; charset="
+#if defined(APIVERSNUM) && APIVERSNUM >= 10503
+				+ (cCharSetConv::SystemCharacterTable() ? cCharSetConv::SystemCharacterTable() : "UTF-8")
+#else
 				+ I18nCharSets()[Setup.OSDLanguage]
+#endif
 				+ "\r\n";
 		}
 		virtual bool HasNext();
