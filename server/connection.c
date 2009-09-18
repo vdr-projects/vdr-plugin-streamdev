@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.c,v 1.12 2009/02/13 10:39:22 schmirl Exp $
+ *  $Id: connection.c,v 1.13 2009/09/18 10:43:26 schmirl Exp $
  */
  
 #include "server/connection.h"
@@ -25,6 +25,63 @@ cServerConnection::cServerConnection(const char *Protocol, int Type):
 
 cServerConnection::~cServerConnection() 
 {
+}
+
+const cChannel* cServerConnection::ChannelFromString(const char *String, int *Apid) {
+	const cChannel *channel = NULL;
+	char *string = strdup(String);
+	char *ptr, *end;
+	int apididx = 0;
+	
+	if ((ptr = strrchr(string, '+')) != NULL) {
+		*(ptr++) = '\0';
+		apididx = strtoul(ptr, &end, 10);
+		Dprintf("found apididx: %d\n", apididx);
+	}
+
+	if (isnumber(string)) {
+		int temp = strtol(String, NULL, 10);
+		if (temp >= 1 && temp <= Channels.MaxNumber())
+			channel = Channels.GetByNumber(temp);
+	} else {
+		channel = Channels.GetByChannelID(tChannelID::FromString(string));
+
+		if (channel == NULL) {
+			int i = 1;
+			while ((channel = Channels.GetByNumber(i, 1)) != NULL) {
+				if (String == channel->Name())
+					break;
+
+				i = channel->Number() + 1;
+			}
+		}
+	}
+
+	if (channel != NULL && apididx > 0) {
+		int apid = 0, index = 1;
+
+		for (int i = 0; channel->Apid(i) != 0; ++i, ++index) {
+			if (index == apididx) {
+				apid = channel->Apid(i);
+				break;
+			}
+		}
+
+		if (apid == 0) {
+			for (int i = 0; channel->Dpid(i) != 0; ++i, ++index) {
+				if (index == apididx) {
+					apid = channel->Dpid(i);
+					break;
+				}
+			}
+		}
+
+		if (Apid != NULL) 
+			*Apid = apid;
+	}
+
+	free(string);
+	return channel;
 }
 
 bool cServerConnection::Read(void) 

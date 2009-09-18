@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.c,v 1.6 2009/02/13 10:39:22 schmirl Exp $
+ *  $Id: setup.c,v 1.7 2009/09/18 10:43:26 schmirl Exp $
  */
  
 #include <vdr/menuitems.h>
@@ -45,35 +45,66 @@ bool cStreamdevServerSetup::SetupParse(const char *Name, const char *Value) {
 	return true;
 }
 
+const char* cStreamdevServerMenuSetupPage::StreamTypes[st_Count - 1] = {
+	"TS",
+	"PES",
+	"PS",
+	"ES",
+	"Extern"
+};
+
+const char* cStreamdevServerMenuSetupPage::SuspendModes[sm_Count] = {
+	"Offer suspend mode",
+	"Always suspended",
+	"Never suspended"
+};
+
 cStreamdevServerMenuSetupPage::cStreamdevServerMenuSetupPage(void) {
 	m_NewSetup = StreamdevServerSetup;
 
+	static const char* modes[sm_Count];
+	for (int i = 0; i < sm_Count; i++)
+		modes[i] = tr(SuspendModes[i]);
+
 	AddCategory (tr("Common Settings"));
-	AddRangeEdit(tr("Maximum Number of Clients"), m_NewSetup.MaxClients, 0, 100);
-	AddSuspEdit (tr("Suspend behaviour"),         m_NewSetup.SuspendMode);
-	AddBoolEdit (tr("Client may suspend"),        m_NewSetup.AllowSuspend);
+	Add(new cMenuEditIntItem (tr("Maximum Number of Clients"), &m_NewSetup.MaxClients, 0, 100));
+
+	Add(new cMenuEditStraItem(tr("Suspend behaviour"),         &m_NewSetup.SuspendMode, sm_Count, modes));
+	Add(new cMenuEditBoolItem(tr("Client may suspend"),        &m_NewSetup.AllowSuspend));
 	
 	AddCategory (tr("VDR-to-VDR Server"));
-	AddBoolEdit (tr("Start VDR-to-VDR Server"),   m_NewSetup.StartVTPServer);
-	AddShortEdit(tr("VDR-to-VDR Server Port"),    m_NewSetup.VTPServerPort);
-	AddIpEdit   (tr("Bind to IP"),                m_NewSetup.VTPBindIP);
+	Add(new cMenuEditBoolItem(tr("Start VDR-to-VDR Server"),   &m_NewSetup.StartVTPServer));
+	Add(new cMenuEditIntItem (tr("VDR-to-VDR Server Port"),    &m_NewSetup.VTPServerPort, 0, 65535));
+	Add(new cMenuEditIpItem  (tr("Bind to IP"),                 m_NewSetup.VTPBindIP));
 
 	AddCategory (tr("HTTP Server"));
-	AddBoolEdit (tr("Start HTTP Server"),         m_NewSetup.StartHTTPServer);
-	AddShortEdit(tr("HTTP Server Port"),          m_NewSetup.HTTPServerPort);
-	AddTypeEdit (tr("HTTP Streamtype"),           m_NewSetup.HTTPStreamType);
-	AddIpEdit   (tr("Bind to IP"),                m_NewSetup.HTTPBindIP);
+	Add(new cMenuEditBoolItem(tr("Start HTTP Server"),         &m_NewSetup.StartHTTPServer));
+	Add(new cMenuEditIntItem (tr("HTTP Server Port"),          &m_NewSetup.HTTPServerPort, 0, 65535));
+	Add(new cMenuEditStraItem(tr("HTTP Streamtype"),           &m_NewSetup.HTTPStreamType, st_Count - 1, StreamTypes));
+	Add(new cMenuEditIpItem  (tr("Bind to IP"),                 m_NewSetup.HTTPBindIP));
 	AddCategory (tr("Multicast Streaming Server"));
-	AddBoolEdit (tr("Start IGMP Server"),         m_NewSetup.StartIGMPServer);
-	AddShortEdit(tr("Multicast Client Port"),     m_NewSetup.IGMPClientPort);
-	AddTypeEdit (tr("Multicast Streamtype"),      m_NewSetup.IGMPStreamType);
-	AddIpEdit   (tr("Bind to IP"),                m_NewSetup.IGMPBindIP);
+	Add(new cMenuEditBoolItem(tr("Start IGMP Server"),         &m_NewSetup.StartIGMPServer));
+	Add(new cMenuEditIntItem (tr("Multicast Client Port"),     &m_NewSetup.IGMPClientPort, 0, 65535));
+	Add(new cMenuEditStraItem(tr("Multicast Streamtype"),      &m_NewSetup.IGMPStreamType, st_Count - 1, StreamTypes));
+	Add(new cMenuEditIpItem  (tr("Bind to IP"),                 m_NewSetup.IGMPBindIP));
 	SetCurrent(Get(1));
 }
 
 cStreamdevServerMenuSetupPage::~cStreamdevServerMenuSetupPage() {
 }
 
+void cStreamdevServerMenuSetupPage::AddCategory(const char *Title) {
+  char *buffer = NULL;
+
+  asprintf(&buffer, "--- %s -------------------------------------------------"
+   		"---------------", Title );
+
+  cOsdItem *item = new cOsdItem(buffer);
+  free(buffer);
+  item->SetSelectable(false);
+  Add(item);
+}
+	
 void cStreamdevServerMenuSetupPage::Store(void) {
 	bool restart = false;
 	if (m_NewSetup.StartVTPServer != StreamdevServerSetup.StartVTPServer
