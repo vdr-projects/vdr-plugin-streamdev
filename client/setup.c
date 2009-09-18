@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.c,v 1.5.2.2 2009/02/03 10:26:24 schmirl Exp $
+ *  $Id: setup.c,v 1.5.2.3 2009/09/18 10:41:11 schmirl Exp $
  */
  
 #include <vdr/menuitems.h>
@@ -42,14 +42,14 @@ bool cStreamdevClientSetup::SetupParse(const char *Name, const char *Value) {
 cStreamdevClientMenuSetupPage::cStreamdevClientMenuSetupPage(void) {
 	m_NewSetup = StreamdevClientSetup;
 
-	AddBoolEdit (tr("Hide Mainmenu Entry"),m_NewSetup.HideMenuEntry);
-	AddBoolEdit (tr("Start Client"),       m_NewSetup.StartClient);
-	AddIpEdit   (tr("Remote IP"),          m_NewSetup.RemoteIp);
-	AddShortEdit(tr("Remote Port"),        m_NewSetup.RemotePort);
-	AddBoolEdit (tr("Filter Streaming"),   m_NewSetup.StreamFilters);
-	AddBoolEdit (tr("Synchronize EPG"),    m_NewSetup.SyncEPG);
-	AddRangeEdit (tr("Minimum Priority"),  m_NewSetup.MinPriority, -1, MAXPRIORITY);
-	AddRangeEdit (tr("Maximum Priority"),  m_NewSetup.MaxPriority, -1, MAXPRIORITY);
+	Add(new cMenuEditBoolItem(tr("Hide Mainmenu Entry"), &m_NewSetup.HideMenuEntry));
+	Add(new cMenuEditBoolItem(tr("Start Client"),        &m_NewSetup.StartClient));
+	Add(new cMenuEditIpItem  (tr("Remote IP"),            m_NewSetup.RemoteIp));
+	Add(new cMenuEditIntItem (tr("Remote Port"),         &m_NewSetup.RemotePort, 0, 65535));
+	Add(new cMenuEditBoolItem(tr("Filter Streaming"),    &m_NewSetup.StreamFilters));
+	Add(new cMenuEditBoolItem(tr("Synchronize EPG"),     &m_NewSetup.SyncEPG));
+	Add(new cMenuEditIntItem (tr("Minimum Priority"),    &m_NewSetup.MinPriority, -1, MAXPRIORITY));
+	Add(new cMenuEditIntItem (tr("Maximum Priority"),    &m_NewSetup.MaxPriority, -1, MAXPRIORITY));
 	SetCurrent(Get(0));
 }
 

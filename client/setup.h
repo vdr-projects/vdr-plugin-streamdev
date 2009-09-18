@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.h,v 1.4.2.1 2009/01/29 07:49:05 schmirl Exp $
+ *  $Id: setup.h,v 1.4.2.2 2009/09/18 10:41:11 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SETUPCLIENT_H
@@ -24,7 +24,7 @@ struct cStreamdevClientSetup {
 
 extern cStreamdevClientSetup StreamdevClientSetup;
 
-class cStreamdevClientMenuSetupPage: public cStreamdevMenuSetupPage {
+class cStreamdevClientMenuSetupPage: public cMenuSetupPage {
 private:
 	cStreamdevClientSetup m_NewSetup;
 	

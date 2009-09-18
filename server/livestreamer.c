@@ -508,8 +508,9 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 	case stTSPIDS:
 		Dprintf("pid streaming mode\n");
 		return true;
+	default:
+		return false;
 	}
-	return false;
 }
 
 int cStreamdevLiveStreamer::Put(const uchar *Data, int Count) 

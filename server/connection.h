@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.h,v 1.5.2.2 2009/02/13 10:39:42 schmirl Exp $
+ *  $Id: connection.h,v 1.5.2.3 2009/09/18 10:41:11 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVER_CONNECTION_H
@@ -40,6 +40,8 @@ protected:
 	   post the next line. */
 	virtual bool Respond(const char *Message, bool Last = true, ...);
 			//__attribute__ ((format (printf, 2, 4)));
+
+	static const cChannel *ChannelFromString(const char *String, int *Apid = NULL);
 
 public:
 	/* If you derive, specify a short string such as HTTP for Protocol, which
