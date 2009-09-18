@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.c,v 1.7 2009/09/18 10:43:26 schmirl Exp $
+ *  $Id: setup.c,v 1.8 2009/09/18 10:50:44 schmirl Exp $
  */
  
 #include <vdr/menuitems.h>
@@ -54,9 +54,9 @@ const char* cStreamdevServerMenuSetupPage::StreamTypes[st_Count - 1] = {
 };
 
 const char* cStreamdevServerMenuSetupPage::SuspendModes[sm_Count] = {
-	"Offer suspend mode",
-	"Always suspended",
-	"Never suspended"
+	trNOOP("Offer suspend mode"),
+	trNOOP("Always suspended"),
+	trNOOP("Never suspended")
 };
 
 cStreamdevServerMenuSetupPage::cStreamdevServerMenuSetupPage(void) {
