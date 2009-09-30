@@ -109,3 +109,6 @@ Joachim König-Baltes
 
 Artem Makhutov
   for suggesting and heavy testing IGMP based multicast streaming
+
+pingpong
+  for adding XBMC support by extending VTP capabilities

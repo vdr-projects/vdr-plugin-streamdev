@@ -1,5 +1,5 @@
 /*
- *  $Id: common.h,v 1.11.2.1 2009/09/18 10:41:11 schmirl Exp $
+ *  $Id: common.h,v 1.11.2.2 2009/09/30 10:02:26 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_COMMON_H
@@ -53,6 +53,7 @@ enum eSocketId {
 	siLive,
 	siReplay,
 	siLiveFilter,
+	siDataRespond,
 	si_Count
 };
 
