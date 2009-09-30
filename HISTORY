@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- don't update recordings list on CmdPLAY (reported by BBlack)
 - adapted and included xmbc patch for VDR 1.4.x
 - cleaned up common.h / common.c
 - dropped cStreamdevMenuSetupPage

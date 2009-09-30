@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.18.2.2 2009/09/30 10:02:27 schmirl Exp $
+ *  $Id: connectionVTP.c,v 1.18.2.3 2009/09/30 10:10:53 schmirl Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -1088,7 +1088,6 @@ bool cConnectionVTP::CmdTUNE(char *Opts)
 
 bool cConnectionVTP::CmdPLAY(char *Opts)
 {
-	Recordings.Update(true);
 	if (*Opts) {
 		if (isnumber(Opts)) {
 			cRecording *recording = Recordings.Get(strtol(Opts, NULL, 10) - 1);

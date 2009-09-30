@@ -110,5 +110,8 @@ Joachim König-Baltes
 Artem Makhutov
   for suggesting and heavy testing IGMP based multicast streaming
 
-pingpong
+Alwin Esch
   for adding XBMC support by extending VTP capabilities
+
+BBlack
+  for reporting that updating recordings list on CmdPLAY is a bad idea
