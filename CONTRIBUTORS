@@ -123,3 +123,6 @@ Artem Makhutov
 
 Alwin Esch
   for adding XBMC support by extending VTP capabilities
+
+BBlack
+  for reporting that updating recordings list on CmdPLAY is a bad idea
