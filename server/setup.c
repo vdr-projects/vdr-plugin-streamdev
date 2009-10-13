@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.c,v 1.3.2.2 2009/09/18 10:41:12 schmirl Exp $
+ *  $Id: setup.c,v 1.3.2.3 2009/10/13 06:38:58 schmirl Exp $
  */
  
 #include <vdr/menuitems.h>
@@ -95,13 +95,11 @@ cStreamdevServerMenuSetupPage::~cStreamdevServerMenuSetupPage() {
 }
 
 void cStreamdevServerMenuSetupPage::AddCategory(const char *Title) {
-  char *buffer = NULL;
 
-  asprintf(&buffer, "--- %s -------------------------------------------------"
+  cString str = cString::sprintf("--- %s -------------------------------------------------"
    		"---------------", Title );
 
-  cOsdItem *item = new cOsdItem(buffer);
-  free(buffer);
+  cOsdItem *item = new cOsdItem(*str);
   item->SetSelectable(false);
   Add(item);
 }

@@ -34,6 +34,7 @@ Rolf Ahrenberg
   for improving externremux script termination
   for fixing PAT repacker version field
   for suggesting to include the charset in HTTP replies
+  for requesting replacement of asprintf calls
 
 Rantanen Teemu
   for providing vdr-incompletesections.diff
