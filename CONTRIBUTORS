@@ -36,6 +36,7 @@ Rolf Ahrenberg
   for fixing PAT repacker version field
   for improving LIMIKUUTIO and PARENTALRATING patch detection
   for suggesting to include the charset in HTTP replies
+  for requesting replacement of asprintf calls
 
 Rantanen Teemu
   for providing vdr-incompletesections.diff

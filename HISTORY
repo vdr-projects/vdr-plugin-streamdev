@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- silenced warnings concerning asprintf (requested by Rolf Ahrenberg)
 - don't update recordings list on CmdPLAY (reported by BBlack)
 - cleaned up common.h / common.c
 - dropped cStreamdevMenuSetupPage
