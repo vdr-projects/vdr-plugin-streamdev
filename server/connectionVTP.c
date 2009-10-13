@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.18.2.4 2009/10/13 06:38:58 schmirl Exp $
+ *  $Id: connectionVTP.c,v 1.18.2.5 2009/10/13 06:48:23 schmirl Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -37,7 +37,7 @@ enum eDumpModeStreamdev { dmsdAll, dmsdPresent, dmsdFollowing, dmsdAtTime, dmsdF
 class cLSTEHandler 
 {
 private:
-#ifdef USE_PARENTALRATING
+#if defined(USE_PARENTALRATING) || defined(PARENTALRATINGCONTENTVERSNUM)
 	enum eStates { Channel, Event, Title, Subtitle, Description, Vps, Content,
 	               EndEvent, EndChannel, EndEPG };
 #else
@@ -282,7 +282,7 @@ bool cLSTEHandler::Next(bool &Last)
 		break;
 
 	case Vps:
-#ifdef USE_PARENTALRATING
+#if defined(USE_PARENTALRATING) || defined(PARENTALRATINGCONTENTVERSNUM)
 		m_State = Content;
 #else
 		m_State = EndEvent;
@@ -297,7 +297,7 @@ bool cLSTEHandler::Next(bool &Last)
 			return Next(Last);
 		break;
 
-#ifdef USE_PARENTALRATING
+#if defined(USE_PARENTALRATING) || defined(PARENTALRATINGCONTENTVERSNUM)
 	case Content:
 		m_State = EndEvent;
 		if (!isempty(m_Event->GetContentsString())) {

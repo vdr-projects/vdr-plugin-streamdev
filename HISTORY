@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- improved PARENTALRATING patch detection was missing in this branch
 - silenced warnings concerning asprintf (requested by Rolf Ahrenberg)
 - don't update recordings list on CmdPLAY (reported by BBlack)
 - adapted and included xmbc patch for VDR 1.4.x
