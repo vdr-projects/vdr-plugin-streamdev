@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- added Slovak translation (thanks to Milan Hrala)
 - fixed regression from fix for switching between encrypted channels. It was
   no longer possible to receive multiple (FTA) streams from the same
   transponder

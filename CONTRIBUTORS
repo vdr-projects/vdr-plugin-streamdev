@@ -12,14 +12,14 @@ The Metzler Brothers
   as a lot of code has been taken from their libdvbmpeg package
 
 Angelus (DOm)
-  for providing italian language texts
+  for providing Italian language texts
   for reporting problems with the Elchi-Patch
 
 Michal
   for sending a patch to select the HTTP streamtype via remote
 
 Rolf Ahrenberg
-  for providing finnish language texts
+  for providing Finnish language texts
   for adding externremux.sh commandline parameter
   for silencing compiler warnings
   for adding PAT, PMT, PCR and EIT to HTTP TS streams
@@ -90,10 +90,10 @@ tobi
   for pointing to unused files in the libdvbmpeg directory
  
 Diego Pierotto
-  for providing italian language texts
+  for providing Italian language texts
  
 micky979
-  for providing french language texts
+  for providing French language texts
 
 Tiroler
   for reporting a problem when switching between encrypted channels
@@ -127,3 +127,6 @@ Alwin Esch
 
 BBlack
   for reporting that updating recordings list on CmdPLAY is a bad idea
+
+Milan Hrala
+  for providing Slovak language texts
