@@ -1,7 +1,7 @@
 #
 # Makefile for a Video Disk Recorder plugin
 #
-# $Id: Makefile,v 1.19 2009/07/01 10:46:15 schmirl Exp $
+# $Id: Makefile,v 1.20 2009/11/04 11:12:20 schmirl Exp $
 
 # The official name of this plugin.
 # This name will be used in the '-P...' option of VDR to load the plugin.
@@ -31,6 +31,7 @@ TMPDIR = /tmp
 ### The version number of VDR (taken from VDR's "config.h"):
 
 APIVERSION = $(shell grep 'define APIVERSION ' $(VDRDIR)/config.h | awk '{ print $$3 }' | sed -e 's/"//g')
+APIVERSNUM = $(shell grep 'define APIVERSNUM ' $(VDRDIR)/config.h | awk '{ print $$3 }' | sed -e 's/"//g')
 
 ### The name of the distribution archive:
 
@@ -42,6 +43,10 @@ PACKAGE = vdr-$(ARCHIVE)
 INCLUDES += -I$(VDRDIR)/include -I.
 
 DEFINES += -D_GNU_SOURCE -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
+
+ifeq ($(shell test $(APIVERSNUM) -ge 10704; echo $$?),0)
+	DEFINES += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
+endif
 
 ### The object files (add further files here):
 

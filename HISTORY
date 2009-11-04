@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- added defines for large file support to Makefile as required by VDR 1.7.4+
+  (reported by wirbel@vdrportal)
 - added Slovak translation (thanks to Milan Hrala)
 - fixed regression from fix for switching between encrypted channels. It was
   no longer possible to receive multiple (FTA) streams from the same

@@ -107,6 +107,7 @@ Anssi Hannula
 
 wirbel
   for pointing out that section filtering is optional for VDR devices
+  for reporting a problem with Makefile defines in VDR 1.7.4+
 
 Jori Hamalainen
   for extensive testing while making stream compatible to Network Media Tank
