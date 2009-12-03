@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- fixed missing virtual destructor for cTSRemux
 - added defines for large file support to Makefile as required by VDR 1.7.4+
   (reported by wirbel@vdrportal)
 - added Slovak translation (thanks to Milan Hrala)
