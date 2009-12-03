@@ -11,6 +11,8 @@ namespace Streamdev {
 
 class cTSRemux {
 public:
+	virtual ~cTSRemux() {};
+
 	virtual int Put(const uchar *Data, int Count) = 0;
 	virtual uchar *Get(int &Count) = 0;
 	virtual void Del(int Count) = 0;
