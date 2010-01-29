@@ -113,6 +113,7 @@ Artem Makhutov
 
 Alwin Esch
   for adding XBMC support by extending VTP capabilities
+  for adding the DELT FORCE option to delete running timers
 
 BBlack
   for reporting that updating recordings list on CmdPLAY is a bad idea

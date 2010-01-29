@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.18.2.5 2009/10/13 06:48:23 schmirl Exp $
+ *  $Id: connectionVTP.c,v 1.18.2.6 2010/01/29 12:02:44 schmirl Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -1390,22 +1390,52 @@ bool cConnectionVTP::CmdDELT(const char *Option)
 {
 	INIT_WRAPPER();
 	if (*Option) {
-		if (isnumber(Option)) {
-			cTimer *timer = Timers.Get(strtol(Option, NULL, 10) - 1);
+		int number = 0;
+		bool force = false;
+		char buf[strlen(Option) + 1];
+		strcpy(buf, Option);
+		const char *delim = " \t";
+		char *strtok_next;
+		char *p = strtok_r(buf, delim, &strtok_next);
+
+		if (isnumber(p)) {
+			number = strtol(p, NULL, 10) - 1;
+		}
+		else if (strcasecmp(p, "FORCE") == 0) {
+			force = true;
+		}
+		if ((p = strtok_r(NULL, delim, &strtok_next)) != NULL) {
+			if (isnumber(p)) {
+				number = strtol(p, NULL, 10) - 1;
+			}
+			else if (strcasecmp(p, "FORCE") == 0) {
+				force = true;
+			}
+			else {
+				Reply(501, "Timer not found or wrong syntax");
+			}
+		}
+
+		cTimer *timer = Timers.Get(number);
 			if (timer) {
-				if (!timer->Recording()) {
+			if (timer->Recording()) {
+				if (force) {
+					timer->Skip();
+					cRecordControls::Process(time(NULL));
+				}
+				else {
+					Reply(550, "Timer \"%i\" is recording", number);
+					EXIT_WRAPPER();
+				}
+			}
 					isyslog("deleting timer %s", *timer->ToDescr());
 					Timers.Del(timer);
 					Timers.SetModified();
-					Reply(250, "Timer \"%s\" deleted", Option);
+			Reply(250, "Timer \"%i\" deleted", number);
 				} else
-					Reply(550, "Timer \"%s\" is recording", Option);
+			Reply(501, "Timer \"%i\" not defined", number);
 			} else
-				Reply(501, "Timer \"%s\" not defined", Option);
-		} else
-			Reply(501, "Error in timer number \"%s\"", Option);
-	} else
-		Reply(501, "Missing timer number");
+		Reply(501, "Missing timer option");
 	EXIT_WRAPPER();
 }
 
