@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.25 2009/10/13 06:38:47 schmirl Exp $
+ *  $Id: connectionVTP.c,v 1.26 2010/01/29 11:44:52 schmirl Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -39,6 +39,9 @@ class cLSTEHandler
 private:
 #if defined(USE_PARENTALRATING) || defined(PARENTALRATINGCONTENTVERSNUM)
 	enum eStates { Channel, Event, Title, Subtitle, Description, Vps, Content,
+	               EndEvent, EndChannel, EndEPG };
+#elif APIVERSNUM >= 10711
+	enum eStates { Channel, Event, Title, Subtitle, Description, Vps, Content, Rating,
 	               EndEvent, EndChannel, EndEPG };
 #else
 	enum eStates { Channel, Event, Title, Subtitle, Description, Vps, 
@@ -282,7 +285,7 @@ bool cLSTEHandler::Next(bool &Last)
 		break;
 
 	case Vps:
-#if defined(USE_PARENTALRATING) || defined(PARENTALRATINGCONTENTVERSNUM)
+#if defined(USE_PARENTALRATING) || defined(PARENTALRATINGCONTENTVERSNUM) || APIVERSNUM >= 10711
 		m_State = Content;
 #else
 		m_State = EndEvent;
@@ -306,6 +309,25 @@ bool cLSTEHandler::Next(bool &Last)
 			strreplace(copy, '\n', '|');
 			return m_Client->Respond(-215, "G %i %i %s", m_Event->Contents() & 0xF0, m_Event->Contents() & 0x0F, copy);
 		} else
+			return Next(Last);
+		break;
+#elif APIVERSNUM >= 10711
+	case Content:
+		m_State = Rating;
+		if (!isempty(m_Event->ContentToString(m_Event->Contents()))) {
+			char *copy = strdup(m_Event->ContentToString(m_Event->Contents()));
+			cString cpy(copy, true);
+			strreplace(copy, '\n', '|');
+			return m_Client->Respond(-215, "G %i %i %s", m_Event->Contents() & 0xF0, m_Event->Contents() & 0x0F, copy);
+		} else
+			return Next(Last);
+		break;
+
+	case Rating:
+		m_State = EndEvent;
+		if (m_Event->ParentalRating())
+			return m_Client->Respond(-215, "R %d", m_Event->ParentalRating());
+		else
 			return Next(Last);
 		break;
 #endif

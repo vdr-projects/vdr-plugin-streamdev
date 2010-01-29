@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- added VDR 1.7.11 parental rating support for VTP LSTE command (thanks to
+  Alwin Esch)
 - added Lithuanian translation (thanks to Valdemaras Pipiras)
 - fixed missing virtual destructor for cTSRemux
 - added defines for large file support to Makefile as required by VDR 1.7.4+
