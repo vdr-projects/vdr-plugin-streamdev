@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- added DELT FORCE option to delete running timers (thanks to Alwin Esch)
 - added VDR 1.7.11 parental rating support for VTP LSTE command (thanks to
   Alwin Esch)
 - added Lithuanian translation (thanks to Valdemaras Pipiras)

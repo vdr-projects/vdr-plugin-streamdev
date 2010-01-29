@@ -126,6 +126,7 @@ Artem Makhutov
 Alwin Esch
   for adding XBMC support by extending VTP capabilities
   for adding VDR 1.7.11 parental rating support for VTP LSTE command
+  for adding the DELT FORCE option to delete running timers
 
 BBlack
   for reporting that updating recordings list on CmdPLAY is a bad idea
