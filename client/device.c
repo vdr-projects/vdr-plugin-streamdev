@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.24 2009/10/19 06:19:10 schmirl Exp $
+ *  $Id: device.c,v 1.25 2010/02/17 12:39:03 schmirl Exp $
  */
  
 #include "client/device.h"
@@ -72,7 +72,9 @@ bool cStreamdevDevice::IsTunedToTransponder(const cChannel *Channel)
 {
 	bool res = false;
 	if (ClientSocket.DataSocket(siLive) != NULL
-			&& TRANSPONDER(Channel, m_Channel))
+			&& TRANSPONDER(Channel, m_Channel)
+			&& Channel->Ca() == CA_FTA
+			&& m_Channel->Ca() == CA_FTA)
 		res = true;
 	return res;
 }
@@ -125,7 +127,8 @@ bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel,
 
 	if (ClientSocket.DataSocket(siLive) != NULL 
 			&& TRANSPONDER(Channel, m_Channel)
-			&& Channel->Ca() == m_Channel->Ca())
+			&& Channel->Ca() == CA_FTA
+			&& m_Channel->Ca() == CA_FTA)
 		return true;
 
 	DetachAllReceivers();
