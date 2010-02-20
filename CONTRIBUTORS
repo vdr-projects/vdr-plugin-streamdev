@@ -139,3 +139,6 @@ Valdemaras Pipiras
 
 sk8ter
   for fixing failures when switching between two encrypted channels
+
+lhanisch
+  for fixing a memory leak in cStreamdevPatFilter::GetPid
