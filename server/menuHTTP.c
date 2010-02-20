@@ -415,13 +415,13 @@ std::string cM3uChannelList::Next()
 
 	if (channel->GroupSep())
 	{
-		return (std::string) "#EXTINF:0," + name + "\r\n" +
+		return (std::string) "#EXTINF:-1," + name + "\r\n" +
 			base + "group.m3u?group=" +
 			(const char*) itoa(cChannelList::GetGroupIndex(channel));
 	}
 	else
 	{
-		return (std::string) "#EXTINF:0," +
+		return (std::string) "#EXTINF:-1," +
 			(const char*) itoa(channel->Number()) + " " + name + "\r\n" +
 			base + (std::string) channel->GetChannelID().ToString();
 	}

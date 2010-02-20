@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- length -1 is the correct value for streams in M3U playlists
 - switching between two encrypted channels on the same transponder didn't
   always work (thanks to sk8ter@vdrportal)
 - added DELT FORCE option to delete running timers (thanks to Alwin Esch)
