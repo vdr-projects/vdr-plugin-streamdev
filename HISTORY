@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- length -1 is the correct value for streams in M3U playlists
 - added DELT FORCE option to delete running timers (thanks to Alwin Esch)
 - fixed missing virtual destructor for cTSRemux
 - improved PARENTALRATING patch detection was missing in this branch
