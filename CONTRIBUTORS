@@ -117,3 +117,6 @@ Alwin Esch
 
 BBlack
   for reporting that updating recordings list on CmdPLAY is a bad idea
+
+lhanisch
+  for fixing a memory leak in cStreamdevPatFilter::GetPid

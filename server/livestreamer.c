@@ -183,14 +183,17 @@ int cStreamdevPatFilter::GetPid(SI::PMT::Stream& stream)
 			case SI::AC3DescriptorTag:
 				Dprintf("cStreamdevPatFilter PMT scanner: adding PID %d (%s) %s\n",
 					stream.getPid(), psStreamTypes[stream.getStreamType()], "AC3");
+				delete d;
 				return stream.getPid();
 			case SI::TeletextDescriptorTag:
 				Dprintf("cStreamdevPatFilter PMT scanner: adding PID %d (%s) %s\n",
 					stream.getPid(), psStreamTypes[stream.getStreamType()], "Teletext");
+				delete d;
 				return stream.getPid();
 			case SI::SubtitlingDescriptorTag:
 				Dprintf("cStreamdevPatFilter PMT scanner: adding PID %d (%s) %s\n",
 					stream.getPid(), psStreamTypes[stream.getStreamType()], "DVBSUB");
+				delete d;
 				return stream.getPid();
 			default:
 				Dprintf("cStreamdevPatFilter PMT scanner: NOT adding PID %d (%s) %s\n",
@@ -223,6 +226,7 @@ int cStreamdevPatFilter::GetPid(SI::PMT::Stream& stream)
 								stream.getPid(), stream.getStreamType(), 
 								d->getLength(), rawdata[2], rawdata[3], 
 								rawdata[4], rawdata[5]);
+							delete d;
 							return stream.getPid();
 						}
 					}
