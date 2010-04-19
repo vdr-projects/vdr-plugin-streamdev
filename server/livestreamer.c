@@ -172,6 +172,7 @@ int cStreamdevPatFilter::GetPid(SI::PMT::Stream& stream)
 		for (SI::Loop::Iterator it; (d = stream.streamDescriptors.getNext(it)); ) {
 			switch (d->getDescriptorTag()) {
 			case SI::AC3DescriptorTag:
+			case SI::EnhancedAC3DescriptorTag:
 				Dprintf("cStreamdevPatFilter PMT scanner: adding PID %d (%s) %s\n",
 					stream.getPid(), psStreamTypes[stream.getStreamType()], "AC3");
 				delete d;

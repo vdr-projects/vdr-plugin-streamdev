@@ -142,3 +142,6 @@ sk8ter
 
 lhanisch
   for fixing a memory leak in cStreamdevPatFilter::GetPid
+ 
+Eric Valette
+  for adding support for EnhancedAC3
