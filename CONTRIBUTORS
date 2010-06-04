@@ -56,6 +56,7 @@ Udo Richter
   for speeding up cPluginStreamdevServer::Active()
   for adapting to VDR 1.5.0 API
   for adapting to VDR 1.7.1
+  for proper tsplay-0.2 patch detection
 
 greenman
   for reporting that the log could get flooded on connection failures.

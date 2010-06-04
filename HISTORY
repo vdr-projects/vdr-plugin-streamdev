@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- proper tsplay-0.2 patch detection. tsplay-0.1 is no longer recognized
+  (thanks to Udo Richter)
 - added compatibility with VDR 1.6 tsplay-0.1 patch
 - added support for EnhancedAC3 (thanks to Eric Valette)
 - fixed a memory leak in cStreamdevPatFilter::GetPid (thanks to lhanisch)

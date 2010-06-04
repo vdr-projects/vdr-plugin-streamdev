@@ -21,6 +21,9 @@
 
 #include "recplayer.h"
 
+// for TSPLAY patch detection
+#include "vdr/device.h"
+
 #define _XOPEN_SOURCE 600
 #include <fcntl.h>
 
@@ -34,7 +37,7 @@ RecPlayer::RecPlayer(cRecording* rec)
 
   // FIXME find out max file path / name lengths
 
-#if VDRVERSNUM >= 10703 || defined(MAXVIDEOFILESIZETS)
+#if VDRVERSNUM >= 10703 || defined(TSPLAY_PATCH_VERSION)
   indexFile = new cIndexFile(recording->FileName(), false, rec->IsPesRecording());
 #else
   indexFile = new cIndexFile(recording->FileName(), false);
@@ -58,7 +61,7 @@ void RecPlayer::scan()
   for(i = 1; i < 1000; i++)
   {
 
-#if APIVERSNUM < 10703 || !defined(MAXVIDEOFILESIZETS)
+#if APIVERSNUM < 10703 || !defined(TSPLAY_PATCH_VERSION)
     snprintf(fileName, 2047, "%s/%03i.vdr", recording->FileName(), i);
     //log->log("RecPlayer", Log::DEBUG, "FILENAME: %s", fileName);
     file = fopen(fileName, "r");
@@ -99,7 +102,7 @@ int RecPlayer::openFile(int index)
 
   char fileName[2048];
 
-#if APIVERSNUM >= 10703 || defined(MAXVIDEOFILESIZETS)
+#if APIVERSNUM >= 10703 || defined(TSPLAY_PATCH_VERSION)
   snprintf(fileName, 2047, "%s/%05i.ts", recording->FileName(), index);
   isyslog("openFile called for index %i string:%s", index, fileName);
 
@@ -222,7 +225,7 @@ uint64_t RecPlayer::positionFromFrameNumber(uint32_t frameNumber)
 {
   if (!indexFile) return 0;
 
-#if VDRVERSNUM >= 10703 || defined(MAXVIDEOFILESIZETS)
+#if VDRVERSNUM >= 10703 || defined(TSPLAY_PATCH_VERSION)
   uint16_t retFileNumber;
   off_t retFileOffset;
 #else
