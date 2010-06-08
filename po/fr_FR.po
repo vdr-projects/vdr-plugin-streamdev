@@ -42,9 +42,6 @@ msgstr "Port du serveur"
 msgid "Filter Streaming"
 msgstr "Filtre streaming"
 
-msgid "Synchronize EPG"
-msgstr "Synchroniser l'EPG"
-
 msgid "Minimum Priority"
 msgstr ""
 

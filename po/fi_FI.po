@@ -42,9 +42,6 @@ msgstr "Etäkoneen portti"
 msgid "Filter Streaming"
 msgstr "Suodatetun tiedon suoratoisto"
 
-msgid "Synchronize EPG"
-msgstr "Päivitä ohjelmaopas"
-
 msgid "Minimum Priority"
 msgstr "Pienin prioriteetti"
 

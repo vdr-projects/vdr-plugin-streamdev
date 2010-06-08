@@ -42,9 +42,6 @@ msgstr "Nuotolinis portas"
 msgid "Filter Streaming"
 msgstr "Filtruoti transliavimą"
 
-msgid "Synchronize EPG"
-msgstr "Sinchronizuoti EPG"
-
 msgid "Minimum Priority"
 msgstr "Minimalus prioritetas"
 

@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.25 2010/02/17 12:39:03 schmirl Exp $
+ *  $Id: device.c,v 1.26 2010/06/08 05:55:17 schmirl Exp $
  */
  
 #include "client/device.h"
@@ -33,9 +33,6 @@ cStreamdevDevice::cStreamdevDevice(void) {
 	m_Device = this;
 	m_Pids = 0;
 	m_DvrClosed = true;
-
-	if (StreamdevClientSetup.SyncEPG)	
-		ClientSocket.SynchronizeEPG();
 }
 
 cStreamdevDevice::~cStreamdevDevice() {

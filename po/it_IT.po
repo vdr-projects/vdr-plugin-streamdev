@@ -44,9 +44,6 @@ msgstr "Porta Server Remoto"
 msgid "Filter Streaming"
 msgstr "Filtra trasmissione"
 
-msgid "Synchronize EPG"
-msgstr "Sincronizza EPG"
-
 msgid "Minimum Priority"
 msgstr ""
 

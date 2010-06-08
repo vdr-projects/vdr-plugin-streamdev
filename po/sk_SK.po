@@ -44,9 +44,6 @@ msgstr "Vzdialený port"
 msgid "Filter Streaming"
 msgstr "filtrova» prúdy"
 
-msgid "Synchronize EPG"
-msgstr "zosúladi» EPG"
-
 msgid "Minimum Priority"
 msgstr "minimálna priorita"
 

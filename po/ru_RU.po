@@ -42,9 +42,6 @@ msgstr "Удаленный порт"
 msgid "Filter Streaming"
 msgstr "Фильтр потока"
 
-msgid "Synchronize EPG"
-msgstr "Синхронизация EPG"
-
 msgid "Minimum Priority"
 msgstr ""
 

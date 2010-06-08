@@ -42,9 +42,6 @@ msgstr "Port der Gegenseite"
 msgid "Filter Streaming"
 msgstr "Filter-Daten streamen"
 
-msgid "Synchronize EPG"
-msgstr "EPG synchronisieren"
-
 msgid "Minimum Priority"
 msgstr "Minimale Priorität"
 

@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- dropped "Synchronize EPG" feature. Please use epgsync-plugin instead
+  (available from http://vdr.schmirler.de)
 - proper tsplay-0.2 patch detection. tsplay-0.1 is no longer recognized
   (thanks to Udo Richter)
 - added compatibility with VDR 1.6 tsplay-0.1 patch
