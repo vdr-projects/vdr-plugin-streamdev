@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- dropped "Synchronize EPG" feature. Please use epgsync-plugin instead
+  (available from http://vdr.schmirler.de)
 - fixed a memory leak in cStreamdevPatFilter::GetPid (thanks to lhanisch)
 - length -1 is the correct value for streams in M3U playlists
 - added DELT FORCE option to delete running timers (thanks to Alwin Esch)

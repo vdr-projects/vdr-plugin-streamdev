@@ -1,5 +1,5 @@
 /*
- *  $Id: socket.h,v 1.6 2008/04/07 14:40:40 schmirl Exp $
+ *  $Id: socket.h,v 1.6.2.1 2010/06/08 05:56:15 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_CLIENT_CONNECTION_H
@@ -48,7 +48,6 @@ public:
 	bool SetPid(int Pid, bool On);
 	bool SetFilter(ushort Pid, uchar Tid, uchar Mask, bool On);
 	bool CloseDvr(void);
-	bool SynchronizeEPG(void);
 	bool SuspendServer(void);
 	bool Quit(void);
 

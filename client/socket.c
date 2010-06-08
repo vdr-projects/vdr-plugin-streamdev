@@ -1,5 +1,5 @@
 /*
- *  $Id: socket.c,v 1.11 2008/04/07 14:40:40 schmirl Exp $
+ *  $Id: socket.c,v 1.11.2.1 2010/06/08 05:56:15 schmirl Exp $
  */
  
 #include <tools/select.h>
@@ -298,52 +298,6 @@ bool cClientSocket::CloseDvr(void) {
 		
 		DELETENULL(m_DataSockets[siLive]);
 	}
-	return true;
-}
-
-bool cClientSocket::SynchronizeEPG(void) {
-	std::string buffer;
-	bool result;
-	FILE *epgfd;
-
-	if (!CheckConnection()) return false;
-
-	isyslog("Streamdev: Synchronizing EPG from server\n");
-
-	CMD_LOCK;
-
-	if (!Command("LSTE"))
-		return false;
-
-	if ((epgfd = tmpfile()) == NULL) {
-		esyslog("ERROR: Streamdev: Error while processing EPG data: %s", 
-				strerror(errno));
-		return false;
-	}
-
-	while ((result = Expect(215, &buffer))) {
-		if (buffer[3] == ' ') break;
-		fputs(buffer.c_str() + 4, epgfd);
-		fputc('\n', epgfd);
-	}
-
-	if (!result) {
-		if (errno == 0)
-			esyslog("ERROR: Streamdev: Couldn't fetch EPG data from %s:%d",
-			        RemoteIp().c_str(), RemotePort());
-		fclose(epgfd);
-		return false;
-	}
-
-	rewind(epgfd);
-	if (cSchedules::Read(epgfd))
-		cSchedules::Cleanup(true);
-	else {
-		esyslog("ERROR: Streamdev: Parsing EPG data failed");
-		fclose(epgfd);
-		return false;
-	}
-	fclose(epgfd);
 	return true;
 }
 

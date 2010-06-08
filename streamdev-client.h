@@ -1,5 +1,5 @@
 /*
- *  $Id: streamdev-client.h,v 1.1 2004/12/30 22:43:59 lordjaxom Exp $
+ *  $Id: streamdev-client.h,v 1.1.1.1.2.1 2010/06/08 05:56:14 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEVCLIENT_H
@@ -19,7 +19,6 @@ public:
   virtual const char *Version(void) { return VERSION; }
   virtual const char *Description(void);
   virtual bool Start(void);
-  virtual void Housekeeping(void);
   virtual const char *MainMenuEntry(void);
   virtual cOsdObject *MainMenuAction(void);
   virtual cMenuSetupPage *SetupMenu(void);

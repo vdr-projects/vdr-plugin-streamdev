@@ -1,5 +1,5 @@
 /*
- *  $Id: i18n.c,v 1.8.2.7 2009/07/07 10:50:13 schmirl Exp $
+ *  $Id: i18n.c,v 1.8.2.8 2010/06/08 05:56:14 schmirl Exp $
  */
  
 #include "i18n.h"
@@ -349,31 +349,6 @@ const tI18nPhrase Phrases[] = {
 		"",		// Magyar
 		"",		// Catala
 		"HTTP áÕàÒÕà",		// Russian
-		"",		// Hrvatski
-		"",		// Eesti
-		"",		// Dansk
-		"",		// Czech
-#if VDRVERSNUM >= 10502
-		"",		// Türkçe
-#endif
-	},
-	{	"Synchronize EPG",		// English
-		"EPG synchronisieren",		// Deutsch
-		"",		// Slovenski
-		"Sincronizza EPG",		// Italiano
-		"",		// Nederlands
-		"",		// Português
-		"Synchroniser l'EPG",		// Français
-		"",		// Norsk
-		"Päivitä ohjelmaopas",		// suomi
-		"",		// Polski
-		"",		// Español
-		"",		// Ellinika
-		"",		// Svenska
-		"",		// Romaneste
-		"",		// Magyar
-		"",		// Catala
-		"ÁØÝåàÞÝØ×ÐæØï EPG",		// Russian
 		"",		// Hrvatski
 		"",		// Eesti
 		"",		// Dansk
