@@ -1,5 +1,5 @@
 /*
- *  $Id: i18n.c,v 1.8.2.8 2010/06/08 05:56:14 schmirl Exp $
+ *  $Id: i18n.c,v 1.8.2.9 2010/07/19 13:50:11 schmirl Exp $
  */
  
 #include "i18n.h"
@@ -360,7 +360,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Minimum Priority",		// English
 		"Minimale Priorität",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Priorità minima",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -385,7 +385,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Maximum Priority",		// English
 		"Maximale Priorität",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Priorità massima",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -735,7 +735,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Multicast Streaming Server",		// English
 		"Multicast Streaming Server",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Server trasmissione Multicast",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -760,7 +760,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Start IGMP Server",		// English
 		"IGMP Server starten",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Avvia Server IGMP",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -785,7 +785,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Multicast Client Port",		// English
 		"Port des Multicast Clients",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Porta Client Multicast",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français
@@ -810,7 +810,7 @@ const tI18nPhrase Phrases[] = {
 	{	"Multicast Streamtype",		// English
 		"Multicast Streamtyp",		// Deutsch
 		"",		// Slovenski
-		"",		// Italiano
+		"Tipo flusso Multicast",		// Italiano
 		"",		// Nederlands
 		"",		// Português
 		"",		// Français

@@ -1,13 +1,18 @@
 #include "remux/extern.h"
 #include "server/server.h"
+#include "server/connection.h"
 #include "server/streamer.h"
+#include <vdr/channels.h>
 #include <vdr/tools.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 namespace Streamdev {
+
+#define MAXENV 63
 
 class cTSExt: public cThread {
 private:
@@ -20,7 +25,7 @@ protected:
 	virtual void Action(void);
 
 public:
-	cTSExt(cRingBufferLinear *ResultBuffer, std::string Parameter);
+	cTSExt(cRingBufferLinear *ResultBuffer, const cServerConnection *Connection, const cChannel *Channel, const int *Apids, const int *Dpids);
 	virtual ~cTSExt();
 
 	void Put(const uchar *Data, int Count);
@@ -29,7 +34,7 @@ public:
 } // namespace Streamdev
 using namespace Streamdev;
 
-cTSExt::cTSExt(cRingBufferLinear *ResultBuffer, std::string Parameter):
+cTSExt::cTSExt(cRingBufferLinear *ResultBuffer, const cServerConnection *Connection, const cChannel *Channel, const int *Apids, const int *Dpids):
 		m_ResultBuffer(ResultBuffer),
 		m_Active(false),
 		m_Process(-1),
@@ -62,6 +67,115 @@ cTSExt::cTSExt(cRingBufferLinear *ResultBuffer, std::string Parameter):
 
 	if (m_Process == 0) {
 		// child process
+		char *env[MAXENV + 1];
+		int i = 0;
+
+#define ADDENV(x...) if (asprintf(&env[i++], x) < 0) i--
+
+		// add channel ID, name and pids to environment
+		ADDENV("REMUX_CHANNEL_ID=%s", *Channel->GetChannelID().ToString());
+		ADDENV("REMUX_CHANNEL_NAME=%s", Channel->Name());
+#if APIVERSNUM >= 10701
+		ADDENV("REMUX_VTYPE=%d", Channel->Vtype());
+#endif
+		if (Channel->Vpid())
+			ADDENV("REMUX_VPID=%d", Channel->Vpid());
+		if (Channel->Ppid() != Channel->Vpid())
+			ADDENV("REMUX_PPID=%d", Channel->Ppid());
+		if (Channel->Tpid())
+			ADDENV("REMUX_TPID=%d", Channel->Tpid());
+
+		std::string buffer;
+		if (Apids && *Apids) {
+			for (const int *pid = Apids; *pid; pid++)
+				(buffer += (const char *) itoa(*pid)) += (*(pid + 1) ? " " : "");
+			ADDENV("REMUX_APID=%s", buffer.c_str());
+
+			buffer.clear();
+			for (const int *pid = Apids; *pid; pid++) {
+				int j;
+				for (j = 0; Channel->Apid(j) && Channel->Apid(j) != *pid; j++)
+					;
+				(buffer += Channel->Alang(j)) += (*(pid + 1) ? " " : "");
+			}
+			ADDENV("REMUX_ALANG=%s", buffer.c_str());
+		}
+
+		if (Dpids && *Dpids) {
+			buffer.clear();
+			for (const int *pid = Dpids; *pid; pid++)
+				(buffer += (const char *) itoa(*pid)) += (*(pid + 1) ? " " : "");
+			ADDENV("REMUX_DPID=%s", buffer.c_str());
+
+			buffer.clear();
+			for (const int *pid = Dpids; *pid; pid++) {
+				int j;
+				for (j = 0; Channel->Dpid(j) && Channel->Dpid(j) != *pid; j++)
+					;
+				(buffer += Channel->Dlang(j)) += (*(pid + 1) ? " " : "");
+			}
+			ADDENV("REMUX_DLANG=%s", buffer.c_str());
+		}
+
+		if (Channel->Spid(0)) {
+			buffer.clear();
+			for (const int *pid = Channel->Spids(); *pid; pid++)
+				(buffer += (const char *) itoa(*pid)) += (*(pid + 1) ? " " : "");
+			ADDENV("REMUX_SPID=%s", buffer.c_str());
+
+			buffer.clear();
+			for (int j = 0; Channel->Spid(j); j++)
+				(buffer += Channel->Slang(j)) += (Channel->Spid(j + 1) ? " " : "");
+			ADDENV("REMUX_SLANG=%s", buffer.c_str());
+		}
+
+		if (Connection) {
+			// add vars for a CGI like interface
+			// the following vars are not implemented:
+			// REMOTE_HOST, REMOTE_IDENT, REMOTE_USER
+			// CONTENT_TYPE, CONTENT_LENGTH,
+			// SCRIPT_NAME, PATH_TRANSLATED, GATEWAY_INTERFACE
+			ADDENV("REMOTE_ADDR=%s", Connection->RemoteIp().c_str());
+			ADDENV("SERVER_NAME=%s", Connection->LocalIp().c_str());
+			ADDENV("SERVER_PORT=%d", Connection->LocalPort());
+			ADDENV("SERVER_PROTOCOL=%s", Connection->Protocol());
+			ADDENV("SERVER_SOFTWARE=%s", VERSION);
+
+			for (tStrStrMap::const_iterator it = Connection->Headers().begin(); it != Connection->Headers().end(); it++) {
+				if (i >= MAXENV) {
+					esyslog("streamdev-server: Too many headers for externremux.sh");
+					break;
+				}
+				ADDENV("%s=%s", it->first.c_str(), it->second.c_str());
+			}
+
+			// look for section parameters: /path;param1=value1;param2=value2/
+			std::string::size_type begin, end;
+			std::string path = Connection->Headers().at("PATH_INFO");
+			begin = path.find(';', 0);
+			begin = path.find_first_not_of(';', begin);
+			end = path.find_first_of(";/", begin);
+			while (begin != std::string::npos && path[begin] != '/') {
+				std::string param = path.substr(begin, end - begin);
+				std::string::size_type e = param.find('=');
+	
+				if (i >= MAXENV) {
+					esyslog("streamdev-server: Too many parameters for externremux.sh");
+					break;
+				}
+				else if (e > 0 && e != std::string::npos) {
+					ADDENV("REMUX_PARAM_%s", param.c_str());
+				}
+				else
+					esyslog("streamdev-server: Invalid externremux.sh parameter %s", param.c_str());
+	
+				begin = path.find_first_not_of(';', end);
+				end = path.find_first_of(";/", begin);
+			}
+		}
+			
+		env[i] = NULL;
+
 		dup2(inpipe[0], STDIN_FILENO);
 		close(inpipe[1]);
 		dup2(outpipe[1], STDOUT_FILENO);
@@ -71,9 +185,11 @@ cTSExt::cTSExt(cRingBufferLinear *ResultBuffer, std::string Parameter):
 		for (int i = STDERR_FILENO + 1; i < MaxPossibleFileDescriptors; i++)
 			close(i); //close all dup'ed filedescriptors
 
-		std::string cmd = std::string(opt_remux) + " " + Parameter;
-		if (execl("/bin/sh", "sh", "-c", cmd.c_str(), NULL) == -1) {
-			esyslog("streamdev-server: externremux script '%s' execution failed: %m", cmd.c_str());
+		if (setpgid(0, 0) == -1)
+			esyslog("streamdev-server: externremux setpgid failed: %m");
+
+		if (execle("/bin/sh", "sh", "-c", opt_remux, NULL, env) == -1) {
+			esyslog("streamdev-server: externremux script '%s' execution failed: %m", opt_remux);
 			_exit(-1);
 		}
 		// should never be reached
@@ -172,9 +288,9 @@ void cTSExt::Put(const uchar *Data, int Count)
 	}
 }
 
-cExternRemux::cExternRemux(int VPid, const int *APids, const int *Dpids, const int *SPids, std::string Parameter):
+cExternRemux::cExternRemux(const cServerConnection *Connection, const cChannel *Channel, const int *Apids, const int *Dpids):
 		m_ResultBuffer(new cRingBufferLinear(WRITERBUFSIZE, TS_SIZE * 2)),
-		m_Remux(new cTSExt(m_ResultBuffer, Parameter))
+		m_Remux(new cTSExt(m_ResultBuffer, Connection, Channel, Apids, Dpids))
 {
 	m_ResultBuffer->SetTimeouts(500, 100);
 }

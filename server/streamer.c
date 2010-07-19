@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.c,v 1.16.2.3 2009/06/29 06:25:30 schmirl Exp $
+ *  $Id: streamer.c,v 1.16.2.4 2010/07/19 13:50:14 schmirl Exp $
  */
  
 #include <vdr/ringbuffer.h>
@@ -100,8 +100,9 @@ void cStreamdevWriter::Action(void)
 
 // --- cStreamdevStreamer -----------------------------------------------------
 
-cStreamdevStreamer::cStreamdevStreamer(const char *Name):
+cStreamdevStreamer::cStreamdevStreamer(const char *Name, const cServerConnection *Connection):
 		cThread(Name),
+		m_Connection(Connection),
 		m_Writer(NULL),
 		m_RingBuffer(new cStreamdevBuffer(STREAMERBUFSIZE, TS_SIZE * 2,
 		             true, "streamdev-streamer")),

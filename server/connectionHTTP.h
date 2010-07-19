@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.h,v 1.5.2.1 2008/10/14 11:05:59 schmirl Exp $
+ *  $Id: connectionHTTP.h,v 1.5.2.2 2010/07/19 13:50:14 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVERS_CONNECTIONHTTP_H
@@ -8,6 +8,7 @@
 #include "connection.h"
 #include "server/livestreamer.h"
 
+#include <map>
 #include <tools/select.h>
 
 class cChannel;
@@ -23,26 +24,19 @@ private:
 		hsFinished,
 	};
 
-	enum eHTTPJob {
-		hjTransfer,
-		hjListing,
-	};
-
-	std::string                       m_Request;
-	std::string                       m_Host;
 	std::string                       m_Authorization;
-	//std::map<std::string,std::string> m_Headers; TODO: later?
 	eHTTPStatus                       m_Status;
-	eHTTPJob                          m_Job;
 	// job: transfer
 	cStreamdevLiveStreamer           *m_LiveStreamer;
-	std::string                       m_StreamerParameter;
 	const cChannel                   *m_Channel;
-	int                               m_Apid;
+	int                               m_Apid[2];
+	int                               m_Dpid[2];
 	eStreamType                       m_StreamType;
 	// job: listing
 	cChannelList                     *m_ChannelList;
 
+	cChannelList* ChannelListFromString(const std::string &PathInfo, const std::string &Filebase, const std::string &Fileext) const;
+	bool ProcessURI(const std::string &PathInfo);
 protected:
 	bool ProcessRequest(void);
 
@@ -56,7 +50,6 @@ public:
 	virtual bool CanAuthenticate(void);
 
 	virtual bool Command(char *Cmd);
-	bool CmdGET(const std::string &Opts);
 
 	virtual bool Abort(void) const;
 	virtual void Flushed(void);

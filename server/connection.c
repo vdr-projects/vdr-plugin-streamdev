@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.c,v 1.10.2.2 2009/09/18 10:41:11 schmirl Exp $
+ *  $Id: connection.c,v 1.10.2.3 2010/07/19 13:50:14 schmirl Exp $
  */
  
 #include "server/connection.h"
@@ -27,7 +27,7 @@ cServerConnection::~cServerConnection()
 {
 }
 
-const cChannel* cServerConnection::ChannelFromString(const char *String, int *Apid) {
+const cChannel* cServerConnection::ChannelFromString(const char *String, int *Apid, int *Dpid) {
 	const cChannel *channel = NULL;
 	char *string = strdup(String);
 	char *ptr, *end;
@@ -58,7 +58,8 @@ const cChannel* cServerConnection::ChannelFromString(const char *String, int *Ap
 	}
 
 	if (channel != NULL && apididx > 0) {
-		int apid = 0, index = 1;
+		int apid = 0, dpid = 0;
+		int index = 1;
 
 		for (int i = 0; channel->Apid(i) != 0; ++i, ++index) {
 			if (index == apididx) {
@@ -70,7 +71,7 @@ const cChannel* cServerConnection::ChannelFromString(const char *String, int *Ap
 		if (apid == 0) {
 			for (int i = 0; channel->Dpid(i) != 0; ++i, ++index) {
 				if (index == apididx) {
-					apid = channel->Dpid(i);
+					dpid = channel->Dpid(i);
 					break;
 				}
 			}
@@ -78,6 +79,8 @@ const cChannel* cServerConnection::ChannelFromString(const char *String, int *Ap
 
 		if (Apid != NULL) 
 			*Apid = apid;
+		if (Dpid != NULL) 
+			*Dpid = dpid;
 	}
 
 	free(string);

@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.h,v 1.1.1.1.2.2 2009/09/18 10:41:12 schmirl Exp $
+ *  $Id: setup.h,v 1.1.1.1.2.3 2010/07/19 13:50:14 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SETUPSERVER_H
@@ -37,8 +37,10 @@ private:
 	cStreamdevServerSetup m_NewSetup;
 
 	void AddCategory(const char *Title);
+	void Set();
 protected:
 	virtual void Store(void);
+	virtual eOSState ProcessKey(eKeys Key);
 
 public:
 	cStreamdevServerMenuSetupPage(void);

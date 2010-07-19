@@ -120,3 +120,6 @@ BBlack
 
 lhanisch
   for fixing a memory leak in cStreamdevPatFilter::GetPid
+
+carel
+  for helping to find a way to cleanly shutdown externremux with mencoder

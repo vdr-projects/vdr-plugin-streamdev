@@ -1,6 +1,24 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+2010-07-19: Version 0.4.0
+
+- using SIGINT in externremux to kill mencoder works better than SIGTERM;
+  especially x264 still needs a SIGKILL sometimes
+- added --remove-destination to cp commands installing plugins
+- updated Italian translation (thanks to Diego Pierotto)
+- config option "client may suspend" hidden if not applicable
+- updated and enhanced README
+- added support for HTTP method HEAD
+- rewrite of externremux.sh, including support for various URL parameters,
+  logging and improved shutdown
+- start externremux script in a separate process group
+- changed HTTP URL path for externremux from EXTERN to EXT (suggested by
+  Rolf Ahrenberg)
+- HTTP headers now have to be emitted by externremux script
+- pass channel related information and URL parameters to externremux script
+  through environment
+- implement CGI like interface for externremux script
 - dropped "Synchronize EPG" feature. Please use epgsync-plugin instead
   (available from http://vdr.schmirler.de)
 - fixed a memory leak in cStreamdevPatFilter::GetPid (thanks to lhanisch)

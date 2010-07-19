@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.h,v 1.5.2.3 2009/09/18 10:41:11 schmirl Exp $
+ *  $Id: connection.h,v 1.5.2.4 2010/07/19 13:50:14 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVER_CONNECTION_H
@@ -7,6 +7,11 @@
 
 #include "tools/socket.h"
 #include "common.h"
+
+#include <map>
+
+typedef std::map<std::string,std::string> tStrStrMap;
+typedef std::pair<std::string,std::string> tStrStr;
 
 class cChannel;
 class cDevice;
@@ -28,6 +33,8 @@ private:
 	uint        m_WriteBytes;
 	uint        m_WriteIndex;
 
+	tStrStrMap  m_Headers;
+
 protected:
 	/* Will be called when a command terminated by a newline has been 
 	   received */
@@ -41,7 +48,10 @@ protected:
 	virtual bool Respond(const char *Message, bool Last = true, ...);
 			//__attribute__ ((format (printf, 2, 4)));
 
-	static const cChannel *ChannelFromString(const char *String, int *Apid = NULL);
+	/* Add a request header */
+	void SetHeader(const char *Name, const char *Value, const char *Prefix = "") { m_Headers.insert(tStrStr(std::string(Prefix) + Name, Value)); }
+
+	static const cChannel *ChannelFromString(const char *String, int *Apid = NULL, int *Dpid = NULL);
 
 public:
 	/* If you derive, specify a short string such as HTTP for Protocol, which
@@ -89,6 +99,12 @@ public:
 
 	virtual void Detach(void) = 0;
 	virtual void Attach(void) = 0;
+
+	/* This connections protocol name */
+	virtual const char* Protocol(void) const { return m_Protocol; }
+
+	/* std::map with additional information */
+	const tStrStrMap& Headers(void) const { return m_Headers; }
 };
 
 inline bool cServerConnection::HasData(void) const

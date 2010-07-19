@@ -205,8 +205,8 @@ std::string cHtmlChannelList::StreamTypeMenu()
 			(std::string) "[<a href=\"/PES/" + self + "\">PES</a>] ");
 	typeMenu += (streamType == stES ? (std::string) "[ES] " :
 			(std::string) "[<a href=\"/ES/" + self + "\">ES</a>] ");
-	typeMenu += (streamType == stExtern ? (std::string) "[Extern] " :
-			(std::string) "[<a href=\"/Extern/" + self + "\">Extern</a>] ");
+	typeMenu += (streamType == stEXT ? (std::string) "[EXT] " :
+			(std::string) "[<a href=\"/EXT/" + self + "\">EXT</a>] ");
 	return typeMenu;
 }
 
