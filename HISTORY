@@ -1,10 +1,15 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+2010-07-20: Version 0.4.0b
+
+- fixed wrong URL path in m3u playlists (reported by Norman Thiel)
+
 2010-07-20: Version 0.4.0a
 
 - set externremux.sh executable in distribution archive
-- externremux quality value should be wlan54, not wlan45
+- externremux quality value should be wlan54, not wlan45 (reported by
+  wolfi.m@vdrportal)
 
 2010-07-19: Version 0.4.0
 
