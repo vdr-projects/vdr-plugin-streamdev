@@ -1,6 +1,11 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+2010-07-20: Version 0.4.0a
+
+- set externremux.sh executable in distribution archive
+- externremux quality value should be wlan54, not wlan45
+
 2010-07-19: Version 0.4.0
 
 - using SIGINT in externremux to kill mencoder works better than SIGTERM;

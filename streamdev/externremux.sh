@@ -247,7 +247,7 @@ case "$QUALITY" in
 	DSL6000|dsl6000)   VBR=378;  ABR=32;  WIDTH=320;;
 	DSL16000|dsl16000) VBR=512;  ABR=32;  WIDTH=480;;
 	WLAN11|wlan11)     VBR=768;  ABR=64;  WIDTH=640;;
-	WLAN45|wlan45)     VBR=2048; ABR=128; WIDTH=;;
+	WLAN54|wlan54)     VBR=2048; ABR=128; WIDTH=;;
 	LAN10|lan10)       VBR=4096; ABR=;    WIDTH=;;
 	*)                 error "Unknown quality '$QUALITY'";;
 esac
