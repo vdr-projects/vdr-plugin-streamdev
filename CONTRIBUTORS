@@ -37,6 +37,7 @@ Rolf Ahrenberg
   for improving LIMIKUUTIO and PARENTALRATING patch detection
   for suggesting to include the charset in HTTP replies
   for requesting replacement of asprintf calls
+  for suggesting to change the URL path from EXTERN to EXT
 
 Rantanen Teemu
   for providing vdr-incompletesections.diff
@@ -146,3 +147,10 @@ lhanisch
  
 Eric Valette
   for adding support for EnhancedAC3
+
+carel
+  for reporting "plugin doesn't honor APIVERSION" error in new Makefile
+  for helping to find a way to cleanly shutdown externremux with mencoder
+
+wolfi.m
+  for reporting a typo in externermux quality parameter value
