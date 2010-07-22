@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- don't use std::map.at(). It's not available in older libstdc++ version
+  (reported by Matthias Prill)
 - fixed extremux x264 using value of ABR for VBR (thanks to vel_tins@vdrportal)
 
 2010-07-20: Version 0.5.0b
