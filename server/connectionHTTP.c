@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.c,v 1.13.2.4 2010/07/20 12:26:10 schmirl Exp $
+ *  $Id: connectionHTTP.c,v 1.13.2.5 2010/07/22 14:18:36 schmirl Exp $
  */
 
 #include <ctype.h>
@@ -140,7 +140,12 @@ bool cConnectionHTTP::ProcessRequest(void)
 		}
 	}
 
-	if (Headers().at(REQUEST_METHOD).compare("GET") == 0 && ProcessURI(Headers().at(PATH_INFO))) {
+	tStrStrMap::const_iterator it_method = Headers().find(REQUEST_METHOD);
+	tStrStrMap::const_iterator it_pathinfo = Headers().find(PATH_INFO);
+	if (it_method == Headers().end() || it_pathinfo == Headers().end()) {
+		// should never happen
+		esyslog("streamdev-server connectionHTTP: Missing method or pathinfo");
+	} else if (it_method->second.compare("GET") == 0 && ProcessURI(it_pathinfo->second)) {
 		if (m_ChannelList)
 			return Respond("%s", true, m_ChannelList->HttpHeader().c_str());
 		else if (m_Channel != NULL) {
@@ -176,7 +181,7 @@ bool cConnectionHTTP::ProcessRequest(void)
 			return Respond("HTTP/1.0 404 not found")
 				&& Respond("");
 		}
-	} else if (Headers().at(REQUEST_METHOD).compare("HEAD") == 0 && ProcessURI(Headers().at(PATH_INFO))) {
+	} else if (it_method->second.compare("HEAD") == 0 && ProcessURI(it_pathinfo->second)) {
 		DeferClose();
 		if (m_ChannelList)
 			return Respond("%s", true, m_ChannelList->HttpHeader().c_str());
@@ -249,7 +254,8 @@ cChannelList* cConnectionHTTP::ChannelListFromString(const std::string& Path, co
 	const static std::string QUERY_STRING("QUERY_STRING");
 	const static std::string HOST("HTTP_HOST");
 
-	const std::string query = Headers().at(QUERY_STRING);
+	tStrStrMap::const_iterator it_query = Headers().find(QUERY_STRING);
+	const std::string& query = it_query == Headers().end() ? "" : it_query->second;
 
 	std::string groupTarget;
 	cChannelIterator *iterator = NULL;

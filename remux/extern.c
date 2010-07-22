@@ -151,7 +151,10 @@ cTSExt::cTSExt(cRingBufferLinear *ResultBuffer, const cServerConnection *Connect
 
 			// look for section parameters: /path;param1=value1;param2=value2/
 			std::string::size_type begin, end;
-			std::string path = Connection->Headers().at("PATH_INFO");
+			const static std::string PATH_INFO("PATH_INFO");
+
+			tStrStrMap::const_iterator it_pathinfo = Connection->Headers().find(PATH_INFO);
+			const std::string& path = it_pathinfo == Connection->Headers().end() ? "/" : it_pathinfo->second;
 			begin = path.find(';', 0);
 			begin = path.find_first_not_of(';', begin);
 			end = path.find_first_of(";/", begin);
