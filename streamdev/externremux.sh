@@ -101,7 +101,7 @@ function remux_mencoder
 			X264OPTS=(
 				${VOPTS}
 				$(hasOpt "$VOPTS" threads || echo "threads=auto")
-				${VBR:+bitrate=$ABR}
+				${VBR:+bitrate=$VBR}
 			)
 			[ ${#X264OPTS[*]} -gt 0 ] && VOPTS=$(IFS=:; echo -x264encopts "${X264OPTS[*]}")
 			;;

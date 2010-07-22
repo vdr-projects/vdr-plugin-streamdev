@@ -125,7 +125,10 @@ carel
   for helping to find a way to cleanly shutdown externremux with mencoder
  
 wolfi.m
-  for reporting a typo in externermux quality parameter value
+  for reporting a typo in externremux quality parameter value
 
 Norman Thiel
   for reporting a wrong URL path in m3u playlists
+
+vel_tins
+  for reporting that externremux x264 uses value of ABR for VBR
