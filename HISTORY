@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- fixed extremux x264 using value of ABR for VBR (thanks to vel_tins@vdrportal)
+
 2010-07-20: Version 0.5.0b
 
 - fixed wrong URL path in m3u playlists (reported by Norman Thiel)
