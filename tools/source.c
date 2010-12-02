@@ -110,7 +110,7 @@ bool cTBSource::SafeWrite(const void *Buffer, size_t Length) {
 
 ssize_t cTBSource::ReadUntil(void *Buffer, size_t Length, const char *Seq,
 		uint TimeoutMs) {
-	int seqlen, ms;
+	int ms;
 	size_t len;
 	cTBSelect sel;
 

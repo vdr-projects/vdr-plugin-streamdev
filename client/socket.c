@@ -1,5 +1,5 @@
 /*
- *  $Id: socket.c,v 1.7 2007/01/15 11:45:48 schmirl Exp $
+ *  $Id: socket.c,v 1.8 2007/04/24 10:57:34 schmirl Exp $
  */
  
 #include <tools/select.h>
@@ -212,6 +212,24 @@ bool cClientSocket::CreateDataConnection(eSocketId Id) {
 		return false;
 	}
 
+	return true;
+}
+
+bool cClientSocket::CloseDataConnection(eSocketId Id) {
+	//if (!CheckConnection()) return false;
+
+	CMD_LOCK;
+
+	if(Id == siLive || Id == siLiveFilter)
+		if (m_DataSockets[Id] != NULL) {
+			std::string command = (std::string)"ABRT " + (const char*)itoa(Id);
+			if (!Command(command, 220)) {
+				if (errno == 0)
+					esyslog("ERROR: Streamdev: Couldn't cleanly close data connection");
+				//return false;
+			}		
+			DELETENULL(m_DataSockets[Id]);
+		}
 	return true;
 }
 

@@ -3,7 +3,7 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-server.c,v 1.5 2007/02/19 12:08:16 schmirl Exp $
+ * $Id: streamdev-server.c,v 1.6 2007/04/16 11:01:02 schmirl Exp $
  */
 
 #include <getopt.h>
@@ -63,7 +63,7 @@ bool cPluginStreamdevServer::Start(void)
 
 	if (!StreamdevHosts.Load(STREAMDEVHOSTSPATH, true, true)) {
 		esyslog("streamdev-server: error while loading %s", STREAMDEVHOSTSPATH);
-		fprintf(stderr, "streamdev-server: error while loading %s\n");
+		fprintf(stderr, "streamdev-server: error while loading %s\n", STREAMDEVHOSTSPATH);
 		if (access(STREAMDEVHOSTSPATH, F_OK) != 0) {
 			fprintf(stderr, "  Please install streamdevhosts.conf into the path "
 			                "printed above. Without it\n" 

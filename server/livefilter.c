@@ -1,18 +1,22 @@
 /*
- *  $Id: livefilter.c,v 1.2 2005/02/08 13:59:16 lordjaxom Exp $
+ *  $Id: livefilter.c,v 1.4 2007/04/24 11:06:12 schmirl Exp $
  */
 
 #include "server/livefilter.h"
-#include "server/livestreamer.h"
+#include "server/streamer.h"
 #include "common.h"
+
+#ifndef TS_SIZE
+#    define TS_SIZE          188
+#endif
+#ifndef TS_SYNC_BYTE
+#    define TS_SYNC_BYTE     0x47
+#endif
 
 #if VDRVERSNUM >= 10300
 
-cStreamdevLiveFilter::cStreamdevLiveFilter(cStreamdevLiveStreamer *Streamer) {
+cStreamdevLiveFilter::cStreamdevLiveFilter(cStreamdevStreamer *Streamer) {
 	m_Streamer = Streamer;
-}
-
-cStreamdevLiveFilter::~cStreamdevLiveFilter() {
 }
 
 void cStreamdevLiveFilter::Process(u_short Pid, u_char Tid, const u_char *Data, int Length) 
@@ -24,7 +28,7 @@ void cStreamdevLiveFilter::Process(u_short Pid, u_char Tid, const u_char *Data, 
 	while (length > 0) {
 		int chunk = min(length, TS_SIZE - 5);
 		buffer[0] = TS_SYNC_BYTE;
-		buffer[1] = (Pid >> 8) & 0xff;
+		buffer[1] = ((Pid >> 8) & 0x3f) | (pos==0 ? 0x40 : 0); /* bit 6: payload unit start indicator (PUSI) */
 		buffer[2] = Pid & 0xff;
 		buffer[3] = Tid;
 		buffer[4] = (uchar)chunk;

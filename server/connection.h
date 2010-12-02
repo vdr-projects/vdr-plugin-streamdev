@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.h,v 1.4 2007/04/02 10:32:34 schmirl Exp $
+ *  $Id: connection.h,v 1.5 2007/04/16 11:01:02 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVER_CONNECTION_H
@@ -38,8 +38,8 @@ protected:
 	   Only one line at a time may be sent. If there are lines to follow, set
 	   Last to false. Command(NULL) will be called in the next cycle, so you can
 	   post the next line. */
-	virtual bool Respond(const char *Message, bool Last = true, ...)
-			__attribute__ ((format (printf, 2, 4)));
+	virtual bool Respond(const char *Message, bool Last = true, ...);
+			//__attribute__ ((format (printf, 2, 4)));
 
 public:
 	/* If you derive, specify a short string such as HTTP for Protocol, which

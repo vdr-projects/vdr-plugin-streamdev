@@ -5,34 +5,14 @@
 #include <vdr/receiver.h>
 
 #include "server/streamer.h"
-#include "server/livefilter.h"
 #include "common.h"
 
 class cTS2PSRemux;
 class cTS2ESRemux;
 class cExternRemux;
 class cRemux;
-
-// --- cStreamdevLiveReceiver -------------------------------------------------
-
-class cStreamdevLiveReceiver: public cReceiver {
-	friend class cStreamdevLiveStreamer;
-
-private:
-	cStreamdevLiveStreamer *m_Streamer;
-
-protected:
-	virtual void Activate(bool On);
-	virtual void Receive(uchar *Data, int Length);
-
-public:
-#if VDRVERSNUM < 10500
-	cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer, int Ca, int Priority, const int *Pids);
-#else
-	cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer, tChannelID ChannelID, int Priority, const int *Pids);
-#endif
-	virtual ~cStreamdevLiveReceiver();
-};
+class cStreamdevPatFilter;
+class cStreamdevLiveReceiver;
 
 // --- cStreamdevLiveStreamer -------------------------------------------------
 
@@ -45,10 +25,14 @@ private:
 	const cChannel         *m_Channel;
 	cDevice                *m_Device;
 	cStreamdevLiveReceiver *m_Receiver;
+	cStreamdevPatFilter    *m_PatFilter;
 	cRemux                 *m_PESRemux;
 	cTS2ESRemux            *m_ESRemux;
 	cTS2PSRemux            *m_PSRemux;
 	cExternRemux           *m_ExtRemux;
+
+	void StartReceiver(void);
+	bool HasPid(int Pid);
 
 public:
 	cStreamdevLiveStreamer(int Priority);
@@ -56,8 +40,8 @@ public:
 
 	void SetDevice(cDevice *Device) { m_Device = Device; }
 	bool SetPid(int Pid, bool On);
+	bool SetPids(int Pid, const int *Pids1 = NULL, const int *Pids2 = NULL, const int *Pids3 = NULL);
 	bool SetChannel(const cChannel *Channel, eStreamType StreamType, int Apid = 0);
-	bool SetFilter(u_short Pid, u_char Tid, u_char Mask, bool On);
 	
 	virtual int Put(const uchar *Data, int Count);
 	virtual uchar *Get(int &Count);
@@ -70,12 +54,36 @@ public:
 	virtual std::string Report(void);
 };
 
-// --- cStreamdevLiveReceiver reverse inlines ---------------------------------
 
-inline void cStreamdevLiveReceiver::Activate(bool On) 
-{ 
-	Dprintf("LiveReceiver->Activate(%d)\n", On);
-	m_Streamer->Activate(On); 
-}
+// --- cStreamdevFilterStreamer -------------------------------------------------
+
+#  if VDRVERSNUM >= 10300
+
+//#include <vdr/status.h>
+
+class cStreamdevLiveFilter;
+
+class cStreamdevFilterStreamer: public cStreamdevStreamer /*, public cStatus*/ {
+private:
+	cDevice                *m_Device;
+	cStreamdevLiveFilter   *m_Filter;
+	//const cChannel         *m_Channel;
+
+public:
+	cStreamdevFilterStreamer();
+	virtual ~cStreamdevFilterStreamer();
+
+	void SetDevice(cDevice *Device);
+	//void SetChannel(const cChannel *Channel);
+	bool SetFilter(u_short Pid, u_char Tid, u_char Mask, bool On);
+	
+	virtual void Attach(void);
+	virtual void Detach(void);
+
+	// cStatus message handlers
+	//virtual void ChannelSwitch(const cDevice *Device, int ChannelNumber);
+};
+
+#  endif // if VDRVERSNUM >= 10300
 
 #endif // VDR_STREAMDEV_LIVESTREAMER_H

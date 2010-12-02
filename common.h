@@ -1,5 +1,5 @@
 /*
- *  $Id: common.h,v 1.7 2005/11/06 16:43:58 lordjaxom Exp $
+ *  $Id: common.h,v 1.8 2007/04/24 10:50:13 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_COMMON_H
@@ -83,6 +83,7 @@ enum eSuspendMode {
 enum eSocketId {
 	siLive,
 	siReplay,
+	siLiveFilter,
 	si_Count
 };
 

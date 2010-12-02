@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.8 2007/03/02 15:27:07 schmirl Exp $
+ *  $Id: connectionVTP.c,v 1.14 2007/05/09 09:12:42 schmirl Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -153,8 +153,6 @@ cLSTEHandler::~cLSTEHandler()
 
 bool cLSTEHandler::Next(bool &Last)
 {
-	char *buffer;
-
 	if (m_Error != NULL) {
 		Last = true;
 		cString str(m_Error, true);
@@ -468,6 +466,8 @@ cConnectionVTP::cConnectionVTP(void):
 		cServerConnection("VTP"),
 		m_LiveSocket(NULL),
 		m_LiveStreamer(NULL),
+		m_FilterSocket(NULL),
+		m_FilterStreamer(NULL),
 		m_LastCommand(NULL),
 		m_NoTSPIDS(false),
 		m_LSTEHandler(NULL),
@@ -482,9 +482,16 @@ cConnectionVTP::~cConnectionVTP()
 		free(m_LastCommand);
 	delete m_LiveStreamer;
 	delete m_LiveSocket;
+	delete m_FilterStreamer;
+	delete m_FilterSocket;
 	delete m_LSTTHandler;
 	delete m_LSTCHandler;
 	delete m_LSTEHandler;
+}
+
+inline bool cConnectionVTP::Abort(void) const
+{
+	return m_LiveStreamer && m_LiveStreamer->Abort();
 }
 
 void cConnectionVTP::Welcome(void) 
@@ -500,12 +507,14 @@ void cConnectionVTP::Reject(void)
 
 void cConnectionVTP::Detach(void) 
 {
-	if (m_LiveStreamer != NULL) m_LiveStreamer->Detach();
+	if (m_LiveStreamer) m_LiveStreamer->Detach();
+	if (m_FilterStreamer) m_FilterStreamer->Detach();
 }
 
 void cConnectionVTP::Attach(void) 
 {
-	if (m_LiveStreamer != NULL) m_LiveStreamer->Attach();
+	if (m_LiveStreamer) m_LiveStreamer->Attach();
+	if (m_FilterStreamer) m_FilterStreamer->Attach();
 }
 
 bool cConnectionVTP::Command(char *Cmd) 
@@ -549,8 +558,8 @@ bool cConnectionVTP::Command(char *Cmd)
 	else if (strcasecmp(Cmd, "ADDF") == 0) return CmdADDF(param);
 	else if (strcasecmp(Cmd, "DELF") == 0) return CmdDELF(param);
 	else if (strcasecmp(Cmd, "ABRT") == 0) return CmdABRT(param);
-	else if (strcasecmp(Cmd, "QUIT") == 0) return CmdQUIT(param);
-	else if (strcasecmp(Cmd, "SUSP") == 0) return CmdSUSP(param);
+	else if (strcasecmp(Cmd, "QUIT") == 0) return CmdQUIT();
+	else if (strcasecmp(Cmd, "SUSP") == 0) return CmdSUSP();
 	// Commands adopted from SVDRP
 	//else if (strcasecmp(Cmd, "DELR") == 0) return CmdDELR(param);
 	else if (strcasecmp(Cmd, "MODT") == 0) return CmdMODT(param);
@@ -562,8 +571,6 @@ bool cConnectionVTP::Command(char *Cmd)
 
 bool cConnectionVTP::CmdCAPS(char *Opts) 
 {
-	char *buffer;
-
 	if (strcasecmp(Opts, "TS") == 0) {
 		m_NoTSPIDS = true;
 		return Respond(220, "Ignored, capability \"%s\" accepted for "
@@ -574,6 +581,14 @@ bool cConnectionVTP::CmdCAPS(char *Opts)
 		m_NoTSPIDS = false;
 		return Respond(220, "Capability \"%s\" accepted", Opts);
 	}
+
+#if VDRVERSNUM >= 10300
+	//
+	// Deliver section filters data in separate, channel-independent data stream
+	//
+	if (strcasecmp(Opts, "FILTERS") == 0)
+		return Respond(220, "Capability \"%s\" accepted", Opts);
+#endif
 
 	return Respond(561, "Capability \"%s\" not known", Opts);
 }
@@ -607,9 +622,14 @@ bool cConnectionVTP::CmdPORT(char *Opts)
 	id = strtoul(Opts, &ep, 10);
 	if (ep == Opts || !isspace(*ep))
 		return Respond(500, "Use: PORT Id Destination");
-
-	if (id != 0)
+	
+#if VDRVERSNUM >= 10300
+	if (id != siLive && id != siLiveFilter)
 		return Respond(501, "Wrong connection id %d", id);
+#else
+	if (id != siLive)
+		return Respond(501, "Wrong connection id %d", id);
+#endif
 	
 	Opts = skipspace(ep);
 	n = 0;
@@ -636,6 +656,33 @@ bool cConnectionVTP::CmdPORT(char *Opts)
 
 	isyslog("Streamdev: Setting data connection to %s:%d", dataip, dataport);
 
+#if VDRVERSNUM >= 10300
+	if (id == siLiveFilter) {
+		if(m_FilterStreamer)
+			m_FilterStreamer->Stop();
+		delete m_FilterSocket;
+
+		m_FilterSocket = new cTBSocket(SOCK_STREAM);
+		if (!m_FilterSocket->Connect(dataip, dataport)) {
+			esyslog("ERROR: Streamdev: Couldn't open data connection to %s:%d: %s",
+				dataip, dataport, strerror(errno));
+			DELETENULL(m_FilterSocket);
+			return Respond(551, "Couldn't open data connection");
+		}
+
+		if(!m_FilterStreamer)
+			m_FilterStreamer = new cStreamdevFilterStreamer;
+		m_FilterStreamer->Start(m_FilterSocket);
+		m_FilterStreamer->Activate(true);
+
+		return Respond(220, "Port command ok, data connection opened");
+	}
+#endif
+
+	if(m_LiveSocket && m_LiveStreamer)
+		m_LiveStreamer->Stop();
+	delete m_LiveSocket;
+
 	m_LiveSocket = new cTBSocket(SOCK_STREAM);
 	if (!m_LiveSocket->Connect(dataip, dataport)) {
 		esyslog("ERROR: Streamdev: Couldn't open data connection to %s:%d: %s",
@@ -644,10 +691,12 @@ bool cConnectionVTP::CmdPORT(char *Opts)
 		return Respond(551, "Couldn't open data connection");
 	}
 
-	if (id == siLive)
+	if (!m_LiveSocket->SetDSCP())
+		LOG_ERROR_STR("unable to set DSCP sockopt");
+	if (m_LiveStreamer)
 		m_LiveStreamer->Start(m_LiveSocket);
 
-  return Respond(220, "Port command ok, data connection opened");
+	return Respond(220, "Port command ok, data connection opened");
 }
 
 bool cConnectionVTP::CmdTUNE(char *Opts) 
@@ -668,7 +717,16 @@ bool cConnectionVTP::CmdTUNE(char *Opts)
 	m_LiveStreamer = new cStreamdevLiveStreamer(1);
 	m_LiveStreamer->SetChannel(chan, m_NoTSPIDS ? stTS : stTSPIDS);
 	m_LiveStreamer->SetDevice(dev);
+	if(m_LiveSocket)
+		m_LiveStreamer->Start(m_LiveSocket);
 	
+#if VDRVERSNUM >= 10300
+	if(!m_FilterStreamer)
+		m_FilterStreamer = new cStreamdevFilterStreamer;
+	m_FilterStreamer->SetDevice(dev);
+	//m_FilterStreamer->SetChannel(chan);
+#endif
+
 	return Respond(220, "Channel tuned");
 }
 
@@ -706,8 +764,8 @@ bool cConnectionVTP::CmdADDF(char *Opts)
 	int pid, tid, mask;
 	char *ep;
 
-	if (m_LiveStreamer == NULL)
-		return Respond(560, "Can't set filters without a stream");
+	if (m_FilterStreamer == NULL)
+		return Respond(560, "Can't set filters without a filter stream");
 	
 	pid = strtol(Opts, &ep, 10);
 	if (ep == Opts || (*ep != ' '))
@@ -721,7 +779,7 @@ bool cConnectionVTP::CmdADDF(char *Opts)
 	if (ep == Opts || (*ep != '\0' && *ep != ' '))
 		return Respond(500, "Use: ADDF Pid Tid Mask");
 
-	return m_LiveStreamer->SetFilter(pid, tid, mask, true)
+	return m_FilterStreamer->SetFilter(pid, tid, mask, true)
 			? Respond(220, "Filter %d transferring", pid)
 			: Respond(560, "Filter %d not available", pid);
 #else
@@ -735,7 +793,7 @@ bool cConnectionVTP::CmdDELF(char *Opts)
 	int pid, tid, mask;
 	char *ep;
 	
-	if (m_LiveStreamer == NULL)
+	if (m_FilterStreamer == NULL)
 		return Respond(560, "Can't delete filters without a stream");
 	
 	pid = strtol(Opts, &ep, 10);
@@ -750,9 +808,8 @@ bool cConnectionVTP::CmdDELF(char *Opts)
 	if (ep == Opts || (*ep != '\0' && *ep != ' '))
 		return Respond(500, "Use: DELF Pid Tid Mask");
 
-	return m_LiveStreamer->SetFilter(pid, tid, mask, false)
-			? Respond(220, "Filter %d stopped", pid)
-			: Respond(560, "Filter %d not transferring", pid);
+	m_FilterStreamer->SetFilter(pid, tid, mask, false);
+	return Respond(220, "Filter %d stopped", pid);
 #else
 	return Respond(500, "DELF known but unimplemented with VDR < 1.3.0");
 #endif
@@ -768,20 +825,32 @@ bool cConnectionVTP::CmdABRT(char *Opts)
 		return Respond(500, "Use: ABRT Id");
 
 	switch (id) {
-	case 0: DELETENULL(m_LiveStreamer); break;
+	case siLive: 
+		DELETENULL(m_LiveStreamer); 
+		DELETENULL(m_LiveSocket);
+		break;
+#if VDRVERSNUM >= 10300
+	case siLiveFilter:
+		DELETENULL(m_FilterStreamer);
+		DELETENULL(m_FilterSocket);
+		break;
+#endif
+	default:
+		return Respond(501, "Wrong connection id %d", id);
+		break;
+
 	}
 
-	DELETENULL(m_LiveSocket);
 	return Respond(220, "Data connection closed");
 }
 
-bool cConnectionVTP::CmdQUIT(char *Opts) 
+bool cConnectionVTP::CmdQUIT(void) 
 {
 	DeferClose();
 	return Respond(221, "Video Disk Recorder closing connection");
 }
 
-bool cConnectionVTP::CmdSUSP(char *Opts) 
+bool cConnectionVTP::CmdSUSP(void) 
 {
 	if (StreamdevServerSetup.SuspendMode == smAlways || cSuspendCtl::IsActive())
 		return Respond(220, "Server is suspended");

@@ -11,7 +11,7 @@
 
 using namespace std;
 
-const char *VERSION = "0.3.3-20070403";
+const char *VERSION = "0.3.3-20070509";
 
 const char *StreamTypes[st_Count] = {
 	"TS",

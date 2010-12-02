@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.c,v 1.10 2006/01/26 19:40:18 lordjaxom Exp $
+ *  $Id: connectionHTTP.c,v 1.12 2007/05/09 09:12:42 schmirl Exp $
  */
 
 #include <ctype.h>
@@ -41,6 +41,8 @@ bool cConnectionHTTP::Command(char *Cmd)
 		}
 		Dprintf("header\n");
 		return true;
+	default:
+		break;
 	}
 	return false; // ??? shouldn't happen
 }
@@ -69,6 +71,8 @@ bool cConnectionHTTP::ProcessRequest(void)
 				device->SwitchChannel(m_Channel, false);
 				if (m_LiveStreamer->SetChannel(m_Channel, m_StreamType, m_Apid)) {
 					m_LiveStreamer->SetDevice(device);
+					if (!SetDSCP())
+						LOG_ERROR_STR("unable to set DSCP sockopt");
 					if (m_StreamType == stES && (m_Apid != 0 || ISRADIO(m_Channel))) {
 						return Respond("HTTP/1.0 200 OK")
 						    && Respond("Content-Type: audio/mpeg")
@@ -153,7 +157,7 @@ bool cConnectionHTTP::CmdGET(const std::string &Opts)
 {
 	const char *sp = Opts.c_str(), *ptr = sp, *ep;
 	const cChannel *chan;
-	int apid = 0, pos;
+	int apid = 0;
 
 	ptr = skipspace(ptr);
 	while (*ptr == '/')
