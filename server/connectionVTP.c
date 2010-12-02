@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.15 2007/09/21 12:45:31 schmirl Exp $
+ *  $Id: connectionVTP.c,v 1.17 2008/03/13 16:01:18 schmirl Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -186,7 +186,11 @@ bool cLSTEHandler::Next(bool &Last)
 	case Event:
 		if (m_Event != NULL) {
 			m_State = Title;
+#ifdef __FreeBSD__
+			return m_Client->Respond(-215, "E %u %d %d %X", m_Event->EventID(),
+#else
 			return m_Client->Respond(-215, "E %u %ld %d %X", m_Event->EventID(),
+#endif
 			                         m_Event->StartTime(), m_Event->Duration(), 
 			                         m_Event->TableID());
 		} else {
@@ -225,7 +229,11 @@ bool cLSTEHandler::Next(bool &Last)
 	case Vps:
 		m_State = EndEvent;
 		if (m_Event->Vps())
+#ifdef __FreeBSD__
+			return m_Client->Respond(-215, "V %d", m_Event->Vps());
+#else
 			return m_Client->Respond(-215, "V %ld", m_Event->Vps());
+#endif
 		else
 			return Next(Last);
 		break;
@@ -470,6 +478,7 @@ cConnectionVTP::cConnectionVTP(void):
 		m_FilterStreamer(NULL),
 		m_LastCommand(NULL),
 		m_StreamType(stTSPIDS),
+		m_FiltersSupport(false),
 		m_LSTEHandler(NULL),
 		m_LSTCHandler(NULL),
 		m_LSTTHandler(NULL)
@@ -600,8 +609,10 @@ bool cConnectionVTP::CmdCAPS(char *Opts)
 	//
 	// Deliver section filters data in separate, channel-independent data stream
 	//
-	if (strcasecmp(Opts, "FILTERS") == 0)
+	if (strcasecmp(Opts, "FILTERS") == 0) {
+		m_FiltersSupport = true;
 		return Respond(220, "Capability \"%s\" accepted", Opts);
+	}
 #endif
 
 	return Respond(561, "Capability \"%s\" not known", Opts);
@@ -672,6 +683,7 @@ bool cConnectionVTP::CmdPORT(char *Opts)
 
 #if VDRVERSNUM >= 10300
 	if (id == siLiveFilter) {
+		m_FiltersSupport = true;
 		if(m_FilterStreamer)
 			m_FilterStreamer->Stop();
 		delete m_FilterSocket;
@@ -735,10 +747,12 @@ bool cConnectionVTP::CmdTUNE(char *Opts)
 		m_LiveStreamer->Start(m_LiveSocket);
 	
 #if VDRVERSNUM >= 10300
-	if(!m_FilterStreamer)
-		m_FilterStreamer = new cStreamdevFilterStreamer;
-	m_FilterStreamer->SetDevice(dev);
-	//m_FilterStreamer->SetChannel(chan);
+	if(m_FiltersSupport) {
+		if(!m_FilterStreamer)
+			m_FilterStreamer = new cStreamdevFilterStreamer;
+		m_FilterStreamer->SetDevice(dev);
+		//m_FilterStreamer->SetChannel(chan);
+	}
 #endif
 
 	return Respond(220, "Channel tuned");

@@ -1,20 +1,22 @@
 /*
- *  $Id: connectionHTTP.c,v 1.12 2007/05/09 09:12:42 schmirl Exp $
+ *  $Id: connectionHTTP.c,v 1.13 2008/03/28 15:11:40 schmirl Exp $
  */
 
 #include <ctype.h>
  
 #include "server/connectionHTTP.h"
+#include "server/menuHTTP.h"
 #include "server/setup.h"
 
 cConnectionHTTP::cConnectionHTTP(void): 
 		cServerConnection("HTTP"),
 		m_Status(hsRequest),
 		m_LiveStreamer(NULL),
+		m_StreamerParameter(""),
 		m_Channel(NULL),
 		m_Apid(0),
 		m_StreamType((eStreamType)StreamdevServerSetup.HTTPStreamType),
-		m_ListChannel(NULL)
+		m_ChannelList(NULL)
 {
 	Dprintf("constructor hsRequest\n");
 }
@@ -39,6 +41,10 @@ bool cConnectionHTTP::Command(char *Cmd)
 			m_Status = hsBody;
 			return ProcessRequest();
 		}
+		if (strncasecmp(Cmd, "Host:", 5) == 0) {
+			Dprintf("Host-Header\n");
+			m_Host = (std::string) skipspace(Cmd + 5);
+		}
 		Dprintf("header\n");
 		return true;
 	default:
@@ -53,11 +59,9 @@ bool cConnectionHTTP::ProcessRequest(void)
 	if (m_Request.substr(0, 4) == "GET " && CmdGET(m_Request.substr(4))) {
 		switch (m_Job) {
 		case hjListing:
-			return Respond("HTTP/1.0 200 OK")
-			    && Respond("Content-Type: text/html")
-			    && Respond("")
-			    && Respond("<html><head><title>VDR Channel Listing</title></head>")
-			    && Respond("<body><ul>");
+			if (m_ChannelList)
+				return Respond("%s", true, m_ChannelList->HttpHeader().c_str());
+			break;
 
 		case hjTransfer:
 			if (m_Channel == NULL) {
@@ -65,7 +69,7 @@ bool cConnectionHTTP::ProcessRequest(void)
 				return Respond("HTTP/1.0 404 not found");
 			}
 			
-			m_LiveStreamer = new cStreamdevLiveStreamer(0);
+			m_LiveStreamer = new cStreamdevLiveStreamer(0, m_StreamerParameter);
 			cDevice *device = GetDevice(m_Channel, 0);
 			if (device != NULL) {
 				device->SwitchChannel(m_Channel, false);
@@ -106,43 +110,21 @@ void cConnectionHTTP::Flushed(void)
 
 	switch (m_Job) {
 	case hjListing:
-		if (m_ListChannel == NULL) {
-			Respond("</ul></body></html>");
-			DeferClose();
-			m_Status = hsFinished;
+		if (m_ChannelList) {
+			if (m_ChannelList->HasNext()) {
+				if (!Respond("%s", true, m_ChannelList->Next().c_str()))
+					DeferClose();
+			}
+			else {
+				DELETENULL(m_ChannelList);
+				m_Status = hsFinished;
+				DeferClose();
+			}
 			return;
 		}
-
-		if (m_ListChannel->GroupSep())
-			line = (std::string)"<li>--- " + m_ListChannel->Name() + "---</li>";
-		else {
-			int index = 1;
-			line = (std::string)"<li><a href=\"http://" + LocalIp() + ":" 
-			     + (const char*)itoa(StreamdevServerSetup.HTTPServerPort) + "/"
-			     + StreamTypes[m_StreamType] + "/"
-			     + (const char*)m_ListChannel->GetChannelID().ToString() + "\">"
-			     + m_ListChannel->Name() + "</a> ";
-			for (int i = 0; m_ListChannel->Apid(i) != 0; ++i, ++index) {
-				line += "<a href=\"http://" + LocalIp() + ":"
-				     + (const char*)itoa(StreamdevServerSetup.HTTPServerPort) + "/"
-				     + StreamTypes[m_StreamType] + "/"
-				     + (const char*)m_ListChannel->GetChannelID().ToString() + "+"
-				     + (const char*)itoa(index) + "\">("
-				     + m_ListChannel->Alang(i) + ")</a> ";
-			}
-			for (int i = 0; m_ListChannel->Dpid(i) != 0; ++i, ++index) {
-				line += "<a href=\"http://" + LocalIp() + ":"
-				     + (const char*)itoa(StreamdevServerSetup.HTTPServerPort) + "/"
-				     + StreamTypes[m_StreamType] + "/"
-				     + (const char*)m_ListChannel->GetChannelID().ToString() + "+"
-				     + (const char*)itoa(index) + "\">("
-				     + m_ListChannel->Dlang(i) + ")</a> ";
-			}
-			line += "</li>";
-		}
-		if (!Respond(line.c_str()))
-			DeferClose();
-		m_ListChannel = Channels.Next(m_ListChannel);
+		// should never be reached
+		esyslog("streamdev-server cConnectionHTTP::Flushed(): no channel list");
+		m_Status = hsFinished;
 		break;
 
 	case hjTransfer:
@@ -155,49 +137,131 @@ void cConnectionHTTP::Flushed(void)
 
 bool cConnectionHTTP::CmdGET(const std::string &Opts) 
 {
-	const char *sp = Opts.c_str(), *ptr = sp, *ep;
+	const char *ptr, *sp, *pp, *fp, *xp, *qp, *ep;
 	const cChannel *chan;
 	int apid = 0;
 
-	ptr = skipspace(ptr);
-	while (*ptr == '/')
-		++ptr;
+	ptr = Opts.c_str();
 
-	if (strncasecmp(ptr, "PS/", 3) == 0) {
+	// find begin of URL
+	sp = skipspace(ptr);
+	// find end of URL (\0 or first space character)
+	for (ep = sp; *ep && !isspace(*ep); ep++) 
+		;
+	// find begin of query string (first ?)
+	for (qp = sp; qp < ep && *qp != '?'; qp++)
+		;
+	// find begin of filename (last /)
+	for (fp = qp; fp > sp && *fp != '/'; --fp)
+		;
+	// find begin of section params (first ;)
+	for (pp = sp; pp < fp && *pp != ';'; pp++)
+		;
+	// find filename extension (first .)
+	for (xp = fp; xp < qp && *xp != '.'; xp++)
+		;
+	if (qp - xp > 5) // too long for a filename extension
+		xp = qp;
+
+	std::string type, filespec, fileext, query;
+	// Streamtype with leading / stripped off
+	if (pp > sp)
+		type = Opts.substr(sp - ptr + 1, pp - sp - 1);
+	// Section parameters with leading ; stripped off
+	if (fp > pp)
+		m_StreamerParameter = Opts.substr(pp - ptr + 1, fp - pp - 1);
+	// file basename with leading / stripped off
+	if (xp > fp)
+		filespec = Opts.substr(fp - ptr + 1, xp - fp - 1);
+	// file extension including leading .
+	fileext = Opts.substr(xp - ptr, qp - xp);
+	// query string including leading ?
+	query = Opts.substr(qp - ptr, ep - qp);
+
+	Dprintf("before channelfromstring: type(%s) param(%s) filespec(%s) fileext(%s) query(%s)\n", type.c_str(), m_StreamerParameter.c_str(), filespec.c_str(), fileext.c_str(), query.c_str());
+
+	const char* pType = type.c_str();
+	if (strcasecmp(pType, "PS") == 0) {
 		m_StreamType = stPS;
-		ptr += 3;
-	} else if (strncasecmp(ptr, "PES/", 4) == 0) {
+	} else if (strcasecmp(pType, "PES") == 0) {
 		m_StreamType = stPES;
-		ptr += 4;
-	} else if (strncasecmp(ptr, "TS/", 3) == 0) {
+	} else if (strcasecmp(pType, "TS") == 0) {
 		m_StreamType = stTS;
-		ptr += 3;
-	} else if (strncasecmp(ptr, "ES/", 3) == 0) {
+	} else if (strcasecmp(pType, "ES") == 0) {
 		m_StreamType = stES;
-		ptr += 3;
-	} else if (strncasecmp(ptr, "Extern/", 3) == 0) {
+	} else if (strcasecmp(pType, "Extern") == 0) {
 		m_StreamType = stExtern;
-		ptr += 7;
 	}
 
-	while (*ptr == '/')
-		++ptr;
-	for (ep = ptr + strlen(ptr); ep >= ptr && !isspace(*ep); --ep) 
-		;
+	std::string groupTarget;
+	cChannelIterator *iterator = NULL;
 
-	std::string filespec = Opts.substr(ptr - sp, ep - ptr);
-	Dprintf("substr: %s\n", filespec.c_str());
+	if (filespec.compare("tree") == 0) {
+		const cChannel* c = NULL;
+		size_t groupIndex = query.find("group=");
+		if (groupIndex != std::string::npos)
+			c = cChannelList::GetGroup(atoi(query.c_str() + groupIndex + 6));
+		iterator = new cListTree(c);
+		groupTarget = filespec + fileext;
+	} else if (filespec.compare("groups") == 0) {
+		iterator = new cListGroups();
+		groupTarget = (std::string) "group" + fileext;
+	} else if (filespec.compare("group") == 0) {
+		const cChannel* c = NULL;
+		size_t groupIndex = query.find("group=");
+		if (groupIndex != std::string::npos)
+			c = cChannelList::GetGroup(atoi(query.c_str() + groupIndex + 6));
+		iterator = new cListGroup(c);
+	} else if (filespec.compare("channels") == 0) {
+		iterator = new cListChannels();
+	} else if (filespec.compare("all") == 0 ||
+			(filespec.empty() && fileext.empty())) {
+		iterator = new cListAll();
+	}
 
-	Dprintf("before channelfromstring\n");
-	if (filespec == "" || filespec.substr(0, 12) == "channels.htm") {
-		m_ListChannel = Channels.First();
-		m_Job = hjListing;
+	if (iterator) {
+		if (filespec.empty() || fileext.compare(".htm") == 0 || fileext.compare(".html") == 0) {
+			m_ChannelList = new cHtmlChannelList(iterator, m_StreamType, (filespec + fileext + query).c_str(), groupTarget.c_str());
+			m_Job = hjListing;
+		} else if (fileext.compare(".m3u") == 0) {
+			std::string base;
+			if (*(m_Host.c_str()))
+				base = "http://" + m_Host + "/";
+			else
+				base = (std::string) "http://" + LocalIp() + ":" +
+					(const char*) itoa(StreamdevServerSetup.HTTPServerPort) + "/";
+			if (type.empty())
+			{
+				switch (m_StreamType)
+				{
+					case stTS:	base += "TS/"; break;
+					case stPS:	base += "PS/"; break;
+					case stPES:	base += "PES/"; break;
+					case stES:	base += "ES/"; break;
+					case stExtern:	base += "Extern/"; break;
+					default:	break;
+			
+				}
+			} else {
+				base += type;
+				if (!m_StreamerParameter.empty())
+					base += ";" + m_StreamerParameter;
+				base += "/";
+			}
+			m_ChannelList = new cM3uChannelList(iterator, base.c_str());
+			m_Job = hjListing;
+		} else {
+			delete iterator;
+			return false;
+		}
 	} else if ((chan = ChannelFromString(filespec.c_str(), &apid)) != NULL) {
 		m_Channel = chan;
 		m_Apid = apid;
 		Dprintf("Apid is %d\n", apid);
 		m_Job = hjTransfer;
-	}
+	} else
+		return false;
+	
 	Dprintf("after channelfromstring\n");
 	return true;
 }

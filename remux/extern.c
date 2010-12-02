@@ -19,13 +19,13 @@ protected:
 	virtual void Action(void);
 
 public:
-	cTSExt(cRingBufferLinear *ResultBuffer);
+	cTSExt(cRingBufferLinear *ResultBuffer, std::string Parameter);
 	virtual ~cTSExt();
 
 	void Put(const uchar *Data, int Count);
 };
 
-cTSExt::cTSExt(cRingBufferLinear *ResultBuffer):
+cTSExt::cTSExt(cRingBufferLinear *ResultBuffer, std::string Parameter):
 		m_ResultBuffer(ResultBuffer),
 		m_Active(false),
 		m_Process(0),
@@ -67,9 +67,8 @@ cTSExt::cTSExt(cRingBufferLinear *ResultBuffer):
 		for (int i = STDERR_FILENO + 1; i < MaxPossibleFileDescriptors; i++)
 			close(i); //close all dup'ed filedescriptors
 
-		//printf("starting externremux.sh\n");
-		execl("/bin/sh", "sh", "-c", g_ExternRemux, NULL);
-		//printf("failed externremux.sh\n");
+		std::string cmd = std::string(g_ExternRemux) + " " + Parameter;
+		execl("/bin/sh", "sh", "-c", cmd.c_str(), NULL);
 		_exit(-1);
 	}
 
@@ -150,9 +149,9 @@ void cTSExt::Put(const uchar *Data, int Count)
 	}
 }
 
-cExternRemux::cExternRemux(int VPid, const int *APids, const int *Dpids, const int *SPids):
+cExternRemux::cExternRemux(int VPid, const int *APids, const int *Dpids, const int *SPids, std::string Parameter):
 		m_ResultBuffer(new cRingBufferLinear(WRITERBUFSIZE, TS_SIZE * 2)),
-		m_Remux(new cTSExt(m_ResultBuffer))
+		m_Remux(new cTSExt(m_ResultBuffer, Parameter))
 {
 	m_ResultBuffer->SetTimeouts(500, 100);
 }

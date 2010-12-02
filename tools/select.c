@@ -16,7 +16,7 @@ cTBSelect::~cTBSelect() {
 
 int cTBSelect::Select(uint TimeoutMs) {
 	struct timeval tv;
-	ssize_t res;
+	ssize_t res = 0;
 	int ms;
 
 	tv.tv_usec = (TimeoutMs % 1000) * 1000;

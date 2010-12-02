@@ -12,6 +12,8 @@
 #include "remux/extern.h"
 #include "common.h"
 
+#define TSPATREPACKER
+
 // --- cStreamdevLiveReceiver -------------------------------------------------
 
 class cStreamdevLiveReceiver: public cReceiver {
@@ -232,9 +234,48 @@ void cStreamdevPatFilter::Process(u_short Pid, u_char Tid, const u_char *Data, i
 							pmtSid = assoc.getServiceId();
 							if (Length < TS_SIZE-5) {
 								// repack PAT to TS frame and send to client
+#ifndef TSPATREPACKER
 								uint8_t pat_ts[TS_SIZE] = {TS_SYNC_BYTE, 0x40 /* pusi=1 */, 0 /* pid=0 */, 0x10 /* adaption=1 */, 0 /* pointer */};
 								memcpy(pat_ts + 5, Data, Length);
 								m_Streamer->Put(pat_ts, TS_SIZE);
+#else
+								int ts_id;
+								unsigned int crc, i, len;
+								uint8_t *tmp, tspat_buf[TS_SIZE];
+								memset(tspat_buf, 0xff, TS_SIZE);
+								memset(tspat_buf, 0x0, 4 + 12 + 5);   // TS_HDR_LEN + PAT_TABLE_LEN + 5
+								ts_id = Channel->Tid();               // Get transport stream id of the channel
+								tspat_buf[0] = TS_SYNC_BYTE;          // Transport packet header sunchronization byte (1000011 = 0x47h)
+								tspat_buf[1] = 0x40;                  // Set payload unit start indicator bit
+								tspat_buf[2] = 0x0;                   // PID
+								tspat_buf[3] = 0x10;                  // Set payload flag to indicate precence of payload data
+								tspat_buf[4] = 0x0;                   // PSI
+								tspat_buf[5] = 0x0;                   // PAT table id
+								tspat_buf[6] = 0xb0;                  // Section syntax indicator bit and reserved bits set
+								tspat_buf[7] = 12 + 1;                // Section length (12 bit): PAT_TABLE_LEN + 1
+								tspat_buf[8] = (ts_id >> 8) & 0xff;   // Transport stream ID (bits 8-15)
+								tspat_buf[9] = (ts_id & 0xff);        // Transport stream ID (bits 0-7)
+								tspat_buf[10] = 0x01;                 // Version number 0, Current next indicator bit set  
+								tspat_buf[11] = 0x0;                  // Section number
+								tspat_buf[12] = 0x0;                  // Last section number
+								tspat_buf[13] = (pmtSid >> 8) & 0xff; // Program number (bits 8-15)
+								tspat_buf[14] = (pmtSid & 0xff);      // Program number (bits 0-7)
+								tspat_buf[15] = (pmtPid >> 8) & 0xff; // Network ID (bits 8-12)
+								tspat_buf[16] = (pmtPid & 0xff);      // Network ID (bits 0-7)
+								crc = 0xffffffff;
+								len = 12;                             // PAT_TABLE_LEN
+								tmp = &tspat_buf[4 + 1];              // TS_HDR_LEN + 1
+								while (len--) {
+									crc ^= *tmp++ << 24;
+									for (i = 0; i < 8; i++)
+										crc = (crc << 1) ^ ((crc & 0x80000000) ? 0x04c11db7 : 0); // CRC32POLY
+								}
+								tspat_buf[17] = crc >> 24 & 0xff;     // Checksum
+								tspat_buf[18] = crc >> 16 & 0xff;     // Checksum
+								tspat_buf[19] = crc >>  8 & 0xff;     // Checksum
+								tspat_buf[20] = crc & 0xff;           // Checksum
+								m_Streamer->Put(tspat_buf, TS_SIZE);
+#endif
 							} else 
 								isyslog("cStreamdevPatFilter: PAT size %d too large to fit in one TS", Length);
 							m_Streamer->SetPids(pmtPid);
@@ -268,9 +309,9 @@ void cStreamdevPatFilter::Process(u_short Pid, u_char Tid, const u_char *Data, i
 #if 0
 		pids[npids++] = 0x10;  // pid 0x10, tid 0x40: NIT 
 		pids[npids++] = 0x11;  // pid 0x11, tid 0x42: SDT 
-		pids[npids++] = 0x12;  // pid 0x12, tid 0x4E...0x6F: EIT 
 		pids[npids++] = 0x14;  // pid 0x14, tid 0x70: TDT 
 #endif
+		pids[npids++] = 0x12;  // pid 0x12, tid 0x4E...0x6F: EIT 
 		for (SI::Loop::Iterator it; pmt.streamLoop.getNext(stream, it); )
 			if (0 != (pids[npids] = GetPid(stream)) && npids < MAXRECEIVEPIDS)
 				npids++;
@@ -282,9 +323,10 @@ void cStreamdevPatFilter::Process(u_short Pid, u_char Tid, const u_char *Data, i
 
 // --- cStreamdevLiveStreamer -------------------------------------------------
 
-cStreamdevLiveStreamer::cStreamdevLiveStreamer(int Priority):
+cStreamdevLiveStreamer::cStreamdevLiveStreamer(int Priority, std::string Parameter):
 		cStreamdevStreamer("streamdev-livestreaming"),
 		m_Priority(Priority),
+		m_Parameter(Parameter),
 		m_NumPids(0),
 		m_StreamType(stTSPIDS),
 		m_Channel(NULL),
@@ -447,7 +489,7 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 
 	case stExtern:
 		m_ExtRemux = new cExternRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(),
-		                              m_Channel->Spids());
+		                              m_Channel->Spids(), m_Parameter);
 		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 
 	case stTSPIDS:

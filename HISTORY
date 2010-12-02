@@ -1,6 +1,94 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+2008-03-31: Version 0.3.4
+
+- added possibility to pass parameter to externremux.sh (thanks to Rolf
+  Ahrenberg)
+- use HTTP host header in absolute URLs for DNAT / reverse proxy support
+- rewrite of the HTTP menu part
+- added M3U playlists (thanks to Petri Hinutkainen)
+- enable section filtering only with compatible clients (thanks to Petri
+  Hintukainen)
+- fixed compiler warning
+- added EIT to HTTP TS streams (thanks to Rolf Ahrenberg)
+- compatibility for FreeBSD (thanks to Joerg Pulz)
+- added TS PAT repacker (thanks to Rolf Ahrenberg)
+- fixed Makefile's default target (suggested by Rolf Ahrenberg)
+- workaround for tuning problems on 1.5.x clients (thanks to alexw)
+- added VTP support for PS, PES and EXTERN (PS requested by mpanczyk)
+- fixed gcc-4.3.0 warnings (thanks to Petri Hintukainen)
+- fixed busy wait when client isn't accepting data fast enough (thanks to
+  Olli Lammi)
+- fixed client reconnect after server restart (reported by alexw)
+- added lock in ~cStreamdevDevice (thanks to Petri Hintukainen)
+- externremux: check for ringbuffer full condition (reported by
+  vdr-freak@vdrportal)
+- diffserv support for traffic shaping and WMM capable WLAN accesspoint
+  (suggested by ollo@vdrportal)
+- check vasprintf() return code (thanks to Rolf Ahrenberg)
+- fixed memory leak in buffer overflow situations (thanks to Rolf Ahrenberg)
+- added PAT, PMT and PCR to HTTP TS streams (thanks to Petri Hintukainen and
+  Rolf Ahrenberg)
+- detect data stream disconnections. Fixes high CPU load (thanks to Petri
+  Hintukainen)
+- fixed segfault with VDR 1.5 (thanks to Petri Hintukainen)
+- made section filtering work (thanks to Petri Hintukainen)
+- added compiler flag -Wall and fixed corresponding warnings (thanks to
+  Rolf Ahrenberg)
+- close pipe when externremux is gone. Fixes high CPU load problem
+- close connection when client is gone. Fixes high CPU load problem
+- silenced compiler warnings (thanks to Rolf Ahrenberg)
+- added commandline parameter for externremux script (thanks to Rolf
+  Ahrenberg)
+- detach receivers before switching transponders
+- API changes for VDR 1.5.0 (thanks to Udo Richter)
+- log connections failures only every 10s (reported by greenman@vdrportal)
+- replaced uint64 by uint64_t
+- added Recursion patch for vdr 1.4
+- added LocalChannelProvide for vdr 1.4.x
+- added respect_ca patch
+- speedup cPluginStreamdevServer::Active() by caching translation (thanks
+  to Udo Richter)
+- periodically check if streamdev-server needs to shutdown (thanks to Udo
+  Richter)
+- collect terminated externremux.sh processes (reported by Norad@vdrportal)
+- avoid fd leaks when we fail to spawn externremux.sh
+- detach all receivers before tuning to a different transponder
+- Re-enabled logging for the Detach()/Attach() issue
+- Added -fPIC compiler flag required on AMD64 architectures
+
+2006-08-17: End of maintenance by Thomas Keil
+
+- updated Finish translation (thanks to Rolf Ahrenberg)
+- fixed fd leak (thanks to Artur Skawina)
+- re-enabled Detach/Attach to temporarily release the device used by
+  streamdev while checking if we can switch transponders (thanks to
+  PanamaJack@vdrportal)
+- adopted to VDR 1.4.x
+
+2006-01-26: End of maintenance by Sascha Volkenandt
+
+- fixed http error response
+- added class forward declaration for gcc >= 4.0
+- adopted to VDR >= 1.3.36
+- added LocalChannelProvide for vdr 1.3.24
+- fixed missing include
+- added TS compatibility mode
+- deleting whole block instead of fractions now
+- fixed wrong remux usage
+- added finish translations (thanks to Rolf Ahrenberg)
+- protected cStreamer::Stop() from being called concurrently
+- some compilers complained about missing declarations, added <ctype.h>
+- removed assembler and thus saving one ringbuffer
+- fixed destruction order on channel switch (fixes one crash that happens
+  occasionally when switching)
+- removed client menu code temporarily
+- streamer now gets stopped when connection terminates unexpectedly
+- fixed recursive delete in streamer
+- fixed pure virtual crash in server
+- audio track selection for http
+
 2004-??-??: Version 0.3.3
 
 - dropped support for non-ts streaming in vdr-to-vdr clients

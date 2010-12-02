@@ -1,10 +1,12 @@
 This is a "plugin" for the Video Disk Recorder (VDR).
 
 Written by:                  Sascha Volkenandt <sascha@akv-soft.de>
+Current maintainer:          Frank Schmirler <vdrdev@schmirler.de>
 
-Project's homepage:          http://www.magoa.net/linux/
+Project's homepage:          http://streamdev.vdr-developer.org/
+Former project homepage:     http://linux.kompiliert.net/
 
-Latest version available at: http://www.magoa.net/linux/index.php?view=streamdev
+Latest version available at: http://streamdev.vdr-developer.org/
 
 See the file COPYING for license information.
 
@@ -14,16 +16,12 @@ Contents:
 1.   Description
 2.   Installation
 2.1  VDR 1.2.X
-2.2  VDR 1.3.X
+2.2  VDR 1.3.X and above
 3.   Usage
-3.1  Usage VDR-to-VDR server
-3.2  Usage HTTP server
+3.1  Usage HTTP server
+3.2  Usage VDR-to-VDR server
 3.3  Usage VDR-to-VDR client
-3.4  General Usage Notes
-4.   VDR-to-VDR client notes (PLEASE READ IF YOU HAVE ONE)
-4.1  EPG data [OUTDATED]
-4.2  Teletext / OSD Teletext
-4.3  AnalogTV [OUTDATED]
+4.   Other useful Plugins
 5.   Known Problems
 
 
@@ -102,8 +100,8 @@ patch -p1 <PLUGINS/src/streamdev/patches/thread.c.diff
 make [options, if necessary] vdr
 make [options, if necessary] plugins
 
-2.2 VDR 1.3.X:
---------------
+2.2 VDR 1.3.X and above:
+------------------------
 
 cd vdr-1.X.X/PLUGINS/src
 tar xvfz vdr-streamdev-0.3.1.tgz
@@ -134,23 +132,13 @@ prevents the client from switching transponders. If you set "Client may
 suspend" to yes, the client can suspend the server remotely (this only applies
 if "Offer suspend mode" is selected).
 
-
-3.1 Usage VDR-to-VDR server:
-----------------------------
-
-You can activate the VDR-to-VDR server part in the PlugIn's Setup Menu. It is
-deactivated by default. The Parameter "VDR-to-VDR Server Port" specifies the 
-port where you want the server to listen for incoming connections. The server
-will be activated when you push the OK button inside the setup menu, so there's
-no need to restart VDR.
-
 NOTE: This mainly applies to One-Card-Systems, since with multiple cards there
 is no need to switch transponders on the primary interface, if the secondary
 can stream a given channel (i.e. if it is not blocked by a recording). If both
 cards are in use (i.e. when something is recorded, or by multiple clients), 
 this applies to Multiple-Card-Systems as well.
 
-3.2 Usage HTTP server:
+3.1 Usage HTTP server:
 ----------------------
 
 You can use the HTTP part by accessing the server with a HTTP-capable media
@@ -164,8 +152,17 @@ TS     Transport Stream (i.e. a dump from the device)
 PES    Packetized Elemetary Stream (VDR's native recording format)
 PS     Program Stream (SVCD, DVD like stream)
 ES     Elementary Stream (only Video, if available, otherwise only Audio)
+EXTERN Pass stream through external script (e.g. for converting with mencoder)
 
-If you leave the default port (3000), you can access the streams like this:
+Assuming that you leave the default port (3000), point your web browser to
+
+http://hostname:3000/
+
+You will be presented a menu with links to various channel lists, including M3U
+playlist formats.
+
+If you don't want to use the HTML menu or the M3U playlists, you can access the
+streams directly like this:
 
 http://hostname:3000/3
 http://hostname:3000/S19.2E-0-12480-898
@@ -178,11 +175,25 @@ http://hostname:3000/TS/3
 http://hostname:3000/PES/S19.2E-0-12480-898
 
 The first one would deliver the stream in TS, the second one in PES format. 
-Possible values are 'PES', 'TS', 'PS' and 'ES'. You need to specify the ES 
-format explicitly if you want to listen to radio channels. Play them pack i.e. 
-with mpg123.
+Possible values are 'PES', 'TS', 'PS', 'ES' and 'EXTERN'. You need to specify
+the ES format explicitly if you want to listen to radio channels. Play them
+back i.e. with mpg123.
 
 mpg123 http://hostname:3000/ES/200
+
+With 'EXTERN' you can also add a parameter which is passed as argument to the
+externremux script.
+
+http://hostname:3000/EXTERN;some_parameter/3
+
+3.2 Usage VDR-to-VDR server:
+----------------------------
+
+You can activate the VDR-to-VDR server part in the PlugIn's Setup Menu. It is
+deactivated by default. The Parameter "VDR-to-VDR Server Port" specifies the 
+port where you want the server to listen for incoming connections. The server
+will be activated when you push the OK button inside the setup menu, so there's
+no need to restart VDR.
 
 3.3 Usage VDR-to-VDR client:
 ----------------------------
@@ -216,84 +227,71 @@ that channel, the client will show it until you switch again, or until the
 server needs that card (if no other is free) for a recording on a different 
 transponder.
 
-You can choose a remote streamtype in the setup. I'd suggest TS streaming as
-it has a much shorter delay than PES streaming (compared to live-view of the
-same channel on the server), and transmits more information such as AC3 and 
-teletext data.
+Only the needed PIDs are transferred, and additional PIDs can be turned on
+during an active transfer. This makes it possible to switch languages, receive
+additional channels (for recording on the client) and use plugins that use
+receivers themselves (like osdteletext).
 
-When setting the parameter "MultiPID streaming" to yes (the default) (only 
-applies if the streamtype is TS), only the needed PIDs are transferred, and 
-additional PIDs can be turned on during an active transfer. This makes it 
-possible to switch languages, receive additional channels (for recording on 
-the client) and use plugins that use receivers themselves (like osdteletext).
+With "Filter Streaming" enabled, the client will receive meta information like
+EPG data and service information, just as if the client had its own DVB card.
+Link channels and even a client-side EPG scan have been reported to work.
 
 The last parameter, "Synchronize EPG", will have the client synchronize it's 
 program table with the server every now and then, but not regularly. This 
 happens when starting the client, and everytime VDR does its housekeeping 
 tasks. The only thing that's guaranteed is, that there will be a minimum 
-interval of ten seconds between each EPG synchronization.
+interval of ten seconds between each EPG synchronization. With "Filter
+Streaming" this option has been obsoleted. If you still need to synchronize
+EPG as additional information is available from the server, you should use the
+epgsync-plugin instead (http://vdr.schmirler.de).
 
-The client has a Main Menu entry called "Streaming Control". This is used to 
-control various aspects of the remote server VDR. Inside, you will find 
-"Remote Timers", "Remote Recordings", "Suspend server" and "Synchronize EPG".
-
-The "Remote Timers" entry gives you the possibility to edit, create and delete
-the server's timers remotely. Every timer is synchronized before the requested
-action actually takes place. This only leaves a very short time-span (of a few
-milliseconds) in which a race-condition could happen.
-
-"Remote Recordings" shows up all recordings that the server can access. Only
-deleting recordings is implemented, yet.
-
-With "Suspend Server", you can send the server into suspend mode remotely, if
-the server is set to "Offer suspend mode" and allows the client to suspend.
-
-Last but not least, "Synchronize EPG" starts a synchronization in case you 
-don't want to do it regularly, or in case you just activated it and can't wait
-for the first synchronization to happen by itself.
-
-3.4 General Usage Notes:
+4. Other useful Plugins:
 ------------------------
 
-If there's still some debug output on stdout, please ignore it ;)
+4.1 Plugins for VDR-to-VDR clients:
+-----------------------------------
 
+The following plugins are useful for VDR-to-VDR clients (i.e. VDRs running the
+streamdev-client):
 
-4. VDR-to-VDR client notes:
----------------------------
+* remotetimers (http://vdr.schmirler.de/)
+Add, edit, delete timers on client and server
 
-4.1  EPG data:
---------------
+* timersync (http://phivdr.dyndns.org/vdr/vdr-timersync/)
+Automatically syncronizes timer lists of client and server. All recordings will
+be made on the server
 
-[ OUTDATED, see "Synchronize EPG" in 3.2 ]
+* remoteosd (http://vdr.schmirler.de/)
+Provides access to the server's OSD menu
+  
+* epgsync (http://vdr.schmirler.de/)
+Import EPG from server VDR
 
-4.2  Teletext / OSD Teletext:
------------------------------
+* femon (http://www.saunalahti.fi/~rahrenbe/vdr/femon/)
+Display signal information from server's DVB card. SVDRP support must be enabled
+in femon's setup
 
-Usual teletext will probably not work on the client, if it has no DVB hardware.
-I never tried, and probably I never will, so don't ask about it please ;)
+4.2 Plugins for Server:
+-----------------------
 
-Osdteletext-0.3.1 (and later) definitely work when used in MultiPID Streaming
-mode.
+* dummydevice (http://phivdr.dyndns.org/vdr/vdr-dummydevice/)
+Recommended on a headless server (i.e. a server with no real output device).
+Without this plugin, a budget DVB card could become VDR's primary device. This
+causes unwanted sideeffects in certain situations.
 
+4.3 Alternatives:
+-----------------
 
-4.3 AnalogTV
-------------
-
-Works with ivtv and analogue cards according to Andreas Kool.
-
+* xineliboutput (http://phivdr.dyndns.org/vdr/vdr-xineliboutput/)
+With its networking option, xineliboutput provides an alternative to streamdev.
+You will get the picture of the server VDR, including its OSD. However you
+won't get independent clients, as they all share the same output.
 
 5. Known Problems:
 ------------------
 
-- Recordings & Timers on the client side could endanger Timers & Recordings on
-	the server, as they will have the same priority (by default). Set the 
-	default priority to i.e. 40 if you want the server to supersede the client.
-
-- Sometimes, if you reload VDR too often (for example while recompiling), the
-  driver can get "stuck" in some situations. Try a driver restart if anything
-  you think should work doesn't before sending a bug-report :-).
-	[ ADDITION ]
-	In the meantime I have discovered that this error is caused by the all-
-	mysterical UPT (unknown picture type) error :-(.
-
-
+* In VDR-to-VDR setup, the availability of a channel is checked with a different
+priority than the actual channel switch. The later always uses priority 0.
+Usually a channel switch for live TV has priority 0 anyway, so it is not a
+problem here. However timers usually have a higher priority. Either avoid
+client side recordings or set the priority of client side timers to 0.

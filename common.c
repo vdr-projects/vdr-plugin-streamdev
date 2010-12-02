@@ -1,5 +1,5 @@
 /*
- *  $Id: common.c,v 1.5 2007/09/21 11:55:56 schmirl Exp $
+ *  $Id: common.c,v 1.6 2008/03/31 10:34:26 schmirl Exp $
  */
  
 #include <vdr/channels.h>
@@ -11,7 +11,7 @@
 
 using namespace std;
 
-const char *VERSION = "0.3.3-20070921";
+const char *VERSION = "0.3.4";
 
 const char *StreamTypes[st_Count] = {
 	"TS",

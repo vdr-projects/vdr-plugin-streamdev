@@ -1,7 +1,7 @@
 #
 # Makefile for a Video Disk Recorder plugin
 #
-# $Id: Makefile,v 1.8 2007/04/16 11:01:02 schmirl Exp $
+# $Id: Makefile,v 1.12 2008/03/31 10:34:26 schmirl Exp $
 
 # The official name of this plugin.
 # This name will be used in the '-P...' option of VDR to load the plugin.
@@ -61,7 +61,7 @@ SERVEROBJS = $(PLUGIN)-server.o \
 	server/server.o server/connectionVTP.o server/connectionHTTP.o \
 	server/componentHTTP.o server/componentVTP.o server/connection.o \
 	server/component.o server/suspend.o server/setup.o server/streamer.o \
-	server/livestreamer.o server/livefilter.o \
+	server/livestreamer.o server/livefilter.o server/menuHTTP.o \
 	\
 	remux/tsremux.o remux/ts2ps.o remux/ts2es.o remux/extern.o
 	
@@ -85,8 +85,10 @@ ifeq ($(shell test -f $(VDRDIR)/sections.c ; echo $$?),0)
   DEFINES += -DHAVE_AUTOPID
 endif
 
-libdvbmpeg/libdvbmpegtools.a: libdvbmpeg/*.c libdvbmpeg/*.cc libdvbmpeg/*.h libdvbmpeg/*.hh
-	make -C ./libdvbmpeg libdvbmpegtools.a
+### The main target:
+
+.PHONY: all dist clean
+all: libvdr-$(PLUGIN)-client.so libvdr-$(PLUGIN)-server.so
 
 ### Implicit rules:
 
@@ -113,7 +115,9 @@ endif
 
 ### Targets:
 
-all: libvdr-$(PLUGIN)-client.so libvdr-$(PLUGIN)-server.so
+libdvbmpeg/libdvbmpegtools.a: libdvbmpeg/*.c libdvbmpeg/*.cc libdvbmpeg/*.h libdvbmpeg/*.hh
+	$(MAKE) -C ./libdvbmpeg libdvbmpegtools.a
+
 
 libvdr-$(PLUGIN)-client.so: $(CLIENTOBJS) $(COMMONOBJS) libdvbmpeg/libdvbmpegtools.a
 libvdr-$(PLUGIN)-server.so: $(SERVEROBJS) $(COMMONOBJS) libdvbmpeg/libdvbmpegtools.a
@@ -126,10 +130,10 @@ dist: clean
 	@-rm -rf $(TMPDIR)/$(ARCHIVE)
 	@mkdir $(TMPDIR)/$(ARCHIVE)
 	@cp -a * $(TMPDIR)/$(ARCHIVE)
-	@tar czf $(PACKAGE).tgz --exclude SCCS -C $(TMPDIR) $(ARCHIVE)
+	@tar czf $(PACKAGE).tgz --exclude CVS -C $(TMPDIR) $(ARCHIVE)
 	@-rm -rf $(TMPDIR)/$(ARCHIVE)
 	@echo Distribution package created as $(PACKAGE).tgz
 
 clean:
 	@-rm -f $(COMMONOBJS) $(CLIENTOBJS) $(SERVEROBJS) $(DEPFILE) *.so *.tgz core* *~
-	make -C ./libdvbmpeg clean
+	$(MAKE) -C ./libdvbmpeg clean

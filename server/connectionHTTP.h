@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.h,v 1.4 2007/04/02 10:32:34 schmirl Exp $
+ *  $Id: connectionHTTP.h,v 1.5 2008/03/28 15:11:40 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVERS_CONNECTIONHTTP_H
@@ -12,6 +12,7 @@
 
 class cChannel;
 class cStreamdevLiveStreamer;
+class cChannelList;
 
 class cConnectionHTTP: public cServerConnection {
 private:
@@ -28,16 +29,18 @@ private:
 	};
 
 	std::string                       m_Request;
+	std::string                       m_Host;
 	//std::map<std::string,std::string> m_Headers; TODO: later?
 	eHTTPStatus                       m_Status;
 	eHTTPJob                          m_Job;
 	// job: transfer
 	cStreamdevLiveStreamer           *m_LiveStreamer;
+	std::string                       m_StreamerParameter;
 	const cChannel                   *m_Channel;
 	int                               m_Apid;
 	eStreamType                       m_StreamType;
 	// job: listing
-	const cChannel                   *m_ListChannel;
+	cChannelList                     *m_ChannelList;
 
 protected:
 	bool ProcessRequest(void);

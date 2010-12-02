@@ -1,9 +1,15 @@
 /*
- *  $Id: common.h,v 1.8 2007/04/24 10:50:13 schmirl Exp $
+ *  $Id: common.h,v 1.9 2008/03/12 09:36:27 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_COMMON_H
 #define VDR_STREAMDEV_COMMON_H
+
+/* FreeBSD has it's own version of isnumber(),
+   but VDR's version is incompatible */
+#ifdef __FreeBSD__
+#undef isnumber
+#endif
 
 #include <vdr/tools.h>
 #include <vdr/plugin.h>

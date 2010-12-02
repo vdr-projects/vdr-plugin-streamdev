@@ -24,6 +24,7 @@ private:
 
 	char                   *m_LastCommand;
 	eStreamType             m_StreamType;
+	bool                    m_FiltersSupport;
 
 	// Members adopted for SVDRP
 	cRecordings Recordings;
