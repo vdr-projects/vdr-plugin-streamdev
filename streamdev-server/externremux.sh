@@ -16,6 +16,8 @@
 # VBR    video bitrate (kbit)
 # VOPTS  custom video options
 # WIDTH  scale video to width
+# HEIGHT scale video to height
+# FPS    output frames per second
 # AC     audio codec
 # ABR    audio bitrate (kbit)
 # AOPTS  custom audio options
@@ -42,14 +44,22 @@ ABR_MONO=64
 ###
 # mencoder binary
 MENCODER=mencoder
+### video part
 # Default video codec (e.g. lavc/x264/copy)
 MENCODER_VC=lavc
+# Default video options if lavc is used (-ovc lavc -lavcopts ...)
+MENCODER_LAVC_VOPTS=vcodec=mpeg4
+# Default video options if x264 is used (-ovc x264 -x264encopts ...)
+MENCODER_X264_VOPTS=threads=auto
+### audio part
 # Default audio codec (e.g. lavc/mp3lame/faac/copy)
 MENCODER_AC=mp3lame
-# Default video codec if lavc is used (-ovc lavc -lavcopts vcodec=)
-MENCODER_LAVC_VC=mpeg4
-# Default audio codec if lavc is used (-oac lavc -lavcopts acodec=)
-MENCODER_LAVC_AC=mp2
+# Default audio options if lavc is used (-oac lavc -lavcopts ...)
+MENCODER_LAVC_AOPTS=acodec=mp2
+# Default audio options if mp3lame is used (-oac mp3lame -lameopts ...)
+MENCODER_LAME_AOPTS=
+# Default audio options if faac is used (-oac faac -faacopts ...)
+MENCODER_FAAC_AOPTS=
 ###
 ### MENCODER CONFIG END
 
@@ -63,6 +73,8 @@ OGG_SPEED=1
 OGG_VQUALITY=0
 # audioquality - higher value gives better quality but is slower (0..10)
 OGG_AQUALITY=0
+# aspect ratio used for scaling if only one of HEIGHT/WIDTH given (16/9 or 4/3)
+OGG_ASPECT='4 / 3'
 ###
 ### OGG CONFIG END
 
@@ -70,7 +82,19 @@ OGG_AQUALITY=0
 
 function hasOpt { echo "$1" | grep -q "\b${2}\b"; }
 
-function isNumeric() { echo "$@" | grep -q '^[0-9]\{1,\}$'; }
+# $1:    concatenation of already set option=value pairs
+# $2-$n: option=value pairs to be echod if the option is not present in $1
+function addOpts
+{
+	local opts="$1"
+	shift
+	while [ $# -gt 0 ]; do
+		hasOpt "$opts" ${1%%=*}= || echo $1
+		shift
+	done
+}
+
+function isNumeric() { echo "$@" | grep -q '^-\?[0-9]\{1,\}$'; }
 
 function remux_cat
 {
@@ -87,20 +111,31 @@ function remux_mencoder
 	# Assemble video options
 	VC=${REMUX_PARAM_VC:-$MENCODER_VC}
 	VOPTS=${REMUX_PARAM_VOPTS}
-	WIDTH=${REMUX_PARAM_WIDTH:-$WIDTH}
+	FPS=${REMUX_PARAM_FPS:-$FPS}
+
+	# if only one of HEIGHT/WIDTH given:
+	# have mencoder calculate other value depending on actual aspect ratio
+	if [ "$HEIGHT" -a -z "$WIDTH" ]; then
+	  WIDTH=-3
+	elif [ "$WIDTH" -a -z "$HEIGHT" ]; then
+	  HEIGHT=-3
+	fi
+
 	case "$VC" in
 		lavc)
 			LAVCOPTS=(
 				${VOPTS}
-				$(hasOpt "$VOPTS" vcodec || echo "vcodec=$MENCODER_LAVC_VC")
+				$(IFS=$IFS:; addOpts "$VOPTS" $MENCODER_LAVC_VOPTS)
 				${VBR:+vbitrate=$VBR}
 			)
 			[ ${#LAVCOPTS[*]} -gt 0 ] && VOPTS=$(IFS=:; echo -lavcopts "${LAVCOPTS[*]}")
 			;; 
 		x264)
+			isNumeric "$HEIGHT" && [ $HEIGHT -lt 0 -a $HEIGHT -gt -8 ] && ((HEIGHT-=8))
+			isNumeric "$WIDTH" && [ $WIDTH -lt 0 -a $WIDTH -gt -8 ] && ((WIDTH-=8))
 			X264OPTS=(
 				${VOPTS}
-				$(hasOpt "$VOPTS" threads || echo "threads=auto")
+				$(IFS=$IFS:; addOpts "$VOPTS" $MENCODER_X264_VOPTS)
 				${VBR:+bitrate=$VBR}
 			)
 			[ ${#X264OPTS[*]} -gt 0 ] && VOPTS=$(IFS=:; echo -x264encopts "${X264OPTS[*]}")
@@ -121,7 +156,7 @@ function remux_mencoder
 			LAVCOPTS=(
 				${LAVCOPTS[*]}
 				${AOPTS}
-				$(hasOpt "$AOPTS" acodec || echo "acodec=$MENCODER_LAVC_AC")
+				$(IFS=$IFS:; addOpts "$AOPTS" $MENCODER_LAVC_AOPTS)
 				${ABR:+abitrate=$ABR}
 			)
 	
@@ -133,6 +168,7 @@ function remux_mencoder
 			LAMEOPTS=(
 				${AOPTS}
 				$(isNumeric "${ABR}" && [ "${ABR}" -lt "$ABR_MONO" ] && ! hasOpt "${AOPTS}" mode ] && echo 'mode=3')
+				$(IFS=$IFS:; addOpts "$AOPTS" $MENCODER_LAME_AOPTS)
 				${ABR:+preset=$ABR}
 			)
 			[ ${#LAMEOPTS[*]} -gt 0 ] && AOPTS=$(IFS=:; echo -lameopts "${LAMEOPTS[*]}")
@@ -140,6 +176,7 @@ function remux_mencoder
 		faac)
 			FAACOPTS=(
 				${AOPTS}
+				$(IFS=$IFS:; addOpts "$AOPTS" $MENCODER_FAAC_AOPTS)
 				${ABR:+br=$ABR}
 			)
 			[ ${#FAACOPTS[*]} -gt 0 ] && AOPTS=$(IFS=:; echo -faacopts "${FAACOPTS[*]}")
@@ -155,15 +192,17 @@ function remux_mencoder
 
 	startReply
 	exec 3<&0
-	echo "$MENCODER" \
+	echo $MENCODER \
 		-ovc $VC $VOPTS \
 		-oac $AC $AOPTS \
-		${WIDTH:+-vf scale -zoom -xy $WIDTH} \
+		${WIDTH:+-vf scale=$WIDTH:$HEIGHT -zoom} \
+		${FPS:+-ofps $FPS} \
 		-o "$FIFO" -- - >&2
-	"$MENCODER" \
+	$MENCODER \
 		-ovc $VC $VOPTS \
 		-oac $AC $AOPTS \
-		${WIDTH:+-vf scale -zoom -xy $WIDTH} \
+		${WIDTH:+-vf scale=$WIDTH:$HEIGHT -zoom} \
+		${FPS:+-ofps $FPS} \
 		-o "$FIFO" -- - 0<&3 >/dev/null &
 }
 
@@ -171,7 +210,15 @@ function remux_ogg
 {
 	VOPTS=${REMUX_PARAM_VOPTS//[:=]/ }
 	AOPTS=${REMUX_PARAM_AOPTS//[:=]/ }
-	WIDTH=${REMUX_PARAM_WIDTH:-$WIDTH}
+
+	# if only one of HEIGHT/WIDTH given:
+	# calculate other value depending on configured aspect ratio
+	# trim to multiple of 8
+	if [ "$HEIGHT" -a -z "$WIDTH" ]; then
+	  WIDTH=$((HEIGHT * $OGG_ASPECT / 8 * 8))
+	elif [ "$WIDTH" -a -z "$HEIGHT" ]; then
+	  HEIGHT=$(($WIDTH * $( echo $OGG_ASPECT | sed 's#^\([0-9]\+\) */ *\([0-9]\+\)$#\2 / \1#') / 8 * 8))
+	fi
 
 	OGGOPTS=(
 		${VOPTS}
@@ -187,14 +234,14 @@ function remux_ogg
 
 	startReply
 	exec 3<&0
-	echo "$OGG" --format ts \
+	echo $OGG --format ts \
 		${OGGOPTS[*]} \
-		${WIDTH:+--width $WIDTH --height $(($WIDTH * 3 / 4 / 8 * 8))} \
+		${WIDTH:+--width $WIDTH --height $HEIGHT} \
                 --title "VDR Streamdev: ${REMUX_CHANNEL_NAME}" \
                 --output "$FIFO" -- - 0<&3 >&2
-	"$OGG" --format ts \
+	$OGG --format ts \
 		${OGGOPTS[*]} \
-		${WIDTH:+--width $WIDTH --height $(($WIDTH * 3 / 4 / 8 * 8))} \
+		${WIDTH:+--width $WIDTH --height $HEIGHT} \
                 --title "VDR Streamdev: ${REMUX_CHANNEL_NAME}" \
                 --output "$FIFO" -- - 0<&3 >/dev/null &
 }
@@ -254,6 +301,7 @@ esac
 ABR=${REMUX_PARAM_ABR:-$ABR}
 VBR=${REMUX_PARAM_VBR:-$VBR}
 WIDTH=${REMUX_PARAM_WIDTH:-$WIDTH}
+HEIGHT=${REMUX_PARAM_HEIGHT:-$HEIGHT}
 PROG=${REMUX_PARAM_PROG:-$PROG}
 
 case "$PROG" in

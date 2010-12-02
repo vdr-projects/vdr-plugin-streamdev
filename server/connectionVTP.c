@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.27 2010/01/29 12:03:02 schmirl Exp $
+ *  $Id: connectionVTP.c,v 1.31 2010/08/18 10:26:54 schmirl Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -746,6 +746,8 @@ cConnectionVTP::cConnectionVTP(void):
 		m_StreamType(stTSPIDS),
 		m_FiltersSupport(false),
 		m_RecPlayer(NULL),
+		m_TuneChannel(NULL),
+		m_TunePriority(0),
 		m_LSTEHandler(NULL),
 		m_LSTCHandler(NULL),
 		m_LSTTHandler(NULL),
@@ -836,6 +838,7 @@ bool cConnectionVTP::Command(char *Cmd)
 	else if (strcasecmp(Cmd, "READ") == 0) return CmdREAD(param);
 	else if (strcasecmp(Cmd, "TUNE") == 0) return CmdTUNE(param);
 	else if (strcasecmp(Cmd, "PLAY") == 0) return CmdPLAY(param);
+	else if (strcasecmp(Cmd, "PRIO") == 0) return CmdPRIO(param);
 	else if (strcasecmp(Cmd, "ADDP") == 0) return CmdADDP(param);
 	else if (strcasecmp(Cmd, "DELP") == 0) return CmdDELP(param);
 	else if (strcasecmp(Cmd, "ADDF") == 0) return CmdADDF(param);
@@ -881,8 +884,8 @@ bool cConnectionVTP::CmdCAPS(char *Opts)
 		return Respond(220, "Capability \"%s\" accepted", Opts);
 	}
 
-	if (strcasecmp(Opts, "EXTERN") == 0) {
-		m_StreamType = stExtern;
+	if (strcasecmp(Opts, "EXT") == 0) {
+		m_StreamType = stEXT;
 		return Respond(220, "Capability \"%s\" accepted", Opts);
 	}
 
@@ -891,6 +894,11 @@ bool cConnectionVTP::CmdCAPS(char *Opts)
 	//
 	if (strcasecmp(Opts, "FILTERS") == 0) {
 		m_FiltersSupport = true;
+		return Respond(220, "Capability \"%s\" accepted", Opts);
+	}
+
+	// Command PRIO is known
+	if (strcasecmp(Opts, "PRIO") == 0) {
 		return Respond(220, "Capability \"%s\" accepted", Opts);
 	}
 
@@ -911,9 +919,15 @@ bool cConnectionVTP::CmdPROV(char *Opts)
 	if ((chan = ChannelFromString(Opts)) == NULL)
 		return Respond(550, "Undefined channel \"%s\"", Opts);
 
-	return GetDevice(chan, prio) != NULL
-			? Respond(220, "Channel available")
-			: Respond(560, "Channel not available");
+	if (ProvidesChannel(chan, prio)) {
+		m_TuneChannel = chan;
+		m_TunePriority = prio;
+		return Respond(220, "Channel available");
+	}
+	else {
+		m_TuneChannel = NULL;
+		return Respond(560, "Channel not available");
+	}
 }
 
 bool cConnectionVTP::CmdPORT(char *Opts) 
@@ -1067,18 +1081,23 @@ bool cConnectionVTP::CmdTUNE(char *Opts)
 {
 	const cChannel *chan;
 	cDevice *dev;
+	int prio = m_TunePriority;
 	
 	if ((chan = ChannelFromString(Opts)) == NULL)
 		return Respond(550, "Undefined channel \"%s\"", Opts);
 
-	if ((dev = GetDevice(chan, 0)) == NULL)
+	if (chan != m_TuneChannel) {
+		esyslog("streamdev-server TUNE %s: Priority unknown - using 0", Opts);
+		prio = 0;
+	}
+	if ((dev = GetDevice(chan, prio)) == NULL)
 		return Respond(560, "Channel not available");
 
 	if (!dev->SwitchChannel(chan, false))
 		return Respond(560, "Channel not available");
 
 	delete m_LiveStreamer;
-	m_LiveStreamer = new cStreamdevLiveStreamer(1);
+	m_LiveStreamer = new cStreamdevLiveStreamer(prio, this);
 	m_LiveStreamer->SetChannel(chan, m_StreamType);
 	m_LiveStreamer->SetDevice(dev);
 	if(m_LiveSocket)
@@ -1117,6 +1136,22 @@ bool cConnectionVTP::CmdPLAY(char *Opts)
 	else {
 		return Respond(500, "Use: PLAY record");
 	}
+}
+
+bool cConnectionVTP::CmdPRIO(char *Opts) 
+{
+	int prio;
+	char *end;
+
+	prio = strtoul(Opts, &end, 10);
+	if (end == Opts || (*end != '\0' && *end != ' '))
+		return Respond(500, "Use: PRIO Priority");
+
+	if (m_LiveStreamer) {
+		m_LiveStreamer->SetPriority(prio);
+		return Respond(220, "Priority changed to %d", prio);
+	}
+	return Respond(550, "Priority not applicable");
 }
 
 bool cConnectionVTP::CmdADDP(char *Opts) 
@@ -1243,6 +1278,7 @@ bool cConnectionVTP::CmdSUSP(void)
 	else if (StreamdevServerSetup.SuspendMode == smOffer 
 			&& StreamdevServerSetup.AllowSuspend) {
 		cControl::Launch(new cSuspendCtl);
+		cControl::Attach();
 		return Respond(220, "Server is suspended");
 	} else
 		return Respond(550, "Client may not suspend server");

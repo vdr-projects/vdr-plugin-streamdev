@@ -1,30 +1,26 @@
 #
 # Makefile for a Video Disk Recorder plugin
 #
-# $Id: Makefile,v 1.5 2010/07/30 10:49:28 schmirl Exp $
+# $Id: Makefile,v 1.2 2010/07/19 13:49:28 schmirl Exp $
 
 ### The object files (add further files here):
 
-OBJS = ctools.o remux.o ringbuffy.o transform.o
-
-### Disable attribute warn_unused_result
-
-DEFINES += -U_FORTIFY_SOURCE
+OBJS = tsremux.o ts2es.o ts2pes.o ts2ps.o extern.o
 
 ### The main target:
 
 .PHONY: clean
-libdvbmpegtools.a: $(OBJS)
-	ar -rcs libdvbmpegtools.a $(OBJS) 
+remux.a: $(OBJS)
+	ar -rcs remux.a $^
 
 ### Implicit rules:
 
 %.o: %.c 
-	$(CC) $(CFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
+	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
 
 ### Dependencies:
 
-MAKEDEP = $(CC) -MM -MG
+MAKEDEP = $(CXX) -MM -MG
 DEPFILE = .dependencies
 
 $(DEPFILE): Makefile

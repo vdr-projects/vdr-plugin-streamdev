@@ -1,5 +1,5 @@
 /*
- *  $Id: streamdev-client.h,v 1.2 2010/06/08 05:55:16 schmirl Exp $
+ *  $Id: streamdev-client.h,v 1.3 2010/08/18 10:26:56 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEVCLIENT_H
@@ -23,6 +23,7 @@ public:
   virtual cOsdObject *MainMenuAction(void);
   virtual cMenuSetupPage *SetupMenu(void);
   virtual bool SetupParse(const char *Name, const char *Value);
+  virtual void MainThreadHook(void);
 };
 
 #endif // VDR_STREAMDEVCLIENT_H

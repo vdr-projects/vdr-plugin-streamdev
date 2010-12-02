@@ -3,7 +3,7 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-client.c,v 1.7 2010/06/08 05:55:16 schmirl Exp $
+ * $Id: streamdev-client.c,v 1.3 2010/08/18 10:26:56 schmirl Exp $
  */
 
 #include "streamdev-client.h"
@@ -50,6 +50,10 @@ cMenuSetupPage *cPluginStreamdevClient::SetupMenu(void) {
 
 bool cPluginStreamdevClient::SetupParse(const char *Name, const char *Value) {
   return StreamdevClientSetup.SetupParse(Name, Value);
+}
+
+void cPluginStreamdevClient::MainThreadHook(void) {
+  cStreamdevDevice::UpdatePriority();
 }
 
 VDRPLUGINCREATOR(cPluginStreamdevClient); // Don't touch this!

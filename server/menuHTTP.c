@@ -2,7 +2,7 @@
 #include "server/menuHTTP.h"
 
 //**************************** cChannelIterator **************
-cChannelIterator::cChannelIterator(cChannel *First): channel(First)
+cChannelIterator::cChannelIterator(const cChannel *First): channel(First)
 {}
 
 const cChannel* cChannelIterator::Next()
@@ -19,7 +19,7 @@ cListAll::cListAll(): cChannelIterator(Channels.First())
 const cChannel* cListAll::NextChannel(const cChannel *Channel)
 {
 	if (Channel)
-		Channel = Channels.Next(Channel);
+		Channel = SkipFakeGroups(Channels.Next(Channel));
 	return Channel;
 }
 
@@ -46,14 +46,19 @@ const cChannel* cListGroups::NextChannel(const cChannel *Channel)
 }
 //
 // ********************* cListGroup ****************
-cListGroup::cListGroup(const cChannel *Group): cChannelIterator((Group && Group->GroupSep() && Channels.Next(Group) && !Channels.Next(Group)->GroupSep()) ? Channels.Next(Group) : NULL)
+cListGroup::cListGroup(const cChannel *Group): cChannelIterator(GetNextChannelInGroup(Group))
 {}
+
+const cChannel* cListGroup::GetNextChannelInGroup(const cChannel *Channel)
+{
+	if (Channel)
+		Channel = SkipFakeGroups(Channels.Next(Channel));
+	return Channel && !Channel->GroupSep() ? Channel : NULL;
+}
 
 const cChannel* cListGroup::NextChannel(const cChannel *Channel)
 {
-	if (Channel)
-		Channel = Channels.Next(Channel);
-	return (Channel && !Channel->GroupSep()) ? Channel : NULL;
+	return GetNextChannelInGroup(Channel);
 }
 //
 // ********************* cListTree ****************
@@ -68,7 +73,7 @@ const cChannel* cListTree::NextChannel(const cChannel *Channel)
 	if (currentGroup == selectedGroup)
 	{
 		if (Channel)
-			Channel = Channels.Next(Channel);
+			Channel = SkipFakeGroups(Channels.Next(Channel));
 		if (Channel && Channel->GroupSep())
 			currentGroup = Channel;
 	}
@@ -205,8 +210,8 @@ std::string cHtmlChannelList::StreamTypeMenu()
 			(std::string) "[<a href=\"/PES/" + self + "\">PES</a>] ");
 	typeMenu += (streamType == stES ? (std::string) "[ES] " :
 			(std::string) "[<a href=\"/ES/" + self + "\">ES</a>] ");
-	typeMenu += (streamType == stExtern ? (std::string) "[Extern] " :
-			(std::string) "[<a href=\"/Extern/" + self + "\">Extern</a>] ");
+	typeMenu += (streamType == stEXT ? (std::string) "[EXT] " :
+			(std::string) "[<a href=\"/EXT/" + self + "\">EXT</a>] ");
 	return typeMenu;
 }
 

@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.c,v 1.20 2010/07/22 14:18:18 schmirl Exp $
+ *  $Id: connectionHTTP.c,v 1.21 2010/08/03 10:46:41 schmirl Exp $
  */
 
 #include <ctype.h>
@@ -149,7 +149,9 @@ bool cConnectionHTTP::ProcessRequest(void)
 		if (m_ChannelList)
 			return Respond("%s", true, m_ChannelList->HttpHeader().c_str());
 		else if (m_Channel != NULL) {
-			cDevice *device = GetDevice(m_Channel, 0);
+			cDevice *device = NULL;
+			if (ProvidesChannel(m_Channel, 0))
+				device = GetDevice(m_Channel, 0);
 			if (device != NULL) {
 				device->SwitchChannel(m_Channel, false);
 				m_LiveStreamer = new cStreamdevLiveStreamer(0, this);
@@ -186,8 +188,7 @@ bool cConnectionHTTP::ProcessRequest(void)
 		if (m_ChannelList)
 			return Respond("%s", true, m_ChannelList->HttpHeader().c_str());
 		else if (m_Channel != NULL) {
-			cDevice *device = GetDevice(m_Channel, 0);
-			if (device != NULL) {
+			if (ProvidesChannel(m_Channel, 0)) {
 				if (m_StreamType == stEXT) {
 					// TODO
 					return Respond("HTTP/1.0 200 OK")

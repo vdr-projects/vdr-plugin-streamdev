@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.h,v 1.8 2009/09/18 10:43:26 schmirl Exp $
+ *  $Id: connection.h,v 1.10 2010/08/03 10:46:41 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVER_CONNECTION_H
@@ -7,6 +7,11 @@
 
 #include "tools/socket.h"
 #include "common.h"
+
+#include <map>
+
+typedef std::map<std::string,std::string> tStrStrMap;
+typedef std::pair<std::string,std::string> tStrStr;
 
 class cChannel;
 class cDevice;
@@ -28,6 +33,13 @@ private:
 	uint        m_WriteBytes;
 	uint        m_WriteIndex;
 
+	tStrStrMap  m_Headers;
+
+	/* Check if a device would be available for transfering the given
+	   channel. This call has no side effects except for temporarily
+           detaching this connection's receivers. */
+	cDevice *CheckDevice(const cChannel *Channel, int Priority, bool LiveView, const cDevice *AvoidDevice = NULL);
+
 protected:
 	/* Will be called when a command terminated by a newline has been 
 	   received */
@@ -41,7 +53,10 @@ protected:
 	virtual bool Respond(const char *Message, bool Last = true, ...);
 			//__attribute__ ((format (printf, 2, 4)));
 
-	static const cChannel *ChannelFromString(const char *String, int *Apid = NULL);
+	/* Add a request header */
+	void SetHeader(const char *Name, const char *Value, const char *Prefix = "") { m_Headers.insert(tStrStr(std::string(Prefix) + Name, Value)); }
+
+	static const cChannel *ChannelFromString(const char *String, int *Apid = NULL, int *Dpid = NULL);
 
 public:
 	/* If you derive, specify a short string such as HTTP for Protocol, which
@@ -81,14 +96,24 @@ public:
 	/* Will make the socket close after sending all queued output data */
 	void DeferClose(void) { m_DeferClose = true; }
 
-	/* Will retrieve an unused device for transmitting data. Use the returned
+	/* Will retrieve an unused device for transmitting data. Receivers have
+	   already been attached from the device if necessary. Use the returned
 	   cDevice in a following call to StartTransfer */
 	cDevice *GetDevice(const cChannel *Channel, int Priority);
+
+	/* Test if a call to GetDevice would return a usable device. */
+	bool ProvidesChannel(const cChannel *Channel, int Priority);
 
 	virtual void Flushed(void) {}
 
 	virtual void Detach(void) = 0;
 	virtual void Attach(void) = 0;
+
+	/* This connections protocol name */
+	virtual const char* Protocol(void) const { return m_Protocol; }
+
+	/* std::map with additional information */
+	const tStrStrMap& Headers(void) const { return m_Headers; }
 };
 
 inline bool cServerConnection::HasData(void) const

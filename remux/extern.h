@@ -5,6 +5,9 @@
 #include <vdr/ringbuffer.h>
 #include <string>
 
+class cChannel;
+class cServerConnection;
+
 namespace Streamdev {
 
 class cTSExt;
@@ -15,7 +18,7 @@ private:
 	cTSExt            *m_Remux;
 
 public:
-	cExternRemux(int VPid, const int *APids, const int *Dpids, const int *SPids, std::string Parameter);
+	cExternRemux(const cServerConnection *Connection, const cChannel *Channel, const int *APids, const int *Dpids);
 	virtual ~cExternRemux();
 	
 	int Put(const uchar *Data, int Count);

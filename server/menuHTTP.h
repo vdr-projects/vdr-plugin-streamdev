@@ -13,9 +13,10 @@ class cChannelIterator
 		const cChannel *channel;
 	protected:
 		virtual const cChannel* NextChannel(const cChannel *Channel) = 0;
+		static inline const cChannel* SkipFakeGroups(const cChannel *Channel);
 	public:
 		const cChannel* Next();
-		cChannelIterator(cChannel *First);
+		cChannelIterator(const cChannel *First);
 		virtual ~cChannelIterator() {};
 };
 
@@ -48,6 +49,8 @@ class cListGroups: public cChannelIterator
 
 class cListGroup: public cChannelIterator
 {
+	private:
+		static const cChannel* GetNextChannelInGroup(const cChannel *Channel);
 	protected:
 		virtual const cChannel* NextChannel(const cChannel *Channel);
 	public:
@@ -139,5 +142,12 @@ class cM3uChannelList: public cChannelList
 		cM3uChannelList(cChannelIterator *Iterator, const char* Base);
 		virtual ~cM3uChannelList();
 };
+
+inline const cChannel* cChannelIterator::SkipFakeGroups(const cChannel* Group)
+{
+	while (Group && Group->GroupSep() && !*Group->Name())
+		Group = Channels.Next(Group);
+	return Group;
+}
 
 #endif

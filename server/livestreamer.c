@@ -289,7 +289,7 @@ void cStreamdevPatFilter::Process(u_short Pid, u_char Tid, const u_char *Data, i
 							if (written != TS_SIZE)
 								siBuffer.ReportOverflow(TS_SIZE - written);
 							if (pmtPid != prevPmtPid) {
-								m_Streamer->SetPids(pmtPid);
+								m_Streamer->SetPid(pmtPid, true);
 								Add(pmtPid, 0x02);
 								pmtVersion = -1;
 							}
@@ -335,10 +335,9 @@ void cStreamdevPatFilter::Process(u_short Pid, u_char Tid, const u_char *Data, i
 
 // --- cStreamdevLiveStreamer -------------------------------------------------
 
-cStreamdevLiveStreamer::cStreamdevLiveStreamer(int Priority, std::string Parameter):
-		cStreamdevStreamer("streamdev-livestreaming"),
+cStreamdevLiveStreamer::cStreamdevLiveStreamer(int Priority, const cServerConnection *Connection):
+		cStreamdevStreamer("streamdev-livestreaming", Connection),
 		m_Priority(Priority),
-		m_Parameter(Parameter),
 		m_NumPids(0),
 		m_StreamType(stTSPIDS),
 		m_Channel(NULL),
@@ -435,53 +434,58 @@ bool cStreamdevLiveStreamer::SetPids(int Pid, const int *Pids1, const int *Pids2
 	return true;
 }
 
-void cStreamdevLiveStreamer::StartReceiver(void)
+void cStreamdevLiveStreamer::SetPriority(int Priority)
 {
-	DELETENULL(m_Receiver);
-	if (m_NumPids > 0) {
-		Dprintf("Creating Receiver to respect changed pids\n");
-		m_Receiver = new cStreamdevLiveReceiver(this, m_Channel->GetChannelID(), m_Priority, m_Pids);
-		if (IsRunning() && m_Device != NULL) {
-			Dprintf("Attaching new receiver\n");
-			Attach();
-		}
-	}
+	m_Priority = Priority;
+	StartReceiver();
 }
 
-bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType StreamType, int Apid) 
+void cStreamdevLiveStreamer::StartReceiver(void)
+{
+	if (m_Device != NULL && m_NumPids > 0 && IsRunning()) {
+		Dprintf("Creating Receiver to respect changed pids\n");
+		cReceiver *current = m_Receiver;
+		m_Receiver = new cStreamdevLiveReceiver(this, m_Channel->GetChannelID(), m_Priority, m_Pids);
+		cThreadLock ThreadLock(m_Device);
+		Attach();
+		delete current;
+	}
+	else
+		DELETENULL(m_Receiver);
+}
+
+bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType StreamType, const int* Apid, const int *Dpid) 
 {
 	Dprintf("Initializing Remuxer for full channel transfer\n");
 	//printf("ca pid: %d\n", Channel->Ca());
 	m_Channel = Channel;
 	m_StreamType = StreamType;
 
-	int apid[2] = { Apid, 0 };
-	const int *Apids = Apid ? apid : m_Channel->Apids();
-	const int *Dpids = Apid ? NULL : m_Channel->Dpids();
+	const int *Apids = Apid ? Apid : m_Channel->Apids();
+	const int *Dpids = Dpid ? Dpid : m_Channel->Dpids();
 
 	switch (m_StreamType) {
 	case stES: 
 		{
 			int pid = ISRADIO(m_Channel) ? m_Channel->Apid(0) : m_Channel->Vpid();
-			if (Apid != 0)
-				pid = Apid;
+			if (Apid && Apid[0])
+				pid = Apid[0];
+			else if (Dpid && Dpid[0])
+				pid = Dpid[0];
 			m_Remux = new cTS2ESRemux(pid);
 			return SetPids(pid);
 		}
 
 	case stPES: 
-		m_Remux = new cTS2PESRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(), 
-								m_Channel->Spids());
+		m_Remux = new cTS2PESRemux(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 
 	case stPS:  
-		m_Remux = new cTS2PSRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(),
-		                            m_Channel->Spids());
+		m_Remux = new cTS2PSRemux(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 
-	case stExtern:
-		m_Remux = new cExternRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(),
-		                              m_Channel->Spids(), m_Parameter);
+	case stEXT:
+		m_Remux = new cExternRemux(Connection(), m_Channel, Apids, Dpids);
 		// fall through
 	case stTS:
 		// This should never happen, but ...
@@ -634,12 +638,10 @@ void cStreamdevFilterStreamer::SetDevice(cDevice *Device)
 {
 	Dprintf("cStreamdevFilterStreamer::SetDevice()\n");
 	LOCK_THREAD;
-	if(Device != m_Device) {
-		Detach();
-		m_Device = Device;
-		//m_Channel = NULL;
-		Attach();
-	}
+	Detach();
+	m_Device = Device;
+	//m_Channel = NULL;
+	Attach();
 }
 
 bool cStreamdevFilterStreamer::SetFilter(u_short Pid, u_char Tid, u_char Mask, bool On) 

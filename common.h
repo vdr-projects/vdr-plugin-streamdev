@@ -1,5 +1,5 @@
 /*
- *  $Id: common.h,v 1.15 2009/09/18 10:41:41 schmirl Exp $
+ *  $Id: common.h,v 1.16 2010/07/19 13:49:24 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_COMMON_H
@@ -37,7 +37,7 @@ enum eStreamType {
 	stPES,
 	stPS,
 	stES,
-	stExtern,
+	stEXT,
 	stTSPIDS,
 	st_Count
 };

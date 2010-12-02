@@ -31,6 +31,11 @@ private:
 	bool                    m_FiltersSupport;
 	RecPlayer              *m_RecPlayer;
 
+	// Priority is only known in PROV command
+	// Store in here for later use in TUNE call
+	const cChannel         *m_TuneChannel;
+	int                     m_TunePriority;
+
 	// Members adopted for SVDRP
 	cLSTEHandler *m_LSTEHandler;
 	cLSTCHandler *m_LSTCHandler;
@@ -59,6 +64,7 @@ public:
 	bool CmdREAD(char *Opts);
 	bool CmdTUNE(char *Opts);
 	bool CmdPLAY(char *Opts);
+	bool CmdPRIO(char *Opts);
 	bool CmdADDP(char *Opts);
 	bool CmdDELP(char *Opts);
 	bool CmdADDF(char *Opts);

@@ -18,7 +18,6 @@ class cStreamdevLiveReceiver;
 class cStreamdevLiveStreamer: public cStreamdevStreamer {
 private:
 	int                     m_Priority;
-	std::string		m_Parameter;
 	int                     m_Pids[MAXRECEIVEPIDS + 1];
 	int                     m_NumPids;
 	eStreamType             m_StreamType;
@@ -32,13 +31,14 @@ private:
 	bool HasPid(int Pid);
 
 public:
-	cStreamdevLiveStreamer(int Priority, std::string Parameter = "");
+	cStreamdevLiveStreamer(int Priority, const cServerConnection *Connection);
 	virtual ~cStreamdevLiveStreamer();
 
 	void SetDevice(cDevice *Device) { m_Device = Device; }
 	bool SetPid(int Pid, bool On);
 	bool SetPids(int Pid, const int *Pids1 = NULL, const int *Pids2 = NULL, const int *Pids3 = NULL);
-	bool SetChannel(const cChannel *Channel, eStreamType StreamType, int Apid = 0);
+	bool SetChannel(const cChannel *Channel, eStreamType StreamType, const int* Apid = NULL, const int* Dpid = NULL);
+	void SetPriority(int Priority);
 	
 	virtual int Put(const uchar *Data, int Count);
 	virtual uchar *Get(int &Count);

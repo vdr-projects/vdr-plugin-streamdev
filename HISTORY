@@ -1,6 +1,40 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- VTP no longer uses a static priority value for its server-side receivers.
+  The server stores channel and priority requested with the PROV command and
+  re-uses these values in a subsequent TUNE for the same channel. The new
+  PRIO command is used to update the receiver's priority if necessary.
+- added parameter HEIGHT to externremux.sh
+- fixed syslog messages reporting local instead of remote IP and port
+- fixed regression of the GetDevice(...) change. Filter streaming to clients
+  with a recent VDR version no longer worked.
+- log an error if externremux.sh is missing or not executable
+- since VDR 1.5.0 cDevice::GetDevice(...) is no longer a query only method.
+  It detaches all receivers of the device it returns. So it is no longer
+  suitable for testing the availability of a device. Added a copy of VDR's
+  cDevice::GetDevice(...) without the detach receivers part as a workaround
+  until a better solution is available
+- added dsyslog messages to help troubleshouting channel switch issues
+- VTP command SUSP didn't attach the player to the primary device
+- fixed incompatibilities with older make versions
+- replacing a connections receiver is now an atomic operation. Solves
+  stuttering audio/video due to lost TS packets when adding/removing PIDs
+- disabled attribute warn_unused_result in libdvbmpeg
+- slightly increased thread priorities of cStreamdevWriter/Streamer
+  (suggested by Rolf Ahrenberg)
+- fixed missing support for invisible channel groups (groups without name)
+  in HTTP menu (reported by Timothy D. Lenz)
+- don't quote actual program call in externremux.sh, so you can run the
+  program through e.g. nice or taskset just by extending the variable
+  which holds the program name
+- in externremux.sh each mencoder audio and video codec has a dedicated
+  variable for a default option string now. Still you can override each
+  default option with an URL parameter
+- externremux.sh mencoder now uses scale parameter with negative height
+  instead of -xy for scaling (suggested by vel_tins@vdrportal)
+- added FPS (frames per second) parameter to externremux.sh (suggested by
+  vel_tins@vdrportal)
 - don't use std::map.at(). It's not available in older libstdc++ version
   (reported by Matthias Prill)
 - fixed extremux x264 using value of ABR for VBR (thanks to vel_tins@vdrportal)
