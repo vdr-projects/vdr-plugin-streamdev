@@ -1,5 +1,5 @@
 /*
- *  $Id: socket.c,v 1.9 2008/03/13 16:01:17 schmirl Exp $
+ *  $Id: socket.c,v 1.12 2008/04/08 14:18:16 schmirl Exp $
  */
  
 #include <tools/select.h>
@@ -13,9 +13,7 @@
 
 #include "client/socket.h"
 #include "client/setup.h"
-#include "client/remote.h"
 #include "common.h"
-#include "i18n.h"
 
 cClientSocket ClientSocket;
 
@@ -141,10 +139,8 @@ bool cClientSocket::CheckConnection(void) {
 	}
 
 	const char *Filters = "";
-#if VDRVERSNUM >= 10300
 	if(Command("CAPS FILTERS", 220))
 		Filters = ",FILTERS";
-#endif
 
 	isyslog("Streamdev: Connected to server %s:%d using capabilities TSPIDS%s",
 	        RemoteIp().c_str(), RemotePort(), Filters);
@@ -270,7 +266,6 @@ bool cClientSocket::SetPid(int Pid, bool On) {
 	return true;
 }
 
-#if VDRVERSNUM >= 10300
 bool cClientSocket::SetFilter(ushort Pid, uchar Tid, uchar Mask, bool On) {
 	if (!CheckConnection()) return false;
 
@@ -286,7 +281,6 @@ bool cClientSocket::SetFilter(ushort Pid, uchar Tid, uchar Mask, bool On) {
 	}
 	return true;
 }
-#endif
 
 bool cClientSocket::CloseDvr(void) {
 	if (!CheckConnection()) return false;
@@ -342,11 +336,7 @@ bool cClientSocket::SynchronizeEPG(void) {
 
 	rewind(epgfd);
 	if (cSchedules::Read(epgfd))
-#if VDRVERSNUM < 10300
-		cSIProcessor::TriggerDump();
-#else
 		cSchedules::Cleanup(true);
-#endif
 	else {
 		esyslog("ERROR: Streamdev: Parsing EPG data failed");
 		fclose(epgfd);
@@ -370,128 +360,6 @@ bool cClientSocket::Quit(void) {
 	return res;
 }
 	
-bool cClientSocket::LoadRecordings(cRemoteRecordings &Recordings) {
-	bool res;
-
-	if (!CheckConnection()) return false;
-	
-	CMD_LOCK;
-
-	if (!Command("LSTR"))
-		return false;
-
-	std::string buffer;
-	while ((res = Expect(250, &buffer))) {
-		cRemoteRecording *rec = new cRemoteRecording(buffer.c_str() + 4);
-		Dprintf("recording valid: %d\n", rec->IsValid());
-		if (rec->IsValid())
-			Recordings.Add(rec);
-		else
-			delete rec;
-		if (buffer[3] == ' ') break;
-	}
-
-	if (!res && buffer.substr(0, 3) != "550") {
-		if (errno == 0)
-			esyslog("ERROR: Streamdev: Couldn't fetch recordings from %s:%d",
-					RemoteIp().c_str(), RemotePort());
-		return false;
-	}
-
-	for (cRemoteRecording *r = Recordings.First(); r; r = Recordings.Next(r)) {
-		std::string command = (std::string)"LSTR " + (const char*)itoa(r->Index());
-		if (!Command(command))
-			return false;
-			
-		if (Expect(250, &buffer))
-			r->ParseInfo(buffer.c_str() + 4);
-		else if (buffer.substr(0, 3) != "550") {
-			if (errno == 0)
-				esyslog("ERROR: Streamdev: Couldn't fetch details for recording from %s:%d",
-				        RemoteIp().c_str(), RemotePort());
-			return false;
-		}
-		Dprintf("recording complete: %d\n", r->Index());
-	}
-	return res;
-}
-
-bool cClientSocket::StartReplay(const char *Filename) {
-	if (!CheckConnection()) return false;
-	
-	CMD_LOCK;
-	
-	std::string command = (std::string)"PLAY " + Filename;
-	if (!Command(command, 220)) {
-		if (errno == 0)
-			esyslog("ERROR: Streamdev: Couldn't replay \"%s\" from %s:%d",
-					Filename, RemoteIp().c_str(), RemotePort());
-		return false;
-	}
-	return true;
-}
-
-bool cClientSocket::AbortReplay(void) {
-	if (!CheckConnection()) return false;
-
-	CMD_LOCK;
-
-	if (m_DataSockets[siReplay] != NULL) {
-		std::string command = (std::string)"ABRT " + (const char*)itoa(siReplay);
-		if (!Command(command, 220)) {
-			if (errno == 0)
-				esyslog("ERROR: Streamdev: Couldn't cleanly close data connection");
-			return false;
-		}
-		
-		DELETENULL(m_DataSockets[siReplay]);
-	}
-	return true;
-}
-
-bool cClientSocket::DeleteRecording(cRemoteRecording *Recording) {
-	bool res;
-	cRemoteRecording *rec = NULL;
-
-	if (!CheckConnection())
-		return false;
-
-	CMD_LOCK;
-
-	if (!Command("LSTR"))
-		return false;
-
-	std::string buffer;
-	while ((res = Expect(250, &buffer))) {
-		if (rec == NULL) {
-			rec = new cRemoteRecording(buffer.c_str() + 4);
-			if (!rec->IsValid() || rec->Index() != Recording->Index())
-				DELETENULL(rec);
-		}
-		if (buffer[3] == ' ') break;
-	}
-
-	if (!res && buffer.substr(0, 3) != "550") {
-		if (errno == 0)
-			esyslog("ERROR: Streamdev: Couldn't fetch recordings from %s:%d",
-					RemoteIp().c_str(), RemotePort());
-		if (rec != NULL) delete rec;
-		return false;
-	}
-
-	if (rec == NULL || *rec != *Recording) {
-		ERROR(tr("Recordings not in sync! Try again..."));
-		return false;
-	}
-
-	std::string command = (std::string)"DELR " + (const char*)itoa(Recording->Index());
-	if (!Command(command, 250)) {
-		ERROR(tr("Couldn't delete recording! Try again..."));
-		return false;
-	}
-	return true;
-}
-
 bool cClientSocket::SuspendServer(void) {
 	if (!CheckConnection()) return false;
 
@@ -500,111 +368,6 @@ bool cClientSocket::SuspendServer(void) {
 	if (!Command("SUSP", 220)) {
 		if (errno == 0)
 			esyslog("ERROR: Streamdev: Couldn't suspend server");
-		return false;
-	}
-	return true;
-}
-
-bool cClientSocket::LoadTimers(cRemoteTimers &Timers) {
-	if (!CheckConnection()) return false;
-	
-	CMD_LOCK;
-
-	if (!Command("LSTT"))
-		return false;
-
-	bool res;
-	std::string buffer;
-	while ((res = Expect(250, &buffer))) {
-		cRemoteTimer *timer = new cRemoteTimer(buffer.c_str() + 4);
-		Dprintf("timer valid: %d\n", timer->IsValid());
-		if (timer->IsValid())
-			Timers.Add(timer);
-		if (buffer[3] == ' ') break;
-	}
-
-	if (!res && buffer.substr(0, 3) != "550") {
-		if (errno == 0)
-			esyslog("ERROR: Streamdev: Couldn't fetch recordings from %s:%d",
-					RemoteIp().c_str(), RemotePort());
-		return false;
-	}
-	return res;
-}
-
-bool cClientSocket::SaveTimer(cRemoteTimer *Old, cRemoteTimer &New) {
-	if (!CheckConnection()) return false;
-	
-	CMD_LOCK;
-
-	if (New.Index() == -1) { // New timer
-		std::string command = (std::string)"NEWT " + (const char*)New.ToText();
-		if (!Command(command, 250)) {
-			ERROR(tr("Couldn't save timer! Try again..."));
-			return false;
-		}
-	} else { // Modified timer
-		std::string command = (std::string)"LSTT " + (const char*)itoa(New.Index());
-		if (!Command(command))
-			return false;
-		
-		std::string buffer;
-		if (!Expect(250, &buffer)) {
-			if (errno == 0)
-				ERROR(tr("Timers not in sync! Try again..."));
-			else
-				ERROR(tr("Server error! Try again..."));
-			return false;
-		}
-
-		cRemoteTimer oldstate(buffer.c_str() + 4);
-		if (oldstate != *Old) {
-			/*Dprintf("old timer: %d,%d,%d,%d,%d,%d,%s,%d,%s,%d\n", oldstate.m_Index,
-					oldstate.m_Active,oldstate.m_Day,oldstate.m_Start,oldstate.m_StartTime,oldstate.m_Priority,oldstate.m_File,oldstate.m_FirstDay,(const char*)oldstate.m_Summary,oldstate.m_Channel->Number());
-			Dprintf("new timer: %d,%d,%d,%d,%d,%d,%s,%d,%s,%d\n", Old->m_Index,
-					Old->m_Active,Old->m_Day,Old->m_Start,Old->m_StartTime,Old->m_Priority,Old->m_File,Old->m_FirstDay,(const char*)Old->m_Summary,Old->m_Channel->Number());*/
-			ERROR(tr("Timers not in sync! Try again..."));
-			return false;
-		}
-
-
-		command = (std::string)"MODT " + (const char*)itoa(New.Index()) + " " 
-		        + (const char*)New.ToText();
-		if (!Command(command, 250)) {
-			ERROR(tr("Couldn't save timer! Try again..."));
-			return false;
-		}
-	}
-	return true;
-}
-
-bool cClientSocket::DeleteTimer(cRemoteTimer *Timer) {
-	if (!CheckConnection()) return false;
-
-	CMD_LOCK;
-
-	std::string command = (std::string)"LSTT " + (const char*)itoa(Timer->Index());
-	if (!Command(command))
-		return false;
-	
-	std::string buffer;
-	if (!Expect(250, &buffer)) {
-		if (errno == 0)
-			ERROR(tr("Timers not in sync! Try again..."));
-		else
-			ERROR(tr("Server error! Try again..."));
-		return false;
-	}
-
-	cRemoteTimer oldstate(buffer.c_str() + 4);
-	if (oldstate != *Timer) {
-		ERROR(tr("Timers not in sync! Try again..."));
-		return false;
-	}
-
-	command = (std::string)"DELT " + (const char*)itoa(Timer->Index());
-	if (!Command(command, 250)) {
-		ERROR(tr("Couldn't delete timer! Try again..."));
 		return false;
 	}
 	return true;

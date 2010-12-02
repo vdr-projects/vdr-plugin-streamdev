@@ -1,13 +1,11 @@
 /*
- *  $Id: livefilter.h,v 1.4 2007/04/24 11:29:29 schmirl Exp $
+ *  $Id: livefilter.h,v 1.5 2008/04/07 14:27:31 schmirl Exp $
  */
 
 #ifndef VDR_STREAMEV_LIVEFILTER_H
 #define VDR_STREAMEV_LIVEFILTER_H
 
 #include <vdr/config.h>
-
-#	if VDRVERSNUM >= 10300
 
 #include <vdr/filter.h>
 
@@ -31,5 +29,4 @@ public:
 	}
 };
 
-#	endif // VDRVERSNUM >= 10300
 #endif // VDR_STREAMEV_LIVEFILTER_H

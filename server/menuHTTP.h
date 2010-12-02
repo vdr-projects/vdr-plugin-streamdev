@@ -126,9 +126,7 @@ class cM3uChannelList: public cChannelList
 		char *base;
 		enum eM3uState { msFirst, msContinue, msLast };
 		eM3uState m3uState;
-#if defined(APIVERSNUM) && APIVERSNUM >= 10503
 		cCharSetConv m_IConv;
-#endif
 	public:
 		virtual std::string HttpHeader() { return cChannelList::HttpHeader() + "Content-type: audio/x-mpegurl\r\n"; };
 		virtual bool HasNext();

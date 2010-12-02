@@ -1,7 +1,7 @@
 #
 # Makefile for a Video Disk Recorder plugin
 #
-# $Id: Makefile,v 1.12 2008/03/31 10:34:26 schmirl Exp $
+# $Id: Makefile,v 1.17 2009/02/13 10:39:20 schmirl Exp $
 
 # The official name of this plugin.
 # This name will be used in the '-P...' option of VDR to load the plugin.
@@ -16,11 +16,10 @@ VERSION = $(shell grep 'const char \*VERSION *=' common.c | awk '{ print $$5 }' 
 ### The C++ compiler and options:
 
 CXX      ?= g++
-CXXFLAGS ?= -fPIC -Wall -Woverloaded-virtual
+CXXFLAGS ?= -fPIC -g -O2 -Wall -Woverloaded-virtual -Wno-parentheses
 
 ### The directory environment:
 
-DVBDIR = ../../../../DVB
 VDRDIR = ../../..
 LIBDIR = ../../lib
 TMPDIR = /tmp
@@ -40,55 +39,39 @@ PACKAGE = vdr-$(ARCHIVE)
 
 ### Includes and Defines (add further entries here):
 
-INCLUDES += -I$(VDRDIR)/include -I$(DVBDIR)/include -I.
+INCLUDES += -I$(VDRDIR)/include -I.
 
-DEFINES += -D_GNU_SOURCE
+DEFINES += -D_GNU_SOURCE -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
 
 ### The object files (add further files here):
 
-COMMONOBJS = common.o i18n.o \
+COMMONOBJS = common.o \
 	\
 	tools/source.o tools/select.o tools/socket.o tools/tools.o
 
 CLIENTOBJS = $(PLUGIN)-client.o \
 	\
 	client/socket.o client/device.o client/setup.o \
-	client/remote.o client/assembler.o client/filter.o
+	client/filter.o
 
 
 SERVEROBJS = $(PLUGIN)-server.o \
 	\
-	server/server.o server/connectionVTP.o server/connectionHTTP.o \
-	server/componentHTTP.o server/componentVTP.o server/connection.o \
-	server/component.o server/suspend.o server/setup.o server/streamer.o \
-	server/livestreamer.o server/livefilter.o server/menuHTTP.o \
-	\
+	server/server.o server/component.o server/connection.o \
+	server/componentVTP.o server/componentHTTP.o server/componentIGMP.o \
+	server/connectionVTP.o server/connectionHTTP.o server/connectionIGMP.o \
+	server/streamer.o server/livestreamer.o server/livefilter.o \
+	server/suspend.o server/setup.o server/menuHTTP.o \
 	remux/tsremux.o remux/ts2ps.o remux/ts2es.o remux/extern.o
 	
 ifdef DEBUG
 	DEFINES += -DDEBUG
-	CXXFLAGS += -g
-else
-	CXXFLAGS += -O2
-endif
-
-ifeq ($(shell test -f $(VDRDIR)/fontsym.h ; echo $$?),0)
-  DEFINES += -DHAVE_BEAUTYPATCH
-endif
-
-ifeq ($(shell test -f $(VDRDIR)/fontsym.c ; echo $$?),0)
-  DEFINES += -DHAVE_BEAUTYPATCH
-endif
-
-# HAVE_AUTOPID only applies if VDRVERSNUM < 10300
-ifeq ($(shell test -f $(VDRDIR)/sections.c ; echo $$?),0)
-  DEFINES += -DHAVE_AUTOPID
 endif
 
 ### The main target:
 
-.PHONY: all dist clean
-all: libvdr-$(PLUGIN)-client.so libvdr-$(PLUGIN)-server.so
+.PHONY: all i18n dist clean
+all: libvdr-$(PLUGIN)-client.so libvdr-$(PLUGIN)-server.so i18n
 
 ### Implicit rules:
 
@@ -97,7 +80,7 @@ all: libvdr-$(PLUGIN)-client.so libvdr-$(PLUGIN)-server.so
 
 # Dependencies:
 
-MAKEDEP = g++ -MM -MG
+MAKEDEP = $(CXX) -MM -MG
 DEPFILE = .dependencies
 ifdef GCC3
 $(DEPFILE): Makefile
@@ -113,11 +96,34 @@ endif
 
 -include $(DEPFILE)
 
+### Internationalization (I18N):
+
+PODIR     = po
+LOCALEDIR = $(VDRDIR)/locale
+I18Npo    = $(wildcard $(PODIR)/*.po)
+I18Nmsgs  = $(addprefix $(LOCALEDIR)/, $(addsuffix /LC_MESSAGES/vdr-$(PLUGIN).mo, $(notdir $(foreach file, $(I18Npo), $(basename $(file))))))
+I18Npot   = $(PODIR)/$(PLUGIN).pot
+
+%.mo: %.po
+	msgfmt -c -o $@ $<
+
+$(I18Npot): $(CLIENTOBJS:%.o=%.c) $(SERVEROBJS:%.o=%.c) $(COMMONOBJS:%.o=%.c)
+	xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --msgid-bugs-address='<http://www.vdr-developer.org/mantisbt/>' -o $@ $^
+
+%.po: $(I18Npot)
+	msgmerge -U --no-wrap --no-location --backup=none -q $@ $<
+	@touch $@
+
+$(I18Nmsgs): $(LOCALEDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
+	@mkdir -p $(dir $@)
+	cp $< $@
+
+i18n: $(I18Nmsgs)
+
 ### Targets:
 
-libdvbmpeg/libdvbmpegtools.a: libdvbmpeg/*.c libdvbmpeg/*.cc libdvbmpeg/*.h libdvbmpeg/*.hh
+libdvbmpeg/libdvbmpegtools.a: libdvbmpeg/*.c libdvbmpeg/*.h
 	$(MAKE) -C ./libdvbmpeg libdvbmpegtools.a
-
 
 libvdr-$(PLUGIN)-client.so: $(CLIENTOBJS) $(COMMONOBJS) libdvbmpeg/libdvbmpegtools.a
 libvdr-$(PLUGIN)-server.so: $(SERVEROBJS) $(COMMONOBJS) libdvbmpeg/libdvbmpegtools.a
@@ -135,5 +141,5 @@ dist: clean
 	@echo Distribution package created as $(PACKAGE).tgz
 
 clean:
-	@-rm -f $(COMMONOBJS) $(CLIENTOBJS) $(SERVEROBJS) $(DEPFILE) *.so *.tgz core* *~
+	@-rm -f $(COMMONOBJS) $(CLIENTOBJS) $(SERVEROBJS) $(DEPFILE) $(PODIR)/*.mo $(PODIR)/*.pot *.so *.tgz core* *~
 	$(MAKE) -C ./libdvbmpeg clean

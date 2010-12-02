@@ -1,5 +1,5 @@
 /*
- *  $Id: common.h,v 1.9 2008/03/12 09:36:27 schmirl Exp $
+ *  $Id: common.h,v 1.12 2009/01/16 11:35:43 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_COMMON_H
@@ -23,27 +23,9 @@
 #	define Dprintf(x...)
 #endif
 
-#if VDRVERSNUM < 10300
-#	define TRANSPONDER(c1, c2) (ISTRANSPONDER(c1->Frequency(), c2->Frequency()))
-#else
 #	define TRANSPONDER(c1, c2) (c1->Transponder() == c2->Transponder())
-#endif
 
-#if VDRVERSNUM < 10307
-#	define INFO(s) Interface->Info(s)
-#	define STATUS(s) Interface->Status(s)
-#	define ERROR(s) Interface->Status(s)
-#	define FLUSH() Interface->Flush()
-#else
-#	define INFO(s) Skins.Message(mtInfo, s)
-#	define STATUS(s) Skins.Message(mtInfo, s)
-#	define ERROR(s) Skins.Message(mtStatus, s)
-#	define FLUSH() Skins.Flush()
-#endif
-
-#if VDRVERSNUM >= 10336
 #	define MAXPARSEBUFFER KILOBYTE(16)
-#endif
 
 /* Check if a channel is a radio station. */
 #define ISRADIO(x) ((x)->Vpid()==0||(x)->Vpid()==1||(x)->Vpid()==0x1fff)
@@ -69,7 +51,9 @@ const cChannel *ChannelFromString(const char *String, int *Apid = NULL);
 
 enum eStreamType {
 	stTS,
+#if APIVERSNUM < 10703
 	stPES,
+#endif
 	stPS,
 	stES,
 	stExtern,

@@ -5,6 +5,10 @@
 #include <vdr/remux.h>
 #include <vdr/ringbuffer.h>
 
+#ifndef MAXTRACKS
+#define MAXTRACKS 64
+#endif
+
 class cTS2PS;
 
 class cTS2PSRemux: public cTSRemux {

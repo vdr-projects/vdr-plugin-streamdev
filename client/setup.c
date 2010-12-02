@@ -1,22 +1,22 @@
 /*
- *  $Id: setup.c,v 1.2 2005/02/08 15:34:38 lordjaxom Exp $
+ *  $Id: setup.c,v 1.8 2009/02/03 10:26:21 schmirl Exp $
  */
  
 #include <vdr/menuitems.h>
 
 #include "client/setup.h"
 #include "client/device.h"
-#include "i18n.h"
 
 cStreamdevClientSetup StreamdevClientSetup;
 
 cStreamdevClientSetup::cStreamdevClientSetup(void) {
 	StartClient   = false;
 	RemotePort    = 2004;
-#if VDRVERSNUM >= 10300
 	StreamFilters = false;
-#endif
 	SyncEPG       = false;
+	HideMenuEntry = false;
+	MinPriority   = -1;
+	MaxPriority   = MAXPRIORITY;
 	strcpy(RemoteIp, "");
 }
 
@@ -29,10 +29,11 @@ bool cStreamdevClientSetup::SetupParse(const char *Name, const char *Value) {
 			strcpy(RemoteIp, Value);
 	}
 	else if (strcmp(Name, "RemotePort") == 0)    RemotePort = atoi(Value);
-#if VDRVERSNUM >= 10300
 	else if (strcmp(Name, "StreamFilters") == 0) StreamFilters = atoi(Value);
-#endif
 	else if (strcmp(Name, "SyncEPG") == 0)       SyncEPG = atoi(Value);
+	else if (strcmp(Name, "HideMenuEntry") == 0) HideMenuEntry = atoi(Value);
+	else if (strcmp(Name, "MinPriority") == 0)   MinPriority = atoi(Value);
+	else if (strcmp(Name, "MaxPriority") == 0)   MaxPriority = atoi(Value);
 	else return false;
 	return true;
 }
@@ -40,13 +41,14 @@ bool cStreamdevClientSetup::SetupParse(const char *Name, const char *Value) {
 cStreamdevClientMenuSetupPage::cStreamdevClientMenuSetupPage(void) {
 	m_NewSetup = StreamdevClientSetup;
 
+	AddBoolEdit (tr("Hide Mainmenu Entry"),m_NewSetup.HideMenuEntry);
 	AddBoolEdit (tr("Start Client"),       m_NewSetup.StartClient);
 	AddIpEdit   (tr("Remote IP"),          m_NewSetup.RemoteIp);
 	AddShortEdit(tr("Remote Port"),        m_NewSetup.RemotePort);
-#if VDRVERSNUM >= 10300
 	AddBoolEdit (tr("Filter Streaming"),   m_NewSetup.StreamFilters);
-#endif
 	AddBoolEdit (tr("Synchronize EPG"),    m_NewSetup.SyncEPG);
+	AddRangeEdit (tr("Minimum Priority"),  m_NewSetup.MinPriority, -1, MAXPRIORITY);
+	AddRangeEdit (tr("Maximum Priority"),  m_NewSetup.MaxPriority, -1, MAXPRIORITY);
 	SetCurrent(Get(0));
 }
 
@@ -57,8 +59,6 @@ void cStreamdevClientMenuSetupPage::Store(void) {
 	if (m_NewSetup.StartClient != StreamdevClientSetup.StartClient) {
 		if (m_NewSetup.StartClient)
 			cStreamdevDevice::Init();
-		else
-			INFO(tr("Please restart VDR to activate changes"));
 	}
 
 	SetupStore("StartClient", m_NewSetup.StartClient);
@@ -67,10 +67,11 @@ void cStreamdevClientMenuSetupPage::Store(void) {
 	else
 		SetupStore("RemoteIp",    m_NewSetup.RemoteIp);
 	SetupStore("RemotePort",    m_NewSetup.RemotePort);
-#if VDRVERSNUM >= 10300
 	SetupStore("StreamFilters", m_NewSetup.StreamFilters);
-#endif
 	SetupStore("SyncEPG",       m_NewSetup.SyncEPG);
+	SetupStore("HideMenuEntry", m_NewSetup.HideMenuEntry);
+	SetupStore("MinPriority",   m_NewSetup.MinPriority);
+	SetupStore("MaxPriority",   m_NewSetup.MaxPriority);
 
 	StreamdevClientSetup = m_NewSetup;
 

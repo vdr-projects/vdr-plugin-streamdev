@@ -1,5 +1,5 @@
 /*
- *  $Id: filter.c,v 1.11 2007/04/24 11:23:16 schmirl Exp $
+ *  $Id: filter.c,v 1.14 2009/02/13 13:02:39 schmirl Exp $
  */
 
 #include "client/filter.h"
@@ -9,8 +9,7 @@
 
 #include <vdr/device.h>
 
-#if VDRVERSNUM >= 10300
-
+#define PID_MASK_HI 0x1F
 // --- cStreamdevFilter ------------------------------------------------------
 
 class cStreamdevFilter: public cListObject {
@@ -228,6 +227,7 @@ void cStreamdevFilters::Action(void) {
 			u_short pid = (((u_short)block[1] & PID_MASK_HI) << 8) | block[2];
 			u_char tid = block[3];
 			bool Pusi = block[1] & 0x40;
+			// proprietary extension
 			int len = block[4];
 #if 0
 			if (block[1] == 0xff &&
@@ -290,5 +290,3 @@ void cStreamdevFilters::Action(void) {
 	DELETENULL(m_TSBuffer);
 	dsyslog("StreamdevFilters::Action() ended");
 }
-
-#endif // VDRVERSNUM >= 10300

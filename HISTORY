@@ -1,6 +1,59 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- added missing call to StopSectionHandler which could cause crashes when
+  shutting down VDR
+- added IGMP based multicast streaming
+- ignore trailing blank lines in HTTP requests
+- fixed parsing Min/MaxPriority from config (thanks to Joachim König-Baltes)
+- updated Finnish translation (thanks to Rolf Ahrenberg)
+- added Min/MaxPriority parameters. Can be used to keep client VDR from
+  using streamdev e.g. when recording
+- disabled PES for VDR 1.7.3+
+- added Network Media Tank browser support to HTML pages (thanks to Jori
+  Hamalainen)
+- minor fixes of PAT repacker
+- repack and send every PAT packet we receive
+- fixed null pointer in server.c when cConnection::Accept() failes
+- consider Pids from channels.conf when HTTP TS streaming. Section filtering
+  is an optional feature for VDR devices, so we must not rely on the PMT
+  alone (pointed out by wirbel@vdrportal)
+- improved externremux script termination (thanks to Rolf Ahrenberg)
+- use cThread::Running()/Active() instead of private members (thanks to
+  Rolf Ahrenberg)
+- fixed output format of some debug messages (thanks to Rolf Ahrenberg)
+- added HTTP authentication
+- compatibility for VDR 1.7.1 (thanks to Udo Richter)
+- added vdr-1.6.0-intcamdevices.patch (thanks to Anssi Hannula)
+- fixed problem when switching from one encrypted channel to an other
+  (reported by Tiroler@vdrportal, initial bugfix by pixelpeter@vdrportal,
+  another fix by owagner@vdrportal)
+- added preprocessor directive for ancient gcc
+- added Russian translation (thanks to Oleg Roitburd)
+- fixed assignment of externremux.sh's default location (reported by plautze)
+- added French translation (thanks to micky979)
+- added Italian translation (thanks to Diego Pierotto)
+- added gettext support (thanks to Rolf Ahrenberg)
+- added vdr-1.6.0-ignore_missing_cam patch
+- dropped obsolete respect_ca patch
+- removed legacy code for < VDR 1.5.9 (thanks to Rolf Ahrenberg)
+
+2008-04-07: Branched v0_4
+
+- changed location of streamdevhosts.conf to VDRCONFDIR/plugins/streamdev
+- changed externremux.sh's default location to VDRCONFDIR/plugins/streamdev
+- added sample externremux.sh from http://www.vdr-wiki.de/
+- stop providing channels after client has been disabled at runtime
+- added logging of the client device's card index
+- changed default suspend mode to "Always suspended"
+- added "Hide Mainmenu Entry" setup option on client
+- resurrected clients "Suspend Server" menu item as its mainmenu entry
+- dropped unused code for remote timers/recordings on client side
+- dropped unused files client/{assembler,menu,remote}.[hc]
+- dropped unused files in libdvbmpeg (reported by tobi)
+- dropped patches for pre VDR 1.4
+- removed legacy code for pre VDR 1.4 (thanks to Rolf Ahrenberg)
+
 2008-03-31: Version 0.3.4
 
 - added possibility to pass parameter to externremux.sh (thanks to Rolf

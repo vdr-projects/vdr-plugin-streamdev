@@ -1,6 +1,7 @@
 #include "remux/tsremux.h"
 
-#define SC_PICTURE 0x00  // "picture header"
+#define SC_PICTURE  0x00  // "picture header"
+#define PID_MASK_HI 0x1F
 
 void cTSRemux::SetBrokenLink(uchar *Data, int Length)
 {

@@ -1,13 +1,14 @@
 /*
- *  $Id: component.c,v 1.3 2005/05/09 20:22:29 lordjaxom Exp $
+ *  $Id: component.c,v 1.4 2009/02/13 10:39:22 schmirl Exp $
  */
  
 #include "server/component.h"
 #include "server/connection.h"
 
 cServerComponent::cServerComponent(const char *Protocol, const char *ListenIp,
-                                   uint ListenPort):
+                                   uint ListenPort, int Type, int IpProto):
 		m_Protocol(Protocol),
+		m_Listen(Type, IpProto),
 		m_ListenIp(ListenIp),
 		m_ListenPort(ListenPort)
 {

@@ -3,18 +3,22 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-server.c,v 1.6 2007/04/16 11:01:02 schmirl Exp $
+ * $Id: streamdev-server.c,v 1.11 2008/10/14 11:05:47 schmirl Exp $
  */
 
 #include <getopt.h>
+#include <vdr/tools.h>
+#include "remux/extern.h"
 #include "streamdev-server.h"
 #include "server/setup.h"
 #include "server/server.h"
 #include "server/suspend.h"
-#include "remux/extern.h"
-#include "i18n.h"
 
-const char *cPluginStreamdevServer::DESCRIPTION = "VDR Streaming Server";
+#if !defined(APIVERSNUM) || APIVERSNUM < 10509
+#error "VDR-1.5.9 API version or greater is required!"
+#endif
+
+const char *cPluginStreamdevServer::DESCRIPTION = trNOOP("VDR Streaming Server");
 
 cPluginStreamdevServer::cPluginStreamdevServer(void) 
 {
@@ -22,6 +26,8 @@ cPluginStreamdevServer::cPluginStreamdevServer(void)
 
 cPluginStreamdevServer::~cPluginStreamdevServer() 
 {
+	free(opt_auth);
+	free(opt_remux);
 }
 
 const char *cPluginStreamdevServer::Description(void) 
@@ -32,22 +38,39 @@ const char *cPluginStreamdevServer::Description(void)
 const char *cPluginStreamdevServer::CommandLineHelp(void)
 {
 	// return a string that describes all known command line options.
-	return "  -r <CMD>, --remux=<CMD>  Define an external command for remuxing.\n";
+	return
+		"  -a <LOGIN:PASSWORD>, --auth=<LOGIN:PASSWORD>  Credentials for HTTP authentication.\n"
+		"  -r <CMD>, --remux=<CMD>  Define an external command for remuxing.\n"
+		;
 }
 
 bool cPluginStreamdevServer::ProcessArgs(int argc, char *argv[])
 {
 	// implement command line argument processing here if applicable.
 	static const struct option long_options[] = {
+		{ "auth", required_argument, NULL, 'a' },
 		{ "remux", required_argument, NULL, 'r' },
 		{ NULL, 0, NULL, 0 }
 	};
 
 	int c;
-	while((c = getopt_long(argc, argv, "r:", long_options, NULL)) != -1) {
+	while((c = getopt_long(argc, argv, "a:r:", long_options, NULL)) != -1) {
 		switch (c) {
+			case 'a':
+				{
+					if (opt_auth)
+						free(opt_auth);
+					int l = strlen(optarg);
+					cBase64Encoder Base64((uchar*) optarg, l,  l * 4 / 3 + 3);
+					const char *s = Base64.NextLine();
+					if (s)
+						opt_auth = strdup(s);
+				}
+				break;
 			case 'r':
-				g_ExternRemux = optarg;
+				if (opt_remux)
+				    free(opt_remux);
+				opt_remux = strdup(optarg);
 				break;
 			default:
 				return false;
@@ -58,9 +81,7 @@ bool cPluginStreamdevServer::ProcessArgs(int argc, char *argv[])
 
 bool cPluginStreamdevServer::Start(void) 
 {
-	i18n_name = Name();
-	RegisterI18n(Phrases);
-
+	I18nRegister(PLUGIN_NAME_I18N);
 	if (!StreamdevHosts.Load(STREAMDEVHOSTSPATH, true, true)) {
 		esyslog("streamdev-server: error while loading %s", STREAMDEVHOSTSPATH);
 		fprintf(stderr, "streamdev-server: error while loading %s\n", STREAMDEVHOSTSPATH);
@@ -73,6 +94,8 @@ bool cPluginStreamdevServer::Start(void)
 		}
 		return false;
 	}
+	if (!opt_remux)
+		opt_remux = strdup(DEFAULT_EXTERNREMUX);
 
 	cStreamdevServer::Initialize();
 

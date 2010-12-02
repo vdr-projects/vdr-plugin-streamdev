@@ -1,5 +1,5 @@
 /*
- *  $Id: suspend.c,v 1.1.1.1 2004/12/30 22:44:21 lordjaxom Exp $
+ *  $Id: suspend.c,v 1.3 2008/10/22 11:59:32 schmirl Exp $
  */
  
 #include "server/suspend.h"
@@ -7,13 +7,12 @@
 #include "common.h"
 
 cSuspendLive::cSuspendLive(void)
-#if VDRVERSNUM >= 10300
 		: cThread("Streamdev: server suspend")
-#endif
 {
 }
 
 cSuspendLive::~cSuspendLive() {
+	Stop();
 	Detach();
 }
 
@@ -26,26 +25,15 @@ void cSuspendLive::Activate(bool On) {
 }
 
 void cSuspendLive::Stop(void) {
-	if (m_Active) {
-		m_Active = false;
+	if (Running())
 		Cancel(3);
-	}
 }
 
 void cSuspendLive::Action(void) {
-#if VDRVERSNUM < 10300
-	isyslog("Streamdev: Suspend Live thread started (pid = %d)", getpid());
-#endif
-
-	m_Active = true;
-	while (m_Active) {
+	while (Running()) {
 		DeviceStillPicture(suspend_mpg, sizeof(suspend_mpg));
-		usleep(100000);
+		cCondWait::SleepMs(100);
 	}
-
-#if VDRVERSNUM < 10300
-	isyslog("Streamdev: Suspend Live thread stopped");
-#endif
 }
 
 bool cSuspendCtl::m_Active = false;
@@ -61,7 +49,7 @@ cSuspendCtl::~cSuspendCtl() {
 }
 
 eOSState cSuspendCtl::ProcessKey(eKeys Key) {
-	if (!m_Suspend->IsActive() || Key == kBack) {
+	if (!m_Suspend->Active() || Key == kBack) {
 		DELETENULL(m_Suspend);
 		return osEnd;
 	}

@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.c,v 1.10 2007/05/07 12:25:11 schmirl Exp $
+ *  $Id: connection.c,v 1.12 2009/02/13 10:39:22 schmirl Exp $
  */
  
 #include "server/connection.h"
@@ -12,7 +12,8 @@
 #include <stdarg.h>
 #include <errno.h>
 
-cServerConnection::cServerConnection(const char *Protocol):
+cServerConnection::cServerConnection(const char *Protocol, int Type):
+		cTBSocket(Type),
 		m_Protocol(Protocol),
 		m_DeferClose(false),
 		m_Pending(false),
@@ -139,11 +140,7 @@ cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority)
 	Dprintf(" * GetDevice(const cChannel*, int)\n");
 	Dprintf(" * -------------------------------\n");
 
-#if VDRVERSNUM < 10500
-	device = cDevice::GetDevice(Channel, Priority);
-#else
 	device = cDevice::GetDevice(Channel, Priority, false);
-#endif
 
 	Dprintf(" * Found following device: %p (%d)\n", device, 
 			device ? device->CardIndex() + 1 : 0);
@@ -161,11 +158,7 @@ cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority)
 		const cChannel *current = Channels.GetByNumber(cDevice::CurrentChannel());
 		isyslog("streamdev-server: Detaching current receiver");
 		Detach();
-#if VDRVERSNUM < 10500
-		device = cDevice::GetDevice(Channel, Priority);
-#else
 		device = cDevice::GetDevice(Channel, Priority, false);
-#endif
 		Attach();
 		Dprintf(" * Found following device: %p (%d)\n", device, 
 				device ? device->CardIndex() + 1 : 0);

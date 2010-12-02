@@ -1,5 +1,5 @@
 /*
- *  $Id: device.h,v 1.5 2007/04/24 10:43:40 schmirl Exp $
+ *  $Id: device.h,v 1.8 2008/10/02 07:14:47 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_DEVICE_H
@@ -8,7 +8,6 @@
 #include <vdr/device.h>
 
 #include "client/socket.h"
-#include "client/assembler.h"
 #include "client/filter.h"
 
 class cTBString;
@@ -21,10 +20,7 @@ class cStreamdevDevice: public cDevice {
 private:
 	const cChannel      *m_Channel;
 	cTSBuffer           *m_TSBuffer;
-	cStreamdevAssembler *m_Assembler;
-#if VDRVERSNUM >= 10307
 	cStreamdevFilters   *m_Filters;
-#endif
 	int                  m_Pids;
 	bool                 m_DvrClosed;
 
@@ -47,14 +43,13 @@ protected:
 	virtual void CloseDvr(void);
 	virtual bool GetTSPacket(uchar *&Data);
 
-#if VDRVERSNUM >= 10300
 	virtual int OpenFilter(u_short Pid, u_char Tid, u_char Mask);
-#endif
 
 public:
 	cStreamdevDevice(void);
 	virtual ~cStreamdevDevice();
 
+	virtual bool HasInternalCam(void) { return true; }
 	virtual bool ProvidesSource(int Source) const;
 	virtual bool ProvidesTransponder(const cChannel *Channel) const;
 	virtual bool ProvidesChannel(const cChannel *Channel, int Priority = -1,

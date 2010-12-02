@@ -1,5 +1,5 @@
 /*
- *  $Id: suspend.h,v 1.1.1.1 2004/12/30 22:44:26 lordjaxom Exp $
+ *  $Id: suspend.h,v 1.2 2008/10/22 11:59:32 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SUSPEND_H
@@ -7,10 +7,7 @@
 
 #include <vdr/player.h>
 
-class cSuspendLive: public cPlayer, cThread {
-private:
-	bool m_Active;
-
+class cSuspendLive: public cPlayer, public cThread {
 protected:
 	virtual void Activate(bool On);
 	virtual void Action(void);
@@ -20,8 +17,6 @@ protected:
 public:
 	cSuspendLive(void);
 	virtual ~cSuspendLive();
-
-	bool IsActive(void) const { return m_Active; }
 };
 
 class cSuspendCtl: public cControl {

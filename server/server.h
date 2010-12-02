@@ -1,5 +1,5 @@
 /*
- *  $Id: server.h,v 1.2 2005/05/09 20:22:29 lordjaxom Exp $
+ *  $Id: server.h,v 1.6 2008/10/22 11:59:32 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVER_H
@@ -10,12 +10,14 @@
 #include "server/component.h"
 #include "server/connection.h"
 
-#define STREAMDEVHOSTSPATH (*AddDirectory(cPlugin::ConfigDirectory(), "streamdevhosts.conf"))
+#define DEFAULT_EXTERNREMUX (*AddDirectory(cPlugin::ConfigDirectory(PLUGIN_NAME_I18N), "externremux.sh"))
+#define STREAMDEVHOSTSPATH (*AddDirectory(cPlugin::ConfigDirectory(PLUGIN_NAME_I18N), "streamdevhosts.conf"))
+
+extern char *opt_auth;
+extern char *opt_remux;
 
 class cStreamdevServer: public cThread {
 private:
-	bool m_Active;
-
 	static cStreamdevServer         *m_Instance;
 	static cList<cServerComponent>   m_Servers;
 	static cList<cServerConnection>  m_Clients;

@@ -24,6 +24,12 @@ Rolf Ahrenberg
   for suggesting a fix of the Makefile's default target
   for a TS PAT repacker based on Petri Laine's VDR TS recording patch
   for making it possible to pass parameters to externremux.sh
+  for removing pre VDR 1.4 legacy code
+  for adding gettext support
+  for fixing output format of some debug messages
+  for replacing private members by cThread::Running()/Active()
+  for improving externremux script termination
+  for fixing PAT repacker version field
 
 Rantanen Teemu
   for providing vdr-incompletesections.diff
@@ -42,6 +48,7 @@ Udo Richter
   for fixing streamdev-server shutdown
   for speeding up cPluginStreamdevServer::Active()
   for adapting to VDR 1.5.0 API
+  for adapting to VDR 1.7.1
 
 greenman
   for reporting that the log could get flooded on connection failures.
@@ -70,3 +77,37 @@ Olli Lammi
 
 Joerg Pulz
   for his FreeBSD compatibility patch
+
+tobi
+  for pointing to unused files in the libdvbmpeg directory
+ 
+Diego Pierotto
+  for providing italian language texts
+ 
+micky979
+  for providing french language texts
+
+Tiroler
+  for reporting a problem when switching between encrypted channels
+
+Pixelpeter
+  for an initial fix to the "switching between ecncrypted channels" problem
+
+Anssi Hannula
+  for the vdr-1.6.0-ignore_missing_cam.diff patch
+
+wirbel
+  for pointing out that section filtering is optional for VDR devices
+
+Jori Hamalainen
+  for extensive testing while making stream compatible to Network Media Tank
+  for adding Network Media Tank browser support to HTML pages
+
+owagner
+  for pointing out a problem with the encrypted channel switching fix
+
+Joachim König-Baltes
+  for fixing Min/MaxPriority parsing
+
+Artem Makhutov
+  for suggesting and heavy testing IGMP based multicast streaming

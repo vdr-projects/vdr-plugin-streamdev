@@ -3,16 +3,18 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-client.c,v 1.2 2005/04/24 16:19:44 lordjaxom Exp $
+ * $Id: streamdev-client.c,v 1.6 2008/04/08 14:18:15 schmirl Exp $
  */
 
 #include "streamdev-client.h"
 #include "client/device.h"
 #include "client/setup.h"
-//#include "client/menu.h"
-#include "i18n.h"
 
-const char *cPluginStreamdevClient::DESCRIPTION = "VTP Streaming Client";
+#if !defined(APIVERSNUM) || APIVERSNUM < 10509
+#error "VDR-1.5.9 API version or greater is required!"
+#endif
+
+const char *cPluginStreamdevClient::DESCRIPTION = trNOOP("VTP Streaming Client");
 
 cPluginStreamdevClient::cPluginStreamdevClient(void) {
 }
@@ -25,12 +27,9 @@ const char *cPluginStreamdevClient::Description(void) {
 }
 
 bool cPluginStreamdevClient::Start(void) {
-	i18n_name = Name();
-	RegisterI18n(Phrases);
-
+	I18nRegister(PLUGIN_NAME_I18N);
 	cStreamdevDevice::Init();
-
-  return true;
+	return true;
 }
 
 void cPluginStreamdevClient::Housekeeping(void) {
@@ -39,13 +38,15 @@ void cPluginStreamdevClient::Housekeeping(void) {
 }
 
 const char *cPluginStreamdevClient::MainMenuEntry(void) {
-	return NULL;
-	//return StreamdevClientSetup.StartClient ? tr("Streaming Control") : NULL;
+	return StreamdevClientSetup.StartClient && !StreamdevClientSetup.HideMenuEntry ? tr("Suspend Server") : NULL;
 }
 
 cOsdObject *cPluginStreamdevClient::MainMenuAction(void) {
+	if (ClientSocket.SuspendServer())
+		Skins.Message(mtInfo, tr("Server is suspended"));
+	else
+		Skins.Message(mtError, tr("Couldn't suspend Server!"));
 	return NULL;
-	//return StreamdevClientSetup.StartClient ? new cStreamdevMenu : NULL;
 }
 
 cMenuSetupPage *cPluginStreamdevClient::SetupMenu(void) {

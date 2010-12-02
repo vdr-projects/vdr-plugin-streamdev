@@ -18,9 +18,10 @@ private:
 	struct sockaddr_in m_RemoteAddr;
 
 	int m_Type;
+	int m_Protocol;
 
 public:
-	cTBSocket(int Type = SOCK_STREAM);
+	cTBSocket(int Type = SOCK_STREAM, int Protocol = 0);
 	virtual ~cTBSocket();
 	
 	/* See cTBSource::SysRead() 
@@ -97,15 +98,22 @@ public:
 };
 
 inline ssize_t cTBSocket::SysRead(void *Buffer, size_t Length) const {
-	if (m_Type == SOCK_DGRAM) {
+	if (m_Type == SOCK_STREAM)
+		return ::recv(*this, Buffer, Length, 0);
+	else {
 		socklen_t len = sizeof(m_RemoteAddr);
 		return ::recvfrom(*this, Buffer, Length, 0, (sockaddr*)&m_RemoteAddr, &len);
-	} else
-		return ::recv(*this, Buffer, Length, 0);
+	}
 }
 
 inline ssize_t cTBSocket::SysWrite(const void *Buffer, size_t Length) const {
 	return ::send(*this, Buffer, Length, 0);
+	if (m_Type == SOCK_STREAM)
+		return ::send(*this, Buffer, Length, 0);
+	else {
+		socklen_t len = sizeof(m_RemoteAddr);
+		return ::sendto(*this, Buffer, Length, 0, (sockaddr*)&m_RemoteAddr, len);
+	}
 }
 
 #endif // TOOLBOX_SOCKET_H

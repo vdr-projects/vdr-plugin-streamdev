@@ -4,6 +4,10 @@
 #include "libdvbmpeg/transform.h"
 #include <vdr/remux.h>
 
+#ifndef NO_PICTURE
+#define NO_PICTURE 0
+#endif
+
 #define RESULTBUFFERSIZE KILOBYTE(256)
 
 class cTSRemux {

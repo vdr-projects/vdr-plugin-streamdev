@@ -1,11 +1,12 @@
 /*
- *  $Id: connectionHTTP.c,v 1.13 2008/03/28 15:11:40 schmirl Exp $
+ *  $Id: connectionHTTP.c,v 1.16 2009/02/13 07:02:19 schmirl Exp $
  */
 
 #include <ctype.h>
  
 #include "server/connectionHTTP.h"
 #include "server/menuHTTP.h"
+#include "server/server.h"
 #include "server/setup.h"
 
 cConnectionHTTP::cConnectionHTTP(void): 
@@ -26,6 +27,11 @@ cConnectionHTTP::~cConnectionHTTP()
 	delete m_LiveStreamer;
 }
 
+bool cConnectionHTTP::CanAuthenticate(void)
+{
+	return opt_auth != NULL;
+}
+
 bool cConnectionHTTP::Command(char *Cmd) 
 {
 	Dprintf("command %s\n", Cmd);
@@ -44,10 +50,22 @@ bool cConnectionHTTP::Command(char *Cmd)
 		if (strncasecmp(Cmd, "Host:", 5) == 0) {
 			Dprintf("Host-Header\n");
 			m_Host = (std::string) skipspace(Cmd + 5);
+			return true;
+		}
+		else if (strncasecmp(Cmd, "Authorization:", 14) == 0) {
+			Cmd = skipspace(Cmd + 14);
+			if (strncasecmp(Cmd, "Basic", 5) == 0) {
+				Dprintf("'Authorization Basic'-Header\n");
+				m_Authorization = (std::string) skipspace(Cmd + 5);
+				return true;
+			}
 		}
 		Dprintf("header\n");
 		return true;
 	default:
+		// skip additional blank lines
+		if (*Cmd == '\0')
+			return true;
 		break;
 	}
 	return false; // ??? shouldn't happen
@@ -56,6 +74,16 @@ bool cConnectionHTTP::Command(char *Cmd)
 bool cConnectionHTTP::ProcessRequest(void) 
 {
 	Dprintf("process\n");
+	if (!StreamdevHosts.Acceptable(RemoteIpAddr()))
+	{
+		if (!opt_auth || m_Authorization.empty() || m_Authorization.compare(opt_auth) != 0) {
+			isyslog("streamdev-server: HTTP authorization required");
+			DeferClose();
+			return Respond("HTTP/1.0 401 Authorization Required")
+				&& Respond("WWW-authenticate: basic Realm=\"Streamdev-Server\")")
+				&& Respond("");
+		}
+	}
 	if (m_Request.substr(0, 4) == "GET " && CmdGET(m_Request.substr(4))) {
 		switch (m_Job) {
 		case hjListing:
@@ -183,8 +211,10 @@ bool cConnectionHTTP::CmdGET(const std::string &Opts)
 	const char* pType = type.c_str();
 	if (strcasecmp(pType, "PS") == 0) {
 		m_StreamType = stPS;
+#if APIVERSNUM < 10703
 	} else if (strcasecmp(pType, "PES") == 0) {
 		m_StreamType = stPES;
+#endif
 	} else if (strcasecmp(pType, "TS") == 0) {
 		m_StreamType = stTS;
 	} else if (strcasecmp(pType, "ES") == 0) {
@@ -236,7 +266,9 @@ bool cConnectionHTTP::CmdGET(const std::string &Opts)
 				{
 					case stTS:	base += "TS/"; break;
 					case stPS:	base += "PS/"; break;
+#if APIVERSNUM < 10703
 					case stPES:	base += "PES/"; break;
+#endif
 					case stES:	base += "ES/"; break;
 					case stExtern:	base += "Extern/"; break;
 					default:	break;

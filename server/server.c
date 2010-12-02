@@ -1,10 +1,11 @@
 /*
- *  $Id: server.c,v 1.5 2007/04/02 10:32:34 schmirl Exp $
+ *  $Id: server.c,v 1.10 2009/02/13 10:39:22 schmirl Exp $
  */
 
 #include "server/server.h"
 #include "server/componentVTP.h"
 #include "server/componentHTTP.h"
+#include "server/componentIGMP.h"
 #include "server/setup.h"
 
 #include <vdr/tools.h>
@@ -13,14 +14,15 @@
 #include <errno.h>
 
 cSVDRPhosts StreamdevHosts;
+char *opt_auth = NULL;
+char *opt_remux = NULL;
 
 cStreamdevServer         *cStreamdevServer::m_Instance = NULL;
 cList<cServerComponent>   cStreamdevServer::m_Servers;
 cList<cServerConnection>  cStreamdevServer::m_Clients;
 
 cStreamdevServer::cStreamdevServer(void):
-		cThread("streamdev server"),
-		m_Active(false)
+		cThread("streamdev server")
 {
 	Start();
 }
@@ -35,6 +37,12 @@ void cStreamdevServer::Initialize(void)
 	if (m_Instance == NULL) {
 		if (StreamdevServerSetup.StartVTPServer)  Register(new cComponentVTP);
 		if (StreamdevServerSetup.StartHTTPServer) Register(new cComponentHTTP);
+		if (StreamdevServerSetup.StartIGMPServer) {
+			if (strcmp(StreamdevServerSetup.IGMPBindIP, "0.0.0.0") == 0)
+				esyslog("streamdev-server: Not starting IGMP. IGMP must be bound to a local IP");
+			else
+				Register(new cComponentIGMP);
+		}
 
 		m_Instance = new cStreamdevServer;
 	}
@@ -47,10 +55,8 @@ void cStreamdevServer::Destruct(void)
 
 void cStreamdevServer::Stop(void) 
 {
-	if (m_Active) {
-		m_Active = false;
+	if (Running())
 		Cancel(3);
-	}
 }
 
 void cStreamdevServer::Register(cServerComponent *Server) 
@@ -60,8 +66,6 @@ void cStreamdevServer::Register(cServerComponent *Server)
 
 void cStreamdevServer::Action(void) 
 {
-	m_Active = true;
-
 	/* Initialize Server components, deleting those that failed */
 	for (cServerComponent *c = m_Servers.First(); c;) {
 		cServerComponent *next = m_Servers.Next(c);
@@ -72,11 +76,11 @@ void cStreamdevServer::Action(void)
 			
 	if (m_Servers.Count() == 0) {
 		esyslog("ERROR: no streamdev server activated, exiting");
-		m_Active = false;
+		Cancel(-1);
 	}
 
 	cTBSelect select;
-	while (m_Active) {
+	while (Running()) {
 		select.Clear();
 
 		/* Ask all Server components to register to the selector */
@@ -102,9 +106,9 @@ void cStreamdevServer::Action(void)
 						sel = 0;
 				}
 			}
-		} while (sel < 0 && errno == ETIMEDOUT && m_Active);
+		} while (sel < 0 && errno == ETIMEDOUT && Running());
 
-		if (!m_Active)
+		if (!Running())
 			break;
 		if (sel < 0) {
 			esyslog("fatal error, server exiting: %m");
@@ -115,13 +119,15 @@ void cStreamdevServer::Action(void)
 		for (cServerComponent *c = m_Servers.First(); c; c = m_Servers.Next(c)){
 			if (sel && select.CanRead(c->Socket())) {
 				cServerConnection *client = c->Accept();
+				if (!client)
+					continue;
 				m_Clients.Add(client);
 
 				if (m_Clients.Count() > StreamdevServerSetup.MaxClients) {
 					esyslog("streamdev: too many clients, rejecting %s:%d",
 					        client->RemoteIp().c_str(), client->RemotePort());
 					client->Reject();
-				} else if (!StreamdevHosts.Acceptable(client->RemoteIpAddr())) {
+				} else if (!client->CanAuthenticate() && !StreamdevHosts.Acceptable(client->RemoteIpAddr())) {
 					esyslog("streamdev: client %s:%d not allowed to connect",
 					        client->RemoteIp().c_str(), client->RemotePort());
 					client->Reject();
@@ -164,6 +170,4 @@ void cStreamdevServer::Action(void)
 		c->Destruct();
 		m_Servers.Del(c);
 	}
-
-	m_Active = false;
 }

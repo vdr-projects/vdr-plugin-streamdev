@@ -1,10 +1,9 @@
 /*
- *  $Id: device.c,v 1.15 2007/12/12 12:22:45 schmirl Exp $
+ *  $Id: device.c,v 1.23 2009/04/06 06:48:59 schmirl Exp $
  */
  
 #include "client/device.h"
 #include "client/setup.h"
-#include "client/assembler.h"
 #include "client/filter.h"
 
 #include "tools/select.h"
@@ -26,20 +25,10 @@ cStreamdevDevice *cStreamdevDevice::m_Device = NULL;
 cStreamdevDevice::cStreamdevDevice(void) {
 	m_Channel    = NULL;
 	m_TSBuffer   = NULL;
-	m_Assembler  = NULL;
 
-#if VDRVERSNUM < 10300
-#	if defined(HAVE_AUTOPID)
-	(void)new cSIProcessor(new cSectionsScanner(""));
-#	else
-	(void)new cSIProcessor("");
-# endif
-	cSIProcessor::Read();
-#else
 	m_Filters    = new cStreamdevFilters;
 	StartSectionHandler();
-	cSchedules::Read();
-#endif
+	isyslog("streamdev-client: got device number %d", CardIndex() + 1);
 
 	m_Device = this;
 	m_Pids = 0;
@@ -61,11 +50,11 @@ cStreamdevDevice::~cStreamdevDevice() {
 
 	Cancel(3);
 
-#if VDRVERSNUM >= 10300
-	DELETENULL(m_Filters);
+#if APIVERSNUM >= 10515
+	StopSectionHandler();
 #endif
+	DELETENULL(m_Filters);
 	DELETENULL(m_TSBuffer);
-	delete m_Assembler;
 }
 
 bool cStreamdevDevice::ProvidesSource(int Source) const {
@@ -93,7 +82,24 @@ bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority,
 	bool res = false;
 	bool prio = Priority < 0 || Priority > this->Priority();
 	bool ndr = false;
+
+	if (!StreamdevClientSetup.StartClient)
+		return false;
+
 	Dprintf("ProvidesChannel, Channel=%s, Prio=%d\n", Channel->Name(), Priority);
+
+	if (StreamdevClientSetup.MinPriority <= StreamdevClientSetup.MaxPriority)
+	{
+		if (Priority < StreamdevClientSetup.MinPriority ||
+				Priority > StreamdevClientSetup.MaxPriority)
+			return false;
+	}
+	else
+	{
+		if (Priority < StreamdevClientSetup.MinPriority &&
+				Priority > StreamdevClientSetup.MaxPriority)
+			return false;
+	}
 
 	if (ClientSocket.DataSocket(siLive) != NULL 
 			&& TRANSPONDER(Channel, m_Channel))
@@ -117,23 +123,14 @@ bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel,
 	if (LiveView)
 		return false;
 
+#if 0
 	if (ClientSocket.DataSocket(siLive) != NULL 
-			&& TRANSPONDER(Channel, m_Channel))
+			&& TRANSPONDER(Channel, m_Channel)
+			&& Channel->Ca() < CA_ENCRYPTED_MIN)
 		return true;
-
-#if VDRVERSNUM < 10338
-	DetachAll(pidHandles[ptAudio].pid);
-	DetachAll(pidHandles[ptVideo].pid);
-	DetachAll(pidHandles[ptPcr].pid);
-	DetachAll(pidHandles[ptTeletext].pid);
-	DelPid(pidHandles[ptAudio].pid);
-	DelPid(pidHandles[ptVideo].pid);
-	DelPid(pidHandles[ptPcr].pid, ptPcr);
-	DelPid(pidHandles[ptTeletext].pid);
-	DelPid(pidHandles[ptDolby].pid);
-#else
-	DetachAllReceivers();
 #endif
+
+	DetachAllReceivers();
 	m_Channel = Channel;
 	bool r = ClientSocket.SetChannelDevice(m_Channel);
 	Dprintf("setchanneldevice r=%d\n", r);
@@ -212,16 +209,11 @@ void cStreamdevDevice::CloseDvrInt(void) {
 	}
 
 	Dprintf("cStreamdevDevice::CloseDvrInt(): Closing DVR connection\n");
-#if VDRVERSNUM < 10500
-	DELETENULL(m_TSBuffer);
-	ClientSocket.CloseDvr();
-#else
 	// Hack for VDR 1.5.x clients (sometimes sending ABRT after TUNE)
 	// TODO: Find a clean solution to fix this
 	ClientSocket.SetChannelDevice(m_Channel);
 	ClientSocket.CloseDvr();
 	DELETENULL(m_TSBuffer);
-#endif
 }
 
 void cStreamdevDevice::CloseDvr(void) {
@@ -268,7 +260,6 @@ esyslog("cStreamDevice::GetTSPacket: GetChecked: NOTHING (%d)", m_TSFails);
 	return false;
 }
 
-#if VDRVERSNUM >= 10300
 int cStreamdevDevice::OpenFilter(u_short Pid, u_char Tid, u_char Mask) {
 	Dprintf("OpenFilter\n");
 
@@ -290,7 +281,6 @@ int cStreamdevDevice::OpenFilter(u_short Pid, u_char Tid, u_char Mask) {
 
 	return -1;
 }
-#endif
 
 bool cStreamdevDevice::Init(void) {
 	if (m_Device == NULL && StreamdevClientSetup.StartClient)
@@ -308,7 +298,6 @@ bool cStreamdevDevice::ReInit(void) {
 	ClientSocket.Reset();
 	if (m_Device != NULL) {
 		//DELETENULL(m_Device->m_TSBuffer);
-		DELETENULL(m_Device->m_Assembler);
 		m_Device->Unlock();
 	}
 	return StreamdevClientSetup.StartClient ? Init() : true;
