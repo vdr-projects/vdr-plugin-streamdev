@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.c,v 1.10.2.3 2010/07/19 13:50:14 schmirl Exp $
+ *  $Id: connection.c,v 1.10.2.4 2010/08/03 10:56:58 schmirl Exp $
  */
  
 #include "server/connection.h"
@@ -254,12 +254,16 @@ cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority)
 			}
 			Dprintf(" * Found device for live tv: %p (%d)\n", newdev,
 					newdev ? newdev->CardIndex() + 1 : 0);
-			if (newdev == NULL || newdev == device)
+			if (newdev == NULL || newdev == device) {
 				// no suitable device to continue live TV, giving up...
 				device = NULL;
+				dsyslog("streamdev: Not providing channel %s at priority %d - live TV not suspended", Channel->Name(), Priority);
+			}
 			else
 				newdev->SwitchChannel(current, true);
 		}
+		else if (!device)
+			dsyslog("streamdev: No device provides channel %s at priority %d", Channel->Name(), Priority);
 	}
 
 	return device;

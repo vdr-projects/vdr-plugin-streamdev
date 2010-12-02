@@ -1,5 +1,5 @@
 /*
- *  $Id: device.h,v 1.7.2.1 2008/04/07 15:07:39 schmirl Exp $
+ *  $Id: device.h,v 1.7.2.2 2010/08/18 10:26:18 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_DEVICE_H
@@ -15,13 +15,14 @@ class cTBString;
 #define CMD_LOCK_OBJ(x) cMutexLock CmdLock((cMutex*)&(x)->m_Mutex)
 
 class cStreamdevDevice: public cDevice {
-	friend class cRemoteRecordings;
 
 private:
 	const cChannel      *m_Channel;
 	cTSBuffer           *m_TSBuffer;
 	cStreamdevFilters   *m_Filters;
 	int                  m_Pids;
+	int                  m_Priority;
+	bool                 m_UpdatePriority;
 	bool                 m_DvrClosed;
 
 	static cStreamdevDevice *m_Device;
@@ -56,6 +57,7 @@ public:
 			bool *NeedsDetachReceivers = NULL) const;
 	virtual bool IsTunedToTransponder(const cChannel *Channel);
 
+	static void UpdatePriority(void);
 	static bool Init(void);
 	static bool ReInit(void);
 

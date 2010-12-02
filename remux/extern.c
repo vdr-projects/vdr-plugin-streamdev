@@ -191,6 +191,11 @@ cTSExt::cTSExt(cRingBufferLinear *ResultBuffer, const cServerConnection *Connect
 		if (setpgid(0, 0) == -1)
 			esyslog("streamdev-server: externremux setpgid failed: %m");
 
+		if (access(opt_remux, X_OK) == -1) {
+			esyslog("streamdev-server %s: %m", opt_remux);
+			_exit(-1);
+		}
+
 		if (execle("/bin/sh", "sh", "-c", opt_remux, NULL, env) == -1) {
 			esyslog("streamdev-server: externremux script '%s' execution failed: %m", opt_remux);
 			_exit(-1);

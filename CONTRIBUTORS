@@ -132,6 +132,10 @@ Norman Thiel
 
 vel_tins
   for reporting that externremux x264 uses value of ABR for VBR
+  for various suggestions to improve externremux.sh
 
 Matthias Prill
   for reporting a compiler error with older libstdc++ versions
+
+Timothy D. Lenz
+  for reporting missing support for invisible channel groups in HTTP menu

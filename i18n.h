@@ -1,5 +1,5 @@
 /*
- *  $Id: i18n.h,v 1.1 2004/12/30 22:43:58 lordjaxom Exp $
+ *  $Id: i18n.h,v 1.1.1.1 2004/12/30 22:43:58 lordjaxom Exp $
  */
  
 #ifndef VDR_STREAMDEV_I18N_H
