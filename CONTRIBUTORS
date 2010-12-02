@@ -147,3 +147,6 @@ lhanisch
  
 Eric Valette
   for adding support for EnhancedAC3
+
+carel
+  for reporting "plugin doesn't honor APIVERSION" error in new Makefile

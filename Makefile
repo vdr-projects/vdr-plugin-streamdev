@@ -1,7 +1,7 @@
 #
 # Makefile for a Video Disk Recorder plugin
 #
-# $Id: Makefile,v 1.21.2.1 2010/06/14 10:40:11 schmirl Exp $
+# $Id: Makefile,v 1.21.2.2 2010/06/20 19:11:15 schmirl Exp $
 
 # The main source file name.
 #
@@ -81,12 +81,14 @@ all: client server
 client:
 	$(MAKE) -C ./tools
 	$(MAKE) -C ./client
+	# installs to $(LIBDIR)/libvdr-streamdev-client.so.$(APIVERSION)
 
 server:
 	$(MAKE) -C ./tools
 	$(MAKE) -C ./libdvbmpeg
 	$(MAKE) -C ./remux
 	$(MAKE) -C ./server
+	# installs to $(LIBDIR)/libvdr-streamdev-server.so.$(APIVERSION)
 
 dist: clean
 	@-rm -rf $(TMPDIR)/$(ARCHIVE)

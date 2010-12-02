@@ -1,7 +1,7 @@
 #
 # Makefile for a Video Disk Recorder plugin
 #
-# $Id: Makefile,v 1.1.2.1 2010/06/14 10:40:20 schmirl Exp $
+# $Id: Makefile,v 1.1.2.2 2010/06/20 19:12:56 schmirl Exp $
 
 # The official name of this plugin.
 # This name will be used in the '-P...' option of VDR to load the plugin.
@@ -76,7 +76,7 @@ libvdr-$(PLUGIN).so: $(SERVEROBJS) $(COMMONOBJS) \
 
 %.so: 
 	$(CXX) $(CXXFLAGS) -shared $^ -o $@
-	@cp $@ $(LIBDIR)/$@.$(APIVERSION)
+	@cp --remove-destination $@ $(LIBDIR)/$@.$(APIVERSION)
 
 clean:
 	@-rm -f $(COMMONOBJS) $(SERVEROBJS) $(DEPFILE) $(PODIR)/*.mo $(PODIR)/*.pot *.so *.tgz core* *~
