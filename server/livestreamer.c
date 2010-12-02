@@ -172,16 +172,20 @@ int cStreamdevPatFilter::GetPid(SI::PMT::Stream& stream)
 		for (SI::Loop::Iterator it; (d = stream.streamDescriptors.getNext(it)); ) {
 			switch (d->getDescriptorTag()) {
 			case SI::AC3DescriptorTag:
+			case SI::EnhancedAC3DescriptorTag:
 				Dprintf("cStreamdevPatFilter PMT scanner: adding PID %d (%s) %s\n",
 					stream.getPid(), psStreamTypes[stream.getStreamType()], "AC3");
+				delete d;
 				return stream.getPid();
 			case SI::TeletextDescriptorTag:
 				Dprintf("cStreamdevPatFilter PMT scanner: adding PID %d (%s) %s\n",
 					stream.getPid(), psStreamTypes[stream.getStreamType()], "Teletext");
+				delete d;
 				return stream.getPid();
 			case SI::SubtitlingDescriptorTag:
 				Dprintf("cStreamdevPatFilter PMT scanner: adding PID %d (%s) %s\n",
 					stream.getPid(), psStreamTypes[stream.getStreamType()], "DVBSUB");
+				delete d;
 				return stream.getPid();
 			default:
 				Dprintf("cStreamdevPatFilter PMT scanner: NOT adding PID %d (%s) %s\n",
@@ -214,6 +218,7 @@ int cStreamdevPatFilter::GetPid(SI::PMT::Stream& stream)
 								stream.getPid(), stream.getStreamType(), 
 								d->getLength(), rawdata[2], rawdata[3], 
 								rawdata[4], rawdata[5]);
+							delete d;
 							return stream.getPid();
 						}
 					}
@@ -330,10 +335,9 @@ void cStreamdevPatFilter::Process(u_short Pid, u_char Tid, const u_char *Data, i
 
 // --- cStreamdevLiveStreamer -------------------------------------------------
 
-cStreamdevLiveStreamer::cStreamdevLiveStreamer(int Priority, std::string Parameter):
-		cStreamdevStreamer("streamdev-livestreaming"),
+cStreamdevLiveStreamer::cStreamdevLiveStreamer(int Priority, const cServerConnection *Connection):
+		cStreamdevStreamer("streamdev-livestreaming", Connection),
 		m_Priority(Priority),
-		m_Parameter(Parameter),
 		m_NumPids(0),
 		m_StreamType(stTSPIDS),
 		m_Channel(NULL),
@@ -443,37 +447,39 @@ void cStreamdevLiveStreamer::StartReceiver(void)
 	}
 }
 
-bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType StreamType, int Apid) 
+bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType StreamType, const int* Apid, const int *Dpid) 
 {
 	Dprintf("Initializing Remuxer for full channel transfer\n");
 	//printf("ca pid: %d\n", Channel->Ca());
 	m_Channel = Channel;
 	m_StreamType = StreamType;
 
-	int apid[2] = { Apid, 0 };
-	const int *Apids = Apid ? apid : m_Channel->Apids();
-	const int *Dpids = Apid ? NULL : m_Channel->Dpids();
+	const int *Apids = Apid ? Apid : m_Channel->Apids();
+	const int *Dpids = Dpid ? Dpid : m_Channel->Dpids();
 
 	switch (m_StreamType) {
 	case stES: 
 		{
 			int pid = ISRADIO(m_Channel) ? m_Channel->Apid(0) : m_Channel->Vpid();
-			if (Apid != 0)
-				pid = Apid;
+			if (Apid && Apid[0])
+				pid = Apid[0];
+			else if (Dpid && Dpid[0])
+				pid = Dpid[0];
 			m_Remux = new cTS2ESRemux(pid);
 			return SetPids(pid);
 		}
 
 	case stPES: 
-		m_Remux = new cTS2PESRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(), 
-								m_Channel->Spids());
+		m_Remux = new cTS2PESRemux(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 
 	case stPS:  
-		m_Remux = new cTS2PSRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(),
-		                            m_Channel->Spids());
+		m_Remux = new cTS2PSRemux(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 
+	case stEXT:
+		m_Remux = new cExternRemux(Connection(), m_Channel, Apids, Dpids);
+		// fall through
 	case stTS:
 		// This should never happen, but ...
 		if (m_PatFilter) {
@@ -488,16 +494,12 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 		m_PatFilter = new cStreamdevPatFilter(this, m_Channel);
 		return true;
 
-	case stExtern:
-		m_Remux = new cExternRemux(m_Channel->Vpid(), m_Channel->Apids(), m_Channel->Dpids(),
-		                              m_Channel->Spids(), m_Parameter);
-		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
-
 	case stTSPIDS:
 		Dprintf("pid streaming mode\n");
 		return true;
+	default:
+		return false;
 	}
-	return false;
 }
 
 int cStreamdevLiveStreamer::Put(const uchar *Data, int Count) 

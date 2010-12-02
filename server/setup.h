@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.h,v 1.2 2009/02/13 10:39:22 schmirl Exp $
+ *  $Id: setup.h,v 1.3.2.1 2010/06/18 19:07:32 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SETUPSERVER_H
@@ -30,12 +30,17 @@ struct cStreamdevServerSetup {
 
 extern cStreamdevServerSetup StreamdevServerSetup;
 
-class cStreamdevServerMenuSetupPage: public cStreamdevMenuSetupPage {
+class cStreamdevServerMenuSetupPage: public cMenuSetupPage {
 private:
+	static const char* StreamTypes[];
+	static const char* SuspendModes[];
 	cStreamdevServerSetup m_NewSetup;
 
+	void AddCategory(const char *Title);
+	void Set();
 protected:
 	virtual void Store(void);
+	virtual eOSState ProcessKey(eKeys Key);
 
 public:
 	cStreamdevServerMenuSetupPage(void);

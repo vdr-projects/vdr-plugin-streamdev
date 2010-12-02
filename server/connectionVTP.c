@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.22 2009/07/02 06:03:51 schmirl Exp $
+ *  $Id: connectionVTP.c,v 1.27.2.1 2010/06/11 06:06:03 schmirl Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -40,6 +40,9 @@ private:
 #if defined(USE_PARENTALRATING) || defined(PARENTALRATINGCONTENTVERSNUM)
 	enum eStates { Channel, Event, Title, Subtitle, Description, Vps, Content,
 	               EndEvent, EndChannel, EndEPG };
+#elif APIVERSNUM >= 10711
+	enum eStates { Channel, Event, Title, Subtitle, Description, Vps, Content, Rating,
+	               EndEvent, EndChannel, EndEPG };
 #else
 	enum eStates { Channel, Event, Title, Subtitle, Description, Vps, 
 	               EndEvent, EndChannel, EndEPG };
@@ -50,7 +53,7 @@ private:
 	const cSchedule   *m_Schedule;
 	const cEvent      *m_Event;
 	int                m_Errno;
-	char              *m_Error;
+	cString            m_Error;
 	eStates            m_State;
 	bool               m_Traverse;
 	time_t             m_ToTime;
@@ -67,7 +70,6 @@ cLSTEHandler::cLSTEHandler(cConnectionVTP *Client, const char *Option):
 		m_Schedule(NULL),
 		m_Event(NULL),
 		m_Errno(0),
-		m_Error(NULL),
 		m_State(Channel),
 		m_Traverse(false),
 		m_ToTime(0)
@@ -94,12 +96,12 @@ cLSTEHandler::cLSTEHandler(cConnectionVTP *Client, const char *Option):
 						attime = strtol(p, NULL, 10);
 					else {
 						m_Errno = 501;
-						m_Error = strdup("Invalid time");
+						m_Error = "Invalid time";
 						break;
 					}
 				} else {
 					m_Errno = 501;
-					m_Error = strdup("Missing time");
+					m_Error = "Missing time";
 					break;
 				}
 			}
@@ -110,7 +112,7 @@ cLSTEHandler::cLSTEHandler(cConnectionVTP *Client, const char *Option):
 						fromtime = strtol(p, NULL, 10);
 					else {
 						m_Errno = 501;
-						m_Error = strdup("Invalid time");
+						m_Error = "Invalid time";
 						break;
 					}
 					if ((p = strtok_r(NULL, delim, &strtok_next)) != NULL) {
@@ -120,19 +122,19 @@ cLSTEHandler::cLSTEHandler(cConnectionVTP *Client, const char *Option):
 									m_ToTime = strtol(p, NULL, 10);
 								else {
 									m_Errno = 501;
-								m_Error = strdup("Invalid time");
+								m_Error = "Invalid time";
 								break;
 								}
 							} else {
 								m_Errno = 501;
-								m_Error = strdup("Missing time");
+								m_Error = "Missing time";
 								break;
 							}
 						}
 					}
 				} else {
 					m_Errno = 501;
-					m_Error = strdup("Missing time");
+					m_Error = "Missing time";
 					break;
 				}
 			} else if (!m_Schedule) {
@@ -146,27 +148,27 @@ cLSTEHandler::cLSTEHandler(cConnectionVTP *Client, const char *Option):
 					m_Schedule = m_Schedules->GetSchedule(Channel->GetChannelID());
 					if (!m_Schedule) {
 						m_Errno = 550;
-						m_Error = strdup("No schedule found");
+						m_Error = "No schedule found";
 						break;
 					}
 				} else {
 					m_Errno = 550;
-					asprintf(&m_Error, "Channel \"%s\" not defined", p);
+					m_Error = cString::sprintf("Channel \"%s\" not defined", p);
 					break;
 				}
 			} else {
 				m_Errno = 501;
-				asprintf(&m_Error, "Unknown option: \"%s\"", p);
+				m_Error = cString::sprintf("Unknown option: \"%s\"", p);
 				break;
 			}
 			p = strtok_r(NULL, delim, &strtok_next);
 		}
 	} else if (m_Schedules == NULL) {
 		m_Errno = 451;
-		m_Error = strdup("EPG data is being modified, try again");
+		m_Error = "EPG data is being modified, try again";
 	}
 
-	if (m_Error == NULL) {
+	if (*m_Error == NULL) {
 		if (m_Schedule != NULL)
 			m_Schedules = NULL;
 		else if (m_Schedules != NULL)
@@ -205,17 +207,15 @@ cLSTEHandler::cLSTEHandler(cConnectionVTP *Client, const char *Option):
 cLSTEHandler::~cLSTEHandler()
 {
 	delete m_SchedulesLock;
-	if (m_Error != NULL)
-		free(m_Error);
 }
 
 bool cLSTEHandler::Next(bool &Last)
 {
-	if (m_Error != NULL) {
+	if (*m_Error != NULL) {
 		Last = true;
-		cString str(m_Error, true);
+		cString str(m_Error);
 		m_Error = NULL;
-		return m_Client->Respond(m_Errno, *str);
+		return m_Client->Respond(m_Errno, "%s", *str);
 	}
 
 	Last = false;
@@ -285,7 +285,7 @@ bool cLSTEHandler::Next(bool &Last)
 		break;
 
 	case Vps:
-#if defined(USE_PARENTALRATING) || defined(PARENTALRATINGCONTENTVERSNUM)
+#if defined(USE_PARENTALRATING) || defined(PARENTALRATINGCONTENTVERSNUM) || APIVERSNUM >= 10711
 		m_State = Content;
 #else
 		m_State = EndEvent;
@@ -309,6 +309,25 @@ bool cLSTEHandler::Next(bool &Last)
 			strreplace(copy, '\n', '|');
 			return m_Client->Respond(-215, "G %i %i %s", m_Event->Contents() & 0xF0, m_Event->Contents() & 0x0F, copy);
 		} else
+			return Next(Last);
+		break;
+#elif APIVERSNUM >= 10711
+	case Content:
+		m_State = Rating;
+		if (!isempty(m_Event->ContentToString(m_Event->Contents()))) {
+			char *copy = strdup(m_Event->ContentToString(m_Event->Contents()));
+			cString cpy(copy, true);
+			strreplace(copy, '\n', '|');
+			return m_Client->Respond(-215, "G %i %i %s", m_Event->Contents() & 0xF0, m_Event->Contents() & 0x0F, copy);
+		} else
+			return Next(Last);
+		break;
+
+	case Rating:
+		m_State = EndEvent;
+		if (m_Event->ParentalRating())
+			return m_Client->Respond(-215, "R %d", m_Event->ParentalRating());
+		else
 			return Next(Last);
 		break;
 #endif
@@ -361,7 +380,7 @@ private:
 	const cChannel *m_Channel;
 	char           *m_Option;
 	int             m_Errno;
-	char           *m_Error;
+	cString         m_Error;
 	bool            m_Traverse;
 public:
 	cLSTCHandler(cConnectionVTP *Client, const char *Option);
@@ -374,18 +393,17 @@ cLSTCHandler::cLSTCHandler(cConnectionVTP *Client, const char *Option):
 		m_Channel(NULL),
 		m_Option(NULL),
 		m_Errno(0),
-		m_Error(NULL),
 		m_Traverse(false)
 {
 	if (!Channels.Lock(false, 500)) {
 		m_Errno = 451;
-		m_Error = strdup("Channels are being modified - try again");
+		m_Error = "Channels are being modified - try again";
 	} else if (*Option) {
 		if (isnumber(Option)) {
 			m_Channel = Channels.GetByNumber(strtol(Option, NULL, 10));
 			if (m_Channel == NULL) {
 				m_Errno = 501;
-				asprintf(&m_Error, "Channel \"%s\" not defined", Option);
+				m_Error = cString::sprintf("Channel \"%s\" not defined", Option);
 				return;
 			}
 		} else {
@@ -401,7 +419,7 @@ cLSTCHandler::cLSTCHandler(cConnectionVTP *Client, const char *Option):
 
 			if (i > Channels.MaxNumber()) {
 				m_Errno = 501;
-				asprintf(&m_Error, "Channel \"%s\" not defined", Option);
+				m_Error = cString::sprintf("Channel \"%s\" not defined", Option);
 				return;
 			}
 		}
@@ -410,26 +428,24 @@ cLSTCHandler::cLSTCHandler(cConnectionVTP *Client, const char *Option):
 		m_Traverse = true;
 	} else {
 		m_Errno = 550;
-		m_Error = strdup("No channels defined");
+		m_Error = "No channels defined";
 	}
 }
 
 cLSTCHandler::~cLSTCHandler()
 {
 	Channels.Unlock();
-	if (m_Error != NULL)
-		free(m_Error);
 	if (m_Option != NULL)
 		free(m_Option);
 }
 
 bool cLSTCHandler::Next(bool &Last)
 {
-	if (m_Error != NULL) {
+	if (*m_Error != NULL) {
 		Last = true;
-		cString str(m_Error, true);
+		cString str(m_Error);
 		m_Error = NULL;
-		return m_Client->Respond(m_Errno, *str);
+		return m_Client->Respond(m_Errno, "%s", *str);
 	}
 
 	int number;
@@ -452,7 +468,7 @@ bool cLSTCHandler::Next(bool &Last)
 				i = m_Channel->Number() + 1;
 			} else {
 				m_Errno = 501;
-				asprintf(&m_Error, "Channel \"%d\" not found", i);
+				m_Error = cString::sprintf("Channel \"%d\" not found", i);
 			}
 		}
 
@@ -472,7 +488,7 @@ private:
 	cTimer         *m_Timer;
 	int             m_Index;
 	int             m_Errno;
-	char           *m_Error;
+	cString         m_Error;
 	bool            m_Traverse;
 public:
 	cLSTTHandler(cConnectionVTP *Client, const char *Option);
@@ -485,7 +501,6 @@ cLSTTHandler::cLSTTHandler(cConnectionVTP *Client, const char *Option):
 		m_Timer(NULL),
 		m_Index(0),
 		m_Errno(0),
-		m_Error(NULL),
 		m_Traverse(false)
 {
 	if (*Option) {
@@ -493,11 +508,11 @@ cLSTTHandler::cLSTTHandler(cConnectionVTP *Client, const char *Option):
 			m_Timer = Timers.Get(strtol(Option, NULL, 10) - 1);
 			if (m_Timer == NULL) {
 				m_Errno = 501;
-				asprintf(&m_Error, "Timer \"%s\" not defined", Option);
+				m_Error = cString::sprintf("Timer \"%s\" not defined", Option);
 			}
 		} else {
 			m_Errno = 501;
-			asprintf(&m_Error, "Error in timer number \"%s\"", Option);
+			m_Error = cString::sprintf("Error in timer number \"%s\"", Option);
 		}
 	} else if (Timers.Count()) {
 		m_Traverse = true;
@@ -505,27 +520,25 @@ cLSTTHandler::cLSTTHandler(cConnectionVTP *Client, const char *Option):
 		m_Timer = Timers.Get(m_Index);
 		if (m_Timer == NULL) {
 			m_Errno = 501;
-			asprintf(&m_Error, "Timer \"%d\" not found", m_Index + 1);
+			m_Error = cString::sprintf("Timer \"%d\" not found", m_Index + 1);
 		}
 	} else {
 		m_Errno = 550;
-		m_Error = strdup("No timers defined");
+		m_Error = "No timers defined";
 	}
 }
 
 cLSTTHandler::~cLSTTHandler()
 {
-	if (m_Error != NULL)
-		free(m_Error);
 }
 
 bool cLSTTHandler::Next(bool &Last)
 {
-	if (m_Error != NULL) {
+	if (*m_Error != NULL) {
 		Last = true;
-		cString str(m_Error, true);
+		cString str(m_Error);
 		m_Error = NULL;
-		return m_Client->Respond(m_Errno, *str);
+		return m_Client->Respond(m_Errno, "%s", *str);
 	}
 
 	bool result;
@@ -541,7 +554,7 @@ bool cLSTTHandler::Next(bool &Last)
 		m_Timer = Timers.Get(++m_Index);
 		if (m_Timer == NULL) {
 			m_Errno = 501;
-			asprintf(&m_Error, "Timer \"%d\" not found", m_Index + 1);
+			m_Error = cString::sprintf("Timer \"%d\" not found", m_Index + 1);
 		}
 	}
 	return result;
@@ -559,7 +572,7 @@ private:
 	const cEvent   *m_Event;
 	int             m_Index;
 	int             m_Errno;
-	char           *m_Error;
+	cString         m_Error;
 	bool            m_Traverse;
 	bool            m_Info;
 	eStates         m_State;
@@ -576,7 +589,6 @@ cLSTRHandler::cLSTRHandler(cConnectionVTP *Client, const char *Option):
 		m_Event(NULL),
 		m_Index(0),
 		m_Errno(0),
-		m_Error(NULL),
 		m_Traverse(false),
 		m_Info(false),
 		m_State(Recording),
@@ -591,12 +603,12 @@ cLSTRHandler::cLSTRHandler(cConnectionVTP *Client, const char *Option):
 			m_Info = true;
 			if (m_Recording == NULL) {
 				m_Errno = 501;
-				asprintf(&m_Error, "Recording \"%s\" not found", Option);
+				m_Error = cString::sprintf("Recording \"%s\" not found", Option);
 			}
 		}
 		else {
 			m_Errno = 501;
-			asprintf(&m_Error, "Error in Recording number \"%s\"", Option);
+			m_Error = cString::sprintf("Error in Recording number \"%s\"", Option);
 		}
 	} 
 	else if (Recordings.Count()) {
@@ -605,28 +617,26 @@ cLSTRHandler::cLSTRHandler(cConnectionVTP *Client, const char *Option):
 		m_Recording = Recordings.Get(m_Index);
 		if (m_Recording == NULL) {
 			m_Errno = 501;
-			asprintf(&m_Error, "Recording \"%d\" not found", m_Index + 1);
+			m_Error = cString::sprintf("Recording \"%d\" not found", m_Index + 1);
 		}
 	} 
 	else {
 		m_Errno = 550;
-		m_Error = strdup("No recordings available");
+		m_Error = "No recordings available";
 	}
 }
 
 cLSTRHandler::~cLSTRHandler()
 {
-	if (m_Error != NULL)
-		free(m_Error);
 }
 
 bool cLSTRHandler::Next(bool &Last)
 {
-	if (m_Error != NULL) {
+	if (*m_Error != NULL) {
 		Last = true;
-		cString str(m_Error, true);
+		cString str(m_Error);
 		m_Error = NULL;
-		return m_Client->Respond(m_Errno, *str);
+		return m_Client->Respond(m_Errno, "%s", *str);
 	}
 	
 	if (m_Info) {
@@ -714,7 +724,7 @@ bool cLSTRHandler::Next(bool &Last)
 			m_Recording = Recordings.Get(++m_Index);
 			if (m_Recording == NULL) {
 				m_Errno = 501;
-				asprintf(&m_Error, "Recording \"%d\" not found", m_Index + 1);
+				m_Error = cString::sprintf("Recording \"%d\" not found", m_Index + 1);
 			}
 		}
 		return result;
@@ -871,8 +881,8 @@ bool cConnectionVTP::CmdCAPS(char *Opts)
 		return Respond(220, "Capability \"%s\" accepted", Opts);
 	}
 
-	if (strcasecmp(Opts, "EXTERN") == 0) {
-		m_StreamType = stExtern;
+	if (strcasecmp(Opts, "EXT") == 0) {
+		m_StreamType = stEXT;
 		return Respond(220, "Capability \"%s\" accepted", Opts);
 	}
 
@@ -1068,7 +1078,7 @@ bool cConnectionVTP::CmdTUNE(char *Opts)
 		return Respond(560, "Channel not available");
 
 	delete m_LiveStreamer;
-	m_LiveStreamer = new cStreamdevLiveStreamer(1);
+	m_LiveStreamer = new cStreamdevLiveStreamer(1, this);
 	m_LiveStreamer->SetChannel(chan, m_StreamType);
 	m_LiveStreamer->SetDevice(dev);
 	if(m_LiveSocket)
@@ -1086,7 +1096,6 @@ bool cConnectionVTP::CmdTUNE(char *Opts)
 
 bool cConnectionVTP::CmdPLAY(char *Opts)
 {
-	Recordings.Update(true);
 	if (*Opts) {
 		if (isnumber(Opts)) {
 			cRecording *recording = Recordings.Get(strtol(Opts, NULL, 10) - 1);
@@ -1397,22 +1406,52 @@ bool cConnectionVTP::CmdDELT(const char *Option)
 {
 	INIT_WRAPPER();
 	if (*Option) {
-		if (isnumber(Option)) {
-			cTimer *timer = Timers.Get(strtol(Option, NULL, 10) - 1);
+		int number = 0;
+		bool force = false;
+		char buf[strlen(Option) + 1];
+		strcpy(buf, Option);
+		const char *delim = " \t";
+		char *strtok_next;
+		char *p = strtok_r(buf, delim, &strtok_next);
+
+		if (isnumber(p)) {
+			number = strtol(p, NULL, 10) - 1;
+		}
+		else if (strcasecmp(p, "FORCE") == 0) {
+			force = true;
+		}
+		if ((p = strtok_r(NULL, delim, &strtok_next)) != NULL) {
+			if (isnumber(p)) {
+				number = strtol(p, NULL, 10) - 1;
+			}
+			else if (strcasecmp(p, "FORCE") == 0) {
+				force = true;
+			}
+			else {
+				Reply(501, "Timer not found or wrong syntax");
+			}
+		}
+
+		cTimer *timer = Timers.Get(number);
 			if (timer) {
-				if (!timer->Recording()) {
+			if (timer->Recording()) {
+				if (force) {
+					timer->Skip();
+					cRecordControls::Process(time(NULL));
+				}
+				else {
+					Reply(550, "Timer \"%i\" is recording", number);
+					EXIT_WRAPPER();
+				}
+			}
 					isyslog("deleting timer %s", *timer->ToDescr());
 					Timers.Del(timer);
 					Timers.SetModified();
-					Reply(250, "Timer \"%s\" deleted", Option);
+			Reply(250, "Timer \"%i\" deleted", number);
 				} else
-					Reply(550, "Timer \"%s\" is recording", Option);
+			Reply(501, "Timer \"%i\" not defined", number);
 			} else
-				Reply(501, "Timer \"%s\" not defined", Option);
-		} else
-			Reply(501, "Error in timer number \"%s\"", Option);
-	} else
-		Reply(501, "Missing timer number");
+		Reply(501, "Missing timer option");
 	EXIT_WRAPPER();
 }
 
@@ -1706,12 +1745,17 @@ bool cConnectionVTP::CmdRENR(const char *Option)
 
 bool cConnectionVTP::Respond(int Code, const char *Message, ...)
 {
-	char *buffer;
 	va_list ap;
 	va_start(ap, Message);
-	vasprintf(&buffer, Message, ap);
-	va_end(ap);
+#if APIVERSNUM < 10515
+	char *buffer;
+	if (vasprintf(&buffer, Message, ap) < 0)
+		buffer = strdup("???");
 	cString str(buffer, true);
+#else
+	cString str = cString::sprintf(Message, ap);
+#endif
+	va_end(ap);
 
 	if (Code >= 0 && m_LastCommand != NULL) {
 		free(m_LastCommand);
@@ -1719,6 +1763,6 @@ bool cConnectionVTP::Respond(int Code, const char *Message, ...)
 	}
 
 	return cServerConnection::Respond("%03d%c%s", Code >= 0, 
-	                                  Code < 0 ? -Code : Code,
-									  Code < 0 ? '-' : ' ', buffer);
+				Code < 0 ? -Code : Code,
+				Code < 0 ? '-' : ' ', *str);
 }

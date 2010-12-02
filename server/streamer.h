@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.h,v 1.11 2009/06/19 06:32:45 schmirl Exp $
+ *  $Id: streamer.h,v 1.11.2.1 2010/06/11 06:06:03 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_STREAMER_H
@@ -11,6 +11,7 @@
 
 class cTBSocket;
 class cStreamdevStreamer;
+class cServerConnection;
 
 #ifndef TS_SIZE
 #define TS_SIZE 188
@@ -64,6 +65,7 @@ public:
 
 class cStreamdevStreamer: public cThread {
 private:
+	const cServerConnection *m_Connection;
 	cStreamdevWriter  *m_Writer;
 	cStreamdevBuffer  *m_RingBuffer;
 	cStreamdevBuffer  *m_SendBuffer;
@@ -74,8 +76,10 @@ protected:
 	bool IsRunning(void) const { return m_Writer; }
 
 public:
-	cStreamdevStreamer(const char *Name);
+	cStreamdevStreamer(const char *Name, const cServerConnection *Connection = NULL);
 	virtual ~cStreamdevStreamer();
+
+	const cServerConnection* Connection(void) const { return m_Connection; }
 
 	virtual void Start(cTBSocket *Socket);
 	virtual void Stop(void);

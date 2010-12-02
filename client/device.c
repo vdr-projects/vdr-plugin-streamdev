@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.23 2009/04/06 06:48:59 schmirl Exp $
+ *  $Id: device.c,v 1.26 2010/06/08 05:55:17 schmirl Exp $
  */
  
 #include "client/device.h"
@@ -33,9 +33,6 @@ cStreamdevDevice::cStreamdevDevice(void) {
 	m_Device = this;
 	m_Pids = 0;
 	m_DvrClosed = true;
-
-	if (StreamdevClientSetup.SyncEPG)	
-		ClientSocket.SynchronizeEPG();
 }
 
 cStreamdevDevice::~cStreamdevDevice() {
@@ -72,7 +69,9 @@ bool cStreamdevDevice::IsTunedToTransponder(const cChannel *Channel)
 {
 	bool res = false;
 	if (ClientSocket.DataSocket(siLive) != NULL
-			&& TRANSPONDER(Channel, m_Channel))
+			&& TRANSPONDER(Channel, m_Channel)
+			&& Channel->Ca() == CA_FTA
+			&& m_Channel->Ca() == CA_FTA)
 		res = true;
 	return res;
 }
@@ -123,12 +122,11 @@ bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel,
 	if (LiveView)
 		return false;
 
-#if 0
 	if (ClientSocket.DataSocket(siLive) != NULL 
 			&& TRANSPONDER(Channel, m_Channel)
-			&& Channel->Ca() < CA_ENCRYPTED_MIN)
+			&& Channel->Ca() == CA_FTA
+			&& m_Channel->Ca() == CA_FTA)
 		return true;
-#endif
 
 	DetachAllReceivers();
 	m_Channel = Channel;

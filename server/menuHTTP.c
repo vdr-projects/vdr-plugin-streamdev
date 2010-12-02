@@ -205,8 +205,8 @@ std::string cHtmlChannelList::StreamTypeMenu()
 			(std::string) "[<a href=\"/PES/" + self + "\">PES</a>] ");
 	typeMenu += (streamType == stES ? (std::string) "[ES] " :
 			(std::string) "[<a href=\"/ES/" + self + "\">ES</a>] ");
-	typeMenu += (streamType == stExtern ? (std::string) "[Extern] " :
-			(std::string) "[<a href=\"/Extern/" + self + "\">Extern</a>] ");
+	typeMenu += (streamType == stEXT ? (std::string) "[EXT] " :
+			(std::string) "[<a href=\"/EXT/" + self + "\">EXT</a>] ");
 	return typeMenu;
 }
 
@@ -415,13 +415,13 @@ std::string cM3uChannelList::Next()
 
 	if (channel->GroupSep())
 	{
-		return (std::string) "#EXTINF:0," + name + "\r\n" +
+		return (std::string) "#EXTINF:-1," + name + "\r\n" +
 			base + "group.m3u?group=" +
 			(const char*) itoa(cChannelList::GetGroupIndex(channel));
 	}
 	else
 	{
-		return (std::string) "#EXTINF:0," +
+		return (std::string) "#EXTINF:-1," +
 			(const char*) itoa(channel->Number()) + " " + name + "\r\n" +
 			base + (std::string) channel->GetChannelID().ToString();
 	}

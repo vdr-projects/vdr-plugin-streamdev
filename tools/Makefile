@@ -1,26 +1,26 @@
 #
 # Makefile for a Video Disk Recorder plugin
 #
-# $Id: Makefile,v 1.3.4.1 2010/06/14 10:40:13 schmirl Exp $
+# $Id: Makefile,v 1.1.2.1 2010/06/14 10:40:31 schmirl Exp $
 
 ### The object files (add further files here):
 
-OBJS = ctools.o remux.o ringbuffy.o transform.o
+OBJS = select.o socket.o source.o tools.o
 
 ### The main target:
 
 .PHONY: clean
-libdvbmpegtools.a: $(OBJS)
-	ar -rcs libdvbmpegtools.a $(OBJS) 
+sockettools.a: $(OBJS)
+	ar -rcs sockettools.a $(OBJS) 
 
 ### Implicit rules:
 
 %.o: %.c 
-	$(CC) $(CFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
+	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
 
 ### Dependencies:
 
-MAKEDEP = $(CC) -MM -MG
+MAKEDEP = $(CXX) -MM -MG
 DEPFILE = .dependencies
 
 $(DEPFILE): Makefile

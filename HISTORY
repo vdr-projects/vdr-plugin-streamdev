@@ -1,6 +1,51 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+- config option "client may suspend" hidden if not applicable
+- updated and enhanced README
+- separated language resources of client and server
+- restructured build process
+- added support for HTTP method HEAD
+- rewrite of externremux.sh, including support for various URL parameters,
+  logging and improved shutdown
+- start externremux script in a separate process group
+- changed HTTP URL path for externremux from EXTERN to EXT (suggested by
+  Rolf Ahrenberg)
+- HTTP headers now have to be emitted by externremux script
+- pass channel related information and URL parameters to externremux script
+  through environment
+- implement CGI like interface for externremux script
+- dropped "Synchronize EPG" feature. Please use epgsync-plugin instead
+  (available from http://vdr.schmirler.de)
+- proper tsplay-0.2 patch detection. tsplay-0.1 is no longer recognized
+  (thanks to Udo Richter)
+- added compatibility with VDR 1.6 tsplay-0.1 patch
+- added support for EnhancedAC3 (thanks to Eric Valette)
+- fixed a memory leak in cStreamdevPatFilter::GetPid (thanks to lhanisch)
+- length -1 is the correct value for streams in M3U playlists
+- switching between two encrypted channels on the same transponder didn't
+  always work (thanks to sk8ter@vdrportal)
+- added DELT FORCE option to delete running timers (thanks to Alwin Esch)
+- added VDR 1.7.11 parental rating support for VTP LSTE command (thanks to
+  Alwin Esch)
+- added Lithuanian translation (thanks to Valdemaras Pipiras)
+- fixed missing virtual destructor for cTSRemux
+- added defines for large file support to Makefile as required by VDR 1.7.4+
+  (reported by wirbel@vdrportal)
+- added Slovak translation (thanks to Milan Hrala)
+- fixed regression from fix for switching between encrypted channels. It was
+  no longer possible to receive multiple (FTA) streams from the same
+  transponder
+- silenced warnings concerning asprintf (requested by Rolf Ahrenberg)
+- don't update recordings list on CmdPLAY (reported by BBlack)
+- cleaned up common.h / common.c
+- dropped cStreamdevMenuSetupPage
+- report charset in HTTP replies (suggested by Rolf Ahrenberg)
+- use SO_KEEPALIVE option on all sockets do detect dead sockets (thanks to
+  owagner)
+- enable PatFilter for externremux, so VLC can be used as remuxer or client
+- fixed insecure format strings in LSTX handlers (thanks to Anssi Hannula)
+- updated Finish translation (thanks to Rolf Ahrenberg)
 - removed redefinitions in includes - caused problems in older compilers
 - fixed ts2ps.h defines
 - fixed missing virtual for cTS2PESRemux destructor

@@ -1,5 +1,5 @@
 /*
- *  $Id: common.h,v 1.14 2009/07/01 10:46:16 schmirl Exp $
+ *  $Id: common.h,v 1.15.2.1 2010/06/11 06:06:01 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_COMMON_H
@@ -23,42 +23,23 @@
 #	define Dprintf(x...)
 #endif
 
-#	define TRANSPONDER(c1, c2) (c1->Transponder() == c2->Transponder())
+#define TRANSPONDER(c1, c2) (c1->Transponder() == c2->Transponder())
 
-#	define MAXPARSEBUFFER KILOBYTE(16)
+#define MAXPARSEBUFFER KILOBYTE(16)
 
 /* Check if a channel is a radio station. */
 #define ISRADIO(x) ((x)->Vpid()==0||(x)->Vpid()==1||(x)->Vpid()==0x1fff)
 
 class cChannel;
 
-char *GetNextLine(char *String, uint Length, uint &Offset);
-
-const cChannel *ChannelFromString(const char *String, int *Apid = NULL);
-
-/* Disable logging if BUFCOUNT buffer overflows occur within BUFOVERTIME
-   milliseconds. Enable logging again if there is no error within BUFOVERTIME
-   milliseconds. */
-#define BUFOVERTIME  5000
-#define BUFOVERCOUNT 100
-
-#define POLLFAIL esyslog("Streamdev: Polling failed: %s", strerror(errno))
-#define WRITEFAIL esyslog("Streamdev: Writing failed: %s", strerror(errno))
-#define READFAIL esyslog("Streamdev: Reading failed: %s", strerror(errno))
-#define CHECKPOLL(x) if ((x)<0){POLLFAIL; return false;}
-#define CHECKWRITE(x) if ((x)<0) { WRITEFAIL; return false; }
-#define CHECKREAD(x) if ((x)<0) { READFAIL; return false; }
-
 enum eStreamType {
 	stTS,
 	stPES,
 	stPS,
 	stES,
-	stExtern,
+	stEXT,
 	stTSPIDS,
-
-#define st_CountSetup (stExtern+1)
-#define st_Count (stTSPIDS+1)
+	st_Count
 };
 
 enum eSuspendMode {
@@ -77,25 +58,10 @@ enum eSocketId {
 };
 
 extern const char *VERSION;
-extern const char *StreamTypes[st_Count];
-extern const char *SuspendModes[sm_Count];
-extern const char  IpCharacters[];
-
-class cStreamdevMenuSetupPage: public cMenuSetupPage {
-protected:
-	void AddCategory(const char *Title);
-	virtual void Store(void) = 0;
-
-	void AddBoolEdit(const char *Title, int &Value);
-	void AddIpEdit(const char *Title, char *Value);
-	void AddShortEdit(const char *Title, int &Value);
-	void AddRangeEdit(const char *Title, int &Value, int Min, int Max);
-	void AddSuspEdit(const char *Title, int &Value);
-	void AddTypeEdit(const char *Title, int &Value);
-};
 
 class cMenuEditIpItem: public cMenuEditItem {
 private:
+	static const char IpCharacters[];
 	char *value;
 	int curNum;
 	int pos;

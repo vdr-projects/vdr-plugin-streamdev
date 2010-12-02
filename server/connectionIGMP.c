@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionIGMP.c,v 1.1 2009/02/13 10:39:22 schmirl Exp $
+ *  $Id: connectionIGMP.c,v 1.1.4.1 2010/06/11 06:06:02 schmirl Exp $
  */
 
 #include <ctype.h>
@@ -31,7 +31,7 @@ bool cConnectionIGMP::Start(cChannel *Channel, in_addr_t Dst)
 			struct in_addr ip;
 			ip.s_addr = Dst;
 			if (Connect(inet_ntoa(ip), m_ClientPort)) {
-				m_LiveStreamer = new cStreamdevLiveStreamer(0);
+				m_LiveStreamer = new cStreamdevLiveStreamer(0, this);
 				if (m_LiveStreamer->SetChannel(Channel, m_StreamType)) {
 					m_LiveStreamer->SetDevice(device);
 					if (!SetDSCP())

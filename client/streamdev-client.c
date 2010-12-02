@@ -3,7 +3,7 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-client.c,v 1.6 2008/04/08 14:18:15 schmirl Exp $
+ * $Id: streamdev-client.c,v 1.1.2.1 2010/06/14 10:40:11 schmirl Exp $
  */
 
 #include "streamdev-client.h"
@@ -30,11 +30,6 @@ bool cPluginStreamdevClient::Start(void) {
 	I18nRegister(PLUGIN_NAME_I18N);
 	cStreamdevDevice::Init();
 	return true;
-}
-
-void cPluginStreamdevClient::Housekeeping(void) {
-	if (StreamdevClientSetup.StartClient && StreamdevClientSetup.SyncEPG)
-		ClientSocket.SynchronizeEPG();
 }
 
 const char *cPluginStreamdevClient::MainMenuEntry(void) {
