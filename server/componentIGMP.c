@@ -1,5 +1,5 @@
 /*
- *  $Id: componentIGMP.c,v 1.1 2009/02/13 10:39:22 schmirl Exp $
+ *  $Id: componentIGMP.c,v 1.2 2009/07/03 21:44:19 schmirl Exp $
  */
 #include <netinet/ip.h>
 #include <netinet/igmp.h>
@@ -209,7 +209,7 @@ cServerConnection* cComponentIGMP::Accept(void)
 	igmp->igmp_cksum = 0;
 	if (chksum != inetChecksum((uint16_t *)igmp, ip_datalen))
 	{
-		esyslog("INVALID CHECKSUM %d %d %d %d 0x%x 0x%x", ntohs(ip->ip_len), ip_hdrlen, ip_datalen, recv_len, chksum, inetChecksum((uint16_t *)igmp, ip_datalen));
+		esyslog("INVALID CHECKSUM %d %d %d %lu 0x%x 0x%x", (int) ntohs(ip->ip_len), ip_hdrlen, ip_datalen, (unsigned long int) recv_len, chksum, inetChecksum((uint16_t *)igmp, ip_datalen));
 		return NULL;
 	}
 	logIGMP(igmp->igmp_type, ip->ip_src, ip->ip_dst, igmp->igmp_group);
