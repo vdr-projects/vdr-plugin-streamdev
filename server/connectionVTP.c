@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.14 2007/05/09 09:12:42 schmirl Exp $
+ *  $Id: connectionVTP.c,v 1.15 2007/09/21 12:45:31 schmirl Exp $
  */
  
 #include "server/connectionVTP.h"
@@ -469,7 +469,7 @@ cConnectionVTP::cConnectionVTP(void):
 		m_FilterSocket(NULL),
 		m_FilterStreamer(NULL),
 		m_LastCommand(NULL),
-		m_NoTSPIDS(false),
+		m_StreamType(stTSPIDS),
 		m_LSTEHandler(NULL),
 		m_LSTCHandler(NULL),
 		m_LSTTHandler(NULL)
@@ -572,13 +572,27 @@ bool cConnectionVTP::Command(char *Cmd)
 bool cConnectionVTP::CmdCAPS(char *Opts) 
 {
 	if (strcasecmp(Opts, "TS") == 0) {
-		m_NoTSPIDS = true;
-		return Respond(220, "Ignored, capability \"%s\" accepted for "
-		               "compatibility", Opts);
+		m_StreamType = stTS;
+		return Respond(220, "Capability \"%s\" accepted", Opts);
 	}
 
 	if (strcasecmp(Opts, "TSPIDS") == 0) {
-		m_NoTSPIDS = false;
+		m_StreamType = stTSPIDS;
+		return Respond(220, "Capability \"%s\" accepted", Opts);
+	}
+
+	if (strcasecmp(Opts, "PS") == 0) {
+		m_StreamType = stPS;
+		return Respond(220, "Capability \"%s\" accepted", Opts);
+	}
+
+	if (strcasecmp(Opts, "PES") == 0) {
+		m_StreamType = stPES;
+		return Respond(220, "Capability \"%s\" accepted", Opts);
+	}
+
+	if (strcasecmp(Opts, "EXTERN") == 0) {
+		m_StreamType = stExtern;
 		return Respond(220, "Capability \"%s\" accepted", Opts);
 	}
 
@@ -715,7 +729,7 @@ bool cConnectionVTP::CmdTUNE(char *Opts)
 
 	delete m_LiveStreamer;
 	m_LiveStreamer = new cStreamdevLiveStreamer(1);
-	m_LiveStreamer->SetChannel(chan, m_NoTSPIDS ? stTS : stTSPIDS);
+	m_LiveStreamer->SetChannel(chan, m_StreamType);
 	m_LiveStreamer->SetDevice(dev);
 	if(m_LiveSocket)
 		m_LiveStreamer->Start(m_LiveSocket);

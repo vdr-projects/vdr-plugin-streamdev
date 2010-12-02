@@ -489,7 +489,7 @@ int get_video_info(Remux *rem)
 	VideoInfo *vi = &rem->video_info;
 
 	while (found < 4 && ring_rest(vid_buffy)){
-		uint8_t b[3];
+		uint8_t b[4];
 
 		vring_peek( rem, b, 4, 0);
 		if ( b[0] == 0x00 && b[1] == 0x00 && b[2] == 0x01

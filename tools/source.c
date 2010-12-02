@@ -140,8 +140,10 @@ ssize_t cTBSource::ReadUntil(void *Buffer, size_t Length, const char *Seq,
 
 			len = m_LineBuffer.size();
 			m_LineBuffer.resize(BUFSIZ);
-			if ((b = Read((char*)m_LineBuffer.data() + len, BUFSIZ - len)) == -1)
+			if ((b = Read((char*)m_LineBuffer.data() + len, BUFSIZ - len)) == -1) {
+				m_LineBuffer.resize(len);
 				return -1;
+			}
 			m_LineBuffer.resize(len + b);
 
 			if ((len = m_LineBuffer.find(Seq)) != (size_t)-1) {

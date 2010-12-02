@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.13 2007/05/07 12:18:18 schmirl Exp $
+ *  $Id: device.c,v 1.14 2007/07/20 06:46:47 schmirl Exp $
  */
  
 #include "client/device.h"
@@ -51,12 +51,21 @@ cStreamdevDevice::cStreamdevDevice(void) {
 
 cStreamdevDevice::~cStreamdevDevice() {
 	Dprintf("Device gets destructed\n");
+
+	Lock();
 	m_Device = NULL;
-	delete m_TSBuffer;
-	delete m_Assembler;
+	m_Filters->SetConnection(-1);
+	ClientSocket.Quit();
+	ClientSocket.Reset();
+	Unlock();
+
+	Cancel(3);
+
 #if VDRVERSNUM >= 10300
-	delete m_Filters;
+	DELETENULL(m_Filters);
 #endif
+	DELETENULL(m_TSBuffer);
+	delete m_Assembler;
 }
 
 bool cStreamdevDevice::ProvidesSource(int Source) const {
@@ -216,7 +225,7 @@ void cStreamdevDevice::CloseDvr(void) {
 }
 
 bool cStreamdevDevice::GetTSPacket(uchar *&Data) {
-	if (m_TSBuffer) {
+	if (m_TSBuffer && m_Device) {
 		Data = m_TSBuffer->Get();
 #if 1 // TODO: this should be fixed in vdr cTSBuffer
 		// simple disconnect detection

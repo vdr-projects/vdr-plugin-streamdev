@@ -1,5 +1,5 @@
 /*
- *  $Id: common.c,v 1.4 2005/02/11 16:44:14 lordjaxom Exp $
+ *  $Id: common.c,v 1.5 2007/09/21 11:55:56 schmirl Exp $
  */
  
 #include <vdr/channels.h>
@@ -11,7 +11,7 @@
 
 using namespace std;
 
-const char *VERSION = "0.3.3-20070509";
+const char *VERSION = "0.3.3-20070921";
 
 const char *StreamTypes[st_Count] = {
 	"TS",
@@ -270,7 +270,7 @@ eOSState cMenuEditIpItem::ProcessKey(eKeys Key) {
 		} else
 			curNum = curNum * 10 + (Key - k0);
 
-		if (!step && (curNum * 10 > 255) || (curNum == 0)) {
+		if ((curNum * 10 > 255) || (curNum == 0)) {
 			in_addr addr;
 			addr.s_addr = inet_addr(value);
 			if ((int)addr.s_addr == -1)

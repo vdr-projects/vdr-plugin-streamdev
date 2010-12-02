@@ -559,11 +559,12 @@ istream & operator >> (istream & stream, PS_Packet & x){
 	p = stream.tellg();
 	while (!stream.eof() && !found && count < MAX_SEARCH) {
 		stream.read((char *)&headr,4);
-		if (headr[0] == 0x00 && headr[1] == 0x00 && headr[2] == 0x01)
+		if (headr[0] == 0x00 && headr[1] == 0x00 && headr[2] == 0x01) {
 			if ( headr[3] == 0xBA ) 
 				found = 1;
 			else if ( headr[3] == 0xB9 ) break;
 			else stream.seekg(p+streampos(1));
+		}
 		count++;
 	}
 	
@@ -776,16 +777,16 @@ int tv_norm(istream &stream){
 	while (!stream.eof() && !found) {
 		p = stream.tellg();
 		stream.read((char *)headr,4);
-		if (headr[0] == 0x00 && headr[1] == 0x00 && headr[2] == 0x01)
+		if (headr[0] == 0x00 && headr[1] == 0x00 && headr[2] == 0x01) {
 			if ( headr[3] == 0xB5 ){ 
-				char *profile[] = {"reserved", "High", "Spatially Scalable",
+				const char *profile[] = {"reserved", "High", "Spatially Scalable",
 						   "SNR Scalable", "Main", "Simple", "undef",
 						   "undef"};
-				char *level[]   = {"res", "res", "res", "res",
+				const char *level[]   = {"res", "res", "res", "res",
 						   "High","res", "High 1440", "res",
 						   "Main","res", "Low", "res",
 						   "res", "res", "res", "res"};
-				char *chroma[]  = {"res", "4:2:0", "4:2:2", "4:4:4:"};
+				const char *chroma[]  = {"res", "4:2:0", "4:2:2", "4:4:4:"};
 				mpeg = 2;
 				stream.read((char *)headr,4);
 				cerr << "PROFILE: " << profile[headr[0] & 0x7] << endl;
@@ -795,7 +796,8 @@ int tv_norm(istream &stream){
 			} else {
 				mpeg = 1;
 				found = 1;
-			}				
+			}
+		}
 		if (! found) stream.seekg(p+streampos(1));
 	}
 
@@ -831,7 +833,7 @@ int stream_type(istream &fin){
 	}
 	
 	fin >> pes;
-	fin.read((char *)!headr,4);
+	fin.read((char *)NULL,4);
 			fin.seekg(p);
 	if (fin && headr[0] == 0x00 && headr[1] == 0x00
 	    && headr[2] == 0x01 ){
@@ -868,7 +870,7 @@ void analyze(istream &fin)
 	PS_Packet ps;
 	PES_Packet pes;
 	int fc = 0;
-	char *frames[3] = {"I-Frame","P-Frame","B-Frame"};
+	const char *frames[3] = {"I-Frame","P-Frame","B-Frame"};
 			
 	while(fin){
 		uint32_t pts;
