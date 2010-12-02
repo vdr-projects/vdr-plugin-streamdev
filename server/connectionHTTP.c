@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.c,v 1.17.2.1 2010/06/11 06:06:02 schmirl Exp $
+ *  $Id: connectionHTTP.c,v 1.19 2010/07/20 12:26:29 schmirl Exp $
  */
 
 #include <ctype.h>
@@ -336,7 +336,7 @@ bool cConnectionHTTP::ProcessURI(const std::string& PathInfo)
 
 	Dprintf("before channelfromstring: type(%s) filespec(%s) fileext(%s)\n", type.c_str(), filespec.c_str(), fileext.c_str());
 
-	if ((m_ChannelList = ChannelListFromString(PathInfo.substr(0, file_pos), filespec.c_str(), fileext.c_str())) != NULL) {
+	if ((m_ChannelList = ChannelListFromString(PathInfo.substr(1, file_pos), filespec.c_str(), fileext.c_str())) != NULL) {
 		Dprintf("Channel list requested\n");
 		return true;
 	} else if ((m_Channel = ChannelFromString(filespec.c_str(), &m_Apid[0], &m_Dpid[0])) != NULL) {

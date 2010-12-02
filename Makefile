@@ -1,7 +1,7 @@
 #
 # Makefile for a Video Disk Recorder plugin
 #
-# $Id: Makefile,v 1.21.2.2 2010/06/20 19:11:15 schmirl Exp $
+# $Id: Makefile,v 1.22 2010/07/19 13:49:24 schmirl Exp $
 
 # The main source file name.
 #

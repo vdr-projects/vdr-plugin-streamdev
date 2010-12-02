@@ -225,14 +225,13 @@ function startReply
 
 	# create FIFO and read from it in the background
 	mkfifo "$FIFO"
-	trap "kill 0; sleep 1; rm '$FIFO'; trap - EXIT HUP INT TERM ABRT PIPE CHLD" EXIT HUP INT TERM ABRT PIPE CHLD
+	trap "trap '' EXIT HUP INT TERM ABRT PIPE CHLD; kill -INT 0; sleep 1; fuser -k '$FIFO'; rm '$FIFO'" EXIT HUP INT TERM ABRT PIPE CHLD
 	cat "$FIFO" <&- &
 }
 
 HEADER=()
 
-set > /tmp/env
-[ "$LOGGER" ] && exec 2> >($LOGGER -t "vdr: [$$] streamdev EXT" 2>&-)
+[ "$LOGGER" ] && exec 2> >($LOGGER -t "vdr: [$$] ${0##*/}" 2>&-)
 
 # set default content-types
 case "$REMUX_VPID" in
@@ -242,15 +241,15 @@ esac
 
 QUALITY=${REMUX_PARAM_QUALITY:-$QUALITY}
 case "$QUALITY" in
-	DSL1000)  VBR=96;   ABR=16;  WIDTH=160;;
-	DSL2000)  VBR=128;  ABR=16;  WIDTH=160;;
-	DSL3000)  VBR=256;  ABR=16;  WIDTH=320;;
-	DSL6000)  VBR=378;  ABR=32;  WIDTH=320;;
-	DSL16000) VBR=512;  ABR=32;  WIDTH=480;;
-	WLAN11)   VBR=768;  ABR=64;  WIDTH=640;;
-	WLAN45)   VBR=2048; ABR=128; WIDTH=;;
-	LAN10)    VBR=4096; ABR=;    WIDTH=;;
-	*)        error "Unknown quality '$QUALITY'";;
+	DSL1000|dsl1000)   VBR=96;   ABR=16;  WIDTH=160;;
+	DSL2000|dsl2000)   VBR=128;  ABR=16;  WIDTH=160;;
+	DSL3000|dsl3000)   VBR=256;  ABR=16;  WIDTH=320;;
+	DSL6000|dsl6000)   VBR=378;  ABR=32;  WIDTH=320;;
+	DSL16000|dsl16000) VBR=512;  ABR=32;  WIDTH=480;;
+	WLAN11|wlan11)     VBR=768;  ABR=64;  WIDTH=640;;
+	WLAN54|wlan54)     VBR=2048; ABR=128; WIDTH=;;
+	LAN10|lan10)       VBR=4096; ABR=;    WIDTH=;;
+	*)                 error "Unknown quality '$QUALITY'";;
 esac
 ABR=${REMUX_PARAM_ABR:-$ABR}
 VBR=${REMUX_PARAM_VBR:-$VBR}

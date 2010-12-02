@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.c,v 1.19.2.1 2010/06/11 06:06:03 schmirl Exp $
+ *  $Id: streamer.c,v 1.20 2010/07/19 13:49:32 schmirl Exp $
  */
  
 #include <vdr/ringbuffer.h>

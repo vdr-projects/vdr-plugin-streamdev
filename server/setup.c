@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.c,v 1.9.2.2 2010/06/18 19:07:32 schmirl Exp $
+ *  $Id: setup.c,v 1.10 2010/07/19 13:49:31 schmirl Exp $
  */
  
 #include <vdr/menuitems.h>

@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.h,v 1.8.2.1 2010/06/11 06:06:02 schmirl Exp $
+ *  $Id: connection.h,v 1.9 2010/07/19 13:49:31 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVER_CONNECTION_H

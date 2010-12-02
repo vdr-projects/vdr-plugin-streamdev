@@ -1,5 +1,5 @@
 /*
- *  $Id: common.h,v 1.15.2.1 2010/06/11 06:06:01 schmirl Exp $
+ *  $Id: common.h,v 1.16 2010/07/19 13:49:24 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_COMMON_H

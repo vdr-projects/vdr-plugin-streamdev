@@ -3,7 +3,7 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-server.c,v 1.1.2.1 2010/06/14 10:40:20 schmirl Exp $
+ * $Id: streamdev-server.c,v 1.2 2010/07/19 13:49:32 schmirl Exp $
  */
 
 #include <getopt.h>

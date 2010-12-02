@@ -1,6 +1,20 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+2010-07-20: Version 0.5.0b
+
+- fixed wrong URL path in m3u playlists (reported by Norman Thiel)
+
+2010-07-20: Version 0.5.0a
+
+- set externremux.sh executable in distribution archive
+- externremux quality value should be wlan54, not wlan45 (reported by
+  wolfi.m@vdrportal)
+
+2010-07-19: Version 0.5.0
+
+- using SIGINT in externremux to kill mencoder works better than SIGTERM;
+  especially x264 still needs a SIGKILL sometimes
 - added --remove-destination to cp commands installing plugins
 - fixed "plugin doesn't honor APIVERSION" (reported by carel@vdrportal)
 - updated Italian translation (thanks to Diego Pierotto)
