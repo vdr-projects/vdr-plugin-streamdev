@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.c,v 1.14 2005/05/09 20:22:29 lordjaxom Exp $
+ *  $Id: streamer.c,v 1.15 2007/04/02 10:32:34 schmirl Exp $
  */
  
 #include <vdr/ringbuffer.h>
@@ -40,6 +40,9 @@ void cStreamdevWriter::Action(void)
 	uchar *block = NULL;
 	int count, offset = 0;
 	m_Active = true;
+
+	sel.Clear();
+	sel.Add(*m_Socket, true);
 	while (m_Active) {
 		if (block == NULL) {
 			block = m_Streamer->Get(count);
@@ -47,9 +50,7 @@ void cStreamdevWriter::Action(void)
 		}
 
 		if (block != NULL) {
-			sel.Clear();
-			sel.Add(*m_Socket, true);
-			if (sel.Select(500) == -1) {
+			if (sel.Select(15000) == -1) {
 				esyslog("ERROR: streamdev-server: couldn't send data: %m");
 				break;
 			}

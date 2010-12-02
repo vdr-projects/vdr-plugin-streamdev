@@ -61,11 +61,11 @@ bool cTBSource::TimedWrite(const void *Buffer, size_t Length, uint TimeoutMs) {
 	cTimeMs starttime;
 	ms = TimeoutMs;
 	offs = 0;
+	sel.Clear();
+	sel.Add(m_Filed, true);
 	while (Length > 0) {
 		int b;
 
-		sel.Clear();
-		sel.Add(m_Filed, true);
 		if (sel.Select(ms) == -1)
 			return false;
 
@@ -90,11 +90,11 @@ bool cTBSource::SafeWrite(const void *Buffer, size_t Length) {
 	int offs;
 
 	offs = 0;
+	sel.Clear();
+	sel.Add(m_Filed, true);
 	while (Length > 0) {
 		int b;
 
-		sel.Clear();
-		sel.Add(m_Filed, true);
 		if (sel.Select() == -1)
 			return false;
 
@@ -128,9 +128,9 @@ ssize_t cTBSource::ReadUntil(void *Buffer, size_t Length, const char *Seq,
 
 	cTimeMs starttime;
 	ms = TimeoutMs;
+	sel.Clear();
+	sel.Add(m_Filed, false);
 	while (m_LineBuffer.size() < BUFSIZ) {
-		sel.Clear();
-		sel.Add(m_Filed, false);
 
 		if (sel.Select(ms) == -1)
 			return -1;

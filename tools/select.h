@@ -11,8 +11,8 @@ class cTBSelect {
 private:
 	int    m_MaxFiled;
 
-	fd_set m_Rfds;
-	fd_set m_Wfds;
+	fd_set m_FdsQuery[2];
+	fd_set m_FdsResult[2];
 
 public:
 	cTBSelect(void);
@@ -50,26 +50,26 @@ public:
 };
 
 inline void cTBSelect::Clear(void) {
-	FD_ZERO(&m_Rfds);
-	FD_ZERO(&m_Wfds);
+	FD_ZERO(&m_FdsQuery[0]);
+	FD_ZERO(&m_FdsQuery[1]);
 	m_MaxFiled = -1;
 }
 
 inline bool cTBSelect::Add(int Filed, bool Output /* = false */) {
 	if (Filed < 0) return false;
-	FD_SET(Filed, Output ? &m_Wfds : &m_Rfds);
+	FD_SET(Filed, &m_FdsQuery[Output ? 1 : 0]);
 	if (Filed > m_MaxFiled) m_MaxFiled = Filed;
 	return true;
 }
 
 inline bool cTBSelect::CanRead(int FileNo) const {
 	if (FileNo < 0) return false;
-	return FD_ISSET(FileNo, &m_Rfds);
+	return FD_ISSET(FileNo, &m_FdsResult[0]);
 }
 
 inline bool cTBSelect::CanWrite(int FileNo) const {
 	if (FileNo < 0) return false;
-	return FD_ISSET(FileNo, &m_Wfds);
+	return FD_ISSET(FileNo, &m_FdsResult[1]);
 }
 
 #endif // TOOLBOX_SELECT_H

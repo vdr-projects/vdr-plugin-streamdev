@@ -1,5 +1,5 @@
 /*
- *  $Id: server.c,v 1.4 2006/11/10 11:52:41 schmirl Exp $
+ *  $Id: server.c,v 1.5 2007/04/02 10:32:34 schmirl Exp $
  */
 
 #include "server/server.h"
@@ -91,20 +91,29 @@ void cStreamdevServer::Action(void)
 				select.Add(s->Socket(), true);
 		}
 
-		int result;
-		while ((result = select.Select(100)) < 0 && errno == ETIMEDOUT) {
-			if (!m_Active) break;
-		}
+		int sel;
+		do
+		{
+			sel = select.Select(400);
+			if (sel < 0 && errno == ETIMEDOUT) {
+				// check for aborted clients
+				for (cServerConnection *s = m_Clients.First(); s; s = m_Clients.Next(s)) {
+					if (s->Abort())
+						sel = 0;
+				}
+			}
+		} while (sel < 0 && errno == ETIMEDOUT && m_Active);
 
-		if (result < 0) {
-			if (m_Active) // no exit was requested while polling
-				esyslog("fatal error, server exiting: %m");
+		if (!m_Active)
+			break;
+		if (sel < 0) {
+			esyslog("fatal error, server exiting: %m");
 			break;
 		}
 	
 		/* Ask all Server components to act on signalled sockets */
 		for (cServerComponent *c = m_Servers.First(); c; c = m_Servers.Next(c)){
-			if (select.CanRead(c->Socket())) {
+			if (sel && select.CanRead(c->Socket())) {
 				cServerConnection *client = c->Accept();
 				m_Clients.Add(client);
 
@@ -125,11 +134,13 @@ void cStreamdevServer::Action(void)
 		for (cServerConnection *s = m_Clients.First(); s;) {
 			bool result = true;
 
-			if (select.CanWrite(s->Socket()))
+			if (sel && select.CanWrite(s->Socket()))
 				result = s->Write();
 
-			if (result && select.CanRead(s->Socket()))
+			if (sel && result && select.CanRead(s->Socket()))
 				result = s->Read();
+
+			result &= !s->Abort();
 			
 			cServerConnection *next = m_Clients.Next(s);
 			if (!result) {

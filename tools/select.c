@@ -21,19 +21,21 @@ int cTBSelect::Select(uint TimeoutMs) {
 
 	tv.tv_usec = (TimeoutMs % 1000) * 1000;
 	tv.tv_sec = TimeoutMs / 1000;
+	memcpy(m_FdsResult, m_FdsQuery, sizeof(m_FdsResult));
 
 	if (TimeoutMs == 0)
-		return ::select(m_MaxFiled + 1, &m_Rfds, &m_Wfds, NULL, &tv);
+		return ::select(m_MaxFiled + 1, &m_FdsResult[0], &m_FdsResult[1], NULL, &tv);
 
 	cTimeMs starttime;
 	ms = TimeoutMs;
-	while (ms > 0 && (res = ::select(m_MaxFiled + 1, &m_Rfds, &m_Wfds, NULL, 
+	while (ms > 0 && (res = ::select(m_MaxFiled + 1, &m_FdsResult[0], &m_FdsResult[1], NULL, 
 			&tv)) == -1 && errno == EINTR) {
 		ms = TimeoutMs - starttime.Elapsed();
 		tv.tv_usec = (ms % 1000) * 1000;
 		tv.tv_sec = ms / 1000;
+		memcpy(m_FdsResult, m_FdsQuery, sizeof(m_FdsResult));
 	}
-	if (ms <= 0) {
+	if (ms <= 0 || res == 0) {
 		errno = ETIMEDOUT;
 		return -1;
 	}
@@ -42,8 +44,8 @@ int cTBSelect::Select(uint TimeoutMs) {
 
 int cTBSelect::Select(void) {
 	ssize_t res;
-	while ((res = ::select(m_MaxFiled + 1, &m_Rfds, &m_Wfds, NULL, NULL)) == -1
-			&& errno == EINTR)
-		;
+	do {
+		memcpy(m_FdsResult, m_FdsQuery, sizeof(m_FdsResult));
+	} while ((res = ::select(m_MaxFiled + 1, &m_FdsResult[0], &m_FdsResult[1], NULL, NULL)) == -1 && errno == EINTR);
 	return res;
 }
