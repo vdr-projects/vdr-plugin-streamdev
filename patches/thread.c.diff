@@ -1,0 +1,29 @@
+--- vdr-vanilla/thread.c	2003-10-10 18:19:15.000000000 +0200
++++ vdr-vanilla-thread/thread.c	2003-10-10 18:43:36.000000000 +0200
+@@ -158,12 +158,21 @@
+ 
+ bool cThread::Active(void)
+ {
+-  if (threadPid) {
+-     if (kill(threadPid, SIGIO) < 0) { // couldn't find another way of checking whether the thread is still running - any ideas?
+-        if (errno == ESRCH)
+-           threadPid = 0;
+-        else
++  if (thread) {
++     /*
++      * Single UNIX Spec v2 says:
++      *
++      * The pthread_kill() function is used to request
++      * that a signal be delivered to the specified thread.
++      *
++      * As in kill(), if sig is zero, error checking is
++      * performed but no signal is actually sent.
++      */
++     int err;
++     if ((err = pthread_kill(thread, 0)) != 0) {
++        if (err != ESRCH)
+            LOG_ERROR;
++        thread = 0;
+         }
+      else
+         return true;

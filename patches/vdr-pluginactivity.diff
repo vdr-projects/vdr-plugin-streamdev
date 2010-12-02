@@ -1,0 +1,113 @@
+diff -Nru -x PLUGINS vdr-1.3.12-orig/i18n.c vdr-1.3.12/i18n.c
+--- vdr-1.3.12-orig/i18n.c	2004-05-28 15:19:29.000000000 +0200
++++ vdr-1.3.12/i18n.c	2004-08-17 16:01:07.000000000 +0200
+@@ -1033,8 +1033,8 @@
+     "´ÕÙáâÒØâÕÛìÝÞ ßÕàÕ×ÐßãáâØâì?",
+     "Zaista ponovo pokrenuti?",
+   },
+-  { "Recording - restart anyway?",
+-    "Aufnahme läuft - trotzdem neu starten?",
++  { "Busy - restart anyway?",
++    "Beschäftigt - trotzdem neu starten?",
+     "Snemanje - zares ponoven zagon?",
+     "In registrazione - restart comunque?",
+     "Opname loopt - toch opnieuw starten?",
+@@ -1052,8 +1052,8 @@
+     "¸Ôñâ ×ÐßØáì - ÔÕÙáâÒØâÕÛìÝÞ ßÕàÕ×ÐßãáâØâì?",
+     "Snimanje traje - svejedno restart sistema?",
+   },
+-  { "Recording - shut down anyway?",
+-    "Aufnahme läuft - trotzdem ausschalten?",
++  { "Busy - shut down anyway?",
++    "Beschäftigt - trotzdem ausschalten?",
+     "Snemanje - zares izklopi?",
+     "In registrazione - spengo comunque?",
+     "Opname loopt - toch uitschakelen?",
+diff -Nru -x PLUGINS vdr-1.3.12-orig/menu.c vdr-1.3.12/menu.c
+--- vdr-1.3.12-orig/menu.c	2004-06-13 22:26:51.000000000 +0200
++++ vdr-1.3.12/menu.c	2004-08-17 16:00:07.000000000 +0200
+@@ -2201,7 +2201,7 @@
+ 
+ eOSState cMenuSetup::Restart(void)
+ {
+-  if (Interface->Confirm(cRecordControls::Active() ? tr("Recording - restart anyway?") : tr("Really restart?"))) {
++  if (Interface->Confirm((cRecordControls::Active() || cPluginManager::Active()) ? tr("Busy - restart anyway?") : tr("Really restart?"))) {
+      cThread::EmergencyExit(true);
+      return osEnd;
+      }
+diff -Nru -x PLUGINS vdr-1.3.12-orig/plugin.c vdr-1.3.12/plugin.c
+--- vdr-1.3.12-orig/plugin.c	2004-05-22 13:25:22.000000000 +0200
++++ vdr-1.3.12/plugin.c	2004-08-17 15:57:52.000000000 +0200
+@@ -64,6 +64,11 @@
+ {
+ }
+ 
++bool cPlugin::Active(void)
++{
++  return false;
++}
++
+ const char *cPlugin::MainMenuEntry(void)
+ {
+   return NULL;
+@@ -369,6 +374,18 @@
+   return NULL;
+ }
+ 
++bool cPluginManager::Active(void)
++{
++  if (pluginManager) {
++     for (cDll *dll = pluginManager->dlls.First(); dll; dll = pluginManager->dlls.Next(dll)) {
++         cPlugin *p = dll->Plugin();
++         if (p && p->Active())
++            return true;
++         }
++     }
++  return false;
++}
++
+ void cPluginManager::Shutdown(bool Log)
+ {
+   cDll *dll;
+diff -Nru -x PLUGINS vdr-1.3.12-orig/plugin.h vdr-1.3.12/plugin.h
+--- vdr-1.3.12-orig/plugin.h	2004-04-30 15:46:21.000000000 +0200
++++ vdr-1.3.12/plugin.h	2004-08-17 15:56:51.000000000 +0200
+@@ -36,6 +36,7 @@
+   virtual bool Initialize(void);
+   virtual bool Start(void);
+   virtual void Housekeeping(void);
++	virtual bool Active(void);
+ 
+   virtual const char *MainMenuEntry(void);
+   virtual cOsdObject *MainMenuAction(void);
+@@ -85,6 +86,7 @@
+   static bool HasPlugins(void);
+   static cPlugin *GetPlugin(int Index);
+   static cPlugin *GetPlugin(const char *Name);
++	static bool Active(void);
+   void Shutdown(bool Log = false);
+   };
+ 
+diff -Nru -x PLUGINS vdr-1.3.12-orig/vdr.c vdr-1.3.12/vdr.c
+--- vdr-1.3.12-orig/vdr.c	2004-06-13 15:52:09.000000000 +0200
++++ vdr-1.3.12/vdr.c	2004-08-17 15:59:18.000000000 +0200
+@@ -707,8 +707,8 @@
+                           Skins.Message(mtError, tr("Can't shutdown - option '-s' not given!"));
+                           break;
+                           }
+-                       if (cRecordControls::Active()) {
+-                          if (Interface->Confirm(tr("Recording - shut down anyway?")))
++                       if (cRecordControls::Active() || cPluginManager::Active()) {
++                          if (Interface->Confirm(tr("Busy - shut down anyway?")))
+                              ForceShutdown = true;
+                           }
+                        LastActivity = 1; // not 0, see below!
+@@ -821,7 +821,7 @@
+                  Skins.Message(mtInfo, tr("Editing process finished"));
+               }
+            }
+-        if (!Interact && ((!cRecordControls::Active() && !cCutter::Active() && (!Interface->HasSVDRPConnection() || UserShutdown)) || ForceShutdown)) {
++        if (!Interact && ((!cRecordControls::Active() && !cCutter::Active() && !cPluginManager::Active() && (!Interface->HasSVDRPConnection() || UserShutdown)) || ForceShutdown)) {
+            time_t Now = time(NULL);
+            if (Now - LastActivity > ACTIVITYTIMEOUT) {
+               // Shutdown:

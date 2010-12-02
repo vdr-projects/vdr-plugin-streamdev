@@ -1,0 +1,146 @@
+VDR Plugin 'streamdev' Revision History
+---------------------------------------
+
+2004-??-??: Version 0.3.3
+
+- dropped support for non-ts streaming in vdr-to-vdr clients
+- implemented packet buffer that seems to improve distortions
+- greatly re-worked device selection on server and client
+  (vdr-to-vdr clients should behave exactly like clients with one card,
+  can't test conditional access, though)
+- now printing an error and exiting if streamdevhosts.conf is not existing
+- increased client stream priority to 1
+- implemented remote schedule to program remote timers directly from schedule
+- the servers are turned on by default now
+- new setup parameters "Bind to IP" for both servers for binding to a specific
+  interface
+- re-implemented section streaming (turned off by default, see setup menu)
+- implemented a possibility to prevent a shutdown when clients are connected
+  (patch VDR with patches/vdr-pluginactivity.diff if you want this feature)
+- implemented channel listing through channels.htm(l) URI
+
+????-??-??: Version 0.3.2
+
+... has myteriously disappeared :-)
+
+2004-02-16: Version 0.3.1 (unstable)
+
+- Added finnish language texts (thanks to Rolf Ahrenberg)
+- Increased all ringbuffer sizes to 3 MB
+- Autodetecting VDR 1.2.x, 1.2.x with AutoPID and 1.3.x on compilation
+- Server is only restarted if necessary after confirming setup
+- Implemented PID-based streaming (only needed PIDs are transferred instead of
+  all PIDs of the requested channel) (configurable)
+- Implemented an editor for remote timers
+- Implemented manual EPG synchronization from client
+- Implemented Server Suspend remotely from client (configurable)
+- Implemented an IP-Editor for the setup menu
+- Separated Client and Server into two PlugIns
+- Increased initial number of clients to five
+- Implemented host-based authorization (syntax is equal to svdrphosts.conf)
+- Removed two irritating messages that appeared sometimes while exiting VDR
+- Implemented "Choose, Always, Never" for Suspend Mode, so it can be configured
+  to behave like 0.2.0 (Always), 0.3.0 (Choose) or completely different (Never)
+- Added missing translation entries
+- Added PlugIn description to translation table
+- Fully upgraded to VDR 1.3.X regarding threading (but still works with 1.2.6)
+- Reworked manual (almost everything)
+
+2003-10-10: Version 0.3.0 (unstable)
+
+- Implemented "Suspend Live TV" in the VDR server (configurable)
+- Reimplemented choice of device for live streaming (better for switching on
+  client, and server doesn't loose live-tv)
+- Added missing translation entries
+- Increased client's streaming buffer size from 1 to 3 MB
+- Updated installation instructions (including a patch to VDR that is 
+  recommended currently)
+- Updated manual
+
+2003-10-04: Version 0.2.0 
+
+- Removed those silly warnings in the toolbox-headers
+- Implemented intelligent buffer overflow logging (doesn't flood syslog)
+- Implemented EPG synchronization in the VDR client (configurable)
+- Station name is transmitted in radio streaming now (Shoutcast-format).
+
+2003-09-24: Version 0.1.1beta1
+
+- Restructured remuxer code
+- Added an ES-remuxer for radio channels (currently only manually)
+
+2003-09-20: Version 0.1.0
+
+- Fixed thread-abortion timeout in server thread
+
+2003-08-31: Version 0.1.0beta4
+
+- Added italian language texts (thanks to Angelus (DOm))
+- Added a missing i18n translation (thanks to DOm)
+- Added an #ifdef so the setup menu is displayed correctly with ElchiAIO 
+	(thanks to DOm for reporting this one)
+- It's possible to select the HTTP streamtype remotely, specified in the
+  URL in addition to the old behaviour (thanks to Michal Novotny)
+- Fixed creation ob remuxer objects in the server
+- Fixed handling of timeout in cTBSelect
+
+2003-06-08: Version 0.1.0beta3
+
+- Fixed setup menu - now the cursor starts at the first visible entry
+- Added PS streaming for HTTP (should work with most players now)
+- Debugging symbols are only compiled with DEBUG=1 set
+
+2003-06-06: Version 0.1.0beta2
+
+- Added an #ifdef so this PlugIn will compile cleanly with the next 
+  AUTOPID-patches
+- Added categories to the menu
+- Fixed segfault when closing the menu with OK
+- Added an AnalogTV section to the README
+- Added some missing i18n entries
+- Corrected client reinitialization code (when changing client settings)
+- Added PS streaming for HTTP (should work with most players now)
+- Added -D_GNU_SOURCE to the Makefile (.......)
+
+2003-06-03: Version 0.1.0beta1
+
+- Replaced the toolbox with a current version
+- Rewrote the server core from scratch
+- Rewrote the client core from scratch
+- Reduced the size of blocks processed in a transceiver turn to 10 TS packets
+- Added TS transmission for HTTP (configurable via setup)
+- Most client settings can be done on-the-fly now
+- MIME type for radio channels now "audio/mpeg" instead of "video/mpeg"
+  (still doesn't work really)
+
+2003-05-08: Version 0.0.3beta1
+
+- Server stops correctly on VDR exit
+- Fixed a race condition when several threads access the client device
+- Made server code more modular
+- Structured the directories
+- Fixed a bug in informational log-message
+- Added Apid2, Dpid1 and Ppid in TS mode (silly me;) )
+
+2003-05-03: Version 0.0.2
+
+- Device is not deactivated anymore, since VDR does that itself
+- Server is correctly deactivated, so it can be faultlessly reactivated
+- Did some major code cleanup
+- Added new command to the PROTOCOL (to negotiate stream types)
+- Added the possibility to stream TS between two VDR's (which adds the 
+  possibility of having AC3, Teletext etc. on the client) - this is 
+  autonegotiated
+- Streamtype can be changed in the setup menu, if TS works too unreliable
+- Fixed a bug in multi-threaded device operation
+- Sharing an epg.data with a server will be possible even if there is no 
+  DVB-Device present
+- Added a basic HTTP daemon to the server code
+
+2003-03-17: Version 0.0.1a
+
+- Corrected some bugs in the README and on the homepage *g*
+
+2003-03-17: Version 0.0.1
+
+- Initial revision.

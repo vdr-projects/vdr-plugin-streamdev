@@ -1,0 +1,43 @@
+# The cannels.conf ca field can be used to bind a channel to a specific
+# device. The streamdev-client does not consider this information, so
+# there's no way to keep VDR from using streamdev for a specific
+# channel. Apply this patch if you need this feature.
+#
+# This fix should probably become part of streamdev. However as it
+# changes the behaviour of streamdev, I decided to keep it as a separate
+# patch until there is something like a new official streamdev release.
+#
+--- client/device.h.bak	2006-11-09 12:25:21.000000000 +0100
++++ client/device.h	2006-11-09 12:26:57.000000000 +0100
+@@ -50,6 +50,7 @@
+ 	cStreamdevDevice(void);
+ 	virtual ~cStreamdevDevice();
+ 
++	virtual int ProvidesCa(const cChannel *Channel) const;
+ 	virtual bool ProvidesSource(int Source) const;
+   virtual bool ProvidesTransponder(const cChannel *Channel) const;
+ 	virtual bool ProvidesChannel(const cChannel *Channel, int Priority = -1,
+--- client/device.c.bak	2006-11-09 12:23:24.000000000 +0100
++++ client/device.c	2006-11-09 12:35:48.000000000 +0100
+@@ -57,6 +57,12 @@
+ #endif
+ }
+ 
++int cStreamdevDevice::ProvidesCa(const cChannel *Channel) const
++{
++	// Encrypted is acceptable for now. Will ask the server later.
++	return Channel->Ca() <= CA_DVB_MAX ? cDevice::ProvidesCa(Channel) : 1;
++}
++
+ bool cStreamdevDevice::ProvidesSource(int Source) const {
+ 	Dprintf("ProvidesSource, Source=%d\n", Source);
+ 	return false;
+@@ -78,7 +84,7 @@
+ 	if (ClientSocket.DataSocket(siLive) != NULL 
+ 			&& TRANSPONDER(Channel, m_Channel))
+ 		res = true;
+-	else {
++	else if (ProvidesCa(Channel)) {
+ 		res = prio && ClientSocket.ProvidesChannel(Channel, Priority);
+ 		ndr = true;
+ 	}

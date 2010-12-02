@@ -1,0 +1,102 @@
+# Apply this patch to VDR if you want to use a fullfeatured DVB card
+# as pure output device. Infact the patch will keep VDR from using the
+# tuner of any local DVB card (also budget cards). It will not affect
+# other input devices like e.g. streamdev-client or DVB cards provided
+# by plugins (e.g. Hauppauge PVR).
+#
+# By default the patch is DISABLED. There will be a new OSD menu entry
+# in Setup->DVB which allows you to enable or disable the patch at any
+# time.
+diff -ru vdr-1.4.3.orig/config.c vdr-1.4.3/config.c
+--- vdr-1.4.3.orig/config.c	2006-07-22 13:57:51.000000000 +0200
++++ vdr-1.4.3/config.c	2006-11-16 08:16:37.000000000 +0100
+@@ -273,6 +273,7 @@
+   CurrentChannel = -1;
+   CurrentVolume = MAXVOLUME;
+   CurrentDolby = 0;
++  LocalChannelProvide = 1;
+   InitialChannel = 0;
+   InitialVolume = -1;
+ }
+@@ -434,6 +435,7 @@
+   else if (!strcasecmp(Name, "CurrentChannel"))      CurrentChannel     = atoi(Value);
+   else if (!strcasecmp(Name, "CurrentVolume"))       CurrentVolume      = atoi(Value);
+   else if (!strcasecmp(Name, "CurrentDolby"))        CurrentDolby       = atoi(Value);
++  else if (!strcasecmp(Name, "LocalChannelProvide")) LocalChannelProvide = atoi(Value);
+   else if (!strcasecmp(Name, "InitialChannel"))      InitialChannel     = atoi(Value);
+   else if (!strcasecmp(Name, "InitialVolume"))       InitialVolume      = atoi(Value);
+   else
+@@ -502,6 +504,7 @@
+   Store("CurrentChannel",     CurrentChannel);
+   Store("CurrentVolume",      CurrentVolume);
+   Store("CurrentDolby",       CurrentDolby);
++  Store("LocalChannelProvide",LocalChannelProvide);
+   Store("InitialChannel",     InitialChannel);
+   Store("InitialVolume",      InitialVolume);
+ 
+diff -ru vdr-1.4.3.orig/config.h vdr-1.4.3/config.h
+--- vdr-1.4.3.orig/config.h	2006-09-23 15:56:08.000000000 +0200
++++ vdr-1.4.3/config.h	2006-11-16 08:16:57.000000000 +0100
+@@ -250,6 +250,7 @@
+   int CurrentChannel;
+   int CurrentVolume;
+   int CurrentDolby;
++  int LocalChannelProvide;
+   int InitialChannel;
+   int InitialVolume;
+   int __EndData__;
+diff -ru vdr-1.4.3.orig/dvbdevice.c vdr-1.4.3/dvbdevice.c
+--- vdr-1.4.3.orig/dvbdevice.c	2006-08-14 11:38:32.000000000 +0200
++++ vdr-1.4.3/dvbdevice.c	2006-11-16 08:17:58.000000000 +0100
+@@ -766,6 +766,8 @@
+ 
+ bool cDvbDevice::ProvidesChannel(const cChannel *Channel, int Priority, bool *NeedsDetachReceivers) const
+ {
++  if (Setup.LocalChannelProvide != 1)
++     return false;
+   bool result = false;
+   bool hasPriority = Priority < 0 || Priority > this->Priority();
+   bool needsDetachReceivers = false;
+diff -ru vdr-1.4.3.orig/i18n.c vdr-1.4.3/i18n.c
+--- vdr-1.4.3.orig/i18n.c	2006-09-16 11:08:30.000000000 +0200
++++ vdr-1.4.3/i18n.c	2006-11-16 08:36:53.000000000 +0100
+@@ -3546,6 +3546,28 @@
+     "Foretrukket sprog",
+     "Preferovaný jazyk",
+   },
++  { "Setup.DVB$Use DVB receivers",
++    "DVB Empfangsteile benutzen",
++    "",
++    "",
++    "",
++    "",
++    "",
++    "",
++    "",
++    "",
++    "",
++    "",
++    "",
++    "",
++    "",
++    "",
++    "",
++    "",
++    "",
++    "",
++    "",
++  },
+   { "Setup.DVB$Primary DVB interface",
+     "Primäres DVB-Interface",
+     "Primarna naprava",
+diff -ru vdr-1.4.3.orig/menu.c vdr-1.4.3/menu.c
+--- vdr-1.4.3.orig/menu.c	2006-07-23 11:23:11.000000000 +0200
++++ vdr-1.4.3/menu.c	2006-11-16 08:37:27.000000000 +0100
+@@ -2354,6 +2354,7 @@
+ 
+   Clear();
+ 
++  Add(new cMenuEditBoolItem(tr("Setup.DVB$Use DVB receivers"),      &data.LocalChannelProvide));
+   Add(new cMenuEditIntItem( tr("Setup.DVB$Primary DVB interface"), &data.PrimaryDVB, 1, cDevice::NumDevices()));
+   Add(new cMenuEditBoolItem(tr("Setup.DVB$Video format"),          &data.VideoFormat, "4:3", "16:9"));
+   if (data.VideoFormat == 0)
