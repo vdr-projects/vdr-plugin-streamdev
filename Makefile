@@ -1,7 +1,7 @@
 #
 # Makefile for a Video Disk Recorder plugin
 #
-# $Id: Makefile,v 1.22 2010/07/19 13:49:24 schmirl Exp $
+# $Id: Makefile,v 1.23 2010/08/02 10:36:59 schmirl Exp $
 
 # The main source file name.
 #
@@ -35,7 +35,8 @@ TSPLAYVERSNUM = $(shell grep 'define TSPLAY_PATCH_VERSION ' $(VDRDIR)/device.h |
 
 ifeq ($(shell test $(APIVERSNUM) -ge 10713; echo $$?),0)
 include $(VDRDIR)/Make.global
-else ifeq ($(shell test $(APIVERSNUM) -ge 10704 -o -n "$(TSPLAYVERSNUM)" ; echo $$?),0)
+else
+ifeq ($(shell test $(APIVERSNUM) -ge 10704 -o -n "$(TSPLAYVERSNUM)" ; echo $$?),0)
 DEFINES  += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
 CFLAGS   += -fPIC
 CXXFLAGS += -fPIC
@@ -43,13 +44,14 @@ else
 CFLAGS   += -fPIC
 CXXFLAGS += -fPIC
 endif
+endif
 
 -include $(VDRDIR)/Make.config
 
 ### export all vars for sub-makes, using absolute paths
 
-VDRDIR := $(abspath $(VDRDIR))
-LIBDIR := $(abspath $(LIBDIR))
+VDRDIR := $(shell cd $(VDRDIR) >/dev/null 2>&1 && pwd)
+LIBDIR := $(shell cd $(LIBDIR) >/dev/null 2>&1 && pwd)
 export
 unexport PLUGIN
 

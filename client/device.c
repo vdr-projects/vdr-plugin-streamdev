@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.26 2010/06/08 05:55:17 schmirl Exp $
+ *  $Id: device.c,v 1.27 2010/08/18 10:26:55 schmirl Exp $
  */
  
 #include "client/device.h"
@@ -8,6 +8,7 @@
 
 #include "tools/select.h"
 
+#include <vdr/config.h>
 #include <vdr/channels.h>
 #include <vdr/ringbuffer.h>
 #include <vdr/eit.h>
@@ -32,6 +33,7 @@ cStreamdevDevice::cStreamdevDevice(void) {
 
 	m_Device = this;
 	m_Pids = 0;
+	m_Priority = -1;
 	m_DvrClosed = true;
 }
 
@@ -107,7 +109,7 @@ bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority,
 		res = prio && ClientSocket.ProvidesChannel(Channel, Priority);
 		ndr = true;
 	}
-	
+
 	if (NeedsDetachReceivers)
 		*NeedsDetachReceivers = ndr;
 	Dprintf("prov res = %d, ndr = %d\n", res, ndr);
@@ -118,6 +120,9 @@ bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel,
 		bool LiveView) {
 	Dprintf("SetChannelDevice Channel: %s, LiveView: %s\n", Channel->Name(),
 			LiveView ? "true" : "false");
+	LOCK_THREAD;
+
+	m_UpdatePriority = ClientSocket.SupportsPrio();
 
 	if (LiveView)
 		return false;
@@ -139,6 +144,8 @@ bool cStreamdevDevice::SetPid(cPidHandle *Handle, int Type, bool On) {
 	Dprintf("SetPid, Pid=%d, Type=%d, On=%d, used=%d\n", Handle->pid, Type, On,
 			Handle->used);
 	LOCK_THREAD;
+
+	m_UpdatePriority = ClientSocket.SupportsPrio();
 
 	if (On && !m_TSBuffer) {
 		Dprintf("SetPid: no data connection -> OpenDvr()");
@@ -301,3 +308,16 @@ bool cStreamdevDevice::ReInit(void) {
 	return StreamdevClientSetup.StartClient ? Init() : true;
 }
 
+void cStreamdevDevice::UpdatePriority(void) {
+	if (m_Device) {
+		m_Device->Lock();
+		if (m_Device->m_UpdatePriority && ClientSocket.DataSocket(siLive)) {
+			int Priority = m_Device->Priority();
+			if (m_Device == cDevice::ActualDevice() && Priority < Setup.PrimaryLimit)
+				Priority = Setup.PrimaryLimit;
+			if (m_Device->m_Priority != Priority && ClientSocket.SetPriority(Priority))
+				m_Device->m_Priority = Priority;
+		}
+		m_Device->Unlock();
+	}
+}

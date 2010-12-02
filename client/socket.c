@@ -1,5 +1,5 @@
 /*
- *  $Id: socket.c,v 1.13 2010/06/08 05:55:17 schmirl Exp $
+ *  $Id: socket.c,v 1.15 2010/08/18 10:26:55 schmirl Exp $
  */
  
 #include <tools/select.h>
@@ -20,6 +20,7 @@ cClientSocket ClientSocket;
 cClientSocket::cClientSocket(void) 
 {
 	memset(m_DataSockets, 0, sizeof(cTBSocket*) * si_Count);
+	m_Prio = false;
 	Reset();
 }
 
@@ -142,8 +143,14 @@ bool cClientSocket::CheckConnection(void) {
 	if(Command("CAPS FILTERS", 220))
 		Filters = ",FILTERS";
 
-	isyslog("Streamdev: Connected to server %s:%d using capabilities TSPIDS%s",
-	        RemoteIp().c_str(), RemotePort(), Filters);
+	const char *Prio = "";
+	if(Command("CAPS PRIO", 220)) {
+		Prio = ",PRIO";
+		m_Prio = true;
+	}
+
+	isyslog("Streamdev: Connected to server %s:%d using capabilities TSPIDS%s%s",
+	        RemoteIp().c_str(), RemotePort(), Filters, Prio);
 	return true;
 }
 
@@ -241,11 +248,26 @@ bool cClientSocket::SetChannelDevice(const cChannel *Channel) {
 	CMD_LOCK;
 
 	std::string command = (std::string)"TUNE " 
-	                    + (const char*)Channel->GetChannelID().ToString();
+				+ (const char*)Channel->GetChannelID().ToString();
 	if (!Command(command, 220)) {
 		if (errno == 0)
 			esyslog("ERROR: Streamdev: Couldn't tune %s:%d to channel %s",
 			        RemoteIp().c_str(), RemotePort(), Channel->Name());
+		return false;
+	}
+	return true;
+}
+
+bool cClientSocket::SetPriority(int Priority) {
+	if (!CheckConnection()) return false;
+
+	CMD_LOCK;
+
+	std::string command = (std::string)"PRIO " + (const char*)itoa(Priority);
+	if (!Command(command, 220)) {
+		if (errno == 0)
+			esyslog("Streamdev: Failed to update priority on %s:%d", RemoteIp().c_str(), 
+			        RemotePort());
 		return false;
 	}
 	return true;
@@ -259,8 +281,8 @@ bool cClientSocket::SetPid(int Pid, bool On) {
 	std::string command = (std::string)(On ? "ADDP " : "DELP ") + (const char*)itoa(Pid);
 	if (!Command(command, 220)) {
 		if (errno == 0)
-			esyslog("Streamdev: Pid %d not available from %s:%d", Pid, LocalIp().c_str(), 
-			        LocalPort());
+			esyslog("Streamdev: Pid %d not available from %s:%d", Pid, RemoteIp().c_str(), 
+			        RemotePort());
 		return false;
 	}
 	return true;
@@ -276,7 +298,7 @@ bool cClientSocket::SetFilter(ushort Pid, uchar Tid, uchar Mask, bool On) {
 	if (!Command(command, 220)) {
 		if (errno == 0)
 				esyslog("Streamdev: Filter %hu, %hhu, %hhu not available from %s:%d", 
-						Pid, Tid, Mask, LocalIp().c_str(), LocalPort());
+						Pid, Tid, Mask, RemoteIp().c_str(), RemotePort());
 		return false;
 	}
 	return true;

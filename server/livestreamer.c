@@ -289,7 +289,7 @@ void cStreamdevPatFilter::Process(u_short Pid, u_char Tid, const u_char *Data, i
 							if (written != TS_SIZE)
 								siBuffer.ReportOverflow(TS_SIZE - written);
 							if (pmtPid != prevPmtPid) {
-								m_Streamer->SetPids(pmtPid);
+								m_Streamer->SetPid(pmtPid, true);
 								Add(pmtPid, 0x02);
 								pmtVersion = -1;
 							}
@@ -434,17 +434,24 @@ bool cStreamdevLiveStreamer::SetPids(int Pid, const int *Pids1, const int *Pids2
 	return true;
 }
 
+void cStreamdevLiveStreamer::SetPriority(int Priority)
+{
+	m_Priority = Priority;
+	StartReceiver();
+}
+
 void cStreamdevLiveStreamer::StartReceiver(void)
 {
-	DELETENULL(m_Receiver);
-	if (m_NumPids > 0) {
+	if (m_Device != NULL && m_NumPids > 0 && IsRunning()) {
 		Dprintf("Creating Receiver to respect changed pids\n");
+		cReceiver *current = m_Receiver;
 		m_Receiver = new cStreamdevLiveReceiver(this, m_Channel->GetChannelID(), m_Priority, m_Pids);
-		if (IsRunning() && m_Device != NULL) {
-			Dprintf("Attaching new receiver\n");
-			Attach();
-		}
+		cThreadLock ThreadLock(m_Device);
+		Attach();
+		delete current;
 	}
+	else
+		DELETENULL(m_Receiver);
 }
 
 bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType StreamType, const int* Apid, const int *Dpid) 
@@ -631,12 +638,10 @@ void cStreamdevFilterStreamer::SetDevice(cDevice *Device)
 {
 	Dprintf("cStreamdevFilterStreamer::SetDevice()\n");
 	LOCK_THREAD;
-	if(Device != m_Device) {
-		Detach();
-		m_Device = Device;
-		//m_Channel = NULL;
-		Attach();
-	}
+	Detach();
+	m_Device = Device;
+	//m_Channel = NULL;
+	Attach();
 }
 
 bool cStreamdevFilterStreamer::SetFilter(u_short Pid, u_char Tid, u_char Mask, bool On) 

@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.c,v 1.20 2010/07/19 13:49:32 schmirl Exp $
+ *  $Id: streamer.c,v 1.21 2010/07/30 10:01:11 schmirl Exp $
  */
  
 #include <vdr/ringbuffer.h>
@@ -46,6 +46,9 @@ void cStreamdevWriter::Action(void)
 	uchar *block = NULL;
 	int count, offset = 0;
 
+#if APIVERSNUM >= 10705
+	SetPriority(-3);
+#endif
 	sel.Clear();
 	sel.Add(*m_Socket, true);
 	while (Running()) {
@@ -149,6 +152,9 @@ void cStreamdevStreamer::Stop(void)
 
 void cStreamdevStreamer::Action(void) 
 {
+#if APIVERSNUM >= 10705
+	SetPriority(-3);
+#endif
 	while (Running()) {
 		int got;
 		uchar *block = m_RingBuffer->Get(got);

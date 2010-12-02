@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionIGMP.c,v 1.2 2010/07/19 13:49:31 schmirl Exp $
+ *  $Id: connectionIGMP.c,v 1.3 2010/08/03 10:46:41 schmirl Exp $
  */
 
 #include <ctype.h>
@@ -25,7 +25,9 @@ cConnectionIGMP::~cConnectionIGMP()
 bool cConnectionIGMP::Start(cChannel *Channel, in_addr_t Dst)
 {
 	if (Channel != NULL) {
-		cDevice *device = GetDevice(Channel, 0);
+		cDevice *device = NULL;
+		if (ProvidesChannel(Channel, 0))
+			device = GetDevice(Channel, 0);
 		if (device != NULL) {
 			device->SwitchChannel(Channel, false);
 			struct in_addr ip;

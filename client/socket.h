@@ -1,5 +1,5 @@
 /*
- *  $Id: socket.h,v 1.7 2010/06/08 05:55:17 schmirl Exp $
+ *  $Id: socket.h,v 1.8 2010/08/18 10:26:55 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_CLIENT_CONNECTION_H
@@ -20,6 +20,7 @@ private:
 	cTBSocket    *m_DataSockets[si_Count];
 	cMutex        m_Mutex;
 	char          m_Buffer[BUFSIZ + 1]; // various uses
+	bool          m_Prio; // server supports command PRIO
 
 protected:
 	/* Send Command, and return true if the command results in Expected. 
@@ -45,6 +46,8 @@ public:
 	bool CreateDataConnection(eSocketId Id);
 	bool CloseDataConnection(eSocketId Id);
 	bool SetChannelDevice(const cChannel *Channel);
+	bool SupportsPrio() { return m_Prio; }
+	bool SetPriority(int Priority);
 	bool SetPid(int Pid, bool On);
 	bool SetFilter(ushort Pid, uchar Tid, uchar Mask, bool On);
 	bool CloseDvr(void);

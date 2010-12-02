@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.h,v 1.9 2010/07/19 13:49:31 schmirl Exp $
+ *  $Id: connection.h,v 1.10 2010/08/03 10:46:41 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_SERVER_CONNECTION_H
@@ -34,6 +34,11 @@ private:
 	uint        m_WriteIndex;
 
 	tStrStrMap  m_Headers;
+
+	/* Check if a device would be available for transfering the given
+	   channel. This call has no side effects except for temporarily
+           detaching this connection's receivers. */
+	cDevice *CheckDevice(const cChannel *Channel, int Priority, bool LiveView, const cDevice *AvoidDevice = NULL);
 
 protected:
 	/* Will be called when a command terminated by a newline has been 
@@ -91,9 +96,13 @@ public:
 	/* Will make the socket close after sending all queued output data */
 	void DeferClose(void) { m_DeferClose = true; }
 
-	/* Will retrieve an unused device for transmitting data. Use the returned
+	/* Will retrieve an unused device for transmitting data. Receivers have
+	   already been attached from the device if necessary. Use the returned
 	   cDevice in a following call to StartTransfer */
 	cDevice *GetDevice(const cChannel *Channel, int Priority);
+
+	/* Test if a call to GetDevice would return a usable device. */
+	bool ProvidesChannel(const cChannel *Channel, int Priority);
 
 	virtual void Flushed(void) {}
 
