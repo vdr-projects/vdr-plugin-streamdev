@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.h,v 1.10 2009/02/13 10:39:22 schmirl Exp $
+ *  $Id: streamer.h,v 1.11 2009/06/19 06:32:45 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_STREAMER_H
@@ -16,8 +16,34 @@ class cStreamdevStreamer;
 #define TS_SIZE 188
 #endif
 
-#define STREAMERBUFSIZE MEGABYTE(4)
-#define WRITERBUFSIZE KILOBYTE(256)
+#define STREAMERBUFSIZE (20000 * TS_SIZE)
+#define WRITERBUFSIZE (5000 * TS_SIZE)
+
+// --- cStreamdevBuffer -------------------------------------------------------
+
+class cStreamdevBuffer: public cRingBufferLinear {
+public:
+	// make public
+	void WaitForPut(void) { cRingBuffer::WaitForPut(); }
+	// Always write complete TS packets
+	// (assumes Count is a multiple of TS_SIZE)
+	int PutTS(const uchar *Data, int Count);
+	cStreamdevBuffer(int Size, int Margin = 0, bool Statistics = false, const char *Description = NULL);
+};
+
+inline int cStreamdevBuffer::PutTS(const uchar *Data, int Count)
+{
+	int free = Free();
+	if (free < Count)
+		Count = free;
+
+	Count -= Count % TS_SIZE;
+	if (Count)
+		Count = Put(Data, Count);
+	else
+		WaitForPut();
+	return Count;
+}
 
 // --- cStreamdevWriter -------------------------------------------------------
 
@@ -38,15 +64,14 @@ public:
 
 class cStreamdevStreamer: public cThread {
 private:
-	bool               m_Running;
 	cStreamdevWriter  *m_Writer;
-	cRingBufferLinear *m_RingBuffer;
-	cRingBufferLinear *m_SendBuffer;
+	cStreamdevBuffer  *m_RingBuffer;
+	cStreamdevBuffer  *m_SendBuffer;
 
 protected:
 	virtual void Action(void);
 
-	bool IsRunning(void) const { return m_Running; }
+	bool IsRunning(void) const { return m_Writer; }
 
 public:
 	cStreamdevStreamer(const char *Name);
@@ -57,10 +82,10 @@ public:
 	bool Abort(void);
 
 	void Activate(bool On);
-	int Receive(uchar *Data, int Length) { return m_RingBuffer->Put(Data, Length); }
+	int Receive(uchar *Data, int Length) { return m_RingBuffer->PutTS(Data, Length); }
 	void ReportOverflow(int Bytes) { m_RingBuffer->ReportOverflow(Bytes); }
 	
-	virtual int Put(const uchar *Data, int Count) { return m_SendBuffer->Put(Data, Count); }
+	virtual int Put(const uchar *Data, int Count) { return m_SendBuffer->PutTS(Data, Count); }
 	virtual uchar *Get(int &Count) { return m_SendBuffer->Get(Count); }
 	virtual void Del(int Count) { m_SendBuffer->Del(Count); }
 

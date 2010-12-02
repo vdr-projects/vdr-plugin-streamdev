@@ -1,11 +1,12 @@
 #include "remux/ts2es.h"
 #include "server/streamer.h"
-#include "libdvbmpeg/transform.h"
 #include "common.h"
 #include <vdr/device.h>
 
 // from VDR's remux.c
 #define MAXNONUSEFULDATA (10*1024*1024)
+
+namespace Streamdev {
 
 class cTS2ES: public ipack {
 	friend void PutES(uint8_t *Buffer, int Size, void *Data);
@@ -31,6 +32,9 @@ void PutES(uint8_t *Buffer, int Size, void *Data)
 		esyslog("ERROR: result buffer overflow, dropped %d out of %d byte", count - n, count);
 	This->start = 1;
 }
+
+} // namespace Streamdev
+using namespace Streamdev;
 
 cTS2ES::cTS2ES(cRingBufferLinear *ResultBuffer) 
 {
@@ -75,10 +79,10 @@ void cTS2ES::PutTSPacket(const uint8_t *Buffer) {
 
 cTS2ESRemux::cTS2ESRemux(int Pid):
 		m_Pid(Pid),
-		m_ResultBuffer(new cRingBufferLinear(WRITERBUFSIZE, IPACKS)),
+		m_ResultBuffer(new cStreamdevBuffer(WRITERBUFSIZE, IPACKS)),
 		m_Remux(new cTS2ES(m_ResultBuffer))
 {
-	m_ResultBuffer->SetTimeouts(0, 100);
+	m_ResultBuffer->SetTimeouts(100, 100);
 }
 
 cTS2ESRemux::~cTS2ESRemux() 
@@ -111,8 +115,10 @@ int cTS2ESRemux::Put(const uchar *Data, int Count)
 			break;
 		if (Data[i] != TS_SYNC_BYTE)
 			break;
-		if (m_ResultBuffer->Free() < 2 * IPACKS)
+		if (m_ResultBuffer->Free() < 2 * IPACKS) {
+			m_ResultBuffer->WaitForPut();
 			break; // A cTS2ES might write one full packet and also a small rest
+		}
 		int pid = cTSRemux::GetPid(Data + i + 1);
 		if (Data[i + 3] & 0x10) { // got payload
 			if (m_Pid == pid)

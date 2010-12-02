@@ -3,12 +3,11 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: streamdev-server.c,v 1.11 2008/10/14 11:05:47 schmirl Exp $
+ * $Id: streamdev-server.c,v 1.12 2009/06/19 06:32:38 schmirl Exp $
  */
 
 #include <getopt.h>
 #include <vdr/tools.h>
-#include "remux/extern.h"
 #include "streamdev-server.h"
 #include "server/setup.h"
 #include "server/server.h"

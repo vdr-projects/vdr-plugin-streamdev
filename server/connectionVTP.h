@@ -2,6 +2,7 @@
 #define VDR_STREAMDEV_SERVERS_CONNECTIONVTP_H
 
 #include "server/connection.h"
+#include "server/recplayer.h"
 
 class cTBSocket;
 class cStreamdevLiveStreamer;
@@ -9,6 +10,7 @@ class cStreamdevFilterStreamer;
 class cLSTEHandler;
 class cLSTCHandler;
 class cLSTTHandler;
+class cLSTRHandler;
 
 class cConnectionVTP: public cServerConnection {
 	friend class cLSTEHandler;
@@ -21,16 +23,19 @@ private:
 	cStreamdevLiveStreamer   *m_LiveStreamer;
 	cTBSocket                *m_FilterSocket;
 	cStreamdevFilterStreamer *m_FilterStreamer;
+	cTBSocket                *m_RecSocket;
+	cTBSocket                *m_DataSocket;
 
 	char                   *m_LastCommand;
 	eStreamType             m_StreamType;
 	bool                    m_FiltersSupport;
+	RecPlayer              *m_RecPlayer;
 
 	// Members adopted for SVDRP
-	cRecordings Recordings;
 	cLSTEHandler *m_LSTEHandler;
 	cLSTCHandler *m_LSTCHandler;
 	cLSTTHandler *m_LSTTHandler;
+	cLSTRHandler *m_LSTRHandler;
 
 protected:
 	template<class cHandler>
@@ -51,7 +56,9 @@ public:
 	bool CmdCAPS(char *Opts);
 	bool CmdPROV(char *Opts);
 	bool CmdPORT(char *Opts);
+	bool CmdREAD(char *Opts);
 	bool CmdTUNE(char *Opts);
+	bool CmdPLAY(char *Opts);
 	bool CmdADDP(char *Opts);
 	bool CmdDELP(char *Opts);
 	bool CmdADDF(char *Opts);
@@ -64,14 +71,20 @@ public:
 	bool CmdLSTE(char *Opts);
 	bool CmdLSTC(char *Opts);
 	bool CmdLSTT(char *Opts);
+	bool CmdLSTR(char *Opts);
 
 	// Commands adopted from SVDRP
+	bool CmdSTAT(const char *Option);
 	bool CmdMODT(const char *Option);
 	bool CmdNEWT(const char *Option);
 	bool CmdDELT(const char *Option);
-
-	//bool CmdLSTR(char *Opts);
-	//bool CmdDELR(char *Opts);
+	bool CmdNEXT(const char *Option);
+	bool CmdNEWC(const char *Option);
+	bool CmdMODC(const char *Option);
+	bool CmdMOVC(const char *Option);
+	bool CmdDELC(const char *Option);
+	bool CmdDELR(const char *Option);
+	bool CmdRENR(const char *Option);
 
 	bool Respond(int Code, const char *Message, ...)
 			__attribute__ ((format (printf, 3, 4)));

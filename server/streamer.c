@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.c,v 1.18 2009/02/13 10:39:22 schmirl Exp $
+ *  $Id: streamer.c,v 1.19 2009/06/19 06:32:45 schmirl Exp $
  */
  
 #include <vdr/ringbuffer.h>
@@ -13,6 +13,13 @@
 #include "tools/socket.h"
 #include "tools/select.h"
 #include "common.h"
+
+// --- cStreamdevBuffer -------------------------------------------------------
+
+cStreamdevBuffer::cStreamdevBuffer(int Size, int Margin, bool Statistics, const char *Description):
+		cRingBufferLinear(Size, Margin, Statistics, Description)
+{
+}
 
 // --- cStreamdevWriter -------------------------------------------------------
 
@@ -95,14 +102,13 @@ void cStreamdevWriter::Action(void)
 
 cStreamdevStreamer::cStreamdevStreamer(const char *Name):
 		cThread(Name),
-		m_Running(false),
 		m_Writer(NULL),
-		m_RingBuffer(new cRingBufferLinear(STREAMERBUFSIZE, TS_SIZE * 2,
+		m_RingBuffer(new cStreamdevBuffer(STREAMERBUFSIZE, TS_SIZE * 2,
 		             true, "streamdev-streamer")),
-		m_SendBuffer(new cRingBufferLinear(WRITERBUFSIZE, TS_SIZE * 2))
+		m_SendBuffer(new cStreamdevBuffer(WRITERBUFSIZE, TS_SIZE * 2))
 {
 	m_RingBuffer->SetTimeouts(0, 100);
-	m_SendBuffer->SetTimeouts(0, 100);
+	m_SendBuffer->SetTimeouts(100, 100);
 }
 
 cStreamdevStreamer::~cStreamdevStreamer() 
@@ -116,7 +122,6 @@ void cStreamdevStreamer::Start(cTBSocket *Socket)
 {
 	Dprintf("start streamer\n");
 	m_Writer = new cStreamdevWriter(Socket, this);
-	m_Running = true;
 	Attach();
 }
 
@@ -135,9 +140,8 @@ void cStreamdevStreamer::Stop(void)
 		Dprintf("stopping streamer\n");
 		Cancel(3);
 	}
-	if (m_Running) {
+	if (m_Writer) {
 		Detach();
-		m_Running = false;
 		DELETENULL(m_Writer);
 	}
 }
@@ -152,8 +156,6 @@ void cStreamdevStreamer::Action(void)
 			int count = Put(block, got);
 			if (count)
 				m_RingBuffer->Del(count);
-			else
-				cCondWait::SleepMs(100);
 		}
 	}
 }

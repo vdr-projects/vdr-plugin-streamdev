@@ -1,5 +1,5 @@
 /*
- *  $Id: device.h,v 1.8 2008/10/02 07:14:47 schmirl Exp $
+ *  $Id: device.h,v 1.9 2009/06/23 10:26:54 schmirl Exp $
  */
  
 #ifndef VDR_STREAMDEV_DEVICE_H
@@ -54,6 +54,9 @@ public:
 	virtual bool ProvidesTransponder(const cChannel *Channel) const;
 	virtual bool ProvidesChannel(const cChannel *Channel, int Priority = -1,
 			bool *NeedsDetachReceivers = NULL) const;
+#if APIVERSNUM >= 10700
+	virtual int NumProvidedSystems(void) const { return 1; }
+#endif
 	virtual bool IsTunedToTransponder(const cChannel *Channel);
 
 	static bool Init(void);
