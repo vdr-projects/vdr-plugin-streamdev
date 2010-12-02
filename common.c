@@ -10,7 +10,7 @@
 
 using namespace std;
 
-const char *VERSION = "0.5.0-pre-20090701";
+const char *VERSION = "0.5.0-pre-20090702";
 
 const char *StreamTypes[st_Count] = {
 	"TS",
