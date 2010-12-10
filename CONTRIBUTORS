@@ -177,3 +177,6 @@ Gavin Hamill
 
 Michal Novotny
   for reporting that switching away live TV fails when "always suspended"
+
+wtor
+  for reporting that a client may interrupt replaying on FF cards

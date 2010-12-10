@@ -295,6 +295,7 @@ cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority)
 	cDevice *device = cDevice::GetDevice(Channel, Priority, false);
 
  	if (device && device == cDevice::ActualDevice()
+			&& (!device->IsPrimaryDevice() || !device->Replaying())
 			&& !cSuspendCtl::IsActive() 
 			&& current != NULL
 			&& !TRANSPONDER(Channel, current)) {
@@ -331,6 +332,7 @@ bool cServerConnection::ProvidesChannel(const cChannel *Channel, int Priority)
 
 	cDevice *device = CheckDevice(Channel, Priority, false);
 	if (!device || (device == cDevice::ActualDevice()
+			&& (!device->IsPrimaryDevice() || !device->Replaying())
 			&& !cSuspendCtl::IsActive()
 			&& StreamdevServerSetup.SuspendMode != smAlways
 			&& current != NULL
@@ -341,6 +343,7 @@ bool cServerConnection::ProvidesChannel(const cChannel *Channel, int Priority)
 		device = CheckDevice(Channel, Priority, false);
 		Attach();
 		if (device && device == cDevice::ActualDevice()
+				&& (!device->IsPrimaryDevice() || !device->Replaying())
 				&& !cSuspendCtl::IsActive() 
 				&& StreamdevServerSetup.SuspendMode != smAlways
 				&& current != NULL
