@@ -139,3 +139,6 @@ Matthias Prill
 
 Timothy D. Lenz
   for reporting missing support for invisible channel groups in HTTP menu
+
+Gavin Hamill
+  for reporting that ES/PS/PES no longer works

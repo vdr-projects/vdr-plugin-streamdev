@@ -450,7 +450,7 @@ void cStreamdevLiveStreamer::SetPriority(int Priority)
 
 void cStreamdevLiveStreamer::StartReceiver(void)
 {
-	if (m_Device != NULL && m_NumPids > 0 && IsRunning()) {
+	if (m_NumPids > 0) {
 		Dprintf("Creating Receiver to respect changed pids\n");
 		cReceiver *current = m_Receiver;
 #if VDRVERSNUM < 10500
@@ -459,7 +459,8 @@ void cStreamdevLiveStreamer::StartReceiver(void)
 		m_Receiver = new cStreamdevLiveReceiver(this, m_Channel->GetChannelID(), m_Priority, m_Pids);
 #endif
 		cThreadLock ThreadLock(m_Device);
-		Attach();
+		if (IsRunning())
+			Attach();
 		delete current;
 	}
 	else
