@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- switching away live TV failed even when "always suspended" (reported by
+  Michal Novotny)
 - fixed regression: no receiver created for ES/PS/PES (reported by Gavin
   Hamill)
 - VTP no longer uses a static priority value for its server-side receivers.

@@ -296,7 +296,6 @@ cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority)
 
  	if (device && device == cDevice::ActualDevice()
 			&& !cSuspendCtl::IsActive() 
-			&& StreamdevServerSetup.SuspendMode != smAlways
 			&& current != NULL
 			&& !TRANSPONDER(Channel, current)) {
 		// now we would have to switch away live tv...let's see if live tv
@@ -307,8 +306,13 @@ cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority)
 #else
 		cDevice *newdev = CheckDevice(current, 0, true, device);
 #endif
-		if (newdev)
+		if (newdev) {
 			newdev->SwitchChannel(current, true);
+		}
+		else if (StreamdevServerSetup.SuspendMode == smAlways) {
+			Channels.SwitchTo(Channel->Number());
+			Skins.Message(mtInfo, tr("Streaming active"));
+		}
 		else
 			device = NULL;
 	}
