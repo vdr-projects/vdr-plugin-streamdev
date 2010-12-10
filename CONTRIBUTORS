@@ -171,3 +171,6 @@ Timothy D. Lenz
 
 Rainer Blickle
   for reporting that channel switches may interrupt live TV on the server
+
+Gavin Hamill
+  for reporting that ES/PS/PES no longer works
