@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- make sure that a client doesn't interrupt replaying on server's FF card
+  (reported by wtor)
 - switching away live TV failed even when "always suspended" (reported by
   Michal Novotny)
 - fixed regression: no receiver created for ES/PS/PES (reported by Gavin
