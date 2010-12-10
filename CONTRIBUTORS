@@ -174,3 +174,6 @@ Rainer Blickle
 
 Gavin Hamill
   for reporting that ES/PS/PES no longer works
+
+Michal Novotny
+  for reporting that switching away live TV fails when "always suspended"
