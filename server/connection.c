@@ -303,25 +303,37 @@ cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority)
 		// can be handled by another device
 #if VDRVERSNUM >= 10516
 		cDevice::SetAvoidDevice(device);
-		cDevice *newdev = cDevice::GetDevice(current, 0, true);
+		if (!Channels.SwitchTo(current->Number())) {
+			if (StreamdevServerSetup.SuspendMode == smAlways) {
+				Channels.SwitchTo(Channel->Number());
+				Skins.Message(mtInfo, tr("Streaming active"));
+			}
+			else {
+				dsyslog("streamdev: GetDevice: Live TV not suspended");
+				device = NULL;
+			}
+		}
 #else
 		cDevice *newdev = CheckDevice(current, 0, true, device);
-#endif
 		if (newdev) {
+			dsyslog("streamdev: GetDevice: Trying to move live TV to device %d", newdev->CardIndex());
 			newdev->SwitchChannel(current, true);
 		}
 		else if (StreamdevServerSetup.SuspendMode == smAlways) {
 			Channels.SwitchTo(Channel->Number());
 			Skins.Message(mtInfo, tr("Streaming active"));
 		}
-		else
+		else {
+			dsyslog("streamdev: GetDevice: Live TV not suspended");
 			device = NULL;
+		}
+#endif
 	}
 
 	if (!device) {
 		// can't switch - continue the current stream
 		Attach();
-		dsyslog("streamdev: GetDevice failed for channel %s at priority %d", Channel->Name(), Priority);
+		dsyslog("streamdev: GetDevice failed for channel %d (%s) at priority %d (PrimaryDevice=%d, ActualDevice=%d)", Channel->Number(), Channel->Name(), Priority, cDevice::PrimaryDevice()->CardIndex(), cDevice::ActualDevice()->CardIndex());
 	}
 	return device;
 }
@@ -351,13 +363,16 @@ bool cServerConnection::ProvidesChannel(const cChannel *Channel, int Priority)
 			// now we would have to switch away live tv...let's see if live tv
 			// can be handled by another device
 			cDevice *newdev = CheckDevice(current, 0, true, device);
-			if (!newdev) {
+			if (newdev) {
+				dsyslog("streamdev: Providing channel %d (%s) at priority %d requires moving live TV to device %d (PrimaryDevice=%d, ActualDevice=%d)", Channel->Number(), Channel->Name(), Priority, newdev->CardIndex(), cDevice::PrimaryDevice()->CardIndex(), cDevice::ActualDevice()->CardIndex());
+			}
+			else {
 				device = NULL;
-				dsyslog("streamdev: Not providing channel %s at priority %d - live TV not suspended", Channel->Name(), Priority);
+				dsyslog("streamdev: Not providing channel %d (%s) at priority %d - live TV not suspended", Channel->Number(), Channel->Name(), Priority);
 			}
 		}
 		else if (!device)
-			dsyslog("streamdev: No device provides channel %s at priority %d", Channel->Name(), Priority);
+			dsyslog("streamdev: No device provides channel %d (%s) at priority %d", Channel->Number(), Channel->Name(), Priority);
 	}
 	return device;
 }
