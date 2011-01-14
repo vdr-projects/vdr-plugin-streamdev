@@ -306,7 +306,7 @@ cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority)
 		if (!Channels.SwitchTo(current->Number())) {
 			if (StreamdevServerSetup.SuspendMode == smAlways) {
 				Channels.SwitchTo(Channel->Number());
-				Skins.Message(mtInfo, tr("Streaming active"));
+				Skins.QueueMessage(mtInfo, tr("Streaming active"));
 			}
 			else {
 				dsyslog("streamdev: GetDevice: Live TV not suspended");
@@ -321,7 +321,7 @@ cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority)
 		}
 		else if (StreamdevServerSetup.SuspendMode == smAlways) {
 			Channels.SwitchTo(Channel->Number());
-			Skins.Message(mtInfo, tr("Streaming active"));
+			Skins.QueueMessage(mtInfo, tr("Streaming active"));
 		}
 		else {
 			dsyslog("streamdev: GetDevice: Live TV not suspended");
