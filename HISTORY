@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- increased client side timeout for TUNE command
 - more dsyslog messages to help troubleshouting channel switch issues
 - improved the channel switch code trying to move live TV to different card
 - make sure that a client doesn't interrupt replaying on server's FF card

@@ -249,7 +249,7 @@ bool cClientSocket::SetChannelDevice(const cChannel *Channel) {
 
 	std::string command = (std::string)"TUNE " 
 				+ (const char*)Channel->GetChannelID().ToString();
-	if (!Command(command, 220)) {
+	if (!Command(command, 220, 10000)) {
 		if (errno == 0)
 			esyslog("ERROR: Streamdev: Couldn't tune %s:%d to channel %s",
 			        RemoteIp().c_str(), RemotePort(), Channel->Name());
