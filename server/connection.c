@@ -285,25 +285,26 @@ cDevice* cServerConnection::CheckDevice(const cChannel *Channel, int Priority, b
   return d;
 }
 
+bool cServerConnection::UsedByLiveTV(cDevice *device)
+{
+	return device == cTransferControl::ReceiverDevice() ||
+		(device->IsPrimaryDevice() && device->HasDecoder() && !device->Replaying());
+}
+
 cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority) 
 {
-	const cChannel *current = Channels.GetByNumber(cDevice::CurrentChannel());
-
 	// turn off the streams of this connection
 	Detach();
 	// This call may detach receivers of the device it returns
 	cDevice *device = cDevice::GetDevice(Channel, Priority, false);
 
- 	if (device && device == cDevice::ActualDevice()
-			&& (!device->IsPrimaryDevice() || !device->Replaying())
-			&& !cSuspendCtl::IsActive() 
-			&& current != NULL
-			&& !TRANSPONDER(Channel, current)) {
+ 	if (device && !device->IsTunedToTransponder(Channel)
+			&& UsedByLiveTV(device)) {
 		// now we would have to switch away live tv...let's see if live tv
 		// can be handled by another device
 #if VDRVERSNUM >= 10516
 		cDevice::SetAvoidDevice(device);
-		if (!Channels.SwitchTo(current->Number())) {
+		if (!Channels.SwitchTo(cDevice::CurrentChannel())) {
 			if (StreamdevServerSetup.SuspendMode == smAlways) {
 				Channels.SwitchTo(Channel->Number());
 				Skins.QueueMessage(mtInfo, tr("Streaming active"));
@@ -314,7 +315,8 @@ cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority)
 			}
 		}
 #else
-		cDevice *newdev = CheckDevice(current, 0, true, device);
+		const cChannel *current = Channels.GetByNumber(cDevice::CurrentChannel());
+		cDevice *newdev = current ? CheckDevice(current, 0, true, device) : NULL;
 		if (newdev) {
 			dsyslog("streamdev: GetDevice: Trying to move live TV to device %d", newdev->CardIndex());
 			newdev->SwitchChannel(current, true);
@@ -340,29 +342,22 @@ cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority)
 
 bool cServerConnection::ProvidesChannel(const cChannel *Channel, int Priority) 
 {
-	const cChannel *current = Channels.GetByNumber(cDevice::CurrentChannel());
-
 	cDevice *device = CheckDevice(Channel, Priority, false);
-	if (!device || (device == cDevice::ActualDevice()
-			&& (!device->IsPrimaryDevice() || !device->Replaying())
-			&& !cSuspendCtl::IsActive()
-			&& StreamdevServerSetup.SuspendMode != smAlways
-			&& current != NULL
-			&& !TRANSPONDER(Channel, current))) {
-		// mustn't switch actual device
+	if (!device || (StreamdevServerSetup.SuspendMode != smAlways
+			&& !device->IsTunedToTransponder(Channel)
+			&& UsedByLiveTV(device))) {
+		// no device available or the device is in use for live TV and suspend mode doesn't allow us to switch it:
 		// maybe a device would be free if THIS connection did turn off its streams?
 		Detach();
 		device = CheckDevice(Channel, Priority, false);
 		Attach();
-		if (device && device == cDevice::ActualDevice()
-				&& (!device->IsPrimaryDevice() || !device->Replaying())
-				&& !cSuspendCtl::IsActive() 
-				&& StreamdevServerSetup.SuspendMode != smAlways
-				&& current != NULL
-				&& !TRANSPONDER(Channel, current)) {
+		if (device && StreamdevServerSetup.SuspendMode != smAlways
+				&& !device->IsTunedToTransponder(Channel)
+				&& UsedByLiveTV(device)) {
 			// now we would have to switch away live tv...let's see if live tv
 			// can be handled by another device
-			cDevice *newdev = CheckDevice(current, 0, true, device);
+			const cChannel *current = Channels.GetByNumber(cDevice::CurrentChannel());
+			cDevice *newdev = current ? CheckDevice(current, 0, true, device) : NULL;
 			if (newdev) {
 				dsyslog("streamdev: Providing channel %d (%s) at priority %d requires moving live TV to device %d (PrimaryDevice=%d, ActualDevice=%d)", Channel->Number(), Channel->Name(), Priority, newdev->CardIndex(), cDevice::PrimaryDevice()->CardIndex(), cDevice::ActualDevice()->CardIndex());
 			}
