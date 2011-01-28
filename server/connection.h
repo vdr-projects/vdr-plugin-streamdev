@@ -40,6 +40,10 @@ private:
            detaching this connection's receivers. */
 	cDevice *CheckDevice(const cChannel *Channel, int Priority, bool LiveView, const cDevice *AvoidDevice = NULL);
 
+	/* Test if device is in use as the transfer mode receiver device
+	   or a FF card, displaying live TV from internal tuner */
+	static bool UsedByLiveTV(cDevice *device);
+
 protected:
 	/* Will be called when a command terminated by a newline has been 
 	   received */
