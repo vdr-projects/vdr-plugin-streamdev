@@ -189,7 +189,7 @@ bool cServerConnection::Respond(const char *Message, bool Last, ...)
 #if APIVERSNUM >= 10700
 static int GetClippedNumProvidedSystems(int AvailableBits, cDevice *Device)
 {
-  int MaxNumProvidedSystems = 1 << AvailableBits;
+  int MaxNumProvidedSystems = (1 << AvailableBits) - 1;
   int NumProvidedSystems = Device->NumProvidedSystems();
   if (NumProvidedSystems > MaxNumProvidedSystems) {
      esyslog("ERROR: device %d supports %d modulation systems but cDevice::GetDevice() currently only supports %d delivery systems which should be fixed", Device->CardIndex() + 1, NumProvidedSystems, MaxNumProvidedSystems);
@@ -261,7 +261,7 @@ cDevice* cServerConnection::CheckDevice(const cChannel *Channel, int Priority, b
              imp <<= 1; imp |= !device->Receiving() && (device != cTransferControl::ReceiverDevice() || device->IsPrimaryDevice()) || ndr; // use receiving devices if we don't need to detach existing receivers, but avoid primary device in local transfer mode
              imp <<= 1; imp |= device->Receiving();                                                               // avoid devices that are receiving
 #if APIVERSNUM >= 10700
-             imp <<= 2; imp |= GetClippedNumProvidedSystems(2, device) - 1;                                       // avoid cards which support multiple delivery systems
+             imp <<= 4; imp |= GetClippedNumProvidedSystems(4, device) - 1;                                       // avoid cards which support multiple delivery systems
 #endif
              imp <<= 1; imp |= device == cTransferControl::ReceiverDevice();                                      // avoid the Transfer Mode receiver device
              imp <<= 8; imp |= min(max(device->Priority() + MAXPRIORITY, 0), 0xFF);                               // use the device with the lowest priority (+MAXPRIORITY to assure that values -99..99 can be used)

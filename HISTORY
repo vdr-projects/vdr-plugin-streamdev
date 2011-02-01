@@ -1,13 +1,15 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- updated copy of GetClippedNumProvidedSystems to the version used since
+  VDR 1.7.15 (reported by carel@vdrportal)
 - fixed the code deciding if a device is in use for live TV or not. It did
-  not work as expected for FF cards (reported by wtor)
+  not work as expected for FF cards (reported by wtor@vdrportal)
 - increased client side timeout for TUNE command
 - more dsyslog messages to help troubleshouting channel switch issues
 - improved the channel switch code trying to move live TV to different card
 - make sure that a client doesn't interrupt replaying on server's FF card
-  (reported by wtor)
+  (reported by wtor@vdrportal)
 - switching away live TV failed even when "always suspended" (reported by
   Michal Novotny)
 - fixed regression: no receiver created for ES/PS/PES (reported by Gavin

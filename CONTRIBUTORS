@@ -152,6 +152,7 @@ Eric Valette
 carel
   for reporting "plugin doesn't honor APIVERSION" error in new Makefile
   for helping to find a way to cleanly shutdown externremux with mencoder
+  for reporting that GetClippedNumProvidedSystems is no longer up-to-date
 
 wolfi.m
   for reporting a typo in externremux quality parameter value
