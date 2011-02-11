@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+2011-02-11: Version 0.5.1
+
 - updated copy of GetClippedNumProvidedSystems to the version used since
   VDR 1.7.15 (reported by carel@vdrportal)
 - fixed the code deciding if a device is in use for live TV or not. It did
