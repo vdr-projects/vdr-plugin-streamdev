@@ -56,7 +56,7 @@ public:
 	virtual bool ProvidesChannel(const cChannel *Channel, int Priority = -1,
 			bool *NeedsDetachReceivers = NULL) const;
 #if APIVERSNUM >= 10700
-	virtual int NumProvidedSystems(void) const { return 1; }
+	virtual int NumProvidedSystems(void) const;
 #endif
 	virtual bool IsTunedToTransponder(const cChannel *Channel);
 

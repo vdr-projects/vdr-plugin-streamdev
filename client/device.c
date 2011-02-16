@@ -56,6 +56,11 @@ cStreamdevDevice::~cStreamdevDevice() {
 	DELETENULL(m_TSBuffer);
 }
 
+#if APIVERSNUM >= 10700
+int cStreamdevDevice::NumProvidedSystems(void) const
+{	return StreamdevClientSetup.NumProvidedSystems; }
+#endif
+
 bool cStreamdevDevice::ProvidesSource(int Source) const {
 	Dprintf("ProvidesSource, Source=%d\n", Source);
 	return true;
