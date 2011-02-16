@@ -508,12 +508,6 @@ The script should perform the following steps (pseudocode):
 6. Known Problems:
 ------------------
 
-* In VDR-to-VDR setup, the availability of a channel is checked with a different
-priority than the actual channel switch. The later always uses priority 0.
-Usually a channel switch for live TV has priority 0 anyway, so it is not a
-problem here. However timers usually have a higher priority. Either avoid
-client side recordings or set the priority of client side timers to 0.
-
 * There have been reports that channel switching with VDR 1.5.x/1.6.x clients
 sometimes fails. Current version includes a workaround which seems to work, but
 YMMV ;)
