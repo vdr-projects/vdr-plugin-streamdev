@@ -1,6 +1,9 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- return value of streamdev-clients cDevice::NumProvidedSystems() now
+  configurable in plugin setup
+
 2011-02-11: Version 0.5.1
 
 - updated copy of GetClippedNumProvidedSystems to the version used since

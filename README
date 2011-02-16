@@ -371,15 +371,31 @@ With "Filter Streaming" enabled, the client will receive meta information like
 EPG data and service information, just as if the client had its own DVB card.
 Link channels and even a client-side EPG scan have been reported to work.
 
-Finally with the maximum and minimum priority, you can keep VDR from considering
-streamdev in certain cases. If for instance you have a streamdev client with its
-own DVB card, VDR would normally use streamdev for recording. If this is not
-what you want, you could set the maximum priority to 0. As recordings usually
-have a much higher priority (default 50), streamdev is now no longer used for
-recordings. The two parameters define the inclusive range of priorities for
-which streamdev will accept to tune. Setting the minimum priority to a higher
-value than the maximum, you will get two ranges: "up to maximum" and "minimum
-and above".
+With maximum and minimum priority you can keep VDR from considering streamdev
+in certain cases. If for instance you have a streamdev client with its own DVB
+card, VDR might use streamdev for recording. If this is not what you want, you
+could set the maximum priority to 0. As recordings usually have a much higher
+priority (default 50), streamdev is now no longer used for recordings. The two
+parameters define the inclusive range of priorities for which streamdev will
+accept to tune. Setting the minimum priority to a higher value than the maximum,
+you will get two ranges: "up to maximum" and "minimum and above".
+
+If you are running at least VDR 1.7.0, you can also configure the "Broadcast
+Systems / Cost" of the streamdev-client device. On a pure streamdev-client only
+system it doesn't matter what you configure here. But if your client is equipped
+with a DVB card, you should read on. VDR always prefers the cheapest device
+in terms of supported broadcast systems and modulations. A DVB-S2 card supports
+two broadcast systems (DVB-S and DVB-S2). From VDR 1.7.15 on, the supported
+modulations are counted as well (QPSK, QAM32/64/128/256, VSB8/16, TURBO_FEC).
+So for a DVB-S2 card which does QPSK you'll get a total cost of three. A DVB-C
+card (one broadcast system) which can do QAM32,QAM64,QAM128,QAM256 would give
+you a total of five. Check your log for "frontend ... provides ... with ..."
+messages to find out the cost of your DVB cards. Then pick a suitable value for
+streamdev-client. With equal costs, VDR will usually prefer the DVB card and
+take streamdev for recordings. If streamdev's costs are higher, live TV will
+use your DVB card until a recordings kicks in. Then the recording will take the
+DVB card and live TV will be shifted to streamdev (you'll notice a short
+interruption of live TV).
 
 Note that streamdev-client acts similar to a DVB card. It is possible to receive
 multiple channels simultaneously, but only from the same transponder. Just add

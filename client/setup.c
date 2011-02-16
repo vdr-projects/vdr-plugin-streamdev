@@ -16,6 +16,9 @@ cStreamdevClientSetup::cStreamdevClientSetup(void) {
 	HideMenuEntry = false;
 	MinPriority   = -1;
 	MaxPriority   = MAXPRIORITY;
+#if APIVERSNUM >= 10700
+	NumProvidedSystems = 1;
+#endif
 	strcpy(RemoteIp, "");
 }
 
@@ -32,6 +35,7 @@ bool cStreamdevClientSetup::SetupParse(const char *Name, const char *Value) {
 	else if (strcmp(Name, "HideMenuEntry") == 0) HideMenuEntry = atoi(Value);
 	else if (strcmp(Name, "MinPriority") == 0)   MinPriority = atoi(Value);
 	else if (strcmp(Name, "MaxPriority") == 0)   MaxPriority = atoi(Value);
+	else if (strcmp(Name, "NumProvidedSystems") == 0) NumProvidedSystems = atoi(Value);
 	else return false;
 	return true;
 }
@@ -46,6 +50,11 @@ cStreamdevClientMenuSetupPage::cStreamdevClientMenuSetupPage(void) {
 	Add(new cMenuEditBoolItem(tr("Filter Streaming"),    &m_NewSetup.StreamFilters));
 	Add(new cMenuEditIntItem (tr("Minimum Priority"),    &m_NewSetup.MinPriority, -1, MAXPRIORITY));
 	Add(new cMenuEditIntItem (tr("Maximum Priority"),    &m_NewSetup.MaxPriority, -1, MAXPRIORITY));
+#if APIVERSNUM >= 10715
+	Add(new cMenuEditIntItem (tr("Broadcast Systems / Cost"),  &m_NewSetup.NumProvidedSystems, 1, 15));
+#elif APIVERSNUM >= 10700
+	Add(new cMenuEditIntItem (tr("Broadcast Systems / Cost"),  &m_NewSetup.NumProvidedSystems, 1, 4));
+#endif
 	SetCurrent(Get(0));
 }
 
@@ -68,6 +77,7 @@ void cStreamdevClientMenuSetupPage::Store(void) {
 	SetupStore("HideMenuEntry", m_NewSetup.HideMenuEntry);
 	SetupStore("MinPriority",   m_NewSetup.MinPriority);
 	SetupStore("MaxPriority",   m_NewSetup.MaxPriority);
+	SetupStore("NumProvidedSystems", m_NewSetup.NumProvidedSystems);
 
 	StreamdevClientSetup = m_NewSetup;
 

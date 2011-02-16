@@ -19,6 +19,9 @@ struct cStreamdevClientSetup {
 	int  HideMenuEntry;
 	int  MinPriority;
 	int  MaxPriority;
+#if APIVERSNUM >= 10700
+	int  NumProvidedSystems;
+#endif
 };
 
 extern cStreamdevClientSetup StreamdevClientSetup;
