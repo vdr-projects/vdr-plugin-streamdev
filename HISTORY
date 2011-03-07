@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- live TV must be switched in VDR main thread
 - return value of streamdev-clients cDevice::NumProvidedSystems() now
   configurable in plugin setup
 
