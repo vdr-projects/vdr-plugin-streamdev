@@ -302,7 +302,6 @@ cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority)
 			&& UsedByLiveTV(device)) {
 		// now we would have to switch away live tv...let's see if live tv
 		// can be handled by another device
-#if VDRVERSNUM >= 10516
 		cDevice::SetAvoidDevice(device);
 		if (!Channels.SwitchTo(cDevice::CurrentChannel())) {
 			if (StreamdevServerSetup.SuspendMode == smAlways) {
@@ -314,22 +313,6 @@ cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority)
 				device = NULL;
 			}
 		}
-#else
-		const cChannel *current = Channels.GetByNumber(cDevice::CurrentChannel());
-		cDevice *newdev = current ? CheckDevice(current, 0, true, device) : NULL;
-		if (newdev) {
-			dsyslog("streamdev: GetDevice: Trying to move live TV to device %d", newdev->CardIndex());
-			newdev->SwitchChannel(current, true);
-		}
-		else if (StreamdevServerSetup.SuspendMode == smAlways) {
-			Channels.SwitchTo(Channel->Number());
-			Skins.QueueMessage(mtInfo, tr("Streaming active"));
-		}
-		else {
-			dsyslog("streamdev: GetDevice: Live TV not suspended");
-			device = NULL;
-		}
-#endif
 	}
 
 	if (!device) {
