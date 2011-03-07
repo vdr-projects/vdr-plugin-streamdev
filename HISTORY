@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- dropped compatibility with VDR < 1.5.16
 - return value of streamdev-clients cDevice::NumProvidedSystems() now
   configurable in plugin setup
 
