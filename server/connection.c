@@ -8,10 +8,59 @@
 #include "common.h"
 
 #include <vdr/tools.h>
+#include <vdr/thread.h>
 #include <vdr/transfer.h>
 #include <string.h>
 #include <stdarg.h>
 #include <errno.h>
+
+class cSwitchLive {
+private:
+	cMutex         mutex;
+	cCondWait      switched;
+	cDevice        *device;
+	const cChannel *channel;
+public:
+	cDevice* Switch(cDevice *Device, const cChannel *Channel);
+	void Switch(void);
+	cSwitchLive(void);
+};
+
+cSwitchLive::cSwitchLive(): device(NULL), channel(NULL)
+{
+}
+
+cDevice* cSwitchLive::Switch(cDevice *Device, const cChannel *Channel)
+{
+	mutex.Lock();
+	device = Device;
+	channel = Channel;
+	mutex.Unlock();
+	switched.Wait();
+	return device;
+}
+
+void cSwitchLive::Switch(void)
+{
+	mutex.Lock();
+	if (channel && device) {
+		cDevice::SetAvoidDevice(device);
+		if (!Channels.SwitchTo(cDevice::CurrentChannel())) {
+			if (StreamdevServerSetup.SuspendMode == smAlways) {
+				Channels.SwitchTo(channel->Number());
+				Skins.Message(mtInfo, tr("Streaming active"));
+			}
+			else {
+				esyslog("streamdev: Can't receive channel %d (%s) from device %d. Moving live TV to other device failed (PrimaryDevice=%d, ActualDevice=%d)", channel->Number(), channel->Name(), device->CardIndex(), cDevice::PrimaryDevice()->CardIndex(), cDevice::ActualDevice()->CardIndex());
+				device = NULL;
+			}
+		}
+		// make sure we don't come in here next time
+		channel = NULL;
+		switched.Signal();
+	}
+	mutex.Unlock();
+}
 
 cServerConnection::cServerConnection(const char *Protocol, int Type):
 		cTBSocket(Type),
@@ -22,10 +71,12 @@ cServerConnection::cServerConnection(const char *Protocol, int Type):
 		m_WriteBytes(0),
 		m_WriteIndex(0)
 {
+	m_SwitchLive = new cSwitchLive();
 }
 
 cServerConnection::~cServerConnection() 
 {
+	delete m_SwitchLive;
 }
 
 const cChannel* cServerConnection::ChannelFromString(const char *String, int *Apid, int *Dpid) {
@@ -302,17 +353,7 @@ cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority)
 			&& UsedByLiveTV(device)) {
 		// now we would have to switch away live tv...let's see if live tv
 		// can be handled by another device
-		cDevice::SetAvoidDevice(device);
-		if (!Channels.SwitchTo(cDevice::CurrentChannel())) {
-			if (StreamdevServerSetup.SuspendMode == smAlways) {
-				Channels.SwitchTo(Channel->Number());
-				Skins.QueueMessage(mtInfo, tr("Streaming active"));
-			}
-			else {
-				dsyslog("streamdev: GetDevice: Live TV not suspended");
-				device = NULL;
-			}
-		}
+		device = m_SwitchLive->Switch(device, Channel);
 	}
 
 	if (!device) {
@@ -353,4 +394,9 @@ bool cServerConnection::ProvidesChannel(const cChannel *Channel, int Priority)
 			dsyslog("streamdev: No device provides channel %d (%s) at priority %d", Channel->Number(), Channel->Name(), Priority);
 	}
 	return device;
+}
+
+void cServerConnection::MainThreadHook()
+{
+	m_SwitchLive->Switch();
 }

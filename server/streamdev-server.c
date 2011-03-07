@@ -130,6 +130,11 @@ cOsdObject *cPluginStreamdevServer::MainMenuAction(void)
 	return NULL;
 }
 
+void cPluginStreamdevServer::MainThreadHook(void)
+{
+	cStreamdevServer::MainThreadHook();
+}
+
 cMenuSetupPage *cPluginStreamdevServer::SetupMenu(void) 
 {
 	return new cStreamdevServerMenuSetupPage;
