@@ -26,6 +26,7 @@ public:
 	virtual cString Active(void);
 	virtual const char *MainMenuEntry(void);
 	virtual cOsdObject *MainMenuAction(void);
+	virtual void MainThreadHook(void);
 	virtual cMenuSetupPage *SetupMenu(void);
 	virtual bool SetupParse(const char *Name, const char *Value);
 };
