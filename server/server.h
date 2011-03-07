@@ -36,6 +36,7 @@ public:
 	static void Initialize(void);
 	static void Destruct(void);
 	static bool Active(void);
+	static void MainThreadHook(void);
 };
 
 inline bool cStreamdevServer::Active(void) 
