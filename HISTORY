@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- added Spanish translation (thanks to Javier Bradineras)
 - return value of streamdev-clients cDevice::NumProvidedSystems() now
   configurable in plugin setup
 

@@ -1,0 +1,84 @@
+# VDR streamdev plugin language source file.
+# Copyright (C) 2008 streamdev development team. See http://streamdev.vdr-developer.org
+# This file is distributed under the same license as the VDR streamdev package.
+# Javier Bradineras <jbradi@hotmail.com>, 2011
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: streamdev 0.5.0\n"
+"Report-Msgid-Bugs-To: <http://www.vdr-developer.org/mantisbt/>\n"
+"POT-Creation-Date: 2010-06-14 13:06+0200\n"
+"PO-Revision-Date: 2010-06-19 03:58+0100\n"
+"Last-Translator: Javier Bradineras <jbradi@hotmail.com>\n"
+"Language-Team:  <vdr@linuxtv.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-15\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "VDR Streaming Server"
+msgstr "Servidor de transmisiones del VDR"
+
+msgid "Streaming active"
+msgstr "Trasmisión activa"
+
+msgid "Suspend Live TV"
+msgstr "Suspender TV en vivo"
+
+msgid "Offer suspend mode"
+msgstr "Ofrecer modo de suspensión"
+
+msgid "Always suspended"
+msgstr "Siempre suspendido"
+
+msgid "Never suspended"
+msgstr "Nunca suspendido"
+
+msgid "Common Settings"
+msgstr "Configuración común"
+
+msgid "Maximum Number of Clients"
+msgstr "Numero máximo de clientes"
+
+msgid "Suspend behaviour"
+msgstr "Comportamiento de la suspensión"
+
+msgid "Client may suspend"
+msgstr "Permitir suspender al cliente"
+
+msgid "VDR-to-VDR Server"
+msgstr "Servidor VDR-a-VDR"
+
+msgid "Start VDR-to-VDR Server"
+msgstr "Iniciar Servidor VDR-a-VDR"
+
+msgid "VDR-to-VDR Server Port"
+msgstr "Puerto del Servidor VDR-a-VDR"
+
+msgid "Bind to IP"
+msgstr "IP asociada"
+
+msgid "HTTP Server"
+msgstr "Servidor HTTP"
+
+msgid "Start HTTP Server"
+msgstr "Iniciar Servidor HTTP"
+
+msgid "HTTP Server Port"
+msgstr "Puerto del Servidor HTTP"
+
+msgid "HTTP Streamtype"
+msgstr "Tipo de flujo HTTP"
+
+msgid "Multicast Streaming Server"
+msgstr "Servidor de transmisión Multicast"
+
+msgid "Start IGMP Server"
+msgstr "Iniciar Servidor IGMP"
+
+msgid "Multicast Client Port"
+msgstr "Puerto del Cliente Multicast"
+
+msgid "Multicast Streamtype"
+msgstr "Tipo de flujo Multicast"
+
+
