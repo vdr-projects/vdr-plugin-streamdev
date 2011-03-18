@@ -121,7 +121,9 @@ void cStreamdevServer::Action(void)
 				cServerConnection *client = c->Accept();
 				if (!client)
 					continue;
+				Lock();
 				m_Clients.Add(client);
+				Unlock();
 
 				if (m_Clients.Count() > StreamdevServerSetup.MaxClients) {
 					esyslog("streamdev: too many clients, rejecting %s:%d",
@@ -153,21 +155,32 @@ void cStreamdevServer::Action(void)
 				isyslog("streamdev: closing streamdev connection to %s:%d", 
 				        s->RemoteIp().c_str(), s->RemotePort());
 				s->Close();
+				Lock();
 				m_Clients.Del(s);
+				Unlock();
 			}
 			s = next;
 		}
 	}
 	
+	Lock();
 	while (m_Clients.Count() > 0) {
 		cServerConnection *s = m_Clients.First();
 		s->Close();
 		m_Clients.Del(s);
 	}
+	Unlock();
 
 	while (m_Servers.Count() > 0) {
 		cServerComponent *c = m_Servers.First();
 		c->Destruct();
 		m_Servers.Del(c);
 	}
+}
+
+void cStreamdevServer::MainThreadHook(void) 
+{
+	cThreadLock lock(m_Instance);
+	for (cServerConnection *s = m_Clients.First(); s; s = m_Clients.Next(s))
+		s->MainThreadHook();
 }

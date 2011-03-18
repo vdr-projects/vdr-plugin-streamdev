@@ -1783,14 +1783,7 @@ bool cConnectionVTP::Respond(int Code, const char *Message, ...)
 {
 	va_list ap;
 	va_start(ap, Message);
-#if APIVERSNUM < 10515
-	char *buffer;
-	if (vasprintf(&buffer, Message, ap) < 0)
-		buffer = strdup("???");
-	cString str(buffer, true);
-#else
 	cString str = cString::sprintf(Message, ap);
-#endif
 	va_end(ap);
 
 	if (Code >= 0 && m_LastCommand != NULL) {
