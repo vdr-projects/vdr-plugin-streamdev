@@ -15,6 +15,7 @@ typedef std::pair<std::string,std::string> tStrStr;
 
 class cChannel;
 class cDevice;
+class cSwitchLive;
 
 /* Basic capabilities of a straight text-based protocol, most functions
    virtual to support more complicated protocols */
@@ -32,6 +33,8 @@ private:
 	char        m_WriteBuffer[MAXPARSEBUFFER];
 	uint        m_WriteBytes;
 	uint        m_WriteIndex;
+
+	cSwitchLive *m_SwitchLive;
 
 	tStrStrMap  m_Headers;
 
@@ -107,6 +110,9 @@ public:
 
 	/* Test if a call to GetDevice would return a usable device. */
 	bool ProvidesChannel(const cChannel *Channel, int Priority);
+
+	/* Do things which must be done in VDR's main loop */
+	void MainThreadHook();
 
 	virtual void Flushed(void) {}
 

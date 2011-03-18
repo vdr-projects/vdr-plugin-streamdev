@@ -49,9 +49,7 @@ cStreamdevDevice::~cStreamdevDevice() {
 
 	Cancel(3);
 
-#if APIVERSNUM >= 10515
 	StopSectionHandler();
-#endif
 	DELETENULL(m_Filters);
 	DELETENULL(m_TSBuffer);
 }

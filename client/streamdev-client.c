@@ -10,8 +10,8 @@
 #include "client/device.h"
 #include "client/setup.h"
 
-#if !defined(APIVERSNUM) || APIVERSNUM < 10509
-#error "VDR-1.5.9 API version or greater is required!"
+#if !defined(APIVERSNUM) || APIVERSNUM < 10516
+#error "VDR-1.5.16 API version or greater is required!"
 #endif
 
 const char *cPluginStreamdevClient::DESCRIPTION = trNOOP("VTP Streaming Client");
