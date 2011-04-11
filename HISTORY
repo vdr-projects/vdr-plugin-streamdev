@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- writer must not spend too much time waiting in select() without checking
+  if the thread has been cancelled
 - added Spanish translation (thanks to Javier Bradineras)
 - live TV must be switched in VDR main thread
 - dropped compatibility with VDR < 1.5.16

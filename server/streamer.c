@@ -45,6 +45,7 @@ void cStreamdevWriter::Action(void)
 	int max = 0;
 	uchar *block = NULL;
 	int count, offset = 0;
+	int timeout = 0;
 
 #if APIVERSNUM >= 10705
 	SetPriority(-3);
@@ -58,10 +59,13 @@ void cStreamdevWriter::Action(void)
 		}
 
 		if (block != NULL) {
-			if (sel.Select(15000) == -1) {
+			if (sel.Select(600) == -1) {
+				if (errno == ETIMEDOUT && timeout++ < 20)
+					continue;	// still Running()?
 				esyslog("ERROR: streamdev-server: couldn't send data: %m");
 				break;
 			}
+			timeout = 0;
 
 			if (sel.CanWrite(*m_Socket)) {
 				int written;
