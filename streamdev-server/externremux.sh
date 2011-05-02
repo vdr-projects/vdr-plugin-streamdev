@@ -44,6 +44,8 @@ ABR_MONO=64
 ###
 # mencoder binary
 MENCODER=mencoder
+# verbosity from all=-1 to all=9 (-msglevel ...)
+MENCODER_MSGLEVEL=all=1
 ### video part
 # Default video codec (e.g. lavc/x264/copy)
 MENCODER_VC=lavc
@@ -52,6 +54,8 @@ MENCODER_LAVC_VOPTS=vcodec=mpeg4
 # Default video options if x264 is used (-ovc x264 -x264encopts ...)
 MENCODER_X264_VOPTS=threads=auto
 ### audio part
+# Audio language to use if several audio PIDs are available (-alang ...)
+MENCODER_ALANG=eng
 # Default audio codec (e.g. lavc/mp3lame/faac/copy)
 MENCODER_AC=mp3lame
 # Default audio options if lavc is used (-oac lavc -lavcopts ...)
@@ -193,14 +197,18 @@ function remux_mencoder
 	startReply
 	exec 3<&0
 	echo $MENCODER \
+		${MENCODER_MSGLEVEL:+-msglevel $MENCODER_MSGLEVEL} \
 		-ovc $VC $VOPTS \
 		-oac $AC $AOPTS \
+		${MENCODER_ALANG:+-alang $MENCODER_ALANG} \
 		${WIDTH:+-vf scale=$WIDTH:$HEIGHT -zoom} \
 		${FPS:+-ofps $FPS} \
 		-o "$FIFO" -- - >&2
 	$MENCODER \
+		${MENCODER_MSGLEVEL:+-msglevel $MENCODER_MSGLEVEL} \
 		-ovc $VC $VOPTS \
 		-oac $AC $AOPTS \
+		${MENCODER_ALANG:+-alang $MENCODER_ALANG} \
 		${WIDTH:+-vf scale=$WIDTH:$HEIGHT -zoom} \
 		${FPS:+-ofps $FPS} \
 		-o "$FIFO" -- - 0<&3 >/dev/null &

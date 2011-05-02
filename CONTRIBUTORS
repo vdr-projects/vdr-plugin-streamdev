@@ -185,3 +185,7 @@ wtor
 
 Javier Bradineras
   for providing Spanish language texts
+
+Pekko Tiitto
+  for providing a git mirror of streamdev's lost CVS repository
+  for suggesting to use mencoder params -alang and -msglevel in externremux

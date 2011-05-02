@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- new externremux.sh mencoder config options: audio pid by language code
+  (-alang) and verbosity (-msglevel) (thanks to Pekko Tiitto)
 - writer must not spend too much time waiting in select() without checking
   if the thread has been cancelled
 - added Spanish translation (thanks to Javier Bradineras)
