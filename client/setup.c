@@ -35,7 +35,9 @@ bool cStreamdevClientSetup::SetupParse(const char *Name, const char *Value) {
 	else if (strcmp(Name, "HideMenuEntry") == 0) HideMenuEntry = atoi(Value);
 	else if (strcmp(Name, "MinPriority") == 0)   MinPriority = atoi(Value);
 	else if (strcmp(Name, "MaxPriority") == 0)   MaxPriority = atoi(Value);
+#if APIVERSNUM >= 10700
 	else if (strcmp(Name, "NumProvidedSystems") == 0) NumProvidedSystems = atoi(Value);
+#endif
 	else return false;
 	return true;
 }
@@ -77,7 +79,9 @@ void cStreamdevClientMenuSetupPage::Store(void) {
 	SetupStore("HideMenuEntry", m_NewSetup.HideMenuEntry);
 	SetupStore("MinPriority",   m_NewSetup.MinPriority);
 	SetupStore("MaxPriority",   m_NewSetup.MaxPriority);
+#if APIVERSNUM >= 10700
 	SetupStore("NumProvidedSystems", m_NewSetup.NumProvidedSystems);
+#endif
 
 	StreamdevClientSetup = m_NewSetup;
 
