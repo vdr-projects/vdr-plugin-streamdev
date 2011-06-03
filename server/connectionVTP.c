@@ -772,9 +772,10 @@ cConnectionVTP::~cConnectionVTP()
 	delete m_RecPlayer;
 }
 
-inline bool cConnectionVTP::Abort(void) const
+bool cConnectionVTP::Abort(void) const
 {
-	return m_LiveStreamer && m_LiveStreamer->Abort();
+	return (m_LiveStreamer && m_LiveStreamer->Abort()) ||
+		(m_FilterStreamer && m_FilterStreamer->Abort());
 }
 
 void cConnectionVTP::Welcome(void) 

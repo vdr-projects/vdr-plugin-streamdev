@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- server must close the VTP connection also if filter stream is broken
 - fixed missing #ifdefs for new NumProvidedSystems setup option
 - new externremux.sh mencoder config options: audio pid by language code
   (-alang) and verbosity (-msglevel) (thanks to Pekko Tiitto)
