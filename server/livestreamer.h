@@ -39,6 +39,7 @@ public:
 	bool SetPids(int Pid, const int *Pids1 = NULL, const int *Pids2 = NULL, const int *Pids3 = NULL);
 	bool SetChannel(const cChannel *Channel, eStreamType StreamType, const int* Apid = NULL, const int* Dpid = NULL);
 	void SetPriority(int Priority);
+	void GetSignal(int *DevNum, int *Strength, int *Quality) const;
 	
 	virtual int Put(const uchar *Data, int Count);
 	virtual uchar *Get(int &Count);

@@ -65,6 +65,7 @@ public:
 	bool CmdTUNE(char *Opts);
 	bool CmdPLAY(char *Opts);
 	bool CmdPRIO(char *Opts);
+	bool CmdSGNL(char *Opts);
 	bool CmdADDP(char *Opts);
 	bool CmdDELP(char *Opts);
 	bool CmdADDF(char *Opts);

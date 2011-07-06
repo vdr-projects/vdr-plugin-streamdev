@@ -21,6 +21,9 @@ cClientSocket::cClientSocket(void)
 {
 	memset(m_DataSockets, 0, sizeof(cTBSocket*) * si_Count);
 	m_Prio = false;
+	m_LastSignalUpdate = 0;
+	m_LastSignalStrength = -1;
+	m_LastSignalQuality = -1;
 	Reset();
 }
 
@@ -255,6 +258,8 @@ bool cClientSocket::SetChannelDevice(const cChannel *Channel) {
 			        RemoteIp().c_str(), RemotePort(), Channel->Name());
 		return false;
 	}
+
+	m_LastSignalUpdate = 0;
 	return true;
 }
 
@@ -271,6 +276,27 @@ bool cClientSocket::SetPriority(int Priority) {
 		return false;
 	}
 	return true;
+}
+
+bool cClientSocket::GetSignal(int *SignalStrength, int *SignalQuality) {
+	if (!CheckConnection()) return -1;
+
+	CMD_LOCK;
+
+	if (m_LastSignalUpdate != time(NULL)) {
+		std::string buffer;
+		if (!Command("SGNL") || !Expect(220, &buffer)
+				|| sscanf(buffer.c_str(), "%*d %*d %d:%d", &m_LastSignalStrength, &m_LastSignalQuality) != 2) {
+			m_LastSignalStrength = -1;
+			m_LastSignalQuality = -1;
+		}
+		m_LastSignalUpdate = time(NULL);
+	}
+	if (SignalStrength)
+		*SignalStrength = m_LastSignalStrength;
+	if (SignalQuality)
+		*SignalQuality = m_LastSignalQuality;
+	return 0;
 }
 
 bool cClientSocket::SetPid(int Pid, bool On) {

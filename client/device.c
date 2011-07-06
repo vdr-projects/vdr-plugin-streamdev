@@ -324,3 +324,18 @@ void cStreamdevDevice::UpdatePriority(void) {
 		m_Device->Unlock();
 	}
 }
+
+int cStreamdevDevice::SignalStrength(void) const {
+	int strength = -1;
+	if (ClientSocket.DataSocket(siLive) != NULL)
+		ClientSocket.GetSignal(&strength, NULL);
+	return strength;
+}
+
+int cStreamdevDevice::SignalQuality(void) const {
+	int quality = -1;
+	if (ClientSocket.DataSocket(siLive) != NULL)
+		ClientSocket.GetSignal(NULL, &quality);
+	return quality;
+}
+

@@ -440,6 +440,17 @@ void cStreamdevLiveStreamer::SetPriority(int Priority)
 	StartReceiver();
 }
 
+void cStreamdevLiveStreamer::GetSignal(int *DevNum, int *Strength, int *Quality) const
+{
+	if (m_Device) {
+		*DevNum = m_Device->DeviceNumber() + 1;
+#if APIVERSNUM >= 10719
+		*Strength = m_Device->SignalStrength();
+		*Quality = m_Device->SignalQuality();
+#endif
+	}
+}
+
 void cStreamdevLiveStreamer::StartReceiver(void)
 {
 	if (m_NumPids > 0) {

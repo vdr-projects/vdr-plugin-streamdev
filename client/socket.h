@@ -22,6 +22,9 @@ private:
 	char          m_Buffer[BUFSIZ + 1]; // various uses
 	bool          m_Prio; // server supports command PRIO
 
+	time_t        m_LastSignalUpdate;
+	int           m_LastSignalStrength;
+	int           m_LastSignalQuality;
 protected:
 	/* Send Command, and return true if the command results in Expected. 
 	   Returns false on failure, setting errno appropriately if it has been
@@ -50,6 +53,7 @@ public:
 	bool SetPriority(int Priority);
 	bool SetPid(int Pid, bool On);
 	bool SetFilter(ushort Pid, uchar Tid, uchar Mask, bool On);
+	bool GetSignal(int *SignalStrength, int *SignalQuality);
 	bool CloseDvr(void);
 	bool SuspendServer(void);
 	bool Quit(void);

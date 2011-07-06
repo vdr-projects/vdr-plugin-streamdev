@@ -840,6 +840,7 @@ bool cConnectionVTP::Command(char *Cmd)
 	else if (strcasecmp(Cmd, "TUNE") == 0) return CmdTUNE(param);
 	else if (strcasecmp(Cmd, "PLAY") == 0) return CmdPLAY(param);
 	else if (strcasecmp(Cmd, "PRIO") == 0) return CmdPRIO(param);
+	else if (strcasecmp(Cmd, "SGNL") == 0) return CmdSGNL(param);
 	else if (strcasecmp(Cmd, "ADDP") == 0) return CmdADDP(param);
 	else if (strcasecmp(Cmd, "DELP") == 0) return CmdDELP(param);
 	else if (strcasecmp(Cmd, "ADDF") == 0) return CmdADDF(param);
@@ -1153,6 +1154,18 @@ bool cConnectionVTP::CmdPRIO(char *Opts)
 		return Respond(220, "Priority changed to %d", prio);
 	}
 	return Respond(550, "Priority not applicable");
+}
+
+bool cConnectionVTP::CmdSGNL(char *Opts) 
+{
+	if (m_LiveStreamer) {
+		int devnum = -1;
+		int signal = -1;
+		int quality = -1;
+		m_LiveStreamer->GetSignal(&devnum, &signal, &quality);
+		return Respond(220, "%d %d:%d", devnum, signal, quality);
+	}
+	return Respond(550, "Signal not applicable");
 }
 
 bool cConnectionVTP::CmdADDP(char *Opts) 

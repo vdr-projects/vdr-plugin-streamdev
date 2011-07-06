@@ -59,6 +59,8 @@ public:
 	virtual int NumProvidedSystems(void) const;
 #endif
 	virtual bool IsTunedToTransponder(const cChannel *Channel);
+	virtual int SignalStrength(void) const;
+	virtual int SignalQuality(void) const;
 
 	static void UpdatePriority(void);
 	static bool Init(void);
