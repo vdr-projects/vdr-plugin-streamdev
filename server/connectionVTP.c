@@ -1089,14 +1089,16 @@ bool cConnectionVTP::CmdTUNE(char *Opts)
 		return Respond(550, "Undefined channel \"%s\"", Opts);
 
 	if (chan != m_TuneChannel) {
-		esyslog("streamdev-server TUNE %s: Priority unknown - using 0", Opts);
+		isyslog("streamdev-server TUNE %s: Priority unknown - using 0", Opts);
 		prio = 0;
+		if (!ProvidesChannel(chan, prio))
+			return Respond(560, "Channel not available (ProvidesChannel)");
 	}
 	if ((dev = GetDevice(chan, prio)) == NULL)
-		return Respond(560, "Channel not available");
+		return Respond(560, "Channel not available (GetDevice)");
 
 	if (!dev->SwitchChannel(chan, false))
-		return Respond(560, "Channel not available");
+		return Respond(560, "Channel not available (SwitchChannel)");
 
 	delete m_LiveStreamer;
 	m_LiveStreamer = new cStreamdevLiveStreamer(prio, this);

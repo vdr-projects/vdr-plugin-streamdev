@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- check availability of channel if VTP command TUNE is called without
+  prior PROV call (e.g. client side EPG scan)
 - added support for VDR 1.7.19 SignalStrength/SignalQuality
 - analog video channels use the same transponder and pid for different
   channels, so streamdev-client must always issue TUNE command
