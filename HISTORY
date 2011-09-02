@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- increased WRITERBUFSIZE. Has been reported to fix some ringbuffer
+  overflows (thanks to Lubo¨ Dole¸el)
 - check availability of channel if VTP command TUNE is called without
   prior PROV call (e.g. client side EPG scan)
 - added support for VDR 1.7.19 SignalStrength/SignalQuality

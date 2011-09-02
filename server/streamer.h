@@ -18,7 +18,7 @@ class cServerConnection;
 #endif
 
 #define STREAMERBUFSIZE (20000 * TS_SIZE)
-#define WRITERBUFSIZE (5000 * TS_SIZE)
+#define WRITERBUFSIZE (20000 * TS_SIZE)
 
 // --- cStreamdevBuffer -------------------------------------------------------
 

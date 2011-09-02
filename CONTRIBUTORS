@@ -189,3 +189,6 @@ Javier Bradineras
 Pekko Tiitto
   for providing a git mirror of streamdev's lost CVS repository
   for suggesting to use mencoder params -alang and -msglevel in externremux
+
+Lubo¨ Dole¸el
+  for suggesting higher buffer sizes to fix some ringbuffer overflows
