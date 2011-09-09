@@ -1,6 +1,9 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- streamdev-client returns true in its AvoidRecording() method introduced
+  with VDR 1.7.19. Note however that the impact of NumProvidedSystems is
+  higher.
 - updated device selection to code of VDR 1.7.19
 - adaption to VDR 1.7.12 cReceiver API change
 - increased WRITERBUFSIZE. Has been reported to fix some ringbuffer

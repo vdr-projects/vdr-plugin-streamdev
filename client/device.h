@@ -58,6 +58,9 @@ public:
 #if APIVERSNUM >= 10700
 	virtual int NumProvidedSystems(void) const;
 #endif
+#if APIVERSNUM >= 10719
+	virtual bool AvoidRecording(void) const { return true; }
+#endif
 	virtual bool IsTunedToTransponder(const cChannel *Channel);
 	virtual int SignalStrength(void) const;
 	virtual int SignalQuality(void) const;
