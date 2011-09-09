@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- updated device selection to code of VDR 1.7.19
 - adaption to VDR 1.7.12 cReceiver API change
 - increased WRITERBUFSIZE. Has been reported to fix some ringbuffer
   overflows (thanks to Lubo¨ Dole¸el)
