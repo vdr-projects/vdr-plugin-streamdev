@@ -29,15 +29,24 @@ protected:
 	virtual void Receive(uchar *Data, int Length);
 
 public:
-	cStreamdevLiveReceiver(cStreamdevStreamer *Streamer, tChannelID ChannelID, int Priority, const int *Pids);
+	cStreamdevLiveReceiver(cStreamdevStreamer *Streamer, const cChannel *Channel, int Priority, const int *Pids);
 	virtual ~cStreamdevLiveReceiver();
 };
 
-cStreamdevLiveReceiver::cStreamdevLiveReceiver(cStreamdevStreamer *Streamer, tChannelID ChannelID, 
+cStreamdevLiveReceiver::cStreamdevLiveReceiver(cStreamdevStreamer *Streamer, const cChannel *Channel, 
                                                int Priority, const int *Pids):
-		cReceiver(ChannelID, Priority, 0, Pids),
+#if APIVERSNUM >= 10712
+		cReceiver(Channel, Priority),
+#else
+		cReceiver(Channel->GetChannelID(), Priority, 0, Pids),
+#endif
 		m_Streamer(Streamer)
 {
+#if APIVERSNUM >= 10712
+		// clears all PIDs but channel remains set
+		SetPids(NULL);
+		AddPids(Pids);
+#endif
 }
 
 cStreamdevLiveReceiver::~cStreamdevLiveReceiver() 
@@ -456,7 +465,7 @@ void cStreamdevLiveStreamer::StartReceiver(void)
 	if (m_NumPids > 0) {
 		Dprintf("Creating Receiver to respect changed pids\n");
 		cReceiver *current = m_Receiver;
-		m_Receiver = new cStreamdevLiveReceiver(this, m_Channel->GetChannelID(), m_Priority, m_Pids);
+		m_Receiver = new cStreamdevLiveReceiver(this, m_Channel, m_Priority, m_Pids);
 		cThreadLock ThreadLock(m_Device);
 		if (IsRunning())
 			Attach();
