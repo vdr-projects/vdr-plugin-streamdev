@@ -20,12 +20,14 @@ private:
 	cStreamdevLiveStreamer           *m_LiveStreamer;
 	int                               m_ClientPort;
 	eStreamType                       m_StreamType;
+	cChannel                         *m_Channel;
 
 public:
 	cConnectionIGMP(const char* Name, int ClientPort, eStreamType StreamType);
 	virtual ~cConnectionIGMP();
 
-	bool Start(cChannel *Channel, in_addr_t Dst);
+	bool SetChannel(cChannel *Channel, in_addr_t Dst);
+	virtual void Welcome(void);
 	void Stop();
 
 	/* Not used here */

@@ -434,7 +434,7 @@ void cComponentIGMP::IGMPStartMulticast(cMulticastGroup* Group)
 	if (g > MULTICAST_PRIV_MIN && g <= MULTICAST_PRIV_MAX) {
 		cChannel *channel = Channels.GetByNumber(g - MULTICAST_PRIV_MIN);
 		Group->connection = (cConnectionIGMP*) NewClient();
-		if (!Group->connection->Start(channel, Group->group)) {
+		if (!Group->connection->SetChannel(channel, Group->group)) {
 			DELETENULL(Group->connection);
 		}
 	}
