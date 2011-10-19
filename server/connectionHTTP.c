@@ -161,10 +161,14 @@ bool cConnectionHTTP::ProcessRequest(void)
 						LOG_ERROR_STR("unable to set DSCP sockopt");
 					if (m_StreamType == stEXT) {
 						return Respond("HTTP/1.0 200 OK");
-					} else if (ISRADIO(m_Channel) || (m_StreamType == stES && (m_Apid[0] || m_Dpid[0]))) {
+					} else if (m_StreamType == stES && (m_Apid[0] || m_Dpid[0] || ISRADIO(m_Channel))) {
 						return Respond("HTTP/1.0 200 OK")
 						    && Respond("Content-Type: audio/mpeg")
 						    && Respond("icy-name: %s", true, m_Channel->Name())
+						    && Respond("");
+					} else if (ISRADIO(m_Channel)) {
+						return Respond("HTTP/1.0 200 OK")
+						    && Respond("Content-Type: audio/mpeg")
 						    && Respond("");
 					} else {
 						return Respond("HTTP/1.0 200 OK")
@@ -193,10 +197,14 @@ bool cConnectionHTTP::ProcessRequest(void)
 					// TODO
 					return Respond("HTTP/1.0 200 OK")
 					    && Respond("");
-				} else if (ISRADIO(m_Channel) || (m_StreamType == stES && (m_Apid[0] || m_Dpid[0]))) {
+				} else if (m_StreamType == stES && (m_Apid[0] || m_Dpid[0] || ISRADIO(m_Channel))) {
 					return Respond("HTTP/1.0 200 OK")
 					    && Respond("Content-Type: audio/mpeg")
 					    && Respond("icy-name: %s", true, m_Channel->Name())
+					    && Respond("");
+				} else if (ISRADIO(m_Channel)) {
+					return Respond("HTTP/1.0 200 OK")
+					    && Respond("Content-Type: audio/mpeg")
 					    && Respond("");
 				} else {
 					return Respond("HTTP/1.0 200 OK")
