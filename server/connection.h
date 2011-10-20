@@ -25,7 +25,6 @@ class cServerConnection: public cListObject, public cTBSocket
 private:
 	const char *m_Protocol;
 	bool        m_DeferClose;
-	bool        m_Pending;
 
 	char        m_ReadBuffer[MAXPARSEBUFFER];
 	uint        m_ReadBytes;
@@ -53,12 +52,8 @@ protected:
 	virtual bool Command(char *Cmd) = 0;
 
 	/* Will put Message into the response queue, which will be sent in the next
-	   server cycle. Note that Message will be line-terminated by Respond. 
-	   Only one line at a time may be sent. If there are lines to follow, set
-	   Last to false. Command(NULL) will be called in the next cycle, so you can
-	   post the next line. */
-	virtual bool Respond(const char *Message, bool Last = true, ...);
-			//__attribute__ ((format (printf, 2, 4)));
+	   server cycle. Note that Message will be line-terminated by Respond. */
+	virtual bool Respond(const char *Message, ...);
 
 	/* Add a request header */
 	void SetHeader(const char *Name, const char *Value, const char *Prefix = "") { m_Headers.insert(tStrStr(std::string(Prefix) + Name, Value)); }
@@ -87,8 +82,8 @@ public:
 	virtual bool HasData(void) const;
 
 	/* Gets called by server when the socket can accept more data. Writes
-	   the buffer filled up by Respond(). Calls Command(NULL) if there is a
-	   command pending. Returns false in case of an error */
+	   the buffer filled up by Respond(). Returns false in case of an
+	   error */
 	virtual bool Write(void);
 
 	/* Gets called by server when there is incoming data to read. Calls
@@ -128,7 +123,7 @@ public:
 
 inline bool cServerConnection::HasData(void) const
 {
-	return m_WriteBytes > 0 || m_Pending || m_DeferClose;
+	return m_WriteBytes > 0 || m_DeferClose;
 }
 
 #endif // VDR_STREAMDEV_SERVER_CONNECTION_H

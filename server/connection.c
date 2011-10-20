@@ -66,7 +66,6 @@ cServerConnection::cServerConnection(const char *Protocol, int Type):
 		cTBSocket(Type),
 		m_Protocol(Protocol),
 		m_DeferClose(false),
-		m_Pending(false),
 		m_ReadBytes(0),
 		m_WriteBytes(0),
 		m_WriteIndex(0)
@@ -196,8 +195,6 @@ bool cServerConnection::Write(void)
 	if (m_WriteIndex == m_WriteBytes) {
 		m_WriteIndex = 0;
 		m_WriteBytes = 0;
-		if (m_Pending)
-			Command(NULL);
 		if (m_DeferClose)
 			return false;
 		Flushed();
@@ -205,12 +202,12 @@ bool cServerConnection::Write(void)
 	return true;
 }
 
-bool cServerConnection::Respond(const char *Message, bool Last, ...) 
+bool cServerConnection::Respond(const char *Message, ...) 
 {
 	char *buffer;
 	int length;
 	va_list ap;
-	va_start(ap, Last);
+	va_start(ap, Message);
 	length = vasprintf(&buffer, Message, ap);
 	va_end(ap);
 
@@ -233,7 +230,6 @@ bool cServerConnection::Respond(const char *Message, bool Last, ...)
 	m_WriteBytes += length;
 	m_WriteBuffer[m_WriteBytes++] = '\015';
 	m_WriteBuffer[m_WriteBytes++] = '\012';
-	m_Pending = !Last;
 	return true;
 }
 

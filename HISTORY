@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- dropped cServerConnection::m_Pending
 - the icy-name HTTP header sent with radio streams makes VLC pick the wrong
   demuxer. Send icy-name only for ES audio streams.
 - fixed regression of "live TV must be switched in VDR main thread" change:

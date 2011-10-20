@@ -147,7 +147,7 @@ bool cConnectionHTTP::ProcessRequest(void)
 		esyslog("streamdev-server connectionHTTP: Missing method or pathinfo");
 	} else if (it_method->second.compare("GET") == 0 && ProcessURI(it_pathinfo->second)) {
 		if (m_ChannelList)
-			return Respond("%s", true, m_ChannelList->HttpHeader().c_str());
+			return Respond("%s", m_ChannelList->HttpHeader().c_str());
 		else if (m_Channel != NULL) {
 			cDevice *device = NULL;
 			if (ProvidesChannel(m_Channel, 0))
@@ -164,7 +164,7 @@ bool cConnectionHTTP::ProcessRequest(void)
 					} else if (m_StreamType == stES && (m_Apid[0] || m_Dpid[0] || ISRADIO(m_Channel))) {
 						return Respond("HTTP/1.0 200 OK")
 						    && Respond("Content-Type: audio/mpeg")
-						    && Respond("icy-name: %s", true, m_Channel->Name())
+						    && Respond("icy-name: %s", m_Channel->Name())
 						    && Respond("");
 					} else if (ISRADIO(m_Channel)) {
 						return Respond("HTTP/1.0 200 OK")
@@ -190,7 +190,7 @@ bool cConnectionHTTP::ProcessRequest(void)
 	} else if (it_method->second.compare("HEAD") == 0 && ProcessURI(it_pathinfo->second)) {
 		DeferClose();
 		if (m_ChannelList)
-			return Respond("%s", true, m_ChannelList->HttpHeader().c_str());
+			return Respond("%s", m_ChannelList->HttpHeader().c_str());
 		else if (m_Channel != NULL) {
 			if (ProvidesChannel(m_Channel, 0)) {
 				if (m_StreamType == stEXT) {
@@ -200,7 +200,7 @@ bool cConnectionHTTP::ProcessRequest(void)
 				} else if (m_StreamType == stES && (m_Apid[0] || m_Dpid[0] || ISRADIO(m_Channel))) {
 					return Respond("HTTP/1.0 200 OK")
 					    && Respond("Content-Type: audio/mpeg")
-					    && Respond("icy-name: %s", true, m_Channel->Name())
+					    && Respond("icy-name: %s", m_Channel->Name())
 					    && Respond("");
 				} else if (ISRADIO(m_Channel)) {
 					return Respond("HTTP/1.0 200 OK")
@@ -235,7 +235,7 @@ void cConnectionHTTP::Flushed(void)
 
 	if (m_ChannelList) {
 		if (m_ChannelList->HasNext()) {
-			if (!Respond("%s", true, m_ChannelList->Next().c_str()))
+			if (!Respond("%s", m_ChannelList->Next().c_str()))
 				DeferClose();
 		}
 		else {
