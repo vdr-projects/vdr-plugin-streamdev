@@ -305,7 +305,12 @@ You might want to increase this up to "number_of_channels + 1". Note that it's
 
   #All channels:
   bash# COUNT=$(grep -c '^[^:]' PATH_TO_YOUR/channels.conf)
-  bash# sysctl -w net.ipv4.igmp_max_memberships=$COUNT
+  bash# sysctl -w net.ipv4.igmp_max_memberships=$((COUNT + 1))
+
+You need to run the sysctl command *before* VDR is started. The setting is lost
+after the next reboot. Check the documentation of your Linux distro on how to
+make the setting persist (i.e. have your distro change the value for you as
+part of the boot procedure). Most likely /etc/sysctl.conf is your friend.
 
 A multicast server never knows how many clients are actually receiving a stream.
 If a client signals that it leaves a multicast group, the server has to query
