@@ -329,9 +329,9 @@ void cStreamdevPatFilter::Process(u_short Pid, u_char Tid, const u_char *Data, i
 		pids[npids++] = pmtPid;
 #if 0
 		pids[npids++] = 0x10;  // pid 0x10, tid 0x40: NIT 
+#endif
 		pids[npids++] = 0x11;  // pid 0x11, tid 0x42: SDT 
 		pids[npids++] = 0x14;  // pid 0x14, tid 0x70: TDT 
-#endif
 		pids[npids++] = 0x12;  // pid 0x12, tid 0x4E...0x6F: EIT 
 		for (SI::Loop::Iterator it; pmt.streamLoop.getNext(stream, it); )
 			if (0 != (pids[npids] = GetPid(stream)) && npids < MAXRECEIVEPIDS)
