@@ -1750,7 +1750,7 @@ bool cConnectionVTP::CmdDELR(const char *Option)
 bool cConnectionVTP::CmdRENR(const char *Option)
 {
 	INIT_WRAPPER();
-#if defined(LIEMIKUUTIO)
+#if defined(LIEMIKUUTIO) && LIEMIKUUTIO < 132
 	bool recordings = Recordings.Update(true);
 	if (recordings) {
 		if (*Option) {
@@ -1790,7 +1790,7 @@ bool cConnectionVTP::CmdRENR(const char *Option)
 		Reply(550, "No recordings available");
 	}
 #else
-	Reply(501, "Rename not supported, please use LIEMIEXT");
+	Reply(501, "Rename not supported, please use LIEMIKUUTIO < 1.32");
 #endif /* LIEMIKUUTIO */
 	EXIT_WRAPPER();
 }

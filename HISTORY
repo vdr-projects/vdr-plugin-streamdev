@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- restricted VTP command RENR to liemikuutio patch < 1.32. Build fails with
+  newer versions of this patch (thanks to Ville Skyttä)
 - updated outdated COPYING file and FSF address (thanks to Ville Skyttä)
 - include SDT and TDT in TS streams
 - the icy-name HTTP header sent with radio streams makes VLC pick the wrong
