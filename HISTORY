@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- updated outdated COPYING file and FSF address (thanks to Ville Skyttä)
 - include SDT and TDT in TS streams
 - the icy-name HTTP header sent with radio streams makes VLC pick the wrong
   demuxer. Send icy-name only for ES audio streams.

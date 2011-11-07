@@ -192,3 +192,6 @@ Pekko Tiitto
 
 Lubo¨ Dole¸el
   for suggesting higher buffer sizes to fix some ringbuffer overflows
+
+Ville Skyttä
+  for updating the outdated COPYING file and FSF address
