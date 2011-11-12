@@ -596,7 +596,10 @@ int read_pes(int f, pes_packet *p){
 	
 	if (p->length >0){
 		buf = (uint8_t *) malloc(p->length);
-		if((neof = save_read(f,buf,p->length))< p->length) return -1;
+		if((neof = save_read(f,buf,p->length))< p->length){
+			free(buf);
+			return -1;
+		}
 		cread_pes((char *)buf,p);
 		free(buf);
 	} else return 0;

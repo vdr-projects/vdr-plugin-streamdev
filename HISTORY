@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- fixed memory leak in libdvbmpeg read_pes (thanks to Ville Skyttä)
 - dropped several unused functions in libdvbmpeg
 - restricted VTP command RENR to liemikuutio patch < 1.32. Build fails with
   newer versions of this patch (thanks to Ville Skyttä)
