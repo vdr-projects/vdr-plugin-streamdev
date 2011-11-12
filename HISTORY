@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- dropped several unused functions in libdvbmpeg
 - restricted VTP command RENR to liemikuutio patch < 1.32. Build fails with
   newer versions of this patch (thanks to Ville Skyttä)
 - updated outdated COPYING file and FSF address (thanks to Ville Skyttä)

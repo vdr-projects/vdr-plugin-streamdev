@@ -387,16 +387,7 @@ extern "C" {
 			    uint8_t    buffer2_scale,
 			    uint32_t   buffer2_size);                    
 	
-
-	int seek_mpg_start(uint8_t *buf, int size);
-
-
-	void split_mpg(char *name, uint64_t size);
-	void cut_mpg(char *name, uint64_t size);
-	int http_open (char *url);
 	ssize_t save_read(int fd, void *buf, size_t count);
-
-  	const char * strerrno(void);
 #ifdef __cplusplus
 }
 #endif				/* __cplusplus */
