@@ -144,7 +144,9 @@ void cComponentIGMP::Destruct(void)
 {
 	if (m_MaxChannelNumber > 0)
 	{
-		Cancel(3);
+		Cancel(-1);
+		m_CondWait.Signal();
+		Cancel(2);
 		for (cChannel *channel = Channels.First(); channel; channel = Channels.Next(channel))
 		{
 			if (channel->GroupSep())
