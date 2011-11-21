@@ -388,10 +388,9 @@ int refill_buffy(Remux *rem)
 	
 	
 	while ( acount > MAX_PLENGTH && vcount > MAX_PLENGTH && count < 10){
-		int neof;
 		count++;
 		init_pes(&pes);
-		if ((neof = read_pes(fin,&pes)) <= 0) return -1;
+		if (read_pes(fin,&pes) <= 0) return -1;
 		switch(pes.stream_id){
 		case AUDIO_STREAM_S ... AUDIO_STREAM_E:
 			rem->apes++;
@@ -700,22 +699,6 @@ void init_remux(Remux *rem, int fin, int fout, int mult)
 	rem->pack_size = 0;
 	rem->muxr      = 0;
 	rem->time_off  = 0;
-}
-
-uint32_t bytes2pts(int bytes, int rate)
-{
-	if (bytes < 0xFFFFFFFFUL/720000UL)
-		return (uint32_t)(bytes*720000UL/rate);
-	else
-		return (uint32_t)(bytes/rate*720000UL);
-}
-
-long pts2bytes( uint32_t pts, int rate)
-{
-	if (pts < 0xEFFFFFFFUL/rate)
-		return (pts*rate/720000);
-	else 
-		return (pts* (rate/720000));
 }
 
 int write_audio_pes( Remux *rem, uint8_t *buf, int *alength)
@@ -1086,12 +1069,6 @@ struct remux_s{
 	PESBuffer pbuf_list[MAX_PBUF];
 	int num_pbuf;
 } REMUX;
-
-
-void init_REMUX(REMUX *rem)
-{
-	rem->num_pbuf = 0;
-}
 
 
 

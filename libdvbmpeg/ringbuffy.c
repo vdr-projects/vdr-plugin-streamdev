@@ -192,9 +192,8 @@ int ring_read_file(ringbuffy *rbuf, int fd, int count)
 }
 
 int ring_rest(ringbuffy *rbuf){
-       	int diff, free, pos, rest;
+       	int diff, free, pos;
 	pos  = rbuf->read_pos;
-	rest = rbuf->size - pos;
 	diff = rbuf->write_pos - pos;
 	free = (diff >= 0) ? diff : rbuf->size+diff;
 	

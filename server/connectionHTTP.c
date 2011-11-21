@@ -228,8 +228,6 @@ bool cConnectionHTTP::ProcessRequest(void)
 
 void cConnectionHTTP::Flushed(void) 
 {
-	std::string line;
-
 	if (m_Status != hsBody)
 		return;
 

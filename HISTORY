@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- code cleanup and optimization (thanks to Ville Skyttä)
 - properly shutdown IGMP timeout handler thread when the plugin is stopped.
   Fixes occasional segfaults on VDR exit.
 - fixed memory leak in libdvbmpeg read_pes (thanks to Ville Skyttä)

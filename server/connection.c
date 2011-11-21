@@ -281,7 +281,6 @@ cDevice* cServerConnection::CheckDevice(const cChannel *Channel, int Priority, b
         return NULL; // no CAM is able to decrypt this channel
      }
 
-  bool NeedsDetachReceivers = false;
   cDevice *d = NULL;
   //cCamSlot *s = NULL;
 
@@ -335,7 +334,6 @@ cDevice* cServerConnection::CheckDevice(const cChannel *Channel, int Priority, b
                 // This device has less impact than any previous one, so we take it.
                 Impact = imp;
                 d = device;
-                NeedsDetachReceivers = ndr;
                 }
              }
           }
