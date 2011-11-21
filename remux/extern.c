@@ -141,7 +141,7 @@ cTSExt::cTSExt(cRingBufferLinear *ResultBuffer, const cServerConnection *Connect
 			ADDENV("SERVER_PROTOCOL=%s", Connection->Protocol());
 			ADDENV("SERVER_SOFTWARE=%s", VERSION);
 
-			for (tStrStrMap::const_iterator it = Connection->Headers().begin(); it != Connection->Headers().end(); it++) {
+			for (tStrStrMap::const_iterator it = Connection->Headers().begin(); it != Connection->Headers().end(); ++it) {
 				if (i >= MAXENV) {
 					esyslog("streamdev-server: Too many headers for externremux.sh");
 					break;
