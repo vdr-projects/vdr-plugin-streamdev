@@ -36,7 +36,8 @@ public:
 	static void Initialize(void);
 	static void Destruct(void);
 	static bool Active(void);
-	static void MainThreadHook(void);
+
+	static const cList<cServerConnection>& Clients(cThreadLock& Lock);
 };
 
 inline bool cStreamdevServer::Active(void) 

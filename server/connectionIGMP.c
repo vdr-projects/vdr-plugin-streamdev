@@ -71,3 +71,9 @@ void cConnectionIGMP::Stop()
 		DELETENULL(m_LiveStreamer);
 	}
 }
+
+cString cConnectionIGMP::ToText() const
+{
+	cString str = cServerConnection::ToText();
+	return m_LiveStreamer ? cString::sprintf("%s\t%s", *str, *m_LiveStreamer->ToText()) : str;
+}

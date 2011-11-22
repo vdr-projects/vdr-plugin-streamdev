@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: streamdev 0.5.0\n"
 "Report-Msgid-Bugs-To: <http://www.vdr-developer.org/mantisbt/>\n"
-"POT-Creation-Date: 2010-06-14 13:06+0200\n"
+"POT-Creation-Date: 2011-11-22 01:05+0100\n"
 "PO-Revision-Date: 2009-11-26 21:57+0200\n"
 "Last-Translator: Valdemaras Pipiras <varas@ambernet.lt>\n"
 "Language-Team: Lietuvių\n"
@@ -21,8 +21,14 @@ msgstr "VDR transliavimo serveris"
 msgid "Streaming active"
 msgstr "Transliavimas vyksta"
 
-msgid "Suspend Live TV"
-msgstr "Pristabdyti Live TV"
+msgid "Streamdev Connections"
+msgstr ""
+
+msgid "Disconnect"
+msgstr ""
+
+msgid "Suspend"
+msgstr "Pristabdyti"
 
 msgid "Offer suspend mode"
 msgstr "Klausti dėl sustabdymo"
@@ -80,4 +86,3 @@ msgstr "Multicast kliento portas"
 
 msgid "Multicast Streamtype"
 msgstr "Multicast transliavimo tipas"
-

@@ -28,6 +28,7 @@ public:
 
 	bool SetChannel(cChannel *Channel, in_addr_t Dst);
 	virtual void Welcome(void);
+	virtual cString ToText() const;
 	void Stop();
 
 	/* Not used here */
@@ -41,7 +42,7 @@ public:
 
 inline bool cConnectionIGMP::Abort(void) const
 {
-	return !m_LiveStreamer || m_LiveStreamer->Abort();
+	return !IsOpen() || !m_LiveStreamer || m_LiveStreamer->Abort();
 }
 
 #endif // VDR_STREAMDEV_SERVERS_CONNECTIONIGMP_H

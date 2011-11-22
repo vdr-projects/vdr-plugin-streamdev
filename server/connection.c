@@ -407,3 +407,6 @@ void cServerConnection::MainThreadHook()
 {
 	m_SwitchLive->Switch();
 }
+
+cString cServerConnection::ToText() const
+{	return cString::sprintf("%s\t%s:%d", Protocol(), RemoteIp().c_str(), RemotePort()); }

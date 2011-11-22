@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: streamdev 0.5.0\n"
 "Report-Msgid-Bugs-To: <http://www.vdr-developer.org/mantisbt/>\n"
-"POT-Creation-Date: 2010-06-14 13:06+0200\n"
+"POT-Creation-Date: 2011-11-22 01:05+0100\n"
 "PO-Revision-Date: 2010-06-19 03:58+0100\n"
 "Last-Translator: Javier Bradineras <jbradi@hotmail.com>\n"
 "Language-Team:  <vdr@linuxtv.org>\n"
@@ -21,8 +21,14 @@ msgstr "Servidor de transmisiones del VDR"
 msgid "Streaming active"
 msgstr "Trasmisión activa"
 
-msgid "Suspend Live TV"
-msgstr "Suspender TV en vivo"
+msgid "Streamdev Connections"
+msgstr ""
+
+msgid "Disconnect"
+msgstr ""
+
+msgid "Suspend"
+msgstr "Suspender"
 
 msgid "Offer suspend mode"
 msgstr "Ofrecer modo de suspensión"
@@ -80,5 +86,3 @@ msgstr "Puerto del Cliente Multicast"
 
 msgid "Multicast Streamtype"
 msgstr "Tipo de flujo Multicast"
-
-

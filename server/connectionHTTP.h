@@ -47,6 +47,8 @@ public:
 	virtual void Attach(void) { if (m_LiveStreamer != NULL) m_LiveStreamer->Attach(); }
 	virtual void Detach(void) { if (m_LiveStreamer != NULL) m_LiveStreamer->Detach(); }
 
+	virtual cString ToText() const;
+
 	virtual bool CanAuthenticate(void);
 
 	virtual bool Command(char *Cmd);
@@ -57,7 +59,7 @@ public:
 
 inline bool cConnectionHTTP::Abort(void) const
 {
-	return m_LiveStreamer && m_LiveStreamer->Abort();
+	return !IsOpen() || (m_LiveStreamer && m_LiveStreamer->Abort());
 }
 
 #endif // VDR_STREAMDEV_SERVERS_CONNECTIONVTP_H
