@@ -38,6 +38,7 @@ eOSState cStreamdevServerMenu::Disconnect() {
 				s->Close();
 				Del(Current());
 				SetHelpKeys();
+				Display();
 				break;
 			}
 		}
