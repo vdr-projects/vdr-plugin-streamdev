@@ -6,6 +6,7 @@
  
 #include "server/componentIGMP.h"
 #include "server/connectionIGMP.h"
+#include "server/server.h"
 #include "server/setup.h"
 
 #ifndef IGMP_ALL_HOSTS
@@ -37,7 +38,6 @@
 class cMulticastGroup: public cListObject
 {
 public:
-	cConnectionIGMP *connection;
 	in_addr_t group;
 	in_addr_t reporter;
 	struct timeval timeout;
@@ -48,7 +48,6 @@ public:
 };
 
 cMulticastGroup::cMulticastGroup(in_addr_t Group) :
-		connection(NULL),
 		group(Group),
 		reporter(0)
 {
@@ -235,10 +234,7 @@ cServerConnection* cComponentIGMP::ProcessMessage(struct igmp *Igmp, in_addr_t G
 				group = new cMulticastGroup(Group);
 				m_Groups.Add(group);
 			}
-			if (!group->connection) {
-				IGMPStartMulticast(group);
-				conn = group->connection;
-			}
+			conn = IGMPStartMulticast(group);
 			IGMPStartTimer(group, Sender);
 			if (Igmp->igmp_type == IGMP_V1_MEMBERSHIP_REPORT)
 				IGMPStartV1HostTimer(group);
@@ -430,20 +426,36 @@ void cComponentIGMP::IGMPSendGroupQuery(cMulticastGroup* Group)
 	IGMPSendQuery(Group->group, IGMP_LAST_MEMBER_QUERY_INTERVAL_TS);
 }
 
-void cComponentIGMP::IGMPStartMulticast(cMulticastGroup* Group)
+cServerConnection* cComponentIGMP::IGMPStartMulticast(cMulticastGroup* Group)
 {
+	cServerConnection *conn = NULL;
 	in_addr_t g = ntohl(Group->group);
 	if (g > MULTICAST_PRIV_MIN && g <= MULTICAST_PRIV_MAX) {
+		cThreadLock lock;
 		cChannel *channel = Channels.GetByNumber(g - MULTICAST_PRIV_MIN);
-		Group->connection = (cConnectionIGMP*) NewClient();
-		if (!Group->connection->SetChannel(channel, Group->group)) {
-			DELETENULL(Group->connection);
+		const cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
+		cServerConnection *s = clients.First();
+		while (s) {
+			if (s->RemoteIpAddr() == Group->group)
+				break;
+			s = clients.Next(s);
+		}
+		if (!s) {
+			conn = NewClient();
+			if (!((cConnectionIGMP *)conn)->SetChannel(channel, Group->group)) {
+				DELETENULL(conn);
+			}
 		}
 	}
+	return conn;
 }
 
 void cComponentIGMP::IGMPStopMulticast(cMulticastGroup* Group)
 {
-	if (Group->connection)
-		Group->connection->Stop();
+	cThreadLock lock;
+	const cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
+	for (cServerConnection *s = clients.First(); s; s = clients.Next(s)) {
+		if (s->RemoteIpAddr() == Group->group)
+			s->Close();
+	}
 }

@@ -10,7 +10,6 @@
 #include <vdr/thread.h>
 #include "server/component.h"
 
-class cConnectionIGMP;
 class cMulticastGroup;
 
 class cComponentIGMP: public cServerComponent, public cThread {
@@ -42,7 +41,7 @@ private:
 	void IGMPStartRetransmitTimer(cMulticastGroup* Group);
 	void IGMPClearRetransmitTimer(cMulticastGroup* Group);
 	void IGMPSendGroupQuery(cMulticastGroup* Group);
-	void IGMPStartMulticast(cMulticastGroup* Group);
+	cServerConnection* IGMPStartMulticast(cMulticastGroup* Group);
 	void IGMPStopMulticast(cMulticastGroup* Group);
 
 	virtual void Action();
