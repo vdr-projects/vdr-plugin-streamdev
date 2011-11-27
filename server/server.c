@@ -152,9 +152,8 @@ void cStreamdevServer::Action(void)
 			
 			cServerConnection *next = m_Clients.Next(s);
 			if (!result) {
-				isyslog("streamdev: closing streamdev connection to %s:%d", 
-				        s->RemoteIp().c_str(), s->RemotePort());
-				s->Close();
+				if (s->IsOpen())
+					s->Close();
 				Lock();
 				m_Clients.Del(s);
 				Unlock();
