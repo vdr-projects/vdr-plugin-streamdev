@@ -175,10 +175,16 @@ Start the server core itself by specifying -Pstreamdev-server on your VDR
 commandline. To use the client core, specify -Pstreamdev-client. Both parts
 can run in one VDR instance, if necessary.
 
+On the server, the main menu entry "Streamdev Connections" gives you a list
+of currently connected clients. Use the "red" key to terminate a connection.
+Note that depending on connection type and client, the client might re-connect
+sooner or later. Depending on the server setup, the "blue" key might be enabled
+as well. Please read below.
+
 The parameter "Suspend behaviour" allows you to specify how the server should 
 react in case the client requests a channel that would require switching the
-primary device (i.e. disrupt live-tv). If set to "Offer suspend mode", you will
-have a new entry in the main menu. Activating that will put the server into
+primary device (i.e. disrupt live-tv). If set to "Offer suspend mode", you
+enable the "blue" key in the server's main menu. It will put the server into
 "Suspend Mode" (a picture is displayed on TV). Then, a client may switch the
 primary card to wherever it likes to. While watching TV (Suspend deactivated),
 the client may not switch the transponder on the primary device.  If you set
@@ -190,10 +196,10 @@ suspend" to yes, the client can suspend the server remotely (this only applies
 if "Offer suspend mode" is selected).
 
 NOTE: This mainly applies to One-Card-Systems, since with multiple cards there
-is no need to switch transponders on the primary interface, if the secondary
-can stream a given channel (i.e. if it is not blocked by a recording). If both
-cards are in use (i.e. when something is recorded, or by multiple clients), 
-this applies to Multiple-Card-Systems as well.
+is no need to switch transponders on the primary interface, if on of the other
+cards is idle (i.e. if it is not blocked by a recording). If all cards are in
+use (i.e. when something is recorded, or by multiple clients), this applies to
+Multiple-Card-Systems as well.
 
 3.1 Usage HTTP server:
 ----------------------
