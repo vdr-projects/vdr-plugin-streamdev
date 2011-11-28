@@ -152,9 +152,8 @@ void cStreamdevServer::Action(void)
 			
 			cServerConnection *next = m_Clients.Next(s);
 			if (!result) {
-				isyslog("streamdev: closing streamdev connection to %s:%d", 
-				        s->RemoteIp().c_str(), s->RemotePort());
-				s->Close();
+				if (s->IsOpen())
+					s->Close();
 				Lock();
 				m_Clients.Del(s);
 				Unlock();
@@ -178,9 +177,8 @@ void cStreamdevServer::Action(void)
 	}
 }
 
-void cStreamdevServer::MainThreadHook(void) 
+const cList<cServerConnection>& cStreamdevServer::Clients(cThreadLock& Lock)
 {
-	cThreadLock lock(m_Instance);
-	for (cServerConnection *s = m_Clients.First(); s; s = m_Clients.Next(s))
-		s->MainThreadHook();
+	Lock.Lock(m_Instance);
+	return m_Clients;
 }

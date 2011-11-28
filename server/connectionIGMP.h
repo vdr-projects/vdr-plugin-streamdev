@@ -28,20 +28,21 @@ public:
 
 	bool SetChannel(cChannel *Channel, in_addr_t Dst);
 	virtual void Welcome(void);
-	void Stop();
+	virtual cString ToText() const;
 
 	/* Not used here */
 	virtual bool Command(char *Cmd) { return false; }
 
 	virtual void Attach(void) { if (m_LiveStreamer != NULL) m_LiveStreamer->Attach(); }
 	virtual void Detach(void) { if (m_LiveStreamer != NULL) m_LiveStreamer->Detach(); }
+	virtual bool Close(void);
 
 	virtual bool Abort(void) const;
 };
 
 inline bool cConnectionIGMP::Abort(void) const
 {
-	return !m_LiveStreamer || m_LiveStreamer->Abort();
+	return !IsOpen() || !m_LiveStreamer || m_LiveStreamer->Abort();
 }
 
 #endif // VDR_STREAMDEV_SERVERS_CONNECTIONIGMP_H

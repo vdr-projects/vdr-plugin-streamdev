@@ -64,10 +64,15 @@ void cConnectionIGMP::Welcome()
 		esyslog("streamdev-server IGMP: GetDevice failed");
 }
 
-void cConnectionIGMP::Stop()
+bool cConnectionIGMP::Close()
 {
-	if (m_LiveStreamer) {
+	if (m_LiveStreamer)
 		m_LiveStreamer->Stop();
-		DELETENULL(m_LiveStreamer);
-	}
+	return cServerConnection::Close();
+}
+
+cString cConnectionIGMP::ToText() const
+{
+	cString str = cServerConnection::ToText();
+	return m_LiveStreamer ? cString::sprintf("%s\t%s", *str, *m_LiveStreamer->ToText()) : str;
 }

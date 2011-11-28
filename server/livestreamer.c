@@ -460,6 +460,14 @@ void cStreamdevLiveStreamer::GetSignal(int *DevNum, int *Strength, int *Quality)
 	}
 }
 
+cString cStreamdevLiveStreamer::ToText() const
+{
+	if (m_Device && m_Channel) {
+		return cString::sprintf("DVB%-2d %3d %s", m_Device->DeviceNumber() + 1, m_Channel->Number(), m_Channel->Name());
+	}
+        return cString("");
+}
+
 void cStreamdevLiveStreamer::StartReceiver(void)
 {
 	if (m_NumPids > 0) {

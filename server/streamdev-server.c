@@ -9,9 +9,9 @@
 #include <getopt.h>
 #include <vdr/tools.h>
 #include "streamdev-server.h"
+#include "server/menu.h"
 #include "server/setup.h"
 #include "server/server.h"
-#include "server/suspend.h"
 
 #if !defined(APIVERSNUM) || APIVERSNUM < 10516
 #error "VDR-1.5.16 API version or greater is required!"
@@ -119,20 +119,20 @@ cString cPluginStreamdevServer::Active(void)
 
 const char *cPluginStreamdevServer::MainMenuEntry(void) 
 {
-	if (StreamdevServerSetup.SuspendMode == smOffer && !cSuspendCtl::IsActive())
-		return tr("Suspend Live TV");
-	return NULL;
+	return tr("Streamdev Connections");
 }
 
 cOsdObject *cPluginStreamdevServer::MainMenuAction(void) 
 {
-	cControl::Launch(new cSuspendCtl);
-	return NULL;
+	return new cStreamdevServerMenu();
 }
 
 void cPluginStreamdevServer::MainThreadHook(void)
 {
-	cStreamdevServer::MainThreadHook();
+	cThreadLock lock;
+	const cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
+	for (cServerConnection *s = clients.First(); s; s = clients.Next(s))
+		s->MainThreadHook();
 }
 
 cMenuSetupPage *cPluginStreamdevServer::SetupMenu(void) 

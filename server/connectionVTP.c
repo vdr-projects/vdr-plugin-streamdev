@@ -774,7 +774,7 @@ cConnectionVTP::~cConnectionVTP()
 
 bool cConnectionVTP::Abort(void) const
 {
-	return (m_LiveStreamer && m_LiveStreamer->Abort()) ||
+	return !IsOpen() || (m_LiveStreamer && m_LiveStreamer->Abort()) ||
 		(m_FilterStreamer && m_FilterStreamer->Abort());
 }
 
@@ -1810,4 +1810,15 @@ bool cConnectionVTP::Respond(int Code, const char *Message, ...)
 	return cServerConnection::Respond("%03d%c%s", Code >= 0, 
 				Code < 0 ? -Code : Code,
 				Code < 0 ? '-' : ' ', *str);
+}
+
+cString cConnectionVTP::ToText() const
+{
+	cString str = cServerConnection::ToText();
+	if (m_LiveStreamer)
+		return cString::sprintf("%s\t%s", *str, *m_LiveStreamer->ToText());
+	else if (m_RecPlayer)
+		return cString::sprintf("%s\t%s", *str, m_RecPlayer->getCurrentRecording()->Name());
+	else
+		return str;
 }

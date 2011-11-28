@@ -40,6 +40,7 @@ public:
 	bool SetChannel(const cChannel *Channel, eStreamType StreamType, const int* Apid = NULL, const int* Dpid = NULL);
 	void SetPriority(int Priority);
 	void GetSignal(int *DevNum, int *Strength, int *Quality) const;
+	cString ToText() const;
 	
 	virtual int Put(const uchar *Data, int Count);
 	virtual uchar *Get(int &Count);

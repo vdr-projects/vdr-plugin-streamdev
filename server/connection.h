@@ -103,6 +103,9 @@ public:
 	/* Will make the socket close after sending all queued output data */
 	void DeferClose(void) { m_DeferClose = true; }
 
+	/* Close the socket */
+	virtual bool Close(void);
+
 	/* Will retrieve an unused device for transmitting data. Receivers have
 	   already been attached from the device if necessary. Use the returned
 	   cDevice in a following call to StartTransfer */
@@ -121,6 +124,9 @@ public:
 
 	/* This connections protocol name */
 	virtual const char* Protocol(void) const { return m_Protocol; }
+
+	/* Representation in menu */
+	virtual cString ToText(void) const;
 
 	/* std::map with additional information */
 	const tStrStrMap& Headers(void) const { return m_Headers; }

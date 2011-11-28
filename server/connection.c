@@ -237,6 +237,13 @@ bool cServerConnection::Respond(const char *Message, bool Last, ...)
 	return true;
 }
 
+bool cServerConnection::Close()
+{
+	if (IsOpen())
+		isyslog("streamdev-server: closing %s connection to %s:%d", Protocol(), RemoteIp().c_str(), RemotePort());
+	return cTBSocket::Close();
+}
+
 #if APIVERSNUM >= 10700
 static int GetClippedNumProvidedSystems(int AvailableBits, cDevice *Device)
 {
@@ -407,3 +414,6 @@ void cServerConnection::MainThreadHook()
 {
 	m_SwitchLive->Switch();
 }
+
+cString cServerConnection::ToText() const
+{	return cString::sprintf("%s\t%s:%d", Protocol(), RemoteIp().c_str(), RemotePort()); }

@@ -359,3 +359,8 @@ bool cConnectionHTTP::ProcessURI(const std::string& PathInfo)
 		return false;
 }
 
+cString cConnectionHTTP::ToText() const
+{
+	cString str = cServerConnection::ToText();
+	return m_LiveStreamer ? cString::sprintf("%s\t%s", *str, *m_LiveStreamer->ToText()) : str;
+}
