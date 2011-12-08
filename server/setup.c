@@ -10,6 +10,7 @@
 cStreamdevServerSetup StreamdevServerSetup;
 
 cStreamdevServerSetup::cStreamdevServerSetup(void) {
+	HideMenuEntry   = false;
 	MaxClients      = 5;
 	StartVTPServer  = true;
 	VTPServerPort   = 2004;
@@ -27,7 +28,8 @@ cStreamdevServerSetup::cStreamdevServerSetup(void) {
 }
 
 bool cStreamdevServerSetup::SetupParse(const char *Name, const char *Value) {
-	if      (strcmp(Name, "MaxClients") == 0)      MaxClients      = atoi(Value);
+	if      (strcmp(Name, "HideMenuEntry") == 0)   HideMenuEntry   = atoi(Value);
+	else if (strcmp(Name, "MaxClients") == 0)      MaxClients      = atoi(Value);
 	else if (strcmp(Name, "StartServer") == 0)     StartVTPServer  = atoi(Value);
 	else if (strcmp(Name, "ServerPort") == 0)      VTPServerPort   = atoi(Value);
 	else if (strcmp(Name, "VTPBindIP") == 0)       strcpy(VTPBindIP, Value);
@@ -76,6 +78,7 @@ void cStreamdevServerMenuSetupPage::Set(void) {
 	int current = Current();
 	Clear();
 	AddCategory (tr("Common Settings"));
+	Add(new cMenuEditBoolItem(tr("Hide Mainmenu Entry"),       &m_NewSetup.HideMenuEntry));
 	Add(new cMenuEditIntItem (tr("Maximum Number of Clients"), &m_NewSetup.MaxClients, 0, 100));
 
 	Add(new cMenuEditStraItem(tr("Suspend behaviour"),         &m_NewSetup.SuspendMode, sm_Count, modes));
@@ -126,6 +129,7 @@ void cStreamdevServerMenuSetupPage::Store(void) {
 		cStreamdevServer::Destruct();
 	}
 	
+	SetupStore("HideMenuEntry",   m_NewSetup.HideMenuEntry);
 	SetupStore("MaxClients",      m_NewSetup.MaxClients);
 	SetupStore("StartServer",     m_NewSetup.StartVTPServer);
 	SetupStore("ServerPort",      m_NewSetup.VTPServerPort);

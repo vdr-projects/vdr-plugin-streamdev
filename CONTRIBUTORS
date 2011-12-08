@@ -39,6 +39,7 @@ Rolf Ahrenberg
   for requesting replacement of asprintf calls
   for suggesting to change the URL path from EXTERN to EXT
   for suggesting increased thread priorities for cStreamdevWriter/Streamer
+  for adding "Hide mainmenu entry" option
 
 Rantanen Teemu
   for providing vdr-incompletesections.diff

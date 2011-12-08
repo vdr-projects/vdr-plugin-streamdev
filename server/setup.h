@@ -12,6 +12,7 @@ struct cStreamdevServerSetup {
 
 	bool SetupParse(const char *Name, const char *Value);
 
+	int HideMenuEntry;
 	int MaxClients;
 	int StartVTPServer;
 	int VTPServerPort;

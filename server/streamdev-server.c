@@ -119,7 +119,7 @@ cString cPluginStreamdevServer::Active(void)
 
 const char *cPluginStreamdevServer::MainMenuEntry(void) 
 {
-	return tr("Streamdev Connections");
+	return !StreamdevServerSetup.HideMenuEntry ? tr("Streamdev Connections") : NULL;
 }
 
 cOsdObject *cPluginStreamdevServer::MainMenuAction(void) 

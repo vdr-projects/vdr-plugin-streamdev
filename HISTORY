@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Added "Hide mainmenu entry" option on server (thanks to Rolf Ahrenberg)
 - Added server menu with list of clients. Connections can be terminated
   with the "red" key. The former main menu action of suspending live TV
   moved to the "blue" key.
