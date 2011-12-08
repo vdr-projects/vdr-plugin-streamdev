@@ -1,19 +1,20 @@
 # VDR streamdev plugin language source file.
 # Copyright (C) 2008 streamdev development team. See http://streamdev.vdr-developer.org
 # This file is distributed under the same license as the VDR streamdev package.
-# Rolf Ahrenberg <rahrenbe@cc.hut.fi>, 2008
+# Rolf Ahrenberg, 2008-
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: streamdev 0.5.0\n"
 "Report-Msgid-Bugs-To: <http://www.vdr-developer.org/mantisbt/>\n"
-"POT-Creation-Date: 2011-11-22 01:05+0100\n"
+"POT-Creation-Date: 2011-12-08 12:50+0100\n"
 "PO-Revision-Date: 2008-03-30 02:11+0200\n"
-"Last-Translator: Rolf Ahrenberg <rahrenbe@cc.hut.fi>\n"
-"Language-Team: <vdr@linuxtv.org>\n"
+"Last-Translator: Rolf Ahrenberg\n"
+"Language-Team: Finnish <vdr@linuxtv.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ISO-8859-15\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: fi\n"
 
 msgid "VDR Streaming Server"
 msgstr "VDR-suoratoistopalvelin"
@@ -22,16 +23,16 @@ msgid "Streaming active"
 msgstr "Suoratoistopalvelin aktiivinen"
 
 msgid "Streamdev Connections"
-msgstr ""
+msgstr "Suoratoistoyhteydet"
 
 msgid "Disconnect"
-msgstr ""
+msgstr "Katkaise"
 
 msgid "Suspend"
-msgstr "Pys‰yt‰"
+msgstr "Pys√§yt√§"
 
 msgid "Offer suspend mode"
-msgstr "tyrkyt‰"
+msgstr "tyrkyt√§"
 
 msgid "Always suspended"
 msgstr "aina"
@@ -42,20 +43,23 @@ msgstr "ei koskaan"
 msgid "Common Settings"
 msgstr "Yleiset asetukset"
 
+msgid "Hide Mainmenu Entry"
+msgstr "Piilota valinta p√§√§valikosta"
+
 msgid "Maximum Number of Clients"
-msgstr "Suurin sallittu asiakkaiden m‰‰r‰"
+msgstr "Suurin sallittu asiakkaiden m√§√§r√§"
 
 msgid "Suspend behaviour"
-msgstr "Pys‰ytystoiminto"
+msgstr "Pys√§ytystoiminto"
 
 msgid "Client may suspend"
-msgstr "Asiakas saa pys‰ytt‰‰ palvelimen"
+msgstr "Asiakas saa pys√§ytt√§√§ palvelimen"
 
 msgid "VDR-to-VDR Server"
 msgstr "VDR-palvelin"
 
 msgid "Start VDR-to-VDR Server"
-msgstr "K‰ynnist‰ VDR-palvelin"
+msgstr "K√§ynnist√§ VDR-palvelin"
 
 msgid "VDR-to-VDR Server Port"
 msgstr "VDR-palvelimen portti"
@@ -67,22 +71,22 @@ msgid "HTTP Server"
 msgstr "HTTP-palvelin"
 
 msgid "Start HTTP Server"
-msgstr "K‰ynnist‰ HTTP-palvelin"
+msgstr "K√§ynnist√§ HTTP-palvelin"
 
 msgid "HTTP Server Port"
 msgstr "HTTP-palvelimen portti"
 
 msgid "HTTP Streamtype"
-msgstr "HTTP-l‰hetysmuoto"
+msgstr "HTTP-l√§hetysmuoto"
 
 msgid "Multicast Streaming Server"
 msgstr "Multicast-suoratoistopalvelin"
 
 msgid "Start IGMP Server"
-msgstr "K‰ynnist‰ IGMP-palvelin"
+msgstr "K√§ynnist√§ IGMP-palvelin"
 
 msgid "Multicast Client Port"
 msgstr "Multicast-portti"
 
 msgid "Multicast Streamtype"
-msgstr "Multicast-l‰hetysmuoto"
+msgstr "Multicast-l√§hetysmuoto"
