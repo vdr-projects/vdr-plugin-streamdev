@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- VDR 1.7.22 obsoletes cap_net_raw patch. Added cap_net_raw patch for VDR
+  1.7.5 - 1.7.21.
 - Update and UTF-8 conversion of Finnish po files (thanks to Rolf Ahrenberg)
 - Added "Hide mainmenu entry" option on server (thanks to Rolf Ahrenberg)
 - Added server menu with list of clients. Connections can be terminated

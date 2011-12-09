@@ -287,10 +287,12 @@ reserved according to RFC-2365).
 Before you can use streamdev's multicast server, you might need to patch VDR.
 Binding an IGMP socket is a privileged operation, so you must start VDR as root.
 If you pass the -u option to VDR, it will drop almost all priviledges before
-streamdev is even loaded. Apply vdr-cap_net_raw.diff to keep VDR from dropping
-the CAP_NET_RAW capability required to bind the IGMP socket. The patch is part
-of streamdev's source distribution. Check the patches subdirectory. There's no
-need to patch VDR if it is kept running as root (not recommended).
+streamdev is even loaded. In VDR < 1.7.22 this prevented streamdev from binding
+the socket. Apply either patch vdr-1.6.0-cap_net_raw.diff (VDR < 1.7.5) or
+vdr-1.7.21-cap_net_raw.diff (VDR < 1.7.22) to keep VDR from dropping capability
+CAP_NET_RAW. The patch is part of streamdev's source distribution. Check the
+patches subdirectory. There's no need to patchif you are running VDR >= 1.7.22
+or if VDR is kept running as root (not recommended).
 
 The multicast server is disabled by default. Enter the streamdev-server setup
 menu to enable it and - IMPORTANT - bind the multicast server to the IP of your
