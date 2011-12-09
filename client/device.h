@@ -61,7 +61,11 @@ public:
 #if APIVERSNUM >= 10719
 	virtual bool AvoidRecording(void) const { return true; }
 #endif
+#if APIVERSNUM >= 10722
+	virtual bool IsTunedToTransponder(const cChannel *Channel) const;
+#else
 	virtual bool IsTunedToTransponder(const cChannel *Channel);
+#endif
 	virtual int SignalStrength(void) const;
 	virtual int SignalQuality(void) const;
 

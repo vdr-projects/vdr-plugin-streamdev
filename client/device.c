@@ -70,7 +70,11 @@ bool cStreamdevDevice::ProvidesTransponder(const cChannel *Channel) const
 	return true;
 }
 
+#if APIVERSNUM >= 10722
+bool cStreamdevDevice::IsTunedToTransponder(const cChannel *Channel) const
+#else
 bool cStreamdevDevice::IsTunedToTransponder(const cChannel *Channel)
+#endif
 {
 	bool res = false;
 	if (ClientSocket.DataSocket(siLive) != NULL
