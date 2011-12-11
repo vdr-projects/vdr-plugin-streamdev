@@ -732,7 +732,23 @@ bool cLSTRHandler::Next(bool &Last)
 	return false;
 }
 
+class cStreamdevLoopPrevention {
+private:
+	bool Unlock;
+public:
+	cStreamdevLoopPrevention(const cChannel* Channel, bool LoopPrevention): Unlock(LoopPrevention) {
+		if (LoopPrevention)
+			cPluginManager::CallAllServices(LOOP_PREVENTION_SERVICE, (void *)Channel);
+	}
+	~cStreamdevLoopPrevention() {
+		if (Unlock)
+			cPluginManager::CallAllServices(LOOP_PREVENTION_SERVICE, NULL);
+	}
+};
+
 // --- cConnectionVTP ---------------------------------------------------------
+
+#define LOOP_PREVENTION(c) cStreamdevLoopPrevention LoopPrevention(c, m_LoopPrevention);
 
 cConnectionVTP::cConnectionVTP(void): 
 		cServerConnection("VTP"),
@@ -753,6 +769,10 @@ cConnectionVTP::cConnectionVTP(void):
 		m_LSTTHandler(NULL),
 		m_LSTRHandler(NULL)
 {
+	m_LoopPrevention = StreamdevServerSetup.LoopPrevention;
+	if (m_LoopPrevention)
+		// Loop prevention enabled - but is there anybody out there?
+		m_LoopPrevention = cPluginManager::CallFirstService(LOOP_PREVENTION_SERVICE);
 }
 
 cConnectionVTP::~cConnectionVTP() 
@@ -921,6 +941,8 @@ bool cConnectionVTP::CmdPROV(char *Opts)
 	if ((chan = ChannelFromString(Opts)) == NULL)
 		return Respond(550, "Undefined channel \"%s\"", Opts);
 
+	LOOP_PREVENTION(chan);
+
 	if (ProvidesChannel(chan, prio)) {
 		m_TuneChannel = chan;
 		m_TunePriority = prio;
@@ -1087,6 +1109,8 @@ bool cConnectionVTP::CmdTUNE(char *Opts)
 	
 	if ((chan = ChannelFromString(Opts)) == NULL)
 		return Respond(550, "Undefined channel \"%s\"", Opts);
+
+	LOOP_PREVENTION(chan);
 
 	if (chan != m_TuneChannel) {
 		isyslog("streamdev-server TUNE %s: Priority unknown - using 0", Opts);

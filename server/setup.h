@@ -17,6 +17,7 @@ struct cStreamdevServerSetup {
 	int StartVTPServer;
 	int VTPServerPort;
 	char VTPBindIP[20];
+	int LoopPrevention;
 	int StartHTTPServer;
 	int HTTPServerPort;
 	int HTTPStreamType;

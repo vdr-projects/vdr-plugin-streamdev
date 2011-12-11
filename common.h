@@ -31,6 +31,9 @@
 
 #define MAXPARSEBUFFER KILOBYTE(16)
 
+/* Service ID for loop prevention */
+#define LOOP_PREVENTION_SERVICE "StreamdevLoopPrevention"
+
 /* Check if a channel is a radio station. */
 #define ISRADIO(x) ((x)->Vpid()==0||(x)->Vpid()==1||(x)->Vpid()==0x1fff)
 

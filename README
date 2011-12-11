@@ -337,6 +337,13 @@ port where you want the server to listen for incoming connections. The server
 will be activated when you push the OK button inside the setup menu, so there's
 no need to restart VDR.
 
+If both, streamdev-client and streamdev-server are installed, the additional
+option "Loop prevention" will show up in the streamdev-server setup. If enabled,
+streamdev-client won't be considered when streamdev-server is looking for a
+device which is able to receive some channel. This is required if two or more
+VDRs mutually share their DVB devices through streamdev. Otherwise you would
+end up in a loop.
+
 3.4 Usage VDR-to-VDR client:
 ----------------------------
 

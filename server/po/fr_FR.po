@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: streamdev 0.5.0\n"
 "Report-Msgid-Bugs-To: <http://www.vdr-developer.org/mantisbt/>\n"
-"POT-Creation-Date: 2011-12-08 12:50+0100\n"
+"POT-Creation-Date: 2011-12-11 11:25+0100\n"
 "PO-Revision-Date: 2008-03-30 02:11+0200\n"
 "Last-Translator: micky979 <micky979@free.fr>\n"
 "Language-Team: <vdr@linuxtv.org>\n"
@@ -65,6 +65,9 @@ msgstr "Port du serveur VDR-to-VDR"
 
 msgid "Bind to IP"
 msgstr "Attacher aux IP"
+
+msgid "Loop Prevention"
+msgstr ""
 
 msgid "HTTP Server"
 msgstr "Serveur HTTP"

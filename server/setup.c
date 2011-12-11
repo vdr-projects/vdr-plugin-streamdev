@@ -14,6 +14,7 @@ cStreamdevServerSetup::cStreamdevServerSetup(void) {
 	MaxClients      = 5;
 	StartVTPServer  = true;
 	VTPServerPort   = 2004;
+	LoopPrevention  = false;
 	StartHTTPServer = true;
 	HTTPServerPort  = 3000;
 	HTTPStreamType  = stTS;
@@ -33,6 +34,7 @@ bool cStreamdevServerSetup::SetupParse(const char *Name, const char *Value) {
 	else if (strcmp(Name, "StartServer") == 0)     StartVTPServer  = atoi(Value);
 	else if (strcmp(Name, "ServerPort") == 0)      VTPServerPort   = atoi(Value);
 	else if (strcmp(Name, "VTPBindIP") == 0)       strcpy(VTPBindIP, Value);
+	else if (strcmp(Name, "LoopPrevention") == 0)  LoopPrevention  = atoi(Value);
 	else if (strcmp(Name, "StartHTTPServer") == 0) StartHTTPServer = atoi(Value);
 	else if (strcmp(Name, "HTTPServerPort") == 0)  HTTPServerPort  = atoi(Value);
 	else if (strcmp(Name, "HTTPStreamType") == 0)  HTTPStreamType  = atoi(Value);
@@ -89,6 +91,8 @@ void cStreamdevServerMenuSetupPage::Set(void) {
 	Add(new cMenuEditBoolItem(tr("Start VDR-to-VDR Server"),   &m_NewSetup.StartVTPServer));
 	Add(new cMenuEditIntItem (tr("VDR-to-VDR Server Port"),    &m_NewSetup.VTPServerPort, 0, 65535));
 	Add(new cMenuEditIpItem  (tr("Bind to IP"),                 m_NewSetup.VTPBindIP));
+	if (cPluginManager::CallFirstService(LOOP_PREVENTION_SERVICE))
+		Add(new cMenuEditBoolItem(tr("Loop Prevention"),           &m_NewSetup.LoopPrevention));
 
 	AddCategory (tr("HTTP Server"));
 	Add(new cMenuEditBoolItem(tr("Start HTTP Server"),         &m_NewSetup.StartHTTPServer));
@@ -134,6 +138,7 @@ void cStreamdevServerMenuSetupPage::Store(void) {
 	SetupStore("StartServer",     m_NewSetup.StartVTPServer);
 	SetupStore("ServerPort",      m_NewSetup.VTPServerPort);
 	SetupStore("VTPBindIP",       m_NewSetup.VTPBindIP);
+	SetupStore("LoopPrevention",  m_NewSetup.LoopPrevention);
 	SetupStore("StartHTTPServer", m_NewSetup.StartHTTPServer);
 	SetupStore("HTTPServerPort",  m_NewSetup.HTTPServerPort);
 	SetupStore("HTTPStreamType",  m_NewSetup.HTTPStreamType);

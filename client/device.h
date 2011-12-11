@@ -26,6 +26,7 @@ private:
 	bool                 m_DvrClosed;
 
 	static cStreamdevDevice *m_Device;
+	static const cChannel   *m_DenyChannel;
 
 	bool OpenDvrInt(void);
 	void CloseDvrInt(void);
@@ -70,6 +71,7 @@ public:
 	virtual int SignalQuality(void) const;
 
 	static void UpdatePriority(void);
+	static void DenyChannel(const cChannel *Channel) { m_DenyChannel = Channel; }
 	static bool Init(void);
 	static bool ReInit(void);
 

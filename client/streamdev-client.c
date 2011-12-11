@@ -52,6 +52,14 @@ bool cPluginStreamdevClient::SetupParse(const char *Name, const char *Value) {
   return StreamdevClientSetup.SetupParse(Name, Value);
 }
 
+bool cPluginStreamdevClient::Service(const char *Id, void *Data) {
+	if (!strcmp(Id, LOOP_PREVENTION_SERVICE)) {
+		cStreamdevDevice::DenyChannel((const cChannel*) Data);
+  		return true;
+	}
+	return false;
+}
+
 void cPluginStreamdevClient::MainThreadHook(void) {
   cStreamdevDevice::UpdatePriority();
 }

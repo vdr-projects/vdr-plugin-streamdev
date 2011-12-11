@@ -22,6 +22,7 @@ using namespace std;
 #define VIDEOBUFSIZE MEGABYTE(3)
 
 cStreamdevDevice *cStreamdevDevice::m_Device = NULL;
+const cChannel *cStreamdevDevice::m_DenyChannel = NULL;
 
 cStreamdevDevice::cStreamdevDevice(void) {
 	m_Channel    = NULL;
@@ -91,7 +92,7 @@ bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority,
 	bool prio = Priority < 0 || Priority > this->Priority();
 	bool ndr = false;
 
-	if (!StreamdevClientSetup.StartClient)
+	if (!StreamdevClientSetup.StartClient || Channel == m_DenyChannel)
 		return false;
 
 	Dprintf("ProvidesChannel, Channel=%s, Prio=%d\n", Channel->Name(), Priority);

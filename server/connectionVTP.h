@@ -29,6 +29,7 @@ private:
 	char                   *m_LastCommand;
 	eStreamType             m_StreamType;
 	bool                    m_FiltersSupport;
+	bool                    m_LoopPrevention;
 	RecPlayer              *m_RecPlayer;
 
 	// Priority is only known in PROV command

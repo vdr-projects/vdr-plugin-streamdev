@@ -1,6 +1,9 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- support for non-cycle-free setups (e.g. where two VDRs mutually share
+  their DVB cards through streamdev-client/-server). Must be enabled in
+  streamdev-server setup. Obsoletes recursion patches.
 - API change of VDR 1.7.22
 - VDR 1.7.22 obsoletes cap_net_raw patch. Added cap_net_raw patch for VDR
   1.7.5 - 1.7.21.
