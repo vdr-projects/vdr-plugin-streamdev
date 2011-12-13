@@ -40,6 +40,7 @@ Rolf Ahrenberg
   for suggesting to change the URL path from EXTERN to EXT
   for suggesting increased thread priorities for cStreamdevWriter/Streamer
   for adding "Hide mainmenu entry" option
+  for polishing po file headers
 
 Rantanen Teemu
   for providing vdr-incompletesections.diff
