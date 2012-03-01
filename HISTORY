@@ -1,6 +1,9 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Report the server-side HTTP status "503 Service unavailable" instead of
+  the client-side error "409 Conflict" when a channel is unavailable
+  (suggested by Methodus)
 - Update of po headers and Finnish translation (thanks to Rolf Ahrenberg)
 - support for non-cycle-free setups (e.g. where two VDRs mutually share
   their DVB cards through streamdev-client/-server). Must be enabled in

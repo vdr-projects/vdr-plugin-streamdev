@@ -200,3 +200,7 @@ Ville Skyttä
   for restricting VTP command RENR to liemikuutio patch < 1.32
   for fixing memory and filedescriptor leaks in libdvbmpeg
   for code cleanup and optimization
+
+Methodus
+  for suggesting to use HTTP code 503 for unavailable channels
+

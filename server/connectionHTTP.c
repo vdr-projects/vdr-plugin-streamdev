@@ -179,7 +179,7 @@ bool cConnectionHTTP::ProcessRequest(void)
 				DELETENULL(m_LiveStreamer);
 			}
 			DeferClose();
-			return Respond("HTTP/1.0 409 Channel not available")
+			return Respond("HTTP/1.0 503 Service unavailable")
 				&& Respond("");
 		}
 		else {
@@ -212,7 +212,7 @@ bool cConnectionHTTP::ProcessRequest(void)
 					    && Respond("");
 				}
 			}
-			return Respond("HTTP/1.0 409 Channel not available")
+			return Respond("HTTP/1.0 503 Service unavailable")
 				&& Respond("");
 		}
 		else {
