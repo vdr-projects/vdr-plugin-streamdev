@@ -15,6 +15,7 @@ struct cStreamdevClientSetup {
 	int  StartClient;
 	char RemoteIp[20];
 	int  RemotePort;
+	int  Timeout;
 	int  StreamFilters;
 	int  HideMenuEntry;
 	int  MinPriority;

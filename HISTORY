@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Timout for network operations now configurable in streamdev-client setup
 - Added timeout to Connect()
 - Report the server-side HTTP status "503 Service unavailable" instead of
   the client-side error "409 Conflict" when a channel is unavailable

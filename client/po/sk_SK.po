@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: streamdev_SK\n"
 "Report-Msgid-Bugs-To: <http://www.vdr-developer.org/mantisbt/>\n"
-"POT-Creation-Date: 2011-12-11 10:48+0100\n"
+"POT-Creation-Date: 2012-03-03 23:12+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Milan Hrala <hrala.milan@gmail.com>\n"
 "Language-Team: Slovak <hrala.milan@gmail.com>\n"
@@ -41,6 +41,9 @@ msgstr "Vzdialená IP"
 
 msgid "Remote Port"
 msgstr "Vzdialený port"
+
+msgid "Timeout (s)"
+msgstr ""
 
 msgid "Filter Streaming"
 msgstr "filtrova» prúdy"

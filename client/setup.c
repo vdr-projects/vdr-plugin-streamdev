@@ -12,6 +12,7 @@ cStreamdevClientSetup StreamdevClientSetup;
 cStreamdevClientSetup::cStreamdevClientSetup(void) {
 	StartClient   = false;
 	RemotePort    = 2004;
+	Timeout       = 2;
 	StreamFilters = false;
 	HideMenuEntry = false;
 	MinPriority   = -1;
@@ -31,6 +32,7 @@ bool cStreamdevClientSetup::SetupParse(const char *Name, const char *Value) {
 			strcpy(RemoteIp, Value);
 	}
 	else if (strcmp(Name, "RemotePort") == 0)    RemotePort = atoi(Value);
+	else if (strcmp(Name, "Timeout") == 0)       Timeout = atoi(Value);
 	else if (strcmp(Name, "StreamFilters") == 0) StreamFilters = atoi(Value);
 	else if (strcmp(Name, "HideMenuEntry") == 0) HideMenuEntry = atoi(Value);
 	else if (strcmp(Name, "MinPriority") == 0)   MinPriority = atoi(Value);
@@ -49,6 +51,7 @@ cStreamdevClientMenuSetupPage::cStreamdevClientMenuSetupPage(void) {
 	Add(new cMenuEditBoolItem(tr("Start Client"),        &m_NewSetup.StartClient));
 	Add(new cMenuEditIpItem  (tr("Remote IP"),            m_NewSetup.RemoteIp));
 	Add(new cMenuEditIntItem (tr("Remote Port"),         &m_NewSetup.RemotePort, 0, 65535));
+	Add(new cMenuEditIntItem (tr("Timeout (s)"),         &m_NewSetup.Timeout, 1, 15));
 	Add(new cMenuEditBoolItem(tr("Filter Streaming"),    &m_NewSetup.StreamFilters));
 	Add(new cMenuEditIntItem (tr("Minimum Priority"),    &m_NewSetup.MinPriority, -1, MAXPRIORITY));
 	Add(new cMenuEditIntItem (tr("Maximum Priority"),    &m_NewSetup.MaxPriority, -1, MAXPRIORITY));
@@ -75,6 +78,7 @@ void cStreamdevClientMenuSetupPage::Store(void) {
 	else
 		SetupStore("RemoteIp",    m_NewSetup.RemoteIp);
 	SetupStore("RemotePort",    m_NewSetup.RemotePort);
+	SetupStore("Timeout",       m_NewSetup.Timeout);
 	SetupStore("StreamFilters", m_NewSetup.StreamFilters);
 	SetupStore("HideMenuEntry", m_NewSetup.HideMenuEntry);
 	SetupStore("MinPriority",   m_NewSetup.MinPriority);

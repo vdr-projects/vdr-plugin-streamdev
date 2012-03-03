@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: streamdev 0.5.0\n"
 "Report-Msgid-Bugs-To: <http://www.vdr-developer.org/mantisbt/>\n"
-"POT-Creation-Date: 2011-12-11 10:48+0100\n"
+"POT-Creation-Date: 2012-03-03 23:12+0100\n"
 "PO-Revision-Date: 2008-03-30 02:11+0200\n"
 "Last-Translator: micky979 <micky979@free.fr>\n"
 "Language-Team: French <vdr@linuxtv.org>\n"
@@ -39,6 +39,9 @@ msgstr "Adresse IP du serveur"
 
 msgid "Remote Port"
 msgstr "Port du serveur"
+
+msgid "Timeout (s)"
+msgstr ""
 
 msgid "Filter Streaming"
 msgstr "Filtre streaming"

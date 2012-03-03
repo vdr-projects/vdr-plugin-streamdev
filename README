@@ -387,6 +387,9 @@ during an active transfer. This makes it possible to switch languages, receive
 additional channels (for recording on the client) and use plugins that use
 receivers themselves (like osdteletext).
 
+The default timeout of 2 seconds for network operations should be sufficient in
+most cases. Increase "Timeout" if you get frequent timeout errors in the log.
+
 With "Filter Streaming" enabled, the client will receive meta information like
 EPG data and service information, just as if the client had its own DVB card.
 Link channels and even a client-side EPG scan have been reported to work.

@@ -8,6 +8,7 @@
 #include <tools/socket.h>
 
 #include "common.h"
+#include "client/setup.h"
 
 #include <string>
 
@@ -21,22 +22,23 @@ private:
 	cMutex        m_Mutex;
 	char          m_Buffer[BUFSIZ + 1]; // various uses
 	bool          m_Prio; // server supports command PRIO
+	bool          m_Abort; // quit command pending
 
 	time_t        m_LastSignalUpdate;
 	int           m_LastSignalStrength;
 	int           m_LastSignalQuality;
 protected:
 	/* Send Command, and return true if the command results in Expected. 
-	   Returns false on failure, setting errno appropriately if it has been
-	   a system failure. If Expected is zero, returns immediately after
-		 sending the command. */
-	bool Command(const std::string &Command, uint Expected = 0, uint TimeoutMs = 1500);
+	   Returns false on failure. */
+	bool Command(const std::string &Command, uint Expected);
 
-	/* Fetch results from an ongoing Command called with Expected == 0. Returns
-	   true if the response has the code Expected, returning an internal buffer
-		 in the array pointer pointed to by Result. Returns false on failure, 
-		 setting errno appropriately if it has been a system failure. */
-	bool Expect(uint Expected, std::string *Result = NULL, uint TimeoutMs = 1500);
+	/* Send the given command. Returns false on failure. */
+	bool Send(const std::string &Command);
+
+	/* Fetch results from an ongoing Command. The status code and the
+	   buffer holding the server's response are stored in Code and Result
+	   if non-NULL. Returns false on failure. */
+	bool Receive(const std::string &Command, uint *Code = NULL, std::string *Result = NULL, uint TimeoutMs = StreamdevClientSetup.Timeout * 1000);
 
 public:
 	cClientSocket(void);

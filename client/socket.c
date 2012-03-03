@@ -11,8 +11,11 @@
 
 #define MINLOGREPEAT 10	//don't log connect failures too often (seconds)
 
+// timeout for writing to command socket
+#define WRITE_TIMEOUT_MS 200
+#define QUIT_TIMEOUT_MS 500
+
 #include "client/socket.h"
-#include "client/setup.h"
 #include "common.h"
 
 cClientSocket ClientSocket;
@@ -21,6 +24,7 @@ cClientSocket::cClientSocket(void)
 {
 	memset(m_DataSockets, 0, sizeof(cTBSocket*) * si_Count);
 	m_Prio = false;
+	m_Abort = false;
 	m_LastSignalUpdate = 0;
 	m_LastSignalStrength = -1;
 	m_LastSignalQuality = -1;
@@ -45,43 +49,53 @@ cTBSocket *cClientSocket::DataSocket(eSocketId Id) const {
 	return m_DataSockets[Id];
 }
 
-bool cClientSocket::Command(const std::string &Command, uint Expected, uint TimeoutMs) 
+bool cClientSocket::Command(const std::string &Command, uint Expected) 
 {
-	errno = 0;
+	uint code = 0;
+	std::string buffer;
+	if (Send(Command) && Receive(Command, &code, &buffer)) {
+		if (code == Expected)
+			return true;
 
+		dsyslog("streamdev-client: Command '%s' rejected by %s:%d: %s",
+			Command.c_str(), RemoteIp().c_str(), RemotePort(), buffer.c_str());
+	}
+	return false;
+}
+bool cClientSocket::Send(const std::string &Command)
+{
 	std::string pkt = Command + "\015\012";
 	Dprintf("OUT: |%s|\n", Command.c_str());
 
-	cTimeMs starttime;
-	if (!TimedWrite(pkt.c_str(), pkt.size(), TimeoutMs)) {
-		esyslog("Streamdev: Lost connection to %s:%d: %s", RemoteIp().c_str(), RemotePort(), 
-		        strerror(errno));
+	errno = 0;
+	if (!TimedWrite(pkt.c_str(), pkt.size(), WRITE_TIMEOUT_MS)) {
+		esyslog("ERROR: streamdev-client: Failed sending command '%s' to %s:%d: %s",
+			Command.c_str(), RemoteIp().c_str(), RemotePort(), strerror(errno));
 		Close();
 		return false;
 	}
-
-	uint64_t elapsed = starttime.Elapsed();
-	if (Expected != 0) { // XXX+ What if elapsed > TimeoutMs?
-		TimeoutMs -= elapsed;
-		return Expect(Expected, NULL, TimeoutMs);
-	}
-
 	return true;
 }
 
-bool cClientSocket::Expect(uint Expected, std::string *Result, uint TimeoutMs) {
-	char *endptr;
+#define TIMEOUT_MS 1000
+bool cClientSocket::Receive(const std::string &Command, uint *Code, std::string *Result, uint TimeoutMs) {
 	int bufcount;
-	bool res;
-
-	errno = 0;
-
-	if ((bufcount = ReadUntil(m_Buffer, sizeof(m_Buffer) - 1, "\012", TimeoutMs)) == -1) {
-		esyslog("Streamdev: Lost connection to %s:%d: %s", RemoteIp().c_str(), RemotePort(), 
-		        strerror(errno));
-		Close();
-		return false;
-	}
+	do
+	{
+		errno = 0;
+		bufcount = ReadUntil(m_Buffer, sizeof(m_Buffer) - 1, "\012", TimeoutMs < TIMEOUT_MS ? TimeoutMs : TIMEOUT_MS);
+		if (bufcount == -1) {
+			if (m_Abort)
+				return false;
+			if (errno != ETIMEDOUT || TimeoutMs <= TIMEOUT_MS) {
+				esyslog("ERROR: streamdev-client: Failed reading reply to '%s' from %s:%d: %s",
+					Command.c_str(), RemoteIp().c_str(), RemotePort(), strerror(errno));
+				Close();
+				return false;
+			}
+			TimeoutMs -= TIMEOUT_MS;
+		}
+	} while (bufcount == -1);
 	if (m_Buffer[bufcount - 1] == '\015')
 		--bufcount;
 	m_Buffer[bufcount] = '\0';
@@ -89,9 +103,9 @@ bool cClientSocket::Expect(uint Expected, std::string *Result, uint TimeoutMs) {
 
 	if (Result != NULL)
 		*Result = m_Buffer;
-
-	res = strtoul(m_Buffer, &endptr, 10) == Expected;
-	return res;
+	if (Code != NULL)
+		*Code = strtoul(m_Buffer, NULL, 10);
+	return true;
 }
 
 bool cClientSocket::CheckConnection(void) {
@@ -115,10 +129,10 @@ bool cClientSocket::CheckConnection(void) {
 		Close();
 	}
 
-	if (!Connect(StreamdevClientSetup.RemoteIp, StreamdevClientSetup.RemotePort)){
+	if (!Connect(StreamdevClientSetup.RemoteIp, StreamdevClientSetup.RemotePort, StreamdevClientSetup.Timeout * 1000)){
 		static time_t lastTime = 0;
 		if (time(NULL) - lastTime > MINLOGREPEAT) {
-			esyslog("ERROR: Streamdev: Couldn't connect to %s:%d: %s", 
+			esyslog("ERROR: streamdev-client: Couldn't connect to %s:%d: %s", 
 				(const char*)StreamdevClientSetup.RemoteIp,
 				StreamdevClientSetup.RemotePort, strerror(errno));
 			lastTime = time(NULL);
@@ -126,18 +140,20 @@ bool cClientSocket::CheckConnection(void) {
 		return false;
 	}
 
-	if (!Expect(220)) {
-		if (errno == 0)
-			esyslog("ERROR: Streamdev: Didn't receive greeting from %s:%d", 
-			        RemoteIp().c_str(), RemotePort());
+	uint code = 0;
+	std::string buffer;
+	if (!Receive("<connect>", &code, &buffer)) {
+		Close();
+		return false;
+	}
+	if (code != 220) {
+		esyslog("ERROR: streamdev-client: Didn't receive greeting from %s:%d: %s",
+		        RemoteIp().c_str(), RemotePort(), buffer.c_str());
 		Close();
 		return false;
 	}
 
 	if (!Command("CAPS TSPIDS", 220)) {
-		if (errno == 0)
-			esyslog("ERROR: Streamdev: Couldn't negotiate capabilities on %s:%d", 
-					RemoteIp().c_str(), RemotePort());
 		Close();
 		return false;
 	}
@@ -152,7 +168,7 @@ bool cClientSocket::CheckConnection(void) {
 		m_Prio = true;
 	}
 
-	isyslog("Streamdev: Connected to server %s:%d using capabilities TSPIDS%s%s",
+	isyslog("streamdev-client: Connected to server %s:%d using capabilities TSPIDS%s%s",
 	        RemoteIp().c_str(), RemotePort(), Filters, Prio);
 	return true;
 }
@@ -164,14 +180,16 @@ bool cClientSocket::ProvidesChannel(const cChannel *Channel, int Priority) {
 
 	std::string command = (std::string)"PROV " + (const char*)itoa(Priority) + " " 
 	                    + (const char*)Channel->GetChannelID().ToString();
-	if (!Command(command))
+	if (!Send(command))
 		return false;
 
+	uint code;
 	std::string buffer;
-	if (!Expect(220, &buffer)) {
-		if (buffer.substr(0, 3) != "560" && errno == 0)
-			esyslog("ERROR: Streamdev: Couldn't check if %s:%d provides channel %s",
-			        RemoteIp().c_str(), RemotePort(), Channel->Name());
+	if (!Receive(command, &code, &buffer))
+		return false;
+	if (code != 220 && code != 560) {
+		esyslog("streamdev-client: Unexpected reply to '%s' from %s:%d: %s",
+			command.c_str(), RemoteIp().c_str(), RemotePort(), buffer.c_str());
 		return false;
 	}
 	return true;
@@ -186,7 +204,7 @@ bool cClientSocket::CreateDataConnection(eSocketId Id) {
 		DELETENULL(m_DataSockets[Id]);
 
 	if (!listen.Listen(LocalIp(), 0, 1)) {
-		esyslog("ERROR: Streamdev: Couldn't create data connection: %s", 
+		esyslog("ERROR: streamdev-client: Couldn't create data connection: %s", 
 				strerror(errno));
 		return false;
 	}
@@ -201,13 +219,8 @@ bool cClientSocket::CreateDataConnection(eSocketId Id) {
 
 	CMD_LOCK;
 
-	if (!Command(command, 220)) {
-		Dprintf("error: %m\n");
-		if (errno == 0)
-			esyslog("ERROR: Streamdev: Couldn't establish data connection to %s:%d",
-					RemoteIp().c_str(), RemotePort());
+	if (!Command(command, 220))
 		return false;
-	}
 
 	/* The server SHOULD do the following:
 	 * - get PORT command
@@ -217,7 +230,7 @@ bool cClientSocket::CreateDataConnection(eSocketId Id) {
 
 	m_DataSockets[Id] = new cTBSocket;
 	if (!m_DataSockets[Id]->Accept(listen)) {
-		esyslog("ERROR: Streamdev: Couldn't establish data connection to %s:%d%s%s",
+		esyslog("ERROR: streamdev-client: Couldn't establish data connection to %s:%d%s%s",
 				RemoteIp().c_str(), RemotePort(), errno == 0 ? "" : ": ",
 				errno == 0 ? "" : strerror(errno));
 		DELETENULL(m_DataSockets[Id]);
@@ -228,18 +241,12 @@ bool cClientSocket::CreateDataConnection(eSocketId Id) {
 }
 
 bool cClientSocket::CloseDataConnection(eSocketId Id) {
-	//if (!CheckConnection()) return false;
-
 	CMD_LOCK;
 
 	if(Id == siLive || Id == siLiveFilter)
 		if (m_DataSockets[Id] != NULL) {
 			std::string command = (std::string)"ABRT " + (const char*)itoa(Id);
-			if (!Command(command, 220)) {
-				if (errno == 0)
-					esyslog("ERROR: Streamdev: Couldn't cleanly close data connection");
-				//return false;
-			}		
+			Command(command, 220);
 			DELETENULL(m_DataSockets[Id]);
 		}
 	return true;
@@ -252,12 +259,8 @@ bool cClientSocket::SetChannelDevice(const cChannel *Channel) {
 
 	std::string command = (std::string)"TUNE " 
 				+ (const char*)Channel->GetChannelID().ToString();
-	if (!Command(command, 220, 10000)) {
-		if (errno == 0)
-			esyslog("ERROR: Streamdev: Couldn't tune %s:%d to channel %s",
-			        RemoteIp().c_str(), RemotePort(), Channel->Name());
+	if (!Command(command, 220))
 		return false;
-	}
 
 	m_LastSignalUpdate = 0;
 	return true;
@@ -269,13 +272,7 @@ bool cClientSocket::SetPriority(int Priority) {
 	CMD_LOCK;
 
 	std::string command = (std::string)"PRIO " + (const char*)itoa(Priority);
-	if (!Command(command, 220)) {
-		if (errno == 0)
-			esyslog("Streamdev: Failed to update priority on %s:%d", RemoteIp().c_str(), 
-			        RemotePort());
-		return false;
-	}
-	return true;
+	return Command(command, 220);
 }
 
 bool cClientSocket::GetSignal(int *SignalStrength, int *SignalQuality) {
@@ -284,8 +281,10 @@ bool cClientSocket::GetSignal(int *SignalStrength, int *SignalQuality) {
 	CMD_LOCK;
 
 	if (m_LastSignalUpdate != time(NULL)) {
+		uint code = 0;
 		std::string buffer;
-		if (!Command("SGNL") || !Expect(220, &buffer)
+		std::string command("SGNL");
+		if (!Send(command) || !Receive(command, &code, &buffer) || code != 220
 				|| sscanf(buffer.c_str(), "%*d %*d %d:%d", &m_LastSignalStrength, &m_LastSignalQuality) != 2) {
 			m_LastSignalStrength = -1;
 			m_LastSignalQuality = -1;
@@ -305,13 +304,7 @@ bool cClientSocket::SetPid(int Pid, bool On) {
 	CMD_LOCK;
 
 	std::string command = (std::string)(On ? "ADDP " : "DELP ") + (const char*)itoa(Pid);
-	if (!Command(command, 220)) {
-		if (errno == 0)
-			esyslog("Streamdev: Pid %d not available from %s:%d", Pid, RemoteIp().c_str(), 
-			        RemotePort());
-		return false;
-	}
-	return true;
+	return Command(command, 220);
 }
 
 bool cClientSocket::SetFilter(ushort Pid, uchar Tid, uchar Mask, bool On) {
@@ -321,13 +314,7 @@ bool cClientSocket::SetFilter(ushort Pid, uchar Tid, uchar Mask, bool On) {
 
 	std::string command = (std::string)(On ? "ADDF " : "DELF ") + (const char*)itoa(Pid)
 	                    + " " + (const char*)itoa(Tid) + " " + (const char*)itoa(Mask);
-	if (!Command(command, 220)) {
-		if (errno == 0)
-				esyslog("Streamdev: Filter %hu, %hhu, %hhu not available from %s:%d", 
-						Pid, Tid, Mask, RemoteIp().c_str(), RemotePort());
-		return false;
-	}
-	return true;
+	return Command(command, 220);
 }
 
 bool cClientSocket::CloseDvr(void) {
@@ -337,27 +324,20 @@ bool cClientSocket::CloseDvr(void) {
 
 	if (m_DataSockets[siLive] != NULL) {
 		std::string command = (std::string)"ABRT " + (const char*)itoa(siLive);
-		if (!Command(command, 220)) {
-			if (errno == 0)
-				esyslog("ERROR: Streamdev: Couldn't cleanly close data connection");
+		if (!Command(command, 220))
 			return false;
-		}
-		
 		DELETENULL(m_DataSockets[siLive]);
 	}
 	return true;
 }
 
 bool cClientSocket::Quit(void) {
-	bool res;
+	m_Abort = true;
+	if (!IsOpen()) return false;
 
-	if (!CheckConnection()) return false;
-
-	if (!(res = Command("QUIT", 221))) {
-		if (errno == 0)
-			esyslog("ERROR: Streamdev: Couldn't quit command connection to %s:%d",
-					RemoteIp().c_str(), RemotePort());
-	}
+	CMD_LOCK;
+	std::string command("QUIT");
+	bool res = Send(command) && Receive(command, NULL, NULL, QUIT_TIMEOUT_MS);
 	Close();
 	return res;
 }
@@ -367,10 +347,5 @@ bool cClientSocket::SuspendServer(void) {
 
 	CMD_LOCK;
 
-	if (!Command("SUSP", 220)) {
-		if (errno == 0)
-			esyslog("ERROR: Streamdev: Couldn't suspend server");
-		return false;
-	}
-	return true;
+	return Command("SUSP", 220);
 }
