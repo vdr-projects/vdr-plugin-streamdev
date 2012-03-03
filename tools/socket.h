@@ -32,11 +32,13 @@ public:
 	   Reimplemented for TCP/IPv4 sockets. */
 	virtual ssize_t SysWrite(const void *Buffer, size_t Length) const;
 
-	/* Connect() tries to connect an available local socket to the port given
-	   by Port of the target host given by Host in numbers-and-dots notation
-	   (i.e. "212.43.45.21"). Returns true if the connection attempt was 
-	   successful and false otherwise, setting errno appropriately. */
-	virtual bool Connect(const std::string &Host, uint Port);
+	/* Connect() tries to connect an available local socket within TimeoutMs
+           milliseconds to the port given by Port of the target host given by
+           Host in numbers-and-dots notation (i.e. "212.43.45.21"). A TimeoutMs
+           of 0 will disable non-blocking IO for the connect call. Returns true
+           if the connection attempt was successful and false otherwise, setting
+           errno appropriately. */
+	virtual bool Connect(const std::string &Host, uint Port, uint TimeoutMs = 0);
 
 	/* Shutdown() shuts down one or both ends of a socket. If called with How
 	   set to SHUT_RD, further reads on this socket will be denied. If called

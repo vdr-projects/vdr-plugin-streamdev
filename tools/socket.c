@@ -1,4 +1,5 @@
 #include "tools/socket.h"
+#include "tools/select.h"
 
 #include <vdr/tools.h>
 #include <string.h>
@@ -27,7 +28,7 @@ cTBSocket::~cTBSocket() {
 	if (IsOpen()) Close();
 }
 
-bool cTBSocket::Connect(const std::string &Host, unsigned int Port) {
+bool cTBSocket::Connect(const std::string &Host, unsigned int Port, unsigned int TimeoutMs) {
 	socklen_t len;
 	int socket;
 
@@ -45,13 +46,36 @@ bool cTBSocket::Connect(const std::string &Host, unsigned int Port) {
 		return false;
 	}
 
+	if (TimeoutMs > 0 && ::fcntl(socket, F_SETFL, O_NONBLOCK) == -1) {
+		::close(socket);
+		return false;
+	}
+	
 	m_RemoteAddr.sin_family = AF_INET;
 	m_RemoteAddr.sin_port   = htons(Port);
 	m_RemoteAddr.sin_addr.s_addr = inet_addr(Host.c_str());
-	if (::connect(socket, (struct sockaddr*)&m_RemoteAddr, 
-			sizeof(m_RemoteAddr)) == -1) {
-		::close(socket);
-		return false;
+	if (::connect(socket, (struct sockaddr*)&m_RemoteAddr, sizeof(m_RemoteAddr)) == -1) {
+		if (TimeoutMs > 0 && errno == EINPROGRESS) {
+			int so_error;
+			socklen_t len = sizeof(so_error);
+			cTBSelect select;
+			select.Add(socket);
+			if (select.Select(TimeoutMs) == -1 ||
+					::getsockopt(socket, SOL_SOCKET, SO_ERROR, &so_error, &len) == -1) {
+				::close(socket);
+				return false;
+			}
+			if (so_error) {
+				errno = so_error;
+				::close(socket);
+				return false;
+			}
+
+		}
+		else {
+			::close(socket);
+			return false;
+		}
 	}
 
 	if (m_Type == SOCK_STREAM) {
