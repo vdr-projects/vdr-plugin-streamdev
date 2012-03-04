@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: streamdev 0.5.0\n"
 "Report-Msgid-Bugs-To: <http://www.vdr-developer.org/mantisbt/>\n"
-"POT-Creation-Date: 2012-03-03 23:12+0100\n"
+"POT-Creation-Date: 2012-03-03 23:57+0100\n"
 "PO-Revision-Date: 2008-03-30 02:11+0200\n"
 "Last-Translator: Frank Schmirler <vdrdev@schmirler.de>\n"
 "Language-Team: German <vdr@linuxtv.org>\n"
@@ -45,6 +45,9 @@ msgstr "Timeout (s)"
 
 msgid "Filter Streaming"
 msgstr "Filter-Daten streamen"
+
+msgid "Live TV Priority"
+msgstr "Live TV Priorität"
 
 msgid "Minimum Priority"
 msgstr "Minimale Priorität"

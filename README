@@ -394,14 +394,17 @@ With "Filter Streaming" enabled, the client will receive meta information like
 EPG data and service information, just as if the client had its own DVB card.
 Link channels and even a client-side EPG scan have been reported to work.
 
-With maximum and minimum priority you can keep VDR from considering streamdev
-in certain cases. If for instance you have a streamdev client with its own DVB
-card, VDR might use streamdev for recording. If this is not what you want, you
-could set the maximum priority to 0. As recordings usually have a much higher
-priority (default 50), streamdev is now no longer used for recordings. The two
-parameters define the inclusive range of priorities for which streamdev will
-accept to tune. Setting the minimum priority to a higher value than the maximum,
-you will get two ranges: "up to maximum" and "minimum and above".
+The precedence among multiple client VDRs receiving live TV from the same
+server is controlled with "Live TV Priority".
+
+With "Maximum Priority" and "Minimum Priority" you can keep VDR from considering
+streamdev in certain cases. If for instance you have a streamdev client with its
+own DVB card, VDR might use streamdev for recording. If this is not what you
+want, you could set the maximum priority to 0. As recordings usually have a much
+higher priority (default 50), streamdev is now no longer used for recordings.
+The two parameters define the inclusive range of priorities for which streamdev
+will accept to tune. Setting the minimum priority to a higher value than the
+maximum, you will get two ranges: "up to maximum" and "minimum and above".
 
 If you are running at least VDR 1.7.0, you can also configure the "Broadcast
 Systems / Cost" of the streamdev-client device. On a pure streamdev-client only

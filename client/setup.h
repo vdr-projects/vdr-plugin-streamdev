@@ -18,6 +18,7 @@ struct cStreamdevClientSetup {
 	int  Timeout;
 	int  StreamFilters;
 	int  HideMenuEntry;
+	int  LivePriority;
 	int  MinPriority;
 	int  MaxPriority;
 #if APIVERSNUM >= 10700

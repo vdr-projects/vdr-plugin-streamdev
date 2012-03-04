@@ -1,6 +1,9 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Use the new streamdev-client setup option "Live TV Priority" to control
+  precedence among multiple clients. The VDR option "Primary Limit" which
+  has previouly been used for this purpose has been dropped in VDR 1.7.25.
 - Timout for network operations now configurable in streamdev-client setup
 - Added timeout to Connect()
 - Report the server-side HTTP status "503 Service unavailable" instead of

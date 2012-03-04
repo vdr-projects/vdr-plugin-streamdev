@@ -15,6 +15,7 @@ cStreamdevClientSetup::cStreamdevClientSetup(void) {
 	Timeout       = 2;
 	StreamFilters = false;
 	HideMenuEntry = false;
+	LivePriority  = 0;
 	MinPriority   = -1;
 	MaxPriority   = MAXPRIORITY;
 #if APIVERSNUM >= 10700
@@ -35,6 +36,7 @@ bool cStreamdevClientSetup::SetupParse(const char *Name, const char *Value) {
 	else if (strcmp(Name, "Timeout") == 0)       Timeout = atoi(Value);
 	else if (strcmp(Name, "StreamFilters") == 0) StreamFilters = atoi(Value);
 	else if (strcmp(Name, "HideMenuEntry") == 0) HideMenuEntry = atoi(Value);
+	else if (strcmp(Name, "LivePriority") == 0)  LivePriority = atoi(Value);
 	else if (strcmp(Name, "MinPriority") == 0)   MinPriority = atoi(Value);
 	else if (strcmp(Name, "MaxPriority") == 0)   MaxPriority = atoi(Value);
 #if APIVERSNUM >= 10700
@@ -53,6 +55,7 @@ cStreamdevClientMenuSetupPage::cStreamdevClientMenuSetupPage(void) {
 	Add(new cMenuEditIntItem (tr("Remote Port"),         &m_NewSetup.RemotePort, 0, 65535));
 	Add(new cMenuEditIntItem (tr("Timeout (s)"),         &m_NewSetup.Timeout, 1, 15));
 	Add(new cMenuEditBoolItem(tr("Filter Streaming"),    &m_NewSetup.StreamFilters));
+	Add(new cMenuEditIntItem (tr("Live TV Priority"),    &m_NewSetup.LivePriority, 0, MAXPRIORITY));
 	Add(new cMenuEditIntItem (tr("Minimum Priority"),    &m_NewSetup.MinPriority, -1, MAXPRIORITY));
 	Add(new cMenuEditIntItem (tr("Maximum Priority"),    &m_NewSetup.MaxPriority, -1, MAXPRIORITY));
 #if APIVERSNUM >= 10715
@@ -81,6 +84,7 @@ void cStreamdevClientMenuSetupPage::Store(void) {
 	SetupStore("Timeout",       m_NewSetup.Timeout);
 	SetupStore("StreamFilters", m_NewSetup.StreamFilters);
 	SetupStore("HideMenuEntry", m_NewSetup.HideMenuEntry);
+	SetupStore("LivePriority",  m_NewSetup.LivePriority);
 	SetupStore("MinPriority",   m_NewSetup.MinPriority);
 	SetupStore("MaxPriority",   m_NewSetup.MaxPriority);
 #if APIVERSNUM >= 10700

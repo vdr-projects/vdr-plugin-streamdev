@@ -321,8 +321,9 @@ void cStreamdevDevice::UpdatePriority(void) {
 		m_Device->Lock();
 		if (m_Device->m_UpdatePriority && ClientSocket.DataSocket(siLive)) {
 			int Priority = m_Device->Priority();
-			if (m_Device == cDevice::ActualDevice() && Priority < Setup.PrimaryLimit)
-				Priority = Setup.PrimaryLimit;
+			// override TRANSFERPRIORITY (-1) with live TV priority from setup
+			if (m_Device == cDevice::ActualDevice() && Priority == -1)
+				Priority = StreamdevClientSetup.LivePriority;
 			if (m_Device->m_Priority != Priority && ClientSocket.SetPriority(Priority))
 				m_Device->m_Priority = Priority;
 		}
