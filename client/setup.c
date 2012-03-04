@@ -16,7 +16,7 @@ cStreamdevClientSetup::cStreamdevClientSetup(void) {
 	StreamFilters = false;
 	HideMenuEntry = false;
 	LivePriority  = 0;
-	MinPriority   = -1;
+	MinPriority   = -MAXPRIORITY;
 	MaxPriority   = MAXPRIORITY;
 #if APIVERSNUM >= 10700
 	NumProvidedSystems = 1;
@@ -56,8 +56,8 @@ cStreamdevClientMenuSetupPage::cStreamdevClientMenuSetupPage(void) {
 	Add(new cMenuEditIntItem (tr("Timeout (s)"),         &m_NewSetup.Timeout, 1, 15));
 	Add(new cMenuEditBoolItem(tr("Filter Streaming"),    &m_NewSetup.StreamFilters));
 	Add(new cMenuEditIntItem (tr("Live TV Priority"),    &m_NewSetup.LivePriority, 0, MAXPRIORITY));
-	Add(new cMenuEditIntItem (tr("Minimum Priority"),    &m_NewSetup.MinPriority, -1, MAXPRIORITY));
-	Add(new cMenuEditIntItem (tr("Maximum Priority"),    &m_NewSetup.MaxPriority, -1, MAXPRIORITY));
+	Add(new cMenuEditIntItem (tr("Minimum Priority"),    &m_NewSetup.MinPriority, -MAXPRIORITY, MAXPRIORITY));
+	Add(new cMenuEditIntItem (tr("Maximum Priority"),    &m_NewSetup.MaxPriority, -MAXPRIORITY, MAXPRIORITY));
 #if APIVERSNUM >= 10715
 	Add(new cMenuEditIntItem (tr("Broadcast Systems / Cost"),  &m_NewSetup.NumProvidedSystems, 1, 15));
 #elif APIVERSNUM >= 10700

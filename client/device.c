@@ -34,7 +34,7 @@ cStreamdevDevice::cStreamdevDevice(void) {
 
 	m_Device = this;
 	m_Pids = 0;
-	m_Priority = -1;
+	m_Priority = -100;
 	m_DvrClosed = true;
 }
 

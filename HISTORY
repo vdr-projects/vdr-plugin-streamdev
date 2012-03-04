@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- With VDR 1.7.25 priorities down to -99 will be used. Please update
+  "Minimum Priority" in streamdev-client setup.
 - Use the new streamdev-client setup option "Live TV Priority" to control
   precedence among multiple clients. The VDR option "Primary Limit" which
   has previouly been used for this purpose has been dropped in VDR 1.7.25.
