@@ -35,18 +35,12 @@ public:
 
 cStreamdevLiveReceiver::cStreamdevLiveReceiver(cStreamdevStreamer *Streamer, const cChannel *Channel, 
                                                int Priority, const int *Pids):
-#if APIVERSNUM >= 10712
 		cReceiver(Channel, Priority),
-#else
-		cReceiver(Channel->GetChannelID(), Priority, 0, Pids),
-#endif
 		m_Streamer(Streamer)
 {
-#if APIVERSNUM >= 10712
 		// clears all PIDs but channel remains set
 		SetPids(NULL);
 		AddPids(Pids);
-#endif
 }
 
 cStreamdevLiveReceiver::~cStreamdevLiveReceiver() 
@@ -453,10 +447,8 @@ void cStreamdevLiveStreamer::GetSignal(int *DevNum, int *Strength, int *Quality)
 {
 	if (m_Device) {
 		*DevNum = m_Device->DeviceNumber() + 1;
-#if APIVERSNUM >= 10719
 		*Strength = m_Device->SignalStrength();
 		*Quality = m_Device->SignalQuality();
-#endif
 	}
 }
 

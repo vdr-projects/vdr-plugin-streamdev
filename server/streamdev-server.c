@@ -13,8 +13,8 @@
 #include "server/setup.h"
 #include "server/server.h"
 
-#if !defined(APIVERSNUM) || APIVERSNUM < 10516
-#error "VDR-1.5.16 API version or greater is required!"
+#if !defined(APIVERSNUM) || APIVERSNUM < 10725
+#error "VDR-1.7.25 or greater required to compile server! Use 'make client' to compile client only."
 #endif
 
 const char *cPluginStreamdevServer::DESCRIPTION = trNOOP("VDR Streaming Server");

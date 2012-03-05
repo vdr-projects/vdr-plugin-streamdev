@@ -75,9 +75,7 @@ cTSExt::cTSExt(cRingBufferLinear *ResultBuffer, const cServerConnection *Connect
 		// add channel ID, name and pids to environment
 		ADDENV("REMUX_CHANNEL_ID=%s", *Channel->GetChannelID().ToString());
 		ADDENV("REMUX_CHANNEL_NAME=%s", Channel->Name());
-#if APIVERSNUM >= 10701
 		ADDENV("REMUX_VTYPE=%d", Channel->Vtype());
-#endif
 		if (Channel->Vpid())
 			ADDENV("REMUX_VPID=%d", Channel->Vpid());
 		if (Channel->Ppid() != Channel->Vpid())

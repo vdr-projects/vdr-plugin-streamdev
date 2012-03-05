@@ -47,9 +47,7 @@ void cStreamdevWriter::Action(void)
 	int count, offset = 0;
 	int timeout = 0;
 
-#if APIVERSNUM >= 10705
 	SetPriority(-3);
-#endif
 	sel.Clear();
 	sel.Add(*m_Socket, true);
 	while (Running()) {
@@ -156,9 +154,7 @@ void cStreamdevStreamer::Stop(void)
 
 void cStreamdevStreamer::Action(void) 
 {
-#if APIVERSNUM >= 10705
 	SetPriority(-3);
-#endif
 	while (Running()) {
 		int got;
 		uchar *block = m_RingBuffer->Get(got);

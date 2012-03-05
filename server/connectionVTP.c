@@ -37,16 +37,8 @@ enum eDumpModeStreamdev { dmsdAll, dmsdPresent, dmsdFollowing, dmsdAtTime, dmsdF
 class cLSTEHandler 
 {
 private:
-#if defined(USE_PARENTALRATING) || defined(PARENTALRATINGCONTENTVERSNUM)
-	enum eStates { Channel, Event, Title, Subtitle, Description, Vps, Content,
-	               EndEvent, EndChannel, EndEPG };
-#elif APIVERSNUM >= 10711
 	enum eStates { Channel, Event, Title, Subtitle, Description, Vps, Content, Rating,
 	               EndEvent, EndChannel, EndEPG };
-#else
-	enum eStates { Channel, Event, Title, Subtitle, Description, Vps, 
-	               EndEvent, EndChannel, EndEPG };
-#endif /* PARENTALRATING */
 	cConnectionVTP    *m_Client;
 	cSchedulesLock    *m_SchedulesLock;
 	const cSchedules  *m_Schedules;
@@ -285,11 +277,7 @@ bool cLSTEHandler::Next(bool &Last)
 		break;
 
 	case Vps:
-#if defined(USE_PARENTALRATING) || defined(PARENTALRATINGCONTENTVERSNUM) || APIVERSNUM >= 10711
 		m_State = Content;
-#else
-		m_State = EndEvent;
-#endif /* PARENTALRATING */
 		if (m_Event->Vps())
 #ifdef __FreeBSD__
 			return m_Client->Respond(-215, "V %d", m_Event->Vps());
@@ -300,18 +288,6 @@ bool cLSTEHandler::Next(bool &Last)
 			return Next(Last);
 		break;
 
-#if defined(USE_PARENTALRATING) || defined(PARENTALRATINGCONTENTVERSNUM)
-	case Content:
-		m_State = EndEvent;
-		if (!isempty(m_Event->GetContentsString())) {
-			char *copy = strdup(m_Event->GetContentsString());
-			cString cpy(copy, true);
-			strreplace(copy, '\n', '|');
-			return m_Client->Respond(-215, "G %i %i %s", m_Event->Contents() & 0xF0, m_Event->Contents() & 0x0F, copy);
-		} else
-			return Next(Last);
-		break;
-#elif APIVERSNUM >= 10711
 	case Content:
 		m_State = Rating;
 		if (!isempty(m_Event->ContentToString(m_Event->Contents()))) {
@@ -330,7 +306,6 @@ bool cLSTEHandler::Next(bool &Last)
 		else
 			return Next(Last);
 		break;
-#endif
 
 	case EndEvent:
 		if (m_Traverse) {
@@ -597,9 +572,7 @@ cLSTRHandler::cLSTRHandler(cConnectionVTP *Client, const char *Option):
 	if (*Option) {
 		if (isnumber(Option)) {
 			m_Recording = Recordings.Get(strtol(Option, NULL, 10) - 1);
-#if defined(USE_STREAMDEVEXT) || APIVERSNUM >= 10705
 			m_Event = m_Recording->Info()->GetEvent();
-#endif
 			m_Info = true;
 			if (m_Recording == NULL) {
 				m_Errno = 501;
@@ -1782,17 +1755,9 @@ bool cConnectionVTP::CmdRENR(const char *Option)
 			int n = strtol(Option, &tail, 10);
 			cRecording *recording = Recordings.Get(n - 1);
 			if (recording && tail && tail != Option) {
-#if APIVERSNUM < 10704
-				int priority = recording->priority;
-				int lifetime = recording->lifetime;
-#endif
 				char *oldName = strdup(recording->Name());
 				tail = skipspace(tail);
-#if APIVERSNUM < 10704
-				if (recording->Rename(tail, &priority, &lifetime)) {
-#else
 				if (recording->Rename(tail)) {
-#endif
 					Reply(250, "Renamed \"%s\" to \"%s\"", oldName, recording->Name());
 					Recordings.ChangeState();
 					Recordings.TouchUpdate();

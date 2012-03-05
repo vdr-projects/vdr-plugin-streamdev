@@ -264,7 +264,6 @@ bool cServerConnection::Close()
 	return cTBSocket::Close();
 }
 
-#if APIVERSNUM >= 10700
 static int GetClippedNumProvidedSystems(int AvailableBits, cDevice *Device)
 {
   int MaxNumProvidedSystems = (1 << AvailableBits) - 1;
@@ -279,7 +278,6 @@ static int GetClippedNumProvidedSystems(int AvailableBits, cDevice *Device)
      }
   return NumProvidedSystems;
 }
-#endif
 
 /*
  * copy of cDevice::GetDevice(...) but without side effects (not detaching receivers)
@@ -337,26 +335,15 @@ cDevice* cServerConnection::CheckDevice(const cChannel *Channel, int Priority, b
              imp <<= 1; imp |= LiveView ? !device->IsPrimaryDevice() || ndr : 0;                                  // prefer the primary device for live viewing if we don't need to detach existing receivers
              imp <<= 1; imp |= !device->Receiving() && (device != cTransferControl::ReceiverDevice() || device->IsPrimaryDevice()) || ndr; // use receiving devices if we don't need to detach existing receivers, but avoid primary device in local transfer mode
              imp <<= 1; imp |= device->Receiving();                                                               // avoid devices that are receiving
-#if APIVERSNUM >= 10700
              imp <<= 4; imp |= GetClippedNumProvidedSystems(4, device) - 1;                                       // avoid cards which support multiple delivery systems
-#endif
              imp <<= 1; imp |= device == cTransferControl::ReceiverDevice();                                      // avoid the Transfer Mode receiver device
              imp <<= 8; imp |= min(max(device->Priority() + MAXPRIORITY, 0), 0xFF);                               // use the device with the lowest priority (+MAXPRIORITY to assure that values -99..99 can be used)
              imp <<= 8; imp |= min(max((NumUsableSlots ? SlotPriority[j] : 0) + MAXPRIORITY, 0), 0xFF);              // use the CAM slot with the lowest priority (+MAXPRIORITY to assure that values -99..99 can be used)
              imp <<= 1; imp |= ndr;                                                                                  // avoid devices if we need to detach existing receivers
-#if VDRVERSNUM < 10719
-             imp <<= 1; imp |= device->IsPrimaryDevice();                                                         // avoid the primary device
-#endif
              imp <<= 1; imp |= NumUsableSlots ? 0 : device->HasCi();                                              // avoid cards with Common Interface for FTA channels
-#if VDRVERSNUM < 10719
-             imp <<= 1; imp |= device->HasDecoder();                                                              // avoid full featured cards
-#else
              imp <<= 1; imp |= device->AvoidRecording();                                                          // avoid SD full featured cards
-#endif
              imp <<= 1; imp |= NumUsableSlots ? !ChannelCamRelations.CamDecrypt(Channel->GetChannelID(), j + 1) : 0; // prefer CAMs that are known to decrypt this channel
-#if VDRVERSNUM >= 10719
              imp <<= 1; imp |= device->IsPrimaryDevice();                                                         // avoid the primary device
-#endif
              if (imp < Impact) {
                 // This device has less impact than any previous one, so we take it.
                 Impact = imp;
