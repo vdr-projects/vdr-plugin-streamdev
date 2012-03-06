@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Updated Finnish translation (thanks to Rolf Ahrenberg)
 - With VDR 1.7.25 priorities down to -99 will be used. Please update
   "Minimum Priority" in streamdev-client setup.
 - Use the new streamdev-client setup option "Live TV Priority" to control

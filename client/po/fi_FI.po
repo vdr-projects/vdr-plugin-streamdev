@@ -41,13 +41,13 @@ msgid "Remote Port"
 msgstr "Etäkoneen portti"
 
 msgid "Timeout (s)"
-msgstr ""
+msgstr "Yhteyden aikakatkaisu (s)"
 
 msgid "Filter Streaming"
 msgstr "Suodatetun tiedon suoratoisto"
 
 msgid "Live TV Priority"
-msgstr ""
+msgstr "Live-katselun prioriteetti"
 
 msgid "Minimum Priority"
 msgstr "Pienin prioriteetti"
