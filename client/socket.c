@@ -192,7 +192,7 @@ bool cClientSocket::ProvidesChannel(const cChannel *Channel, int Priority) {
 			command.c_str(), RemoteIp().c_str(), RemotePort(), buffer.c_str());
 		return false;
 	}
-	return true;
+	return code == 220;
 }
 
 bool cClientSocket::CreateDataConnection(eSocketId Id) {
