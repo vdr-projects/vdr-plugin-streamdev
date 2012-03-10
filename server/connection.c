@@ -44,7 +44,12 @@ void cSwitchLive::Switch(void)
 {
 	mutex.Lock();
 	if (channel && device) {
+#if APIVERSNUM >= 10722
+		cDevice *d = device;
+		d->SetOccupied(10);
+#else
 		cDevice::SetAvoidDevice(device);
+#endif
 		if (!Channels.SwitchTo(cDevice::CurrentChannel())) {
 			if (StreamdevServerSetup.SuspendMode == smAlways) {
 				Channels.SwitchTo(channel->Number());
@@ -55,6 +60,9 @@ void cSwitchLive::Switch(void)
 				device = NULL;
 			}
 		}
+#if APIVERSNUM >= 10722
+		d->SetOccupied(0);
+#endif
 		// make sure we don't come in here next time
 		channel = NULL;
 		switched.Signal();
