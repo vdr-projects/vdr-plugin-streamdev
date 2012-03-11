@@ -44,12 +44,24 @@ void cSwitchLive::Switch(void)
 {
 	mutex.Lock();
 	if (channel && device) {
-#if APIVERSNUM >= 10722
-		cDevice *d = device;
-		d->SetOccupied(10);
+#if APIVERSNUM >= 10726
+		cChannel *current = Channels.GetByNumber(cDevice::CurrentChannel());
+		cDevice *newdev = cServerConnection::CheckDevice(current, 0, true, device);
+		if (!newdev) { 
+			if (StreamdevServerSetup.SuspendMode == smAlways) {
+				Channels.SwitchTo(channel->Number());
+				Skins.Message(mtInfo, tr("Streaming active"));
+			}
+			else {
+				esyslog("streamdev: Can't receive channel %d (%s) from device %d. Moving live TV to other device failed (PrimaryDevice=%d, ActualDevice=%d)", channel->Number(), channel->Name(), device->CardIndex(), cDevice::PrimaryDevice()->CardIndex(), cDevice::ActualDevice()->CardIndex());
+				device = NULL;
+			}
+		}
+		else {
+			newdev->SwitchChannel(current, true);
+		}
 #else
 		cDevice::SetAvoidDevice(device);
-#endif
 		if (!Channels.SwitchTo(cDevice::CurrentChannel())) {
 			if (StreamdevServerSetup.SuspendMode == smAlways) {
 				Channels.SwitchTo(channel->Number());
@@ -60,8 +72,6 @@ void cSwitchLive::Switch(void)
 				device = NULL;
 			}
 		}
-#if APIVERSNUM >= 10722
-		d->SetOccupied(0);
 #endif
 		// make sure we don't come in here next time
 		channel = NULL;

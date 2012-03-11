@@ -1,7 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
-- API change of VDR 1.7.26: Use "occupied" instead of "avoid device".
+- API change of VDR 1.7.26: "avoid device" is no longer available
 - Fixed ProvidesChannel() on client always returning true since the new timeout
   option has been added.
 - Updated Finnish translation (thanks to Rolf Ahrenberg)

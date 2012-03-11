@@ -38,11 +38,6 @@ private:
 
 	tStrStrMap  m_Headers;
 
-	/* Check if a device would be available for transfering the given
-	   channel. This call has no side effects except for temporarily
-           detaching this connection's receivers. */
-	cDevice *CheckDevice(const cChannel *Channel, int Priority, bool LiveView, const cDevice *AvoidDevice = NULL);
-
 	/* Test if device is in use as the transfer mode receiver device
 	   or a FF card, displaying live TV from internal tuner */
 	static bool UsedByLiveTV(cDevice *device);
@@ -105,6 +100,10 @@ public:
 
 	/* Close the socket */
 	virtual bool Close(void);
+
+	/* Check if a device would be available for transfering the given
+	   channel. This call has no side effects. */
+	static cDevice *CheckDevice(const cChannel *Channel, int Priority, bool LiveView, const cDevice *AvoidDevice = NULL);
 
 	/* Will retrieve an unused device for transmitting data. Receivers have
 	   already been attached from the device if necessary. Use the returned
