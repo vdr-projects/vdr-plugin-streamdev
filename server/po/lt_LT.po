@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: streamdev 0.5.0\n"
 "Report-Msgid-Bugs-To: <http://www.vdr-developer.org/mantisbt/>\n"
-"POT-Creation-Date: 2011-12-11 11:25+0100\n"
+"POT-Creation-Date: 2012-03-31 15:06+0200\n"
 "PO-Revision-Date: 2009-11-26 21:57+0200\n"
 "Last-Translator: Valdemaras Pipiras <varas@ambernet.lt>\n"
 "Language-Team: Lithuanian <vdr@linuxtv.org>\n"
@@ -31,15 +31,6 @@ msgstr ""
 msgid "Suspend"
 msgstr "Pristabdyti"
 
-msgid "Offer suspend mode"
-msgstr "Klausti dėl sustabdymo"
-
-msgid "Always suspended"
-msgstr "Visada stabdyti"
-
-msgid "Never suspended"
-msgstr "Niekada nestabdyti"
-
 msgid "Common Settings"
 msgstr "Bendri nustatymai"
 
@@ -48,12 +39,6 @@ msgstr ""
 
 msgid "Maximum Number of Clients"
 msgstr "Maksimalus klientų skaičius"
-
-msgid "Suspend behaviour"
-msgstr "Pristabdyti veikimą"
-
-msgid "Client may suspend"
-msgstr "Klientas gali pristabdyti"
 
 msgid "VDR-to-VDR Server"
 msgstr "VDR-su-VDR Serveris"
@@ -67,6 +52,12 @@ msgstr "VDR-su-VDR Serverio portas"
 msgid "Bind to IP"
 msgstr "Pririšti IP"
 
+msgid "Legacy Client Priority"
+msgstr ""
+
+msgid "Client may suspend"
+msgstr "Klientas gali pristabdyti"
+
 msgid "Loop Prevention"
 msgstr ""
 
@@ -78,6 +69,9 @@ msgstr "Paleisti HTTP serverį"
 
 msgid "HTTP Server Port"
 msgstr "HTTP serverio portas"
+
+msgid "Priority"
+msgstr ""
 
 msgid "HTTP Streamtype"
 msgstr "HTTP transliavimo tipas"

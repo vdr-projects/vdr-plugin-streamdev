@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: streamdev 0.5.0\n"
 "Report-Msgid-Bugs-To: <http://www.vdr-developer.org/mantisbt/>\n"
-"POT-Creation-Date: 2011-12-11 11:25+0100\n"
+"POT-Creation-Date: 2012-03-31 15:06+0200\n"
 "PO-Revision-Date: 2008-03-30 02:11+0200\n"
 "Last-Translator: Rolf Ahrenberg\n"
 "Language-Team: Finnish <vdr@linuxtv.org>\n"
@@ -31,15 +31,6 @@ msgstr "Katkaise"
 msgid "Suspend"
 msgstr "Pysäytä"
 
-msgid "Offer suspend mode"
-msgstr "tyrkytä"
-
-msgid "Always suspended"
-msgstr "aina"
-
-msgid "Never suspended"
-msgstr "ei koskaan"
-
 msgid "Common Settings"
 msgstr "Yleiset asetukset"
 
@@ -48,12 +39,6 @@ msgstr "Piilota valinta päävalikosta"
 
 msgid "Maximum Number of Clients"
 msgstr "Suurin sallittu asiakkaiden määrä"
-
-msgid "Suspend behaviour"
-msgstr "Pysäytystoiminto"
-
-msgid "Client may suspend"
-msgstr "Asiakas saa pysäyttää palvelimen"
 
 msgid "VDR-to-VDR Server"
 msgstr "VDR-palvelin"
@@ -67,6 +52,12 @@ msgstr "VDR-palvelimen portti"
 msgid "Bind to IP"
 msgstr "Sido osoitteeseen"
 
+msgid "Legacy Client Priority"
+msgstr ""
+
+msgid "Client may suspend"
+msgstr "Asiakas saa pysäyttää palvelimen"
+
 msgid "Loop Prevention"
 msgstr "Estä asiakaslaitesilmukat"
 
@@ -78,6 +69,9 @@ msgstr "Käynnistä HTTP-palvelin"
 
 msgid "HTTP Server Port"
 msgstr "HTTP-palvelimen portti"
+
+msgid "Priority"
+msgstr ""
 
 msgid "HTTP Streamtype"
 msgstr "HTTP-lähetysmuoto"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: streamdev 0.5.0\n"
 "Report-Msgid-Bugs-To: <http://www.vdr-developer.org/mantisbt/>\n"
-"POT-Creation-Date: 2011-12-11 11:25+0100\n"
+"POT-Creation-Date: 2012-03-31 15:06+0200\n"
 "PO-Revision-Date: 2010-06-19 03:58+0100\n"
 "Last-Translator: Javier Bradineras <jbradi@hotmail.com>\n"
 "Language-Team: Spanish <vdr@linuxtv.org>\n"
@@ -31,15 +31,6 @@ msgstr ""
 msgid "Suspend"
 msgstr "Suspender"
 
-msgid "Offer suspend mode"
-msgstr "Ofrecer modo de suspensión"
-
-msgid "Always suspended"
-msgstr "Siempre suspendido"
-
-msgid "Never suspended"
-msgstr "Nunca suspendido"
-
 msgid "Common Settings"
 msgstr "Configuración común"
 
@@ -48,12 +39,6 @@ msgstr ""
 
 msgid "Maximum Number of Clients"
 msgstr "Numero máximo de clientes"
-
-msgid "Suspend behaviour"
-msgstr "Comportamiento de la suspensión"
-
-msgid "Client may suspend"
-msgstr "Permitir suspender al cliente"
 
 msgid "VDR-to-VDR Server"
 msgstr "Servidor VDR-a-VDR"
@@ -67,6 +52,12 @@ msgstr "Puerto del Servidor VDR-a-VDR"
 msgid "Bind to IP"
 msgstr "IP asociada"
 
+msgid "Legacy Client Priority"
+msgstr ""
+
+msgid "Client may suspend"
+msgstr "Permitir suspender al cliente"
+
 msgid "Loop Prevention"
 msgstr ""
 
@@ -78,6 +69,9 @@ msgstr "Iniciar Servidor HTTP"
 
 msgid "HTTP Server Port"
 msgstr "Puerto del Servidor HTTP"
+
+msgid "Priority"
+msgstr ""
 
 msgid "HTTP Streamtype"
 msgstr "Tipo de flujo HTTP"

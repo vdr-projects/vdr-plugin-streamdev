@@ -49,13 +49,6 @@ enum eStreamType {
 	st_Count
 };
 
-enum eSuspendMode {
-	smOffer,
-	smAlways,
-	smNever,
-	sm_Count
-};
-	
 enum eSocketId {
 	siLive,
 	siReplay,

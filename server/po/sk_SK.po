@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: streamdev_SK\n"
 "Report-Msgid-Bugs-To: <http://www.vdr-developer.org/mantisbt/>\n"
-"POT-Creation-Date: 2011-12-11 11:25+0100\n"
+"POT-Creation-Date: 2012-03-31 15:06+0200\n"
 "PO-Revision-Date: 2011-12-11 11:25+0100\n"
 "Last-Translator: Milan Hrala <hrala.milan@gmail.com>\n"
 "Language-Team: Slovak <hrala.milan@gmail.com>\n"
@@ -33,15 +33,6 @@ msgstr ""
 msgid "Suspend"
 msgstr "Pozastavenie"
 
-msgid "Offer suspend mode"
-msgstr "Výber re¾ímu pozastavenia"
-
-msgid "Always suspended"
-msgstr "V¾dy pozastavi»"
-
-msgid "Never suspended"
-msgstr "Nikdy nepozastavi»"
-
 msgid "Common Settings"
 msgstr "V¹eobecné nastavenia"
 
@@ -50,12 +41,6 @@ msgstr "Schova» v hlavnom menu"
 
 msgid "Maximum Number of Clients"
 msgstr "Maximály poèet klientov"
-
-msgid "Suspend behaviour"
-msgstr "Správanie preru¹enia"
-
-msgid "Client may suspend"
-msgstr "Klient mô¾e pozastavi»"
 
 msgid "VDR-to-VDR Server"
 msgstr "VDR-do-VDR server"
@@ -69,6 +54,12 @@ msgstr "Port serveru pre VDR-do-VDR"
 msgid "Bind to IP"
 msgstr "viaza» na IP"
 
+msgid "Legacy Client Priority"
+msgstr ""
+
+msgid "Client may suspend"
+msgstr "Klient mô¾e pozastavi»"
+
 msgid "Loop Prevention"
 msgstr ""
 
@@ -80,6 +71,9 @@ msgstr "Spusti» HTTP Server"
 
 msgid "HTTP Server Port"
 msgstr "Port serveru HTTP"
+
+msgid "Priority"
+msgstr ""
 
 msgid "HTTP Streamtype"
 msgstr "typ prúdu HTTP"

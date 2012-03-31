@@ -15,7 +15,6 @@ typedef std::pair<std::string,std::string> tStrStr;
 
 class cChannel;
 class cDevice;
-class cSwitchLive;
 
 /* Basic capabilities of a straight text-based protocol, most functions
    virtual to support more complicated protocols */
@@ -34,7 +33,8 @@ private:
 	uint        m_WriteBytes;
 	uint        m_WriteIndex;
 
-	cSwitchLive *m_SwitchLive;
+	/* Set to this connection's current channel when live TV was interrupted */
+	const cChannel *m_SwitchTo;
 
 	tStrStrMap  m_Headers;
 

@@ -150,11 +150,11 @@ bool cConnectionHTTP::ProcessRequest(void)
 			return Respond("%s", true, m_ChannelList->HttpHeader().c_str());
 		else if (m_Channel != NULL) {
 			cDevice *device = NULL;
-			if (ProvidesChannel(m_Channel, 0))
-				device = GetDevice(m_Channel, 0);
+			if (ProvidesChannel(m_Channel, StreamdevServerSetup.HTTPPriority))
+				device = GetDevice(m_Channel, StreamdevServerSetup.HTTPPriority);
 			if (device != NULL) {
 				device->SwitchChannel(m_Channel, false);
-				m_LiveStreamer = new cStreamdevLiveStreamer(0, this);
+				m_LiveStreamer = new cStreamdevLiveStreamer(StreamdevServerSetup.HTTPPriority, this);
 				if (m_LiveStreamer->SetChannel(m_Channel, m_StreamType, m_Apid[0] ? m_Apid : NULL, m_Dpid[0] ? m_Dpid : NULL)) {
 					m_LiveStreamer->SetDevice(device);
 					if (!SetDSCP())

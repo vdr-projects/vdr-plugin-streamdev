@@ -733,6 +733,7 @@ cConnectionVTP::cConnectionVTP(void):
 		m_DataSocket(NULL),
 		m_LastCommand(NULL),
 		m_StreamType(stTSPIDS),
+		m_ClientVersion(0),
 		m_FiltersSupport(false),
 		m_RecPlayer(NULL),
 		m_TuneChannel(NULL),
@@ -773,7 +774,7 @@ bool cConnectionVTP::Abort(void) const
 
 void cConnectionVTP::Welcome(void) 
 {
-	Respond(220, "Welcome to Video Disk Recorder (VTP)");
+	Respond(220, "VTP/1.0 Welcome to Video Disk Recorder");
 }
 
 void cConnectionVTP::Reject(void)
@@ -827,6 +828,7 @@ bool cConnectionVTP::Command(char *Cmd)
 	}
 
 	if      (strcasecmp(Cmd, "CAPS") == 0) return CmdCAPS(param);
+	else if (strcasecmp(Cmd, "VERS") == 0) return CmdVERS(param);
 	else if (strcasecmp(Cmd, "PROV") == 0) return CmdPROV(param);
 	else if (strcasecmp(Cmd, "PORT") == 0) return CmdPORT(param);
 	else if (strcasecmp(Cmd, "READ") == 0) return CmdREAD(param);
@@ -900,6 +902,17 @@ bool cConnectionVTP::CmdCAPS(char *Opts)
 	return Respond(561, "Capability \"%s\" not known", Opts);
 }
 
+bool cConnectionVTP::CmdVERS(char *Opts) 
+{
+	unsigned int major, minor;
+	if (sscanf(Opts, " %u.%u", &major, &minor) != 2)
+		return Respond(501, "Use: VERS version (with version in format major.minor)");
+
+	m_ClientVersion = major * 100 + minor;
+	m_FiltersSupport = true;
+	return Respond(220, "Protocol version %u.%u accepted", major, minor);
+}
+
 bool cConnectionVTP::CmdPROV(char *Opts) 
 {
 	const cChannel *chan;
@@ -914,6 +927,10 @@ bool cConnectionVTP::CmdPROV(char *Opts)
 	if ((chan = ChannelFromString(Opts)) == NULL)
 		return Respond(550, "Undefined channel \"%s\"", Opts);
 
+	// legacy clients use priority 0 even if live TV has priority
+	if (m_ClientVersion == 0 && prio == 0)
+		prio = StreamdevServerSetup.VTPPriority;
+
 	LOOP_PREVENTION(chan);
 
 	if (ProvidesChannel(chan, prio)) {
@@ -921,10 +938,20 @@ bool cConnectionVTP::CmdPROV(char *Opts)
 		m_TunePriority = prio;
 		return Respond(220, "Channel available");
 	}
-	else {
-		m_TuneChannel = NULL;
-		return Respond(560, "Channel not available");
+	// legacy clients didn't lower priority when switching channels,
+	// so get our own receiver temporarily out of the way
+	if (m_ClientVersion == 0) {
+		Detach();
+		bool provided = ProvidesChannel(chan, prio);
+		Attach();
+		if (provided) {
+			m_TuneChannel = chan;
+			m_TunePriority = prio;
+			return Respond(220, "Channel available");
+		}
 	}
+	m_TuneChannel = NULL;
+	return Respond(560, "Channel not available");
 }
 
 bool cConnectionVTP::CmdPORT(char *Opts) 
@@ -1286,10 +1313,9 @@ bool cConnectionVTP::CmdQUIT(void)
 
 bool cConnectionVTP::CmdSUSP(void) 
 {
-	if (StreamdevServerSetup.SuspendMode == smAlways || cSuspendCtl::IsActive())
+	if (cSuspendCtl::IsActive())
 		return Respond(220, "Server is suspended");
-	else if (StreamdevServerSetup.SuspendMode == smOffer 
-			&& StreamdevServerSetup.AllowSuspend) {
+	else if (StreamdevServerSetup.AllowSuspend) {
 		cControl::Launch(new cSuspendCtl);
 		cControl::Attach();
 		return Respond(220, "Server is suspended");

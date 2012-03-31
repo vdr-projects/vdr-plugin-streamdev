@@ -17,17 +17,19 @@ struct cStreamdevServerSetup {
 	int StartVTPServer;
 	int VTPServerPort;
 	char VTPBindIP[20];
+	int VTPPriority;
+	int AllowSuspend;
 	int LoopPrevention;
 	int StartHTTPServer;
 	int HTTPServerPort;
+	int HTTPPriority;
 	int HTTPStreamType;
 	char HTTPBindIP[20];
 	int StartIGMPServer;
 	int IGMPClientPort;
+	int IGMPPriority;
 	int IGMPStreamType;
 	char IGMPBindIP[20];
-	int SuspendMode;
-	int AllowSuspend;
 };
 
 extern cStreamdevServerSetup StreamdevServerSetup;
@@ -35,14 +37,12 @@ extern cStreamdevServerSetup StreamdevServerSetup;
 class cStreamdevServerMenuSetupPage: public cMenuSetupPage {
 private:
 	static const char* StreamTypes[];
-	static const char* SuspendModes[];
 	cStreamdevServerSetup m_NewSetup;
 
 	void AddCategory(const char *Title);
 	void Set();
 protected:
 	virtual void Store(void);
-	virtual eOSState ProcessKey(eKeys Key);
 
 public:
 	cStreamdevServerMenuSetupPage(void);

@@ -28,6 +28,7 @@ private:
 
 	char                   *m_LastCommand;
 	eStreamType             m_StreamType;
+	unsigned int            m_ClientVersion;
 	bool                    m_FiltersSupport;
 	bool                    m_LoopPrevention;
 	RecPlayer              *m_RecPlayer;
@@ -62,6 +63,7 @@ public:
 
 	virtual bool Command(char *Cmd);
 	bool CmdCAPS(char *Opts);
+	bool CmdVERS(char *Opts);
 	bool CmdPROV(char *Opts);
 	bool CmdPORT(char *Opts);
 	bool CmdREAD(char *Opts);

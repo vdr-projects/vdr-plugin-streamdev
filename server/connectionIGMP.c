@@ -43,11 +43,11 @@ bool cConnectionIGMP::SetChannel(cChannel *Channel, in_addr_t Dst)
 void cConnectionIGMP::Welcome()
 {
 	cDevice *device = NULL;
-	if (ProvidesChannel(m_Channel, 0))
-		device = GetDevice(m_Channel, 0);
+	if (ProvidesChannel(m_Channel, StreamdevServerSetup.IGMPPriority))
+		device = GetDevice(m_Channel, StreamdevServerSetup.IGMPPriority);
 	if (device != NULL) {
 		device->SwitchChannel(m_Channel, false);
-		m_LiveStreamer = new cStreamdevLiveStreamer(0, this);
+		m_LiveStreamer = new cStreamdevLiveStreamer(StreamdevServerSetup.IGMPPriority, this);
 		if (m_LiveStreamer->SetChannel(m_Channel, m_StreamType)) {
 			m_LiveStreamer->SetDevice(device);
 			if (!SetDSCP())

@@ -24,7 +24,7 @@ cStreamdevServerMenu::~cStreamdevServerMenu() {
 }
 
 void cStreamdevServerMenu::SetHelpKeys() {
-	SetHelp(Count() ? tr("Disconnect") : NULL, NULL, NULL, StreamdevServerSetup.SuspendMode == smOffer ? tr("Suspend") : NULL);
+	SetHelp(Count() ? tr("Disconnect") : NULL, NULL, NULL, tr("Suspend"));
 }
 
 eOSState cStreamdevServerMenu::Disconnect() {
@@ -47,7 +47,7 @@ eOSState cStreamdevServerMenu::Disconnect() {
 }
 
 eOSState cStreamdevServerMenu::Suspend() {
-	if (StreamdevServerSetup.SuspendMode == smOffer && !cSuspendCtl::IsActive()) {
+	if (!cSuspendCtl::IsActive()) {
 		cControl::Launch(new cSuspendCtl);
 		return osBack;
 	}
