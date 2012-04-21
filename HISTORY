@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Added streamdev-client support for upcoming streamdev-server versions
+  with purely priority driven precedence.
 - API change of VDR 1.7.26: "avoid device" is no longer available
 - Fixed ProvidesChannel() on client always returning true since the new timeout
   option has been added.

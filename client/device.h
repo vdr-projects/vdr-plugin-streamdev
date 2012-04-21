@@ -70,7 +70,7 @@ public:
 	virtual int SignalStrength(void) const;
 	virtual int SignalQuality(void) const;
 
-	static void UpdatePriority(void);
+	static void UpdatePriority(bool SwitchingChannels = false);
 	static void DenyChannel(const cChannel *Channel) { m_DenyChannel = Channel; }
 	static bool Init(void);
 	static bool ReInit(void);

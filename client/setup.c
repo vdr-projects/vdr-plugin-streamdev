@@ -7,6 +7,10 @@
 #include "client/setup.h"
 #include "client/device.h"
 
+#ifndef MINPRIORITY
+#define MINPRIORITY -MAXPRIORITY
+#endif
+
 cStreamdevClientSetup StreamdevClientSetup;
 
 cStreamdevClientSetup::cStreamdevClientSetup(void) {
@@ -16,7 +20,7 @@ cStreamdevClientSetup::cStreamdevClientSetup(void) {
 	StreamFilters = false;
 	HideMenuEntry = false;
 	LivePriority  = 0;
-	MinPriority   = -MAXPRIORITY;
+	MinPriority   = MINPRIORITY;
 	MaxPriority   = MAXPRIORITY;
 #if APIVERSNUM >= 10700
 	NumProvidedSystems = 1;
@@ -55,9 +59,9 @@ cStreamdevClientMenuSetupPage::cStreamdevClientMenuSetupPage(void) {
 	Add(new cMenuEditIntItem (tr("Remote Port"),         &m_NewSetup.RemotePort, 0, 65535));
 	Add(new cMenuEditIntItem (tr("Timeout (s)"),         &m_NewSetup.Timeout, 1, 15));
 	Add(new cMenuEditBoolItem(tr("Filter Streaming"),    &m_NewSetup.StreamFilters));
-	Add(new cMenuEditIntItem (tr("Live TV Priority"),    &m_NewSetup.LivePriority, 0, MAXPRIORITY));
-	Add(new cMenuEditIntItem (tr("Minimum Priority"),    &m_NewSetup.MinPriority, -MAXPRIORITY, MAXPRIORITY));
-	Add(new cMenuEditIntItem (tr("Maximum Priority"),    &m_NewSetup.MaxPriority, -MAXPRIORITY, MAXPRIORITY));
+	Add(new cMenuEditIntItem (tr("Live TV Priority"),    &m_NewSetup.LivePriority, MINPRIORITY, MAXPRIORITY));
+	Add(new cMenuEditIntItem (tr("Minimum Priority"),    &m_NewSetup.MinPriority, MINPRIORITY, MAXPRIORITY));
+	Add(new cMenuEditIntItem (tr("Maximum Priority"),    &m_NewSetup.MaxPriority, MINPRIORITY, MAXPRIORITY));
 #if APIVERSNUM >= 10715
 	Add(new cMenuEditIntItem (tr("Broadcast Systems / Cost"),  &m_NewSetup.NumProvidedSystems, 1, 15));
 #elif APIVERSNUM >= 10700

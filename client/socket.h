@@ -21,6 +21,7 @@ private:
 	cTBSocket    *m_DataSockets[si_Count];
 	cMutex        m_Mutex;
 	char          m_Buffer[BUFSIZ + 1]; // various uses
+	unsigned int  m_ServerVersion;
 	bool          m_Prio; // server supports command PRIO
 	bool          m_Abort; // quit command pending
 
@@ -52,6 +53,7 @@ public:
 	bool CloseDataConnection(eSocketId Id);
 	bool SetChannelDevice(const cChannel *Channel);
 	bool SupportsPrio() { return m_Prio; }
+	unsigned int ServerVersion() { return m_ServerVersion; }
 	bool SetPriority(int Priority);
 	bool SetPid(int Pid, bool On);
 	bool SetFilter(ushort Pid, uchar Tid, uchar Mask, bool On);

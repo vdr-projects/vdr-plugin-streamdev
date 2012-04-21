@@ -23,6 +23,7 @@ cClientSocket ClientSocket;
 cClientSocket::cClientSocket(void) 
 {
 	memset(m_DataSockets, 0, sizeof(cTBSocket*) * si_Count);
+	m_ServerVersion = 0;
 	m_Prio = false;
 	m_Abort = false;
 	m_LastSignalUpdate = 0;
@@ -153,23 +154,38 @@ bool cClientSocket::CheckConnection(void) {
 		return false;
 	}
 
-	if (!Command("CAPS TSPIDS", 220)) {
-		Close();
-		return false;
+	unsigned int major, minor;
+	if (sscanf(buffer.c_str(), "%*u VTP/%u.%u", &major, &minor) == 2)
+		m_ServerVersion = major * 100 + minor;
+
+	if (m_ServerVersion == 0) {
+		if (!Command("CAPS TSPIDS", 220)) {
+			Close();
+			return false;
+		}
+
+		const char *Filters = "";
+		if(Command("CAPS FILTERS", 220))
+			Filters = ",FILTERS";
+
+		const char *Prio = "";
+		if(Command("CAPS PRIO", 220)) {
+			Prio = ",PRIO";
+			m_Prio = true;
+		}
+		isyslog("streamdev-client: Connected to server %s:%d using capabilities TSPIDS%s%s",
+				RemoteIp().c_str(), RemotePort(), Filters, Prio);
 	}
-
-	const char *Filters = "";
-	if(Command("CAPS FILTERS", 220))
-		Filters = ",FILTERS";
-
-	const char *Prio = "";
-	if(Command("CAPS PRIO", 220)) {
-		Prio = ",PRIO";
+	else {
+		if(!Command("VERS 1.0", 220)) {
+			Close();
+			return false;
+		}
 		m_Prio = true;
+		isyslog("streamdev-client: Connected to server %s:%d using protocol version %u.%u",
+				RemoteIp().c_str(), RemotePort(), major, minor);
 	}
 
-	isyslog("streamdev-client: Connected to server %s:%d using capabilities TSPIDS%s%s",
-	        RemoteIp().c_str(), RemotePort(), Filters, Prio);
 	return true;
 }
 

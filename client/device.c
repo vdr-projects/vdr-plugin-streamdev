@@ -19,6 +19,14 @@
 
 using namespace std;
 
+#ifndef LIVEPRIORITY
+#define LIVEPRIORITY 0
+#endif
+
+#ifndef TRANSFERPRIORITY
+#define TRANSFERPRIORITY -1
+#endif
+
 #define VIDEOBUFSIZE MEGABYTE(3)
 
 cStreamdevDevice *cStreamdevDevice::m_Device = NULL;
@@ -89,7 +97,11 @@ bool cStreamdevDevice::IsTunedToTransponder(const cChannel *Channel)
 bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority, 
 		bool *NeedsDetachReceivers) const {
 	bool res = false;
+#if APIVERSNUM >= 10725
+	bool prio = Priority == IDLEPRIORITY || Priority >= this->Priority();
+#else
 	bool prio = Priority < 0 || Priority > this->Priority();
+#endif
 	bool ndr = false;
 
 	if (!StreamdevClientSetup.StartClient || Channel == m_DenyChannel)
@@ -114,7 +126,24 @@ bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority,
 			&& TRANSPONDER(Channel, m_Channel))
 		res = true;
 	else {
+		if (Priority == LIVEPRIORITY)
+		{
+			if (ClientSocket.ServerVersion() >= 100)
+			{
+				Priority = StreamdevClientSetup.LivePriority;
+				UpdatePriority(true);
+			}
+			else
+			{
+				if (StreamdevClientSetup.LivePriority >= 0)
+					Priority = StreamdevClientSetup.LivePriority;
+			}
+		}
+
 		res = prio && ClientSocket.ProvidesChannel(Channel, Priority);
+
+		if (ClientSocket.ServerVersion() >= 100)
+			UpdatePriority(false);
 		ndr = true;
 	}
 
@@ -316,14 +345,21 @@ bool cStreamdevDevice::ReInit(void) {
 	return StreamdevClientSetup.StartClient ? Init() : true;
 }
 
-void cStreamdevDevice::UpdatePriority(void) {
+void cStreamdevDevice::UpdatePriority(bool SwitchingChannels) {
 	if (m_Device) {
 		m_Device->Lock();
 		if (m_Device->m_UpdatePriority && ClientSocket.DataSocket(siLive)) {
 			int Priority = m_Device->Priority();
 			// override TRANSFERPRIORITY (-1) with live TV priority from setup
-			if (m_Device == cDevice::ActualDevice() && Priority == -1)
+			if (m_Device == cDevice::ActualDevice() && Priority == TRANSFERPRIORITY) {
 				Priority = StreamdevClientSetup.LivePriority;
+				// temporarily lower priority
+				if (SwitchingChannels)
+					Priority--;
+				if (Priority < 0 && ClientSocket.ServerVersion() < 100)
+					Priority = 0;
+
+			}
 			if (m_Device->m_Priority != Priority && ClientSocket.SetPriority(Priority))
 				m_Device->m_Priority = Priority;
 		}
