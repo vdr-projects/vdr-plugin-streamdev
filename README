@@ -231,8 +231,10 @@ streams directly like this:
   http://hostname:3000/S19.2E-0-12480-898
 
 The first one will deliver a channel by number on the server, the second one
-will request the channel by unique channel id. In addition, you can specify 
-the desired stream type as a path to the channel.
+will request the channel by unique channel id. Use the special channel number 0
+to see the server's current live TV channel.
+
+In addition, you can specify the desired stream type as a path to the channel.
 
   http://hostname:3000/TS/3
   http://hostname:3000/PES/S19.2E-0-12480-898

@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- New special meaning "show current channel" when channel 0 is requested.
+  Applies to HTTP streaming only (thanks to Rolf Ahrenberg)
 - Added streamdev-client support for upcoming streamdev-server versions
   with purely priority driven precedence.
 - API change of VDR 1.7.26: "avoid device" is no longer available

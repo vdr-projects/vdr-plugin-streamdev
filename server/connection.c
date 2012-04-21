@@ -111,6 +111,8 @@ const cChannel* cServerConnection::ChannelFromString(const char *String, int *Ap
 
 	if (isnumber(string)) {
 		int temp = strtol(String, NULL, 10);
+		if (temp == 0)
+			temp = cDevice::CurrentChannel();
 		if (temp >= 1 && temp <= Channels.MaxNumber())
 			channel = Channels.GetByNumber(temp);
 	} else {

@@ -41,6 +41,7 @@ Rolf Ahrenberg
   for suggesting increased thread priorities for cStreamdevWriter/Streamer
   for adding "Hide mainmenu entry" option
   for polishing po file headers
+  for adding the special meaning "show current channel" to channel 0
 
 Rantanen Teemu
   for providing vdr-incompletesections.diff
