@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Use fileno() to retrieve the fd from a FILE structure (submitted by an
+  anonymous user)
 - New special meaning "show current channel" when channel 0 is requested.
   Applies to HTTP streaming only (thanks to Rolf Ahrenberg)
 - Added streamdev-client support for upcoming streamdev-server versions

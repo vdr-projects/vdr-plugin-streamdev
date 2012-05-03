@@ -200,7 +200,7 @@ unsigned long RecPlayer::getBlock(unsigned char* buffer, uint64_t position, unsi
     if (fread(&buffer[got], getFromThisSegment, 1, file) != 1) return 0; // umm, big problem.
 
     // Tell linux not to bother keeping the data in the FS cache
-    posix_fadvise(file->_fileno, filePosition, getFromThisSegment, POSIX_FADV_DONTNEED);
+    posix_fadvise(fileno(file), filePosition, getFromThisSegment, POSIX_FADV_DONTNEED);
 
     got += getFromThisSegment;
     currentPosition += getFromThisSegment;
