@@ -1,6 +1,14 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Replaced server-side suspend modes with priority based precedence handling
+- Client-side priority handling for VDR >= 1.7.25 and servers running VTP > 1.0
+- Introduced VTP protocol version numbering for easier compatibility handling
+  between different client and server versions. The server includes the protocol
+  version in its greeting string, the client reports its version with the new
+  command "VERS".
+- Dropped compatibility of streamdev-server with VDR < 1.7.25
+
 2012-05-12: Version 0.5.2
 
 - Use fileno() to retrieve the fd from a FILE structure (submitted by an
@@ -10,13 +18,6 @@ VDR Plugin 'streamdev' Revision History
 - Fixed ProvidesChannel() on client always returning true since the new timeout
   option has been added.
 - Updated Finnish translation (thanks to Rolf Ahrenberg)
-- Replaced server-side suspend modes with priority based precedence handling
-- Client-side priority handling for VDR >= 1.7.25 and servers running VTP > 1.0
-- Introduced VTP protocol version numbering for easier compatibility handling
-  between different client and server versions. The server includes the protocol
-  version in its greeting string, the client reports its version with the new
-  command "VERS".
-- Dropped compatibility of streamdev-server with VDR < 1.7.25
 - With VDR 1.7.25 priorities down to -99 will be used. Please update
   "Minimum Priority" in streamdev-client setup.
 - Use the new streamdev-client setup option "Live TV Priority" to control
