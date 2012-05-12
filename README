@@ -101,9 +101,8 @@ as otherwise -r will be passed to VDR and not to streamdev.
 2.1 Compatibility:
 ------------------
 
-This version is not compatible to VDR releases older than 1.5.9. Take one of
-the streamdev-0.4.x releases if you are running at least VDR 1.4.x. For older
-VDRs you will probably need one of the streamdev-0.3.x releases.
+This version is not compatible to VDR releases older than 1.7.25. Use one of
+the streamdev-0.5.x releases for older versions.
 
 2.2 Compiling:
 --------------
@@ -175,31 +174,32 @@ Start the server core itself by specifying -Pstreamdev-server on your VDR
 commandline. To use the client core, specify -Pstreamdev-client. Both parts
 can run in one VDR instance, if necessary.
 
+Precedence between multiple clients and between client and server is controlled
+with priorities. For HTTP and IGMP Multicast, the priority is configured in
+streamdev-server's setup menu. A negative priority gives precedence to local
+live TV on the server. Zero and positive values give precedence to the client.
+
+The priority for VDR clients watching live TV is configured in the plugin setup
+of streamdev-client. For other client tasks (e.g. recording a client side timer)the same priority as on the client is used. With the parameter "Legacy client
+Priority" in streamdev-server's setup menu you can configure the priority for
+clients which cannot be configured to use negative priorities. It is used
+when an old client is detected an it requests priority "0".
+
 On the server, the main menu entry "Streamdev Connections" gives you a list
 of currently connected clients. Use the "red" key to terminate a connection.
 Note that depending on connection type and client, the client might re-connect
-sooner or later. Depending on the server setup, the "blue" key might be enabled
-as well. Please read below.
+sooner or later.
 
-The parameter "Suspend behaviour" allows you to specify how the server should 
-react in case the client requests a channel that would require switching the
-primary device (i.e. disrupt live-tv). If set to "Offer suspend mode", you
-enable the "blue" key in the server's main menu. It will put the server into
-"Suspend Mode" (a picture is displayed on TV). Then, a client may switch the
-primary card to wherever it likes to. While watching TV (Suspend deactivated),
-the client may not switch the transponder on the primary device.  If you set
-the behaviour to "Always suspended" (the default), there will be normal live-tv
-on the server, but whenever a client decides to switch the transponder, the 
-server will lose it's live-tv. Set to "Never suspended", the server always 
-prevents the client from switching transponders. If you set "Client may 
-suspend" to yes, the client can suspend the server remotely (this only applies
-if "Offer suspend mode" is selected).
+The "blue" key in the server's main menu will suspend live TV on server. An
+image is displayed instead. This would allow a low priority client to switch
+to a different transponder. Enable "Client may suspend" in the server setup
+to allow VDR clients to suspend live TV remotely.
 
-NOTE: This mainly applies to One-Card-Systems, since with multiple cards there
-is no need to switch transponders on the primary interface, if on of the other
-cards is idle (i.e. if it is not blocked by a recording). If all cards are in
-use (i.e. when something is recorded, or by multiple clients), this applies to
-Multiple-Card-Systems as well.
+NOTE: Precedence is mainly an issue on One-Card-Systems, since with multiple
+cards there is no need to switch transponders on the primary interface, if on
+of the other cards is idle (i.e. if it is not blocked by a recording). If all
+cards are in use (i.e. when something is recorded, or by multiple clients), this
+applies to Multiple-Card-Systems as well.
 
 3.1 Usage HTTP server:
 ----------------------
@@ -288,13 +288,6 @@ reserved according to RFC-2365).
 
 Before you can use streamdev's multicast server, you might need to patch VDR.
 Binding an IGMP socket is a privileged operation, so you must start VDR as root.
-If you pass the -u option to VDR, it will drop almost all priviledges before
-streamdev is even loaded. In VDR < 1.7.22 this prevented streamdev from binding
-the socket. Apply either patch vdr-1.6.0-cap_net_raw.diff (VDR < 1.7.5) or
-vdr-1.7.21-cap_net_raw.diff (VDR < 1.7.22) to keep VDR from dropping capability
-CAP_NET_RAW. The patch is part of streamdev's source distribution. Check the
-patches subdirectory. There's no need to patchif you are running VDR >= 1.7.22
-or if VDR is kept running as root (not recommended).
 
 The multicast server is disabled by default. Enter the streamdev-server setup
 menu to enable it and - IMPORTANT - bind the multicast server to the IP of your
@@ -408,22 +401,21 @@ The two parameters define the inclusive range of priorities for which streamdev
 will accept to tune. Setting the minimum priority to a higher value than the
 maximum, you will get two ranges: "up to maximum" and "minimum and above".
 
-If you are running at least VDR 1.7.0, you can also configure the "Broadcast
-Systems / Cost" of the streamdev-client device. On a pure streamdev-client only
-system it doesn't matter what you configure here. But if your client is equipped
-with a DVB card, you should read on. VDR always prefers the cheapest device
-in terms of supported broadcast systems and modulations. A DVB-S2 card supports
-two broadcast systems (DVB-S and DVB-S2). From VDR 1.7.15 on, the supported
-modulations are counted as well (QPSK, QAM32/64/128/256, VSB8/16, TURBO_FEC).
-So for a DVB-S2 card which does QPSK you'll get a total cost of three. A DVB-C
-card (one broadcast system) which can do QAM32,QAM64,QAM128,QAM256 would give
-you a total of five. Check your log for "frontend ... provides ... with ..."
-messages to find out the cost of your DVB cards. Then pick a suitable value for
-streamdev-client. With equal costs, VDR will usually prefer the DVB card and
-take streamdev for recordings. If streamdev's costs are higher, live TV will
-use your DVB card until a recordings kicks in. Then the recording will take the
-DVB card and live TV will be shifted to streamdev (you'll notice a short
-interruption of live TV).
+You can also configure the "Broadcast Systems / Cost" of the streamdev-client
+device. On a pure streamdev-client only system it doesn't matter what you
+configure here. But if your client is equipped with a DVB card, you should read
+on. VDR always prefers the cheapest device in terms of supported broadcast
+systems and modulations. A DVB-S2 card supports two broadcast systems (DVB-S and
+DVB-S2). The supported modulations are counted as well (QPSK, QAM32/64/128/256,
+VSB8/16, TURBO_FEC). So for a DVB-S2 card which does QPSK you'll get a total
+cost of three. A DVB-C card (one broadcast system) which can do QAM32, QAM64,
+QAM128, QAM256 would give you a total of five. Check your log for "frontend ...
+provides ... with ..." messages to find out the cost of your DVB cards. Then
+pick a suitable value for streamdev-client. With equal costs, VDR will usually
+prefer the DVB card and take streamdev for recordings. If streamdev's costs are
+higher, live TV will use your DVB card until a recordings kicks in. Then the
+recording will take the DVB card and live TV will be shifted to streamdev
+(you'll notice a short interruption of live TV).
 
 Note that streamdev-client acts similar to a DVB card. It is possible to receive
 multiple channels simultaneously, but only from the same transponder. Just add
@@ -535,10 +527,6 @@ The script should perform the following steps (pseudocode):
 
 6. Known Problems:
 ------------------
-
-* There have been reports that channel switching with VDR 1.5.x/1.6.x clients
-sometimes fails. Current version includes a workaround which seems to work, but
-YMMV ;)
 
 * Viewing encrypted channels became an issue with VDR's new CAM handling code.
 Streamdev doesn't provide a (dummy) CAM, so out of the box, VDR won't ever try
