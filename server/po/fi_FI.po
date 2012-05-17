@@ -53,7 +53,7 @@ msgid "Bind to IP"
 msgstr "Sido osoitteeseen"
 
 msgid "Legacy Client Priority"
-msgstr ""
+msgstr "Legacy-asiakkaan prioriteetti"
 
 msgid "Client may suspend"
 msgstr "Asiakas saa pysäyttää palvelimen"
@@ -71,7 +71,7 @@ msgid "HTTP Server Port"
 msgstr "HTTP-palvelimen portti"
 
 msgid "Priority"
-msgstr ""
+msgstr "Prioriteetti"
 
 msgid "HTTP Streamtype"
 msgstr "HTTP-lähetysmuoto"
