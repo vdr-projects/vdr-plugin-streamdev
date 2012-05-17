@@ -24,6 +24,7 @@
 // for TSPLAY patch detection
 #include "vdr/device.h"
 
+#undef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 600
 #include <fcntl.h>
 
