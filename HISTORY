@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Proper fix for "client sends ABRT after TUNE". Obsoletes many hacks in client
 - Added CLOCK_MONOTONIC timestamp and thread id to Dprintf
 - Silenced warning (thanks to Rolf Ahrenberg)
 - Updated Finnish translation (thanks to Rolf Ahrenberg)

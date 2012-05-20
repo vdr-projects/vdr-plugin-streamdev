@@ -23,13 +23,9 @@ private:
 	int                  m_Pids;
 	int                  m_Priority;
 	bool                 m_UpdatePriority;
-	bool                 m_DvrClosed;
 
 	static cStreamdevDevice *m_Device;
 	static const cChannel   *m_DenyChannel;
-
-	bool OpenDvrInt(void);
-	void CloseDvrInt(void);
 
 protected:
 	virtual bool SetChannelDevice(const cChannel *Channel, bool LiveView);

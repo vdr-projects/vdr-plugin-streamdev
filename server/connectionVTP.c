@@ -1282,7 +1282,8 @@ bool cConnectionVTP::CmdABRT(char *Opts)
 
 	switch (id) {
 	case siLive: 
-		DELETENULL(m_LiveStreamer); 
+		if (m_LiveStreamer)
+			m_LiveStreamer->Stop();
 		DELETENULL(m_LiveSocket);
 		break;
 	case siLiveFilter:

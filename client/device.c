@@ -43,7 +43,6 @@ cStreamdevDevice::cStreamdevDevice(void) {
 	m_Device = this;
 	m_Pids = 0;
 	m_Priority = -100;
-	m_DvrClosed = true;
 }
 
 cStreamdevDevice::~cStreamdevDevice() {
@@ -178,16 +177,10 @@ bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel,
 }
 
 bool cStreamdevDevice::SetPid(cPidHandle *Handle, int Type, bool On) {
-	Dprintf("SetPid, Pid=%d, Type=%d, On=%d, used=%d\n", Handle->pid, Type, On,
-			Handle->used);
+	Dprintf("SetPid, Pid=%d, Type=%d, On=%d, used=%d\n", Handle->pid, Type, On, Handle->used);
 	LOCK_THREAD;
 
 	m_UpdatePriority = ClientSocket.SupportsPrio();
-
-	if (On && !m_TSBuffer) {
-		Dprintf("SetPid: no data connection -> OpenDvr()");
-		OpenDvrInt();
-	}
 
 	bool res = true; 
 	if (Handle->pid && (On || !Handle->used)) {
@@ -196,74 +189,31 @@ bool cStreamdevDevice::SetPid(cPidHandle *Handle, int Type, bool On) {
 		m_Pids += (!res) ? 0 : On ? 1 : -1;
 		if (m_Pids < 0) 
 			m_Pids = 0;
-
-		if(m_Pids < 1 && m_DvrClosed) { 
-			Dprintf("SetPid: 0 pids left -> CloseDvr()"); 
-			CloseDvrInt(); 
-		}
 	}
-
 	return res;
-}
-
-bool cStreamdevDevice::OpenDvrInt(void) {
-	Dprintf("OpenDvrInt\n");
-	LOCK_THREAD;
-
-	CloseDvrInt();
-	if (m_TSBuffer) {
-		Dprintf("cStreamdevDevice::OpenDvrInt(): DVR connection already open\n");
-		return true;
-	}
-
-	Dprintf("cStreamdevDevice::OpenDvrInt(): Connecting ...\n");
-	if (ClientSocket.CreateDataConnection(siLive)) {
-		m_TSBuffer = new cTSBuffer(*ClientSocket.DataSocket(siLive), MEGABYTE(2), CardIndex() + 1);
-		return true;
-	}
-	esyslog("cStreamdevDevice::OpenDvrInt(): DVR connection FAILED");
-	return false;
 }
 
 bool cStreamdevDevice::OpenDvr(void) {
 	Dprintf("OpenDvr\n");
 	LOCK_THREAD;
 
-	m_DvrClosed = false;
-	return OpenDvrInt();
-}
-
-void cStreamdevDevice::CloseDvrInt(void) {
-	Dprintf("CloseDvrInt\n");
-	LOCK_THREAD;
-
-	if (ClientSocket.CheckConnection()) {
-		if (!m_DvrClosed) {
-			Dprintf("cStreamdevDevice::CloseDvrInt(): m_DvrClosed=false -> not closing yet\n");
-			return;
-		}
-		if (m_Pids > 0) {
-			Dprintf("cStreamdevDevice::CloseDvrInt(): %d active pids -> not closing yet\n", m_Pids);
-			return;
-		}
-	} else {
-		Dprintf("cStreamdevDevice::CloseDvrInt(): Control connection gone !\n");
+	CloseDvr();
+	if (ClientSocket.CreateDataConnection(siLive)) {
+		m_TSBuffer = new cTSBuffer(*ClientSocket.DataSocket(siLive), MEGABYTE(2), CardIndex() + 1);
 	}
-
-	Dprintf("cStreamdevDevice::CloseDvrInt(): Closing DVR connection\n");
-	// Hack for VDR 1.5.x clients (sometimes sending ABRT after TUNE)
-	// TODO: Find a clean solution to fix this
-	ClientSocket.SetChannelDevice(m_Channel);
-	ClientSocket.CloseDvr();
-	DELETENULL(m_TSBuffer);
+	else {
+		esyslog("cStreamdevDevice::OpenDvr(): DVR connection FAILED");
+	}
+	return m_TSBuffer != NULL;
 }
+
 
 void cStreamdevDevice::CloseDvr(void) {
 	Dprintf("CloseDvr\n");
 	LOCK_THREAD;
 
-	m_DvrClosed = true;
-	CloseDvrInt();
+	ClientSocket.CloseDvr();
+	DELETENULL(m_TSBuffer);
 }
 
 bool cStreamdevDevice::GetTSPacket(uchar *&Data) {
@@ -287,7 +237,7 @@ esyslog("cStreamDevice::GetTSPacket: GetChecked: NOTHING (%d)", m_TSFails);
 					if (m_TSFails > 10) {
 						isyslog("cStreamdevDevice::GetTSPacket(): disconnected");
 						m_Pids = 0;
-						CloseDvrInt();
+						CloseDvr();
 						m_TSFails = 0;
 						return false;
 					}
