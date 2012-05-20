@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Added CLOCK_MONOTONIC timestamp and thread id to Dprintf
 - Silenced warning (thanks to Rolf Ahrenberg)
 - Updated Finnish translation (thanks to Rolf Ahrenberg)
 - Replaced server-side suspend modes with priority based precedence handling

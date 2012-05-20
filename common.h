@@ -17,10 +17,16 @@
 #include "tools/socket.h"
 
 #ifdef DEBUG
-#	include <stdio.h>
-#	define Dprintf(x...) fprintf(stderr, x)
+#include <stdio.h>
+#include <time.h>
+#define Dprintf(fmt, x...) {\
+	struct timespec ts;\
+	clock_gettime(CLOCK_MONOTONIC, &ts);\
+	fprintf(stderr, "%ld.%.3ld [%d] "fmt,\
+		ts.tv_sec, ts.tv_nsec / 1000000, cThread::ThreadId(), ##x);\
+}
 #else
-#	define Dprintf(x...)
+#define Dprintf(x...)
 #endif
 
 #if APIVERSNUM >= 10714
