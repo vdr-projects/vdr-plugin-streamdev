@@ -22,7 +22,6 @@ private:
 	cStreamdevFilters   *m_Filters;
 	int                  m_Pids;
 	int                  m_Priority;
-	bool                 m_UpdatePriority;
 
 	static cStreamdevDevice *m_Device;
 	static const cChannel   *m_DenyChannel;

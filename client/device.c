@@ -158,8 +158,6 @@ bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel,
 			LiveView ? "true" : "false");
 	LOCK_THREAD;
 
-	m_UpdatePriority = ClientSocket.SupportsPrio();
-
 	if (LiveView)
 		return false;
 
@@ -179,8 +177,6 @@ bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel,
 bool cStreamdevDevice::SetPid(cPidHandle *Handle, int Type, bool On) {
 	Dprintf("SetPid, Pid=%d, Type=%d, On=%d, used=%d\n", Handle->pid, Type, On, Handle->used);
 	LOCK_THREAD;
-
-	m_UpdatePriority = ClientSocket.SupportsPrio();
 
 	bool res = true; 
 	if (Handle->pid && (On || !Handle->used)) {
@@ -298,7 +294,7 @@ bool cStreamdevDevice::ReInit(void) {
 void cStreamdevDevice::UpdatePriority(bool SwitchingChannels) {
 	if (m_Device) {
 		m_Device->Lock();
-		if (m_Device->m_UpdatePriority && ClientSocket.DataSocket(siLive)) {
+		if (ClientSocket.SupportsPrio() && ClientSocket.DataSocket(siLive)) {
 			int Priority = m_Device->Priority();
 			// override TRANSFERPRIORITY (-1) with live TV priority from setup
 			if (m_Device == cDevice::ActualDevice() && Priority == TRANSFERPRIORITY) {
