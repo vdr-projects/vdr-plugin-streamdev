@@ -84,23 +84,19 @@ bool cStreamdevDevice::IsTunedToTransponder(const cChannel *Channel) const
 bool cStreamdevDevice::IsTunedToTransponder(const cChannel *Channel)
 #endif
 {
-	bool res = false;
-	if (ClientSocket.DataSocket(siLive) != NULL
-			&& TRANSPONDER(Channel, m_Channel)
-			&& Channel->Ca() == CA_FTA
-			&& m_Channel->Ca() == CA_FTA)
-		res = true;
-	return res;
+	return ClientSocket.DataSocket(siLive) != NULL &&
+			m_Channel != NULL &&
+			Channel->Transponder() == m_Channel->Transponder();
 }
 
 bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority, 
 		bool *NeedsDetachReceivers) const {
-	bool res = false;
 #if APIVERSNUM >= 10725
 	bool prio = Priority == IDLEPRIORITY || Priority >= this->Priority();
 #else
 	bool prio = Priority < 0 || Priority > this->Priority();
 #endif
+	bool res = prio;
 	bool ndr = false;
 
 	if (!StreamdevClientSetup.StartClient || Channel == m_DenyChannel)
@@ -121,29 +117,31 @@ bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority,
 			return false;
 	}
 
-	if (ClientSocket.DataSocket(siLive) != NULL 
-			&& TRANSPONDER(Channel, m_Channel))
-		res = true;
-	else {
-		if (Priority == LIVEPRIORITY)
-		{
-			if (ClientSocket.ServerVersion() >= 100)
-			{
+	if (IsTunedToTransponder(Channel)) {
+		if (Channel->Ca() < CA_ENCRYPTED_MIN ||
+				(Channel->Vpid() && HasPid(Channel->Vpid())) ||
+				(Channel->Apid(0) && HasPid(Channel->Apid(0))))
+			res = true;
+		else
+			ndr = true;
+	}
+	else if (prio) {
+		if (Priority == LIVEPRIORITY) {
+			if (ClientSocket.ServerVersion() >= 100) {
 				Priority = StreamdevClientSetup.LivePriority;
 				UpdatePriority(true);
 			}
-			else
-			{
+			else {
 				if (StreamdevClientSetup.LivePriority >= 0)
 					Priority = StreamdevClientSetup.LivePriority;
 			}
 		}
 
-		res = prio && ClientSocket.ProvidesChannel(Channel, Priority);
+		res = ClientSocket.ProvidesChannel(Channel, Priority);
+		ndr = Receiving();
 
 		if (ClientSocket.ServerVersion() >= 100)
 			UpdatePriority(false);
-		ndr = true;
 	}
 
 	if (NeedsDetachReceivers)
@@ -154,6 +152,7 @@ bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority,
 
 bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel, 
 		bool LiveView) {
+	bool res;
 	Dprintf("SetChannelDevice Channel: %s, LiveView: %s\n", Channel->Name(),
 			LiveView ? "true" : "false");
 	LOCK_THREAD;
@@ -161,17 +160,23 @@ bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel,
 	if (LiveView)
 		return false;
 
-	if (ClientSocket.DataSocket(siLive) != NULL 
-			&& TRANSPONDER(Channel, m_Channel)
-			&& Channel->Ca() == CA_FTA
-			&& m_Channel->Ca() == CA_FTA)
-		return true;
-
-	DetachAllReceivers();
-	m_Channel = Channel;
-	bool r = ClientSocket.SetChannelDevice(m_Channel);
-	Dprintf("setchanneldevice r=%d\n", r);
-	return r;
+	if (Receiving() && IsTunedToTransponder(Channel) && (
+			Channel->Ca() < CA_ENCRYPTED_MIN ||
+			(Channel->Vpid() && HasPid(Channel->Vpid())) ||
+			(Channel->Apid(0) && HasPid(Channel->Apid(0))))) {
+		res = true;
+	}
+	else {
+		DetachAllReceivers();
+		m_Channel = Channel;
+		// Old servers delete cStreamdevLiveStreamer in ABRT.
+		// Delete it now or it will happen after we tuned to new channel
+		if (ClientSocket.ServerVersion() < 100)
+			CloseDvr();
+		res = ClientSocket.SetChannelDevice(m_Channel);
+	}
+	Dprintf("setchanneldevice res=%d\n", res);
+	return res;
 }
 
 bool cStreamdevDevice::SetPid(cPidHandle *Handle, int Type, bool On) {

@@ -29,12 +29,6 @@
 #define Dprintf(x...)
 #endif
 
-#if APIVERSNUM >= 10714
-#define TRANSPONDER(c1, c2) (c1->Transponder() == c2->Transponder() && !c1->IsSourceType('V'))
-#else
-#define TRANSPONDER(c1, c2) (c1->Transponder() == c2->Transponder())
-#endif
-
 #define MAXPARSEBUFFER KILOBYTE(16)
 
 /* Service ID for loop prevention */
