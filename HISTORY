@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+2012-05-29: Version 0.6.0
+
 - Reimplemented some client device methods
 - Proper fix for "client sends ABRT after TUNE". Obsoletes many hacks in client
 - Added CLOCK_MONOTONIC timestamp and thread id to Dprintf

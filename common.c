@@ -10,7 +10,7 @@
 
 using namespace std;
 
-const char *VERSION = "0.5.2-git";
+const char *VERSION = "0.6.0-git";
 
 const char cMenuEditIpItem::IpCharacters[] = "0123456789.";
 
