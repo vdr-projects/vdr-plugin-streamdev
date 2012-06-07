@@ -28,6 +28,7 @@ private:
 	time_t        m_LastSignalUpdate;
 	int           m_LastSignalStrength;
 	int           m_LastSignalQuality;
+	int           m_LastDev;
 protected:
 	/* Send Command, and return true if the command results in Expected. 
 	   Returns false on failure. */
@@ -57,7 +58,7 @@ public:
 	bool SetPriority(int Priority);
 	bool SetPid(int Pid, bool On);
 	bool SetFilter(ushort Pid, uchar Tid, uchar Mask, bool On);
-	bool GetSignal(int *SignalStrength, int *SignalQuality);
+	bool GetSignal(int *SignalStrength, int *SignalQuality, int *Dev);
 	bool CloseDvr(void);
 	bool SuspendServer(void);
 	bool Quit(void);

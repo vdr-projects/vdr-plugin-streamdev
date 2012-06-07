@@ -318,17 +318,34 @@ void cStreamdevDevice::UpdatePriority(bool SwitchingChannels) {
 	}
 }
 
+cString cStreamdevDevice::DeviceName(void) const {
+	return StreamdevClientSetup.RemoteIp;
+}
+
+cString cStreamdevDevice::DeviceType(void) const {
+	static int dev = -1;
+	static cString devType("STRDev");
+	int d = -1;
+	if (ClientSocket.DataSocket(siLive) != NULL)
+		ClientSocket.GetSignal(NULL, NULL, &d);
+	if (d != dev) {
+		dev = d;
+		devType = d < 0 ? "STRDev" : *cString::sprintf("STRD%2d", d);
+	}
+	return devType;
+}
+
 int cStreamdevDevice::SignalStrength(void) const {
 	int strength = -1;
 	if (ClientSocket.DataSocket(siLive) != NULL)
-		ClientSocket.GetSignal(&strength, NULL);
+		ClientSocket.GetSignal(&strength, NULL, NULL);
 	return strength;
 }
 
 int cStreamdevDevice::SignalQuality(void) const {
 	int quality = -1;
 	if (ClientSocket.DataSocket(siLive) != NULL)
-		ClientSocket.GetSignal(NULL, &quality);
+		ClientSocket.GetSignal(NULL, &quality, NULL);
 	return quality;
 }
 

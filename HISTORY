@@ -1,6 +1,9 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Added DeviceName() and DeviceType() to client device. The server IP and the
+  number of the device used on the server are returned respectively.
+
 2012-05-29: Version 0.6.0
 
 - Reimplemented some client device methods

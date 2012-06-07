@@ -29,6 +29,7 @@ cClientSocket::cClientSocket(void)
 	m_LastSignalUpdate = 0;
 	m_LastSignalStrength = -1;
 	m_LastSignalQuality = -1;
+	m_LastDev = -1;
 	Reset();
 }
 
@@ -291,7 +292,7 @@ bool cClientSocket::SetPriority(int Priority) {
 	return Command(command, 220);
 }
 
-bool cClientSocket::GetSignal(int *SignalStrength, int *SignalQuality) {
+bool cClientSocket::GetSignal(int *SignalStrength, int *SignalQuality, int *Dev) {
 	if (!CheckConnection()) return -1;
 
 	CMD_LOCK;
@@ -301,7 +302,8 @@ bool cClientSocket::GetSignal(int *SignalStrength, int *SignalQuality) {
 		std::string buffer;
 		std::string command("SGNL");
 		if (!Send(command) || !Receive(command, &code, &buffer) || code != 220
-				|| sscanf(buffer.c_str(), "%*d %*d %d:%d", &m_LastSignalStrength, &m_LastSignalQuality) != 2) {
+				|| sscanf(buffer.c_str(), "%*d %d %d:%d", &m_LastDev, &m_LastSignalStrength, &m_LastSignalQuality) != 3) {
+			m_LastDev = -1;
 			m_LastSignalStrength = -1;
 			m_LastSignalQuality = -1;
 		}
@@ -311,6 +313,8 @@ bool cClientSocket::GetSignal(int *SignalStrength, int *SignalQuality) {
 		*SignalStrength = m_LastSignalStrength;
 	if (SignalQuality)
 		*SignalQuality = m_LastSignalQuality;
+	if (Dev)
+		*Dev = m_LastDev;
 	return 0;
 }
 

@@ -62,6 +62,8 @@ public:
 #else
 	virtual bool IsTunedToTransponder(const cChannel *Channel);
 #endif
+	virtual cString DeviceName(void) const;
+	virtual cString DeviceType(void) const;
 	virtual int SignalStrength(void) const;
 	virtual int SignalQuality(void) const;
 
