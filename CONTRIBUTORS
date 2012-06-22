@@ -205,3 +205,5 @@ Ville Skyttä
 Methodus
   for suggesting to use HTTP code 503 for unavailable channels
 
+Uwe
+  for reporting a compiler error in client/device.c with VDR < 1.7.22

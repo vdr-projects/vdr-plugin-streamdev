@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Fixed compiler error in client/device.c with VDR < 1.7.22 (reported by
+  Uwe@vdrportal)
 - Updated Italian translation (thanks to Diego Pierotto)
 - Added DeviceName() and DeviceType() to client device. The server IP and the
   number of the device used on the server are returned respectively.

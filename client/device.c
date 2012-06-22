@@ -117,7 +117,11 @@ bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority,
 			return false;
 	}
 
+#if APIVERSNUM >= 10722
 	if (IsTunedToTransponder(Channel)) {
+#else
+	if (const_cast<cStreamdevDevice*>(this)->IsTunedToTransponder(Channel)) {
+#endif
 		if (Channel->Ca() < CA_ENCRYPTED_MIN ||
 				(Channel->Vpid() && HasPid(Channel->Vpid())) ||
 				(Channel->Apid(0) && HasPid(Channel->Apid(0))))
