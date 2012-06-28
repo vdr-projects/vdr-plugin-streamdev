@@ -296,7 +296,7 @@ For multicast streaming over the public Internet you would even need to register
 for your own IP range. So don't even think of multicasting via Internet with
 streamdev! Streamdev will send the stream only to one local ethernet segment and
 all clients must be connected to this same segment. There must not be a router
-inbetween. Also note that the client must not run on the streamdev-server
+in between. Also note that the client must not run on the streamdev-server
 machine.
 
 Each channel is offered on a different multicast IP. Channel 1 is available from
@@ -310,7 +310,7 @@ Binding an IGMP socket is a privileged operation, so you must start VDR as root.
 The multicast server is disabled by default. Enter the streamdev-server setup
 menu to enable it and - IMPORTANT - bind the multicast server to the IP of your
 VDR server's LAN ethernet card. The multicast server will refuse to start with
-the default bind adresse "0.0.0.0".
+the default bind address "0.0.0.0".
 
 Now edit your streamdevhosts.conf. To allow streaming of all channels, it must
 contain "239.255.0.0/16". Note that you cannot limit connections by client IP
@@ -365,9 +365,9 @@ setup parameter "Hide Mainmenu Entry" you can hide this menu item if you don't
 need it. "Suspend Server" is only useful if the server runs in "Offer suspend
 mode" with "Client may suspend" enabled.
 
-The parameter "Remote IP" uses an IP-Adress-Editor, where you can just enter
+The parameter "Remote IP" uses an IP-Address-Editor, where you can just enter
 the IP number with the number keys on your remote. After three digits (or if 
-the next digit would result in an invalid IP adress, or if the first digit is
+the next digit would result in an invalid IP address, or if the first digit is
 0), the current position jumps to the next one. You can change positions with 
 the left and right buttons, and you can cycle the current position using up 
 and down. To confirm the entered address, press OK. So, if you want to enter 

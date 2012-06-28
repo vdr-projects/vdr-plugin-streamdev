@@ -62,7 +62,7 @@ public:
 	/* Accept() returns a newly created cTBSocket, which is connected to the 
 	   first connection request on the queue of pending connections of a
 	   listening socket. If no connection request was pending, or if any other
-	   error occured, the resulting cTBSocket is closed. */
+	   error occurred, the resulting cTBSocket is closed. */
 	virtual cTBSocket Accept(void) const;
 
 	/* Accept() extracts the first connection request on the queue of pending

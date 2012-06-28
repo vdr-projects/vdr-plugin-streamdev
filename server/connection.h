@@ -101,7 +101,7 @@ public:
 	/* Close the socket */
 	virtual bool Close(void);
 
-	/* Check if a device would be available for transfering the given
+	/* Check if a device would be available for transferring the given
 	   channel. This call has no side effects. */
 	static cDevice *CheckDevice(const cChannel *Channel, int Priority, bool LiveView, const cDevice *AvoidDevice = NULL);
 

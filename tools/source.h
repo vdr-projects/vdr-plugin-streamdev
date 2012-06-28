@@ -54,7 +54,7 @@ public:
 	/* Close() resets the source to the uninitialized state (IsOpen() == false)
 	   and must be called by any derivations after really closing the source.
 	   Returns true on success and false on error, setting errno appropriately.
-	   The object is in closed state afterwards, even if an error occured. */
+	   The object is in closed state afterwards, even if an error occurred. */
 	virtual bool Close(void);
 
 	/* Read() reads at most Length bytes into the storage pointed to by Buffer,

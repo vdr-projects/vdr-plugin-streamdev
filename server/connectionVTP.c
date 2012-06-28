@@ -1662,7 +1662,7 @@ bool cConnectionVTP::CmdMOVC(const char *Option)
 								Reply(250,"Channel \"%d\" moved to \"%d\"", From, To);
 							}
 							else {
-								Reply(501, "Can't move channel to same postion");
+								Reply(501, "Can't move channel to same position");
 							}
 						}
 						else {
