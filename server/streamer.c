@@ -128,6 +128,7 @@ void cStreamdevStreamer::Start(cTBSocket *Socket)
 {
 	Dprintf("start streamer\n");
 	m_Writer = new cStreamdevWriter(Socket, this);
+	m_Writer->Start();
 	Attach();
 }
 
@@ -135,7 +136,6 @@ void cStreamdevStreamer::Activate(bool On)
 {
 	if (On && !Active()) {
 		Dprintf("activate streamer\n");
-		m_Writer->Start();
 		cThread::Start();
 	}
 }
