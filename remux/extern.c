@@ -295,7 +295,7 @@ void cTSExt::Put(const uchar *Data, int Count)
 }
 
 cExternRemux::cExternRemux(const cServerConnection *Connection, const cChannel *Channel, const int *Apids, const int *Dpids):
-		m_ResultBuffer(new cRingBufferLinear(WRITERBUFSIZE, TS_SIZE * 2)),
+		m_ResultBuffer(new cRingBufferLinear(WRITERBUFSIZE)),
 		m_Remux(new cTSExt(m_ResultBuffer, Connection, Channel, Apids, Dpids))
 {
 	m_ResultBuffer->SetTimeouts(500, 100);

@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Support HTTP HEAD requests with external remuxer
 - Fixed always using priority 0 for HTTP HEAD requests
 - Start writer right after creating it
 - Corrected typos (thanks to Ville Skyttä)

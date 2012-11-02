@@ -188,34 +188,40 @@ bool cConnectionHTTP::ProcessRequest(void)
 				&& Respond("");
 		}
 	} else if (it_method->second.compare("HEAD") == 0 && ProcessURI(it_pathinfo->second)) {
-		DeferClose();
-		if (m_ChannelList)
+		if (m_ChannelList) {
+			DeferClose();
 			return Respond("%s", true, m_ChannelList->HttpHeader().c_str());
+		}
 		else if (m_Channel != NULL) {
 			if (ProvidesChannel(m_Channel, StreamdevServerSetup.HTTPPriority)) {
 				if (m_StreamType == stEXT) {
-					// TODO
-					return Respond("HTTP/1.0 200 OK")
-					    && Respond("");
+					m_LiveStreamer = new cStreamdevLiveStreamer(StreamdevServerSetup.HTTPPriority, this);
+					m_LiveStreamer->SetChannel(m_Channel, m_StreamType, m_Apid[0] ? m_Apid : NULL, m_Dpid[0] ? m_Dpid : NULL);
+					return Respond("HTTP/1.0 200 OK");
 				} else if (m_StreamType == stES && (m_Apid[0] || m_Dpid[0] || ISRADIO(m_Channel))) {
+					DeferClose();
 					return Respond("HTTP/1.0 200 OK")
 					    && Respond("Content-Type: audio/mpeg")
 					    && Respond("icy-name: %s", true, m_Channel->Name())
 					    && Respond("");
 				} else if (ISRADIO(m_Channel)) {
+					DeferClose();
 					return Respond("HTTP/1.0 200 OK")
 					    && Respond("Content-Type: audio/mpeg")
 					    && Respond("");
 				} else {
+					DeferClose();
 					return Respond("HTTP/1.0 200 OK")
 					    && Respond("Content-Type: video/mpeg")
 					    && Respond("");
 				}
 			}
+			DeferClose();
 			return Respond("HTTP/1.0 503 Service unavailable")
 				&& Respond("");
 		}
 		else {
+			DeferClose();
 			return Respond("HTTP/1.0 404 not found")
 				&& Respond("");
 		}
