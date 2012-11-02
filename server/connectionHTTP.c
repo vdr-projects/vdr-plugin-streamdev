@@ -192,7 +192,7 @@ bool cConnectionHTTP::ProcessRequest(void)
 		if (m_ChannelList)
 			return Respond("%s", true, m_ChannelList->HttpHeader().c_str());
 		else if (m_Channel != NULL) {
-			if (ProvidesChannel(m_Channel, 0)) {
+			if (ProvidesChannel(m_Channel, StreamdevServerSetup.HTTPPriority)) {
 				if (m_StreamType == stEXT) {
 					// TODO
 					return Respond("HTTP/1.0 200 OK")

@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Fixed always using priority 0 for HTTP HEAD requests
 - Start writer right after creating it
 - Corrected typos (thanks to Ville Skyttä)
 - Fixed compiler error in client/device.c with VDR < 1.7.22 (reported by
