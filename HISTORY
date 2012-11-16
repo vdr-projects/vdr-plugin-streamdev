@@ -1,6 +1,9 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Return HTTP/1.1 compliant response headers plus some always useful headers
+- Return HTTP URL parameters ending with ".dlna.org" as response headers
+- Store HTTP URL parameters in a map
 - Support HTTP HEAD requests with external remuxer
 - Fixed always using priority 0 for HTTP HEAD requests
 - Start writer right after creating it

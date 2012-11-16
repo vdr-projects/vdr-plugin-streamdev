@@ -26,6 +26,7 @@ private:
 
 	std::string                       m_Authorization;
 	eHTTPStatus                       m_Status;
+	tStrStrMap                        m_Params;
 	// job: transfer
 	cStreamdevLiveStreamer           *m_LiveStreamer;
 	const cChannel                   *m_Channel;
@@ -37,6 +38,8 @@ private:
 
 	cChannelList* ChannelListFromString(const std::string &PathInfo, const std::string &Filebase, const std::string &Fileext) const;
 	bool ProcessURI(const std::string &PathInfo);
+	bool HttpResponse(int Code, bool Last, const char* ContentType = NULL, const char* Headers = "", ...);
+			//__attribute__ ((format (printf, 5, 6)));
 protected:
 	bool ProcessRequest(void);
 

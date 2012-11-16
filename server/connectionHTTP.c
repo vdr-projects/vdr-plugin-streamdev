@@ -3,6 +3,8 @@
  */
 
 #include <ctype.h>
+#include <time.h>
+#include <stdarg.h>
  
 #include "server/connectionHTTP.h"
 #include "server/menuHTTP.h"
@@ -48,9 +50,24 @@ bool cConnectionHTTP::Command(char *Cmd)
 					*v = 0;
 					SetHeader("REQUEST_METHOD", Cmd);
 					q = strchr(p, '?');
-					if (q)
+					if (q) {
 						*q = 0;
-					SetHeader("QUERY_STRING", q ? ++q : "");
+						SetHeader("QUERY_STRING", q + 1);
+						while (q++) {
+							char *n = strchr(q, '&');
+							if (n)
+								*n = 0;
+							char *e = strchr(q, '=');
+							if (e)
+								*e++ = 0;
+							else
+								e = n ? n : v;
+							m_Params.insert(tStrStr(q, e));
+							q = n;
+						}
+					}
+					else
+						SetHeader("QUERY_STRING", "");
 					SetHeader("PATH_INFO", p);
 					m_Status = hsHeaders;
 					return true;
@@ -133,10 +150,7 @@ bool cConnectionHTTP::ProcessRequest(void)
 		}
 		if (!authOk) {
 			isyslog("streamdev-server: HTTP authorization required");
-			DeferClose();
-			return Respond("HTTP/1.0 401 Authorization Required")
-				&& Respond("WWW-authenticate: basic Realm=\"Streamdev-Server\")")
-				&& Respond("");
+			return HttpResponse(401, true, NULL, "WWW-authenticate: basic Realm=\"Streamdev-Server\"");
 		}
 	}
 
@@ -162,30 +176,19 @@ bool cConnectionHTTP::ProcessRequest(void)
 					if (m_StreamType == stEXT) {
 						return Respond("HTTP/1.0 200 OK");
 					} else if (m_StreamType == stES && (m_Apid[0] || m_Dpid[0] || ISRADIO(m_Channel))) {
-						return Respond("HTTP/1.0 200 OK")
-						    && Respond("Content-Type: audio/mpeg")
-						    && Respond("icy-name: %s", true, m_Channel->Name())
-						    && Respond("");
+						return HttpResponse(200, false, "audio/mpeg", "icy-name: %s", m_Channel->Name());
 					} else if (ISRADIO(m_Channel)) {
-						return Respond("HTTP/1.0 200 OK")
-						    && Respond("Content-Type: audio/mpeg")
-						    && Respond("");
+						return HttpResponse(200, false, "audio/mpeg");
 					} else {
-						return Respond("HTTP/1.0 200 OK")
-						    && Respond("Content-Type: video/mpeg")
-						    && Respond("");
+						return HttpResponse(200, false, "video/mpeg");
 					}
 				}
 				DELETENULL(m_LiveStreamer);
 			}
-			DeferClose();
-			return Respond("HTTP/1.0 503 Service unavailable")
-				&& Respond("");
+			return HttpResponse(503, true);
 		}
 		else {
-			DeferClose();
-			return Respond("HTTP/1.0 404 not found")
-				&& Respond("");
+			return HttpResponse(404, true);
 		}
 	} else if (it_method->second.compare("HEAD") == 0 && ProcessURI(it_pathinfo->second)) {
 		if (m_ChannelList) {
@@ -199,37 +202,77 @@ bool cConnectionHTTP::ProcessRequest(void)
 					m_LiveStreamer->SetChannel(m_Channel, m_StreamType, m_Apid[0] ? m_Apid : NULL, m_Dpid[0] ? m_Dpid : NULL);
 					return Respond("HTTP/1.0 200 OK");
 				} else if (m_StreamType == stES && (m_Apid[0] || m_Dpid[0] || ISRADIO(m_Channel))) {
-					DeferClose();
-					return Respond("HTTP/1.0 200 OK")
-					    && Respond("Content-Type: audio/mpeg")
-					    && Respond("icy-name: %s", true, m_Channel->Name())
-					    && Respond("");
+					return HttpResponse(200, true, "audio/mpeg", "icy-name: %s", m_Channel->Name());
 				} else if (ISRADIO(m_Channel)) {
-					DeferClose();
-					return Respond("HTTP/1.0 200 OK")
-					    && Respond("Content-Type: audio/mpeg")
-					    && Respond("");
+					return HttpResponse(200, true, "audio/mpeg");
 				} else {
-					DeferClose();
-					return Respond("HTTP/1.0 200 OK")
-					    && Respond("Content-Type: video/mpeg")
-					    && Respond("");
+					return HttpResponse(200, true, "video/mpeg");
 				}
 			}
-			DeferClose();
-			return Respond("HTTP/1.0 503 Service unavailable")
-				&& Respond("");
+			return HttpResponse(503, true);
 		}
 		else {
-			DeferClose();
-			return Respond("HTTP/1.0 404 not found")
-				&& Respond("");
+			return HttpResponse(404, true);
 		}
 	}
 
-	DeferClose();
-	return Respond("HTTP/1.0 400 Bad Request")
-		&& Respond("");
+	return HttpResponse(400, true);
+}
+
+static const char *AAA[] = {
+	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+};
+static const char *MMM[] = {
+	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+	"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+};
+
+bool cConnectionHTTP::HttpResponse(int Code, bool Last, const char* ContentType, const char* Headers, ...)
+{
+        va_list ap;
+        va_start(ap, Headers);
+        cString headers = cString::sprintf(Headers, ap);
+        va_end(ap);
+
+	bool rc;
+	if (Last)
+		DeferClose();
+	switch (Code)
+	{
+		case 200: rc = Respond("HTTP/1.1 200 OK"); break;
+		case 400: rc = Respond("HTTP/1.1 400 Bad Request"); break;
+		case 401: rc = Respond("HTTP/1.1 401 Authorization Required"); break;
+		case 404: rc = Respond("HTTP/1.1 404 Not Found"); break;
+		case 503: rc = Respond("HTTP/1.1 503 Service Unavailable"); break;
+		default:  rc = Respond("HTTP/1.1 500 Internal Server Error");
+	}
+	if (rc && ContentType)
+		rc = Respond("Content-Type: %s", true, ContentType);
+	
+	if (rc)
+		rc = Respond("Connection: close")
+			&& Respond("Pragma: no-cache")
+			&& Respond("Cache-Control: no-cache");
+
+	time_t t = time(NULL);
+	struct tm *gmt = gmtime(&t);
+	if (rc && gmt) {
+		char buf[] = "Date: AAA, DD MMM YYYY HH:MM:SS GMT";
+		if (snprintf(buf, sizeof(buf), "Date: %s, %.2d %s %.4d %.2d:%.2d:%.2d GMT", AAA[gmt->tm_wday], gmt->tm_mday, MMM[gmt->tm_mon], gmt->tm_year + 1900, gmt->tm_hour, gmt->tm_min, gmt->tm_sec) == sizeof(buf) - 1)
+			rc = Respond(buf);
+	}
+
+	if (rc && strlen(Headers) > 0)
+		rc = Respond(headers);
+
+	tStrStrMap::iterator it = m_Params.begin();
+	while (rc && it != m_Params.end()) {
+		static const char DLNA_POSTFIX[] = ".dlna.org";
+		if (it->first.rfind(DLNA_POSTFIX) + sizeof(DLNA_POSTFIX) - 1 == it->first.length())
+			rc = Respond("%s: %s", true, it->first.c_str(), it->second.c_str());
+		++it;
+	}
+	return rc && Respond("");
 }
 
 void cConnectionHTTP::Flushed(void) 
@@ -263,21 +306,15 @@ void cConnectionHTTP::Flushed(void)
 
 cChannelList* cConnectionHTTP::ChannelListFromString(const std::string& Path, const std::string& Filebase, const std::string& Fileext) const
 {
-	// keys for Headers() hash
-	const static std::string QUERY_STRING("QUERY_STRING");
-	const static std::string HOST("HTTP_HOST");
-
-	tStrStrMap::const_iterator it_query = Headers().find(QUERY_STRING);
-	const std::string& query = it_query == Headers().end() ? "" : it_query->second;
-
 	std::string groupTarget;
 	cChannelIterator *iterator = NULL;
 
+	const static std::string GROUP("group");
 	if (Filebase.compare("tree") == 0) {
 		const cChannel* c = NULL;
-		size_t groupIndex = query.find("group=");
-		if (groupIndex != std::string::npos)
-			c = cChannelList::GetGroup(atoi(query.c_str() + groupIndex + 6));
+		tStrStrMap::const_iterator it = m_Params.find(GROUP);
+		if (it != m_Params.end())
+			c = cChannelList::GetGroup(atoi(it->second.c_str()));
 		iterator = new cListTree(c);
 		groupTarget = Filebase + Fileext;
 	} else if (Filebase.compare("groups") == 0) {
@@ -285,9 +322,9 @@ cChannelList* cConnectionHTTP::ChannelListFromString(const std::string& Path, co
 		groupTarget = (std::string) "group" + Fileext;
 	} else if (Filebase.compare("group") == 0) {
 		const cChannel* c = NULL;
-		size_t groupIndex = query.find("group=");
-		if (groupIndex != std::string::npos)
-			c = cChannelList::GetGroup(atoi(query.c_str() + groupIndex + 6));
+		tStrStrMap::const_iterator it = m_Params.find(GROUP);
+		if (it != m_Params.end())
+			c = cChannelList::GetGroup(atoi(it->second.c_str()));
 		iterator = new cListGroup(c);
 	} else if (Filebase.compare("channels") == 0) {
 		iterator = new cListChannels();
@@ -299,11 +336,13 @@ cChannelList* cConnectionHTTP::ChannelListFromString(const std::string& Path, co
 	if (iterator) {
 		if (Filebase.empty() || Fileext.compare(".htm") == 0 || Fileext.compare(".html") == 0) {
 			std::string self = Filebase + Fileext;
+			const std::string& query = Headers().at("QUERY_STRING");
 			if (!query.empty())
 				self += '?' + query;
 			return new cHtmlChannelList(iterator, m_StreamType, self.c_str(), groupTarget.c_str());
 		} else if (Fileext.compare(".m3u") == 0) {
 			std::string base;
+			const static std::string HOST("HTTP_HOST");
 			tStrStrMap::const_iterator it = Headers().find(HOST);
 			if (it != Headers().end())
 				base = "http://" + it->second + "/";
