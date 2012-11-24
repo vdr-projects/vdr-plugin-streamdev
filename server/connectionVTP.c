@@ -4,6 +4,7 @@
  
 #include "server/connectionVTP.h"
 #include "server/livestreamer.h"
+#include "server/livefilter.h"
 #include "server/suspend.h"
 #include "setup.h"
 

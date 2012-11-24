@@ -5,28 +5,25 @@
 #ifndef VDR_STREAMEV_LIVEFILTER_H
 #define VDR_STREAMEV_LIVEFILTER_H
 
-#include <vdr/config.h>
+#include "server/streamer.h"
 
-#include <vdr/filter.h>
+class cDevice;
+class cStreamdevLiveFilter;
 
-class cStreamdevStreamer;
-
-class cStreamdevLiveFilter: public cFilter {
+class cStreamdevFilterStreamer: public cStreamdevStreamer {
 private:
-	cStreamdevStreamer *m_Streamer;
-
-protected:
-	virtual void Process(u_short Pid, u_char Tid, const u_char *Data, int Length);
+	cDevice                *m_Device;
+	cStreamdevLiveFilter   *m_Filter;
 
 public:
-	cStreamdevLiveFilter(cStreamdevStreamer *Streamer);
+	cStreamdevFilterStreamer();
+	virtual ~cStreamdevFilterStreamer();
 
-	void Set(u_short Pid, u_char Tid, u_char Mask) {
-		cFilter::Set(Pid, Tid, Mask);
-	}
-	void Del(u_short Pid, u_char Tid, u_char Mask) {
-		cFilter::Del(Pid, Tid, Mask);
-	}
+	void SetDevice(cDevice *Device);
+	bool SetFilter(u_short Pid, u_char Tid, u_char Mask, bool On);
+	
+	virtual void Attach(void);
+	virtual void Detach(void);
 };
 
 #endif // VDR_STREAMEV_LIVEFILTER_H

@@ -53,32 +53,4 @@ public:
 	virtual std::string Report(void);
 };
 
-
-// --- cStreamdevFilterStreamer -------------------------------------------------
-
-//#include <vdr/status.h>
-
-class cStreamdevLiveFilter;
-
-class cStreamdevFilterStreamer: public cStreamdevStreamer /*, public cStatus*/ {
-private:
-	cDevice                *m_Device;
-	cStreamdevLiveFilter   *m_Filter;
-	//const cChannel         *m_Channel;
-
-public:
-	cStreamdevFilterStreamer();
-	virtual ~cStreamdevFilterStreamer();
-
-	void SetDevice(cDevice *Device);
-	//void SetChannel(const cChannel *Channel);
-	bool SetFilter(u_short Pid, u_char Tid, u_char Mask, bool On);
-	
-	virtual void Attach(void);
-	virtual void Detach(void);
-
-	// cStatus message handlers
-	//virtual void ChannelSwitch(const cDevice *Device, int ChannelNumber);
-};
-
 #endif // VDR_STREAMDEV_LIVESTREAMER_H
