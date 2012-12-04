@@ -231,7 +231,11 @@ bool cConnectionHTTP::HttpResponse(int Code, bool Last, const char* ContentType,
 {
         va_list ap;
         va_start(ap, Headers);
+#if APIVERSNUM >= 10728
+        cString headers = cString::vsprintf(Headers, ap);
+#else
         cString headers = cString::sprintf(Headers, ap);
+#endif
         va_end(ap);
 
 	bool rc;
