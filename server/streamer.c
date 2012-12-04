@@ -126,30 +126,25 @@ cStreamdevStreamer::~cStreamdevStreamer()
 
 void cStreamdevStreamer::Start(cTBSocket *Socket) 
 {
-	Dprintf("start streamer\n");
+	Dprintf("start writer\n");
 	m_Writer = new cStreamdevWriter(Socket, this);
 	m_Writer->Start();
-	Attach();
-}
-
-void cStreamdevStreamer::Activate(bool On) 
-{
-	if (On && !Active()) {
-		Dprintf("activate streamer\n");
+	if (!Active()) {
+		Dprintf("start streamer\n");
 		cThread::Start();
 	}
+	Attach();
 }
 
 void cStreamdevStreamer::Stop(void) 
 {
+	Detach();
 	if (Running()) {
-		Dprintf("stopping streamer\n");
+		Dprintf("stop streamer\n");
 		Cancel(3);
 	}
-	if (m_Writer) {
-		Detach();
-		DELETENULL(m_Writer);
-	}
+	Dprintf("stop writer\n");
+	DELETENULL(m_Writer);
 }
 
 void cStreamdevStreamer::Action(void) 

@@ -24,7 +24,6 @@ private:
 	cStreamdevStreamer *m_Streamer;
 
 protected:
-	virtual void Activate(bool On);
 	virtual void Receive(uchar *Data, int Length);
 
 public:
@@ -52,12 +51,6 @@ void cStreamdevLiveReceiver::Receive(uchar *Data, int Length) {
 	int p = m_Streamer->Receive(Data, Length);
 	if (p != Length)
 		m_Streamer->ReportOverflow(Length - p);
-}
-
-inline void cStreamdevLiveReceiver::Activate(bool On) 
-{ 
-	Dprintf("LiveReceiver->Activate(%d)\n", On);
-	m_Streamer->Activate(On); 
 }
 
 // --- cStreamdevPatFilter ----------------------------------------------------

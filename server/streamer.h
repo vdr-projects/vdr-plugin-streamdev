@@ -85,7 +85,6 @@ public:
 	virtual void Stop(void);
 	bool Abort(void);
 
-	void Activate(bool On);
 	int Receive(uchar *Data, int Length) { return m_RingBuffer->PutTS(Data, Length); }
 	void ReportOverflow(int Bytes) { m_RingBuffer->ReportOverflow(Bytes); }
 	

@@ -1012,7 +1012,6 @@ bool cConnectionVTP::CmdPORT(char *Opts)
 		if(!m_FilterStreamer)
 			m_FilterStreamer = new cStreamdevFilterStreamer;
 		m_FilterStreamer->Start(m_FilterSocket);
-		m_FilterStreamer->Activate(true);
 
 		return Respond(220, "Port command ok, data connection opened");
 		break;

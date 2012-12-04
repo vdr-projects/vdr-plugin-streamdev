@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- In cStreamdevStreamer dropped Activate(bool) and moved its code into Start().
 - Moved cStreamdevFilterStreamer to livefilter.[hc]
 - Return HTTP/1.1 compliant response headers plus some always useful headers
 - Return HTTP URL parameters ending with ".dlna.org" as response headers
