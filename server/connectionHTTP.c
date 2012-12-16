@@ -340,9 +340,9 @@ cChannelList* cConnectionHTTP::ChannelListFromString(const std::string& Path, co
 	if (iterator) {
 		if (Filebase.empty() || Fileext.compare(".htm") == 0 || Fileext.compare(".html") == 0) {
 			std::string self = Filebase + Fileext;
-			const std::string& query = Headers().at("QUERY_STRING");
-			if (!query.empty())
-				self += '?' + query;
+			tStrStrMap::const_iterator it = Headers().find("QUERY_STRING");
+			if (it != Headers().end() && !it->second.empty())
+				self += '?' + it->second;
 			return new cHtmlChannelList(iterator, m_StreamType, self.c_str(), groupTarget.c_str());
 		} else if (Fileext.compare(".m3u") == 0) {
 			std::string base;
