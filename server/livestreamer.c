@@ -449,13 +449,19 @@ cString cStreamdevLiveStreamer::ToText() const
         return cString("");
 }
 
+bool cStreamdevLiveStreamer::IsReceiving(void) const
+{
+	cThreadLock ThreadLock(m_Device);
+	return m_Receiver && m_Receiver->IsAttached();
+}
+
 void cStreamdevLiveStreamer::StartReceiver(void)
 {
 	if (m_NumPids > 0) {
 		Dprintf("Creating Receiver to respect changed pids\n");
 		cReceiver *current = m_Receiver;
-		m_Receiver = new cStreamdevLiveReceiver(this, m_Channel, m_Priority, m_Pids);
 		cThreadLock ThreadLock(m_Device);
+		m_Receiver = new cStreamdevLiveReceiver(this, m_Channel, m_Priority, m_Pids);
 		if (IsRunning())
 			Attach();
 		delete current;

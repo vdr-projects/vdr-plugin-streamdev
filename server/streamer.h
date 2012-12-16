@@ -84,6 +84,7 @@ public:
 
 	virtual void Start(cTBSocket *Socket);
 	virtual void Stop(void);
+	virtual bool IsReceiving(void) const = 0;
 	bool Abort(void);
 
 	virtual uchar *Get(int &Count) { return m_SendBuffer->Get(Count); }

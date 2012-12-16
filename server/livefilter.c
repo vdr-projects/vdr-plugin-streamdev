@@ -18,12 +18,16 @@
 class cStreamdevLiveFilter: public cFilter {
 private:
 	cStreamdevFilterStreamer *m_Streamer;
+	bool m_On;
 
 protected:
 	virtual void Process(u_short Pid, u_char Tid, const u_char *Data, int Length);
+	virtual void SetStatus(bool On);
 
 public:
 	cStreamdevLiveFilter(cStreamdevFilterStreamer *Streamer);
+
+	virtual bool IsAttached(void) const { return m_On; };
 
 	void Set(u_short Pid, u_char Tid, u_char Mask) {
 		cFilter::Set(Pid, Tid, Mask);
@@ -34,7 +38,14 @@ public:
 };
 
 cStreamdevLiveFilter::cStreamdevLiveFilter(cStreamdevFilterStreamer *Streamer) {
+	m_On = false;
 	m_Streamer = Streamer;
+}
+
+void cStreamdevLiveFilter::SetStatus(bool On)
+{
+	m_On = On;
+	cFilter::SetStatus(On);
 }
 
 void cStreamdevLiveFilter::Process(u_short Pid, u_char Tid, const u_char *Data, int Length) 
@@ -111,6 +122,11 @@ void cStreamdevFilterStreamer::SetDevice(cDevice *Device)
 	Detach();
 	m_Device = Device;
 	Attach();
+}
+
+bool cStreamdevFilterStreamer::IsReceiving(void) const
+{
+	return m_Filter && m_Filter->IsAttached();
 }
 
 bool cStreamdevFilterStreamer::SetFilter(u_short Pid, u_char Tid, u_char Mask, bool On) 

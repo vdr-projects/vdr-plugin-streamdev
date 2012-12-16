@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Close writer when streamer is finished
 - Don't abort VTP connection if filter stream is broken
 - Restructured cStreamdevStreamer: Moved inbound buffer into actual subclass.
 - In cStreamdevStreamer dropped Activate(bool) and moved its code into Start().

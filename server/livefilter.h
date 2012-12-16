@@ -26,6 +26,8 @@ public:
 
 	void SetDevice(cDevice *Device);
 	bool SetFilter(u_short Pid, u_char Tid, u_char Mask, bool On);
+
+	virtual bool IsReceiving(void) const;
 	void Receive(uchar *Data);
 	
 	virtual void Attach(void);

@@ -52,6 +52,8 @@ public:
 	cString ToText() const;
 	
 	void Receive(uchar *Data, int Length);
+	virtual bool IsReceiving(void) const;
+
 	virtual uchar *Get(int &Count);
 	virtual void Del(int Count);
 

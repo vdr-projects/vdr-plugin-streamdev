@@ -54,6 +54,11 @@ void cStreamdevWriter::Action(void)
 		if (block == NULL) {
 			block = m_Streamer->Get(count);
 			offset = 0;
+			// still no data - are we done?
+			if (block == NULL && !m_Streamer->IsReceiving() && timeout++ > 20) {
+				esyslog("streamdev-server: streamer done - writer exiting");
+				break;
+			}
 		}
 
 		if (block != NULL) {
@@ -100,6 +105,7 @@ void cStreamdevWriter::Action(void)
 			}
 		}
 	}
+	m_Socket->Close();
 	Dprintf("Max. Transmit Blocksize was: %d\n", max);
 }
 
