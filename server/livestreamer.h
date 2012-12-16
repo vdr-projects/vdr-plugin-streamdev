@@ -7,6 +7,8 @@
 #include "server/streamer.h"
 #include "common.h"
 
+#define LIVEBUFSIZE (20000 * TS_SIZE)
+
 namespace Streamdev {
 	class cTSRemux;
 }
@@ -24,11 +26,18 @@ private:
 	const cChannel         *m_Channel;
 	cDevice                *m_Device;
 	cStreamdevLiveReceiver *m_Receiver;
+	cStreamdevBuffer       *m_ReceiveBuffer;
 	cStreamdevPatFilter    *m_PatFilter;
 	Streamdev::cTSRemux    *m_Remux;
 
 	void StartReceiver(void);
 	bool HasPid(int Pid);
+
+protected:
+	virtual uchar* GetFromReceiver(int &Count) { return m_ReceiveBuffer->Get(Count); }
+	virtual void DelFromReceiver(int Count) { m_ReceiveBuffer->Del(Count); }
+
+	virtual int Put(const uchar *Data, int Count);
 
 public:
 	cStreamdevLiveStreamer(int Priority, const cServerConnection *Connection);
@@ -42,7 +51,7 @@ public:
 	void GetSignal(int *DevNum, int *Strength, int *Quality) const;
 	cString ToText() const;
 	
-	virtual int Put(const uchar *Data, int Count);
+	void Receive(uchar *Data, int Length);
 	virtual uchar *Get(int &Count);
 	virtual void Del(int Count);
 

@@ -21,18 +21,17 @@ class cStreamdevLiveReceiver: public cReceiver {
 	friend class cStreamdevStreamer;
 
 private:
-	cStreamdevStreamer *m_Streamer;
+	cStreamdevLiveStreamer *m_Streamer;
 
 protected:
 	virtual void Receive(uchar *Data, int Length);
 
 public:
-	cStreamdevLiveReceiver(cStreamdevStreamer *Streamer, const cChannel *Channel, int Priority, const int *Pids);
+	cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer, const cChannel *Channel, int Priority, const int *Pids);
 	virtual ~cStreamdevLiveReceiver();
 };
 
-cStreamdevLiveReceiver::cStreamdevLiveReceiver(cStreamdevStreamer *Streamer, const cChannel *Channel, 
-                                               int Priority, const int *Pids):
+cStreamdevLiveReceiver::cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer, const cChannel *Channel, int Priority, const int *Pids):
 		cReceiver(Channel, Priority),
 		m_Streamer(Streamer)
 {
@@ -48,9 +47,7 @@ cStreamdevLiveReceiver::~cStreamdevLiveReceiver()
 }
 
 void cStreamdevLiveReceiver::Receive(uchar *Data, int Length) {
-	int p = m_Streamer->Receive(Data, Length);
-	if (p != Length)
-		m_Streamer->ReportOverflow(Length - p);
+	m_Streamer->Receive(Data, Length);
 }
 
 // --- cStreamdevPatFilter ----------------------------------------------------
@@ -341,18 +338,18 @@ cStreamdevLiveStreamer::cStreamdevLiveStreamer(int Priority, const cServerConnec
 		m_PatFilter(NULL),
 		m_Remux(NULL)
 {
+		m_ReceiveBuffer = new cStreamdevBuffer(LIVEBUFSIZE, TS_SIZE *2, true, "streamdev-livestreamer"),
+		m_ReceiveBuffer->SetTimeouts(0, 100);
 }
 
 cStreamdevLiveStreamer::~cStreamdevLiveStreamer() 
 {
 	Dprintf("Desctructing Live streamer\n");
 	Stop();
-	if(m_PatFilter) {
-		Detach();
-		DELETENULL(m_PatFilter);
-	}
+	DELETENULL(m_PatFilter);
 	DELETENULL(m_Receiver);
 	delete m_Remux;
+	delete m_ReceiveBuffer;
 }
 
 bool cStreamdevLiveStreamer::HasPid(int Pid) 
@@ -520,6 +517,13 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 	default:
 		return false;
 	}
+}
+
+void cStreamdevLiveStreamer::Receive(uchar *Data, int Length)
+{
+	int p = m_ReceiveBuffer->PutTS(Data, Length);
+	if (p != Length)
+		m_ReceiveBuffer->ReportOverflow(Length - p);
 }
 
 int cStreamdevLiveStreamer::Put(const uchar *Data, int Count) 

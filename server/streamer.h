@@ -17,7 +17,6 @@ class cServerConnection;
 #define TS_SIZE 188
 #endif
 
-#define STREAMERBUFSIZE (20000 * TS_SIZE)
 #define WRITERBUFSIZE (20000 * TS_SIZE)
 
 // --- cStreamdevBuffer -------------------------------------------------------
@@ -67,10 +66,12 @@ class cStreamdevStreamer: public cThread {
 private:
 	const cServerConnection *m_Connection;
 	cStreamdevWriter  *m_Writer;
-	cStreamdevBuffer  *m_RingBuffer;
 	cStreamdevBuffer  *m_SendBuffer;
 
 protected:
+	virtual uchar* GetFromReceiver(int &Count) = 0;
+	virtual void DelFromReceiver(int Count) = 0;
+	virtual int Put(const uchar *Data, int Count) { return m_SendBuffer->PutTS(Data, Count); }
 	virtual void Action(void);
 
 	bool IsRunning(void) const { return m_Writer; }
@@ -85,10 +86,6 @@ public:
 	virtual void Stop(void);
 	bool Abort(void);
 
-	int Receive(uchar *Data, int Length) { return m_RingBuffer->PutTS(Data, Length); }
-	void ReportOverflow(int Bytes) { m_RingBuffer->ReportOverflow(Bytes); }
-	
-	virtual int Put(const uchar *Data, int Count) { return m_SendBuffer->PutTS(Data, Count); }
 	virtual uchar *Get(int &Count) { return m_SendBuffer->Get(Count); }
 	virtual void Del(int Count) { m_SendBuffer->Del(Count); }
 

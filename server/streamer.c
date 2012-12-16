@@ -109,18 +109,14 @@ cStreamdevStreamer::cStreamdevStreamer(const char *Name, const cServerConnection
 		cThread(Name),
 		m_Connection(Connection),
 		m_Writer(NULL),
-		m_RingBuffer(new cStreamdevBuffer(STREAMERBUFSIZE, TS_SIZE * 2,
-		             true, "streamdev-streamer")),
 		m_SendBuffer(new cStreamdevBuffer(WRITERBUFSIZE, TS_SIZE * 2))
 {
-	m_RingBuffer->SetTimeouts(0, 100);
 	m_SendBuffer->SetTimeouts(100, 100);
 }
 
 cStreamdevStreamer::~cStreamdevStreamer() 
 {
 	Dprintf("Desctructing streamer\n");
-	delete m_RingBuffer;
 	delete m_SendBuffer;
 }
 
@@ -152,12 +148,12 @@ void cStreamdevStreamer::Action(void)
 	SetPriority(-3);
 	while (Running()) {
 		int got;
-		uchar *block = m_RingBuffer->Get(got);
+		uchar *block = GetFromReceiver(got);
 
 		if (block) {
 			int count = Put(block, got);
 			if (count)
-				m_RingBuffer->Del(count);
+				DelFromReceiver(count);
 		}
 	}
 }

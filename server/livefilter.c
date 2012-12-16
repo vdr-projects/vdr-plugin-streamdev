@@ -11,18 +11,19 @@
 #    define TS_SYNC_BYTE     0x47
 #endif
 
+#define FILTERBUFSIZE (1000 * TS_SIZE)
 
 // --- cStreamdevLiveFilter -------------------------------------------------
 
 class cStreamdevLiveFilter: public cFilter {
 private:
-	cStreamdevStreamer *m_Streamer;
+	cStreamdevFilterStreamer *m_Streamer;
 
 protected:
 	virtual void Process(u_short Pid, u_char Tid, const u_char *Data, int Length);
 
 public:
-	cStreamdevLiveFilter(cStreamdevStreamer *Streamer);
+	cStreamdevLiveFilter(cStreamdevFilterStreamer *Streamer);
 
 	void Set(u_short Pid, u_char Tid, u_char Mask) {
 		cFilter::Set(Pid, Tid, Mask);
@@ -32,7 +33,7 @@ public:
 	}
 };
 
-cStreamdevLiveFilter::cStreamdevLiveFilter(cStreamdevStreamer *Streamer) {
+cStreamdevLiveFilter::cStreamdevLiveFilter(cStreamdevFilterStreamer *Streamer) {
 	m_Streamer = Streamer;
 }
 
@@ -54,9 +55,7 @@ void cStreamdevLiveFilter::Process(u_short Pid, u_char Tid, const u_char *Data, 
 		length -= chunk;
 		pos += chunk;
 
-		int p = m_Streamer->Put(buffer, TS_SIZE);
-		if (p != TS_SIZE)
-			m_Streamer->ReportOverflow(TS_SIZE - p);
+		m_Streamer->Receive(buffer);
 	}
 }
 
@@ -68,6 +67,8 @@ cStreamdevFilterStreamer::cStreamdevFilterStreamer():
 		m_Filter(NULL)/*,
 		m_Channel(NULL)*/
 {
+	m_ReceiveBuffer = new cStreamdevBuffer(FILTERBUFSIZE, TS_SIZE);
+	m_ReceiveBuffer->SetTimeouts(0, 500);
 }
 
 cStreamdevFilterStreamer::~cStreamdevFilterStreamer() 
@@ -77,6 +78,14 @@ cStreamdevFilterStreamer::~cStreamdevFilterStreamer()
 	m_Device = NULL;
 	DELETENULL(m_Filter);
 	Stop();
+	delete m_ReceiveBuffer;
+}
+
+void cStreamdevFilterStreamer::Receive(uchar *Data)
+{
+	int p = m_ReceiveBuffer->PutTS(Data, TS_SIZE);
+	if (p != TS_SIZE)
+		m_ReceiveBuffer->ReportOverflow(TS_SIZE - p);
 }
 
 void cStreamdevFilterStreamer::Attach(void) 
