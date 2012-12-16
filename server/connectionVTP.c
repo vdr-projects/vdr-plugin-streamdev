@@ -770,7 +770,7 @@ cConnectionVTP::~cConnectionVTP()
 bool cConnectionVTP::Abort(void) const
 {
 	return !IsOpen() || (m_LiveStreamer && m_LiveStreamer->Abort()) ||
-		(m_FilterStreamer && m_FilterStreamer->Abort());
+		(!m_LiveStreamer && m_FilterStreamer && m_FilterStreamer->Abort());
 }
 
 void cConnectionVTP::Welcome(void) 
