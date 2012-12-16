@@ -9,6 +9,7 @@
 #include "common.h"
 
 #include <map>
+#include <string>
 
 typedef std::map<std::string,std::string> tStrStrMap;
 typedef std::pair<std::string,std::string> tStrStr;
