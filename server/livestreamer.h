@@ -49,7 +49,7 @@ public:
 	bool SetChannel(const cChannel *Channel, eStreamType StreamType, const int* Apid = NULL, const int* Dpid = NULL);
 	void SetPriority(int Priority);
 	void GetSignal(int *DevNum, int *Strength, int *Quality) const;
-	cString ToText() const;
+	virtual cString ToText() const;
 	
 	void Receive(uchar *Data, int Length);
 	virtual bool IsReceiving(void) const;

@@ -22,7 +22,7 @@ SERVEROBJS = $(PLUGIN).o \
 	componentVTP.o connectionVTP.o \
 	componentHTTP.o connectionHTTP.o menuHTTP.o \
 	componentIGMP.o connectionIGMP.o \
-	streamer.o livestreamer.o livefilter.o recplayer.o \
+	streamer.o livestreamer.o livefilter.o recstreamer.o recplayer.o \
 	menu.o suspend.o setup.o
 	
 ### The main target:

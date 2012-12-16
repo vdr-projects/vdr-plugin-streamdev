@@ -92,6 +92,8 @@ public:
 
 	virtual void Detach(void) {}
 	virtual void Attach(void) {}
+
+	virtual cString ToText() const { return ""; };
 };
 
 inline bool cStreamdevStreamer::Abort(void)

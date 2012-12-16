@@ -5,6 +5,8 @@
 #include <ctype.h>
 #include <time.h>
 #include <stdarg.h>
+#include <vdr/thread.h>
+#include <vdr/recording.h>
  
 #include "server/connectionHTTP.h"
 #include "server/menuHTTP.h"
@@ -14,9 +16,10 @@
 cConnectionHTTP::cConnectionHTTP(void): 
 		cServerConnection("HTTP"),
 		m_Status(hsRequest),
-		m_LiveStreamer(NULL),
-		m_Channel(NULL),
+		m_Streamer(NULL),
 		m_StreamType((eStreamType)StreamdevServerSetup.HTTPStreamType),
+		m_Channel(NULL),
+		m_Recording(NULL),
 		m_ChannelList(NULL)
 {
 	Dprintf("constructor hsRequest\n");
@@ -26,7 +29,8 @@ cConnectionHTTP::cConnectionHTTP(void):
 
 cConnectionHTTP::~cConnectionHTTP() 
 {
-	delete m_LiveStreamer;
+	delete m_Streamer;
+	delete m_Recording;
 }
 
 bool cConnectionHTTP::CanAuthenticate(void)
@@ -168,9 +172,10 @@ bool cConnectionHTTP::ProcessRequest(void)
 				device = GetDevice(m_Channel, StreamdevServerSetup.HTTPPriority);
 			if (device != NULL) {
 				device->SwitchChannel(m_Channel, false);
-				m_LiveStreamer = new cStreamdevLiveStreamer(StreamdevServerSetup.HTTPPriority, this);
-				if (m_LiveStreamer->SetChannel(m_Channel, m_StreamType, m_Apid[0] ? m_Apid : NULL, m_Dpid[0] ? m_Dpid : NULL)) {
-					m_LiveStreamer->SetDevice(device);
+				cStreamdevLiveStreamer* liveStreamer = new cStreamdevLiveStreamer(StreamdevServerSetup.HTTPPriority, this);
+				m_Streamer = liveStreamer;
+				if (liveStreamer->SetChannel(m_Channel, m_StreamType, m_Apid[0] ? m_Apid : NULL, m_Dpid[0] ? m_Dpid : NULL)) {
+					liveStreamer->SetDevice(device);
 					if (!SetDSCP())
 						LOG_ERROR_STR("unable to set DSCP sockopt");
 					if (m_StreamType == stEXT) {
@@ -183,9 +188,25 @@ bool cConnectionHTTP::ProcessRequest(void)
 						return HttpResponse(200, false, "video/mpeg");
 					}
 				}
-				DELETENULL(m_LiveStreamer);
+				DELETENULL(m_Streamer);
 			}
 			return HttpResponse(503, true);
+		}
+		else if (m_Recording != NULL) {
+			Dprintf("GET recording\n");
+			cStreamdevRecStreamer* recStreamer = new cStreamdevRecStreamer(m_Recording, this);
+			m_Streamer = recStreamer;
+			int64_t from, to;
+			uint64_t total = recStreamer->GetLength();
+			if (ParseRange(from, to)) {
+				int64_t length = recStreamer->SetRange(from, to);
+				if (length < 0L)
+					return HttpResponse(416, true, "video/mpeg", "Accept-Ranges: bytes\r\nContent-Range: bytes */%llu", (unsigned long long) total);
+				else
+					return HttpResponse(206, false, "video/mpeg", "Accept-Ranges: bytes\r\nContent-Range: bytes %lld-%lld/%llu\r\nContent-Length: %lld", (long long) from, (long long) to, (unsigned long long) total, (long long) length);
+			}
+			else
+				return HttpResponse(200, false, "video/mpeg", "Accept-Ranges: bytes");
 		}
 		else {
 			return HttpResponse(404, true);
@@ -198,8 +219,9 @@ bool cConnectionHTTP::ProcessRequest(void)
 		else if (m_Channel != NULL) {
 			if (ProvidesChannel(m_Channel, StreamdevServerSetup.HTTPPriority)) {
 				if (m_StreamType == stEXT) {
-					m_LiveStreamer = new cStreamdevLiveStreamer(StreamdevServerSetup.HTTPPriority, this);
-					m_LiveStreamer->SetChannel(m_Channel, m_StreamType, m_Apid[0] ? m_Apid : NULL, m_Dpid[0] ? m_Dpid : NULL);
+					cStreamdevLiveStreamer *liveStreamer = new cStreamdevLiveStreamer(StreamdevServerSetup.HTTPPriority, this);
+					liveStreamer->SetChannel(m_Channel, m_StreamType, m_Apid[0] ? m_Apid : NULL, m_Dpid[0] ? m_Dpid : NULL);
+					m_Streamer = liveStreamer;
 					return Respond("HTTP/1.0 200 OK");
 				} else if (m_StreamType == stES && (m_Apid[0] || m_Dpid[0] || ISRADIO(m_Channel))) {
 					return HttpResponse(200, true, "audio/mpeg", "icy-name: %s", m_Channel->Name());
@@ -210,6 +232,22 @@ bool cConnectionHTTP::ProcessRequest(void)
 				}
 			}
 			return HttpResponse(503, true);
+		}
+		else if (m_Recording != NULL) {
+			Dprintf("HEAD recording\n");
+			cStreamdevRecStreamer *recStreamer = new cStreamdevRecStreamer(m_Recording, this);
+			m_Streamer = recStreamer;
+			int64_t from, to;
+			uint64_t total = recStreamer->GetLength();
+			if (ParseRange(from, to)) {
+				int64_t length = recStreamer->SetRange(from, to);
+				if (length < 0L)
+					return HttpResponse(416, true, "video/mpeg", "Accept-Ranges: bytes\r\nContent-Range: bytes */%llu", (unsigned long long) total);
+				else
+					return HttpResponse(206, true, "video/mpeg", "Accept-Ranges: bytes\r\nContent-Range: bytes %lld-%lld/%llu\r\nContent-Length: %lld", (long long) from, (long long) to, (unsigned long long) total, (long long) length);
+			}
+			else
+				return HttpResponse(200, true, "video/mpeg", "Accept-Ranges: bytes");
 		}
 		else {
 			return HttpResponse(404, true);
@@ -244,9 +282,11 @@ bool cConnectionHTTP::HttpResponse(int Code, bool Last, const char* ContentType,
 	switch (Code)
 	{
 		case 200: rc = Respond("HTTP/1.1 200 OK"); break;
+		case 206: rc = Respond("HTTP/1.1 206 Partial Content"); break;
 		case 400: rc = Respond("HTTP/1.1 400 Bad Request"); break;
 		case 401: rc = Respond("HTTP/1.1 401 Authorization Required"); break;
 		case 404: rc = Respond("HTTP/1.1 404 Not Found"); break;
+		case 416: rc = Respond("HTTP/1.1 416 Requested range not satisfiable"); break;
 		case 503: rc = Respond("HTTP/1.1 503 Service Unavailable"); break;
 		default:  rc = Respond("HTTP/1.1 500 Internal Server Error");
 	}
@@ -279,6 +319,40 @@ bool cConnectionHTTP::HttpResponse(int Code, bool Last, const char* ContentType,
 	return rc && Respond("");
 }
 
+bool cConnectionHTTP::ParseRange(int64_t &From, int64_t &To) const
+{
+	const static std::string RANGE("HTTP_RANGE");
+	From = To = 0L;
+	tStrStrMap::const_iterator it = Headers().find(RANGE);
+	if (it != Headers().end()) {
+		size_t b = it->second.find("bytes=");
+		if (b != std::string::npos) {
+			char* e = NULL;
+			const char* r = it->second.c_str() + b + sizeof("bytes=") - 1;
+			if (strchr(r, ',') != NULL)
+				esyslog("streamdev-server cConnectionHTTP::GetRange: Multi-ranges not supported");
+			From = strtol(r, &e, 10);
+			if (r != e) {
+				if (From < 0L) {
+					To = -1L;
+					return *e == 0 || *e == ',';
+				}
+				else if (*e == '-') {
+					r = e + 1;
+					if (*r == 0 || *e == ',') {
+						To = -1L;
+						return true;
+					}
+					To = strtol(r, &e, 10);
+					return r != e && To >= From &&
+							(*e == 0 || *e == ',');
+				}
+			}
+		}
+	}
+	return false;
+}
+
 void cConnectionHTTP::Flushed(void) 
 {
 	if (m_Status != hsBody)
@@ -296,9 +370,9 @@ void cConnectionHTTP::Flushed(void)
 		}
 		return;
 	}
-	else if (m_Channel != NULL) {
+	else if (m_Streamer != NULL) {
 		Dprintf("streamer start\n");
-		m_LiveStreamer->Start(this);
+		m_Streamer->Start(this);
 		m_Status = hsFinished;
 	}
 	else {
@@ -401,6 +475,13 @@ bool cConnectionHTTP::ProcessURI(const std::string& PathInfo)
 	if ((m_ChannelList = ChannelListFromString(PathInfo.substr(1, file_pos), filespec.c_str(), fileext.c_str())) != NULL) {
 		Dprintf("Channel list requested\n");
 		return true;
+	} else if (strcmp(fileext.c_str(), ".rec") == 0) {
+		cThreadLock RecordingsLock(&Recordings);
+		cRecording* rec = Recordings.Get(atoi(filespec.c_str()) - 1);
+		Dprintf("Recording %s%s found\n", rec ? rec->Name() : filespec.c_str(), rec ? "" : " not");
+		if (rec)
+			m_Recording = new cRecording(rec->FileName());
+		return m_Recording != NULL;
 	} else if ((m_Channel = ChannelFromString(filespec.c_str(), &m_Apid[0], &m_Dpid[0])) != NULL) {
 		Dprintf("Channel found. Apid/Dpid is %d/%d\n", m_Apid[0], m_Dpid[0]);
 		return true;
@@ -411,5 +492,5 @@ bool cConnectionHTTP::ProcessURI(const std::string& PathInfo)
 cString cConnectionHTTP::ToText() const
 {
 	cString str = cServerConnection::ToText();
-	return m_LiveStreamer ? cString::sprintf("%s\t%s", *str, *m_LiveStreamer->ToText()) : str;
+	return m_Streamer ? cString::sprintf("%s\t%s", *str, *m_Streamer->ToText()) : str;
 }

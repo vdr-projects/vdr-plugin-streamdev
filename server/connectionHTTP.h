@@ -7,12 +7,12 @@
 
 #include "connection.h"
 #include "server/livestreamer.h"
+#include "server/recstreamer.h"
 
 #include <map>
 #include <tools/select.h>
 
 class cChannel;
-class cStreamdevLiveStreamer;
 class cChannelList;
 
 class cConnectionHTTP: public cServerConnection {
@@ -27,12 +27,14 @@ private:
 	std::string                       m_Authorization;
 	eHTTPStatus                       m_Status;
 	tStrStrMap                        m_Params;
+	cStreamdevStreamer               *m_Streamer;
+	eStreamType                       m_StreamType;
 	// job: transfer
-	cStreamdevLiveStreamer           *m_LiveStreamer;
 	const cChannel                   *m_Channel;
 	int                               m_Apid[2];
 	int                               m_Dpid[2];
-	eStreamType                       m_StreamType;
+	// job: replay
+	cRecording                       *m_Recording;
 	// job: listing
 	cChannelList                     *m_ChannelList;
 
@@ -40,6 +42,13 @@ private:
 	bool ProcessURI(const std::string &PathInfo);
 	bool HttpResponse(int Code, bool Last, const char* ContentType = NULL, const char* Headers = "", ...);
 			//__attribute__ ((format (printf, 5, 6)));
+	/**
+	 * Extract byte range from HTTP Range header. Returns false if no valid
+	 * range is found. The contents of From and To are undefined in this
+	 * case. From may be negative in which case To is undefined.
+	 * TODO: support for multiple ranges.
+	 */
+	bool ParseRange(int64_t &From, int64_t &To) const;
 protected:
 	bool ProcessRequest(void);
 
@@ -47,8 +56,8 @@ public:
 	cConnectionHTTP(void);
 	virtual ~cConnectionHTTP();
 
-	virtual void Attach(void) { if (m_LiveStreamer != NULL) m_LiveStreamer->Attach(); }
-	virtual void Detach(void) { if (m_LiveStreamer != NULL) m_LiveStreamer->Detach(); }
+	virtual void Attach(void) { if (m_Streamer != NULL) m_Streamer->Attach(); }
+	virtual void Detach(void) { if (m_Streamer != NULL) m_Streamer->Detach(); }
 
 	virtual cString ToText() const;
 
@@ -62,7 +71,7 @@ public:
 
 inline bool cConnectionHTTP::Abort(void) const
 {
-	return !IsOpen() || (m_LiveStreamer && m_LiveStreamer->Abort());
+	return !IsOpen() || (m_Streamer && m_Streamer->Abort());
 }
 
 #endif // VDR_STREAMDEV_SERVERS_CONNECTIONVTP_H
