@@ -28,15 +28,18 @@ struct cStreamdevClientSetup {
 
 extern cStreamdevClientSetup StreamdevClientSetup;
 
+class cPluginStreamdevClient;
+
 class cStreamdevClientMenuSetupPage: public cMenuSetupPage {
 private:
-	cStreamdevClientSetup m_NewSetup;
+	cPluginStreamdevClient *m_Plugin;
+	cStreamdevClientSetup    m_NewSetup;
 	
 protected:
 	virtual void Store(void);
 
 public:
-	cStreamdevClientMenuSetupPage(void);
+	cStreamdevClientMenuSetupPage(cPluginStreamdevClient *Plugin);
 	virtual ~cStreamdevClientMenuSetupPage();
 };
 

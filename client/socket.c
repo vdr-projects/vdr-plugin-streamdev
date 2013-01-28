@@ -18,12 +18,11 @@
 #include "client/socket.h"
 #include "common.h"
 
-cClientSocket ClientSocket;
-
 cClientSocket::cClientSocket(void) 
 {
 	memset(m_DataSockets, 0, sizeof(cTBSocket*) * si_Count);
 	m_ServerVersion = 0;
+	m_Priority = -100;
 	m_Prio = false;
 	m_Abort = false;
 	m_LastSignalUpdate = 0;
@@ -284,12 +283,19 @@ bool cClientSocket::SetChannelDevice(const cChannel *Channel) {
 }
 
 bool cClientSocket::SetPriority(int Priority) {
+	if (Priority == m_Priority)
+		return true;
+
 	if (!CheckConnection()) return false;
 
 	CMD_LOCK;
 
 	std::string command = (std::string)"PRIO " + (const char*)itoa(Priority);
-	return Command(command, 220);
+	if (!Command(command, 220))
+		return false;
+
+	m_Priority = Priority;
+	return true;
 }
 
 bool cClientSocket::GetSignal(int *SignalStrength, int *SignalQuality, int *Dev) {

@@ -376,29 +376,26 @@ type "127001<OK>" on your remote. If you want to enter "192.168.1.12", type
 "1921681<Right>12<OK>". 
 
 The parameters "Remote IP" and "Remote Port" in the client's setup specify the 
-address of the remote VDR-to-VDR server to connect to. Activate the client by
-setting "Start Client" to yes. It is disabled by default, because it wouldn't
-make much sense to start the client without specifying a server anyway. The 
-client is activated after you push the OK button, so there's no need to restart
-VDR. Deactivation on-the-fly is not possible, so in order to deactivate the 
-client, you will have to restart VDR. However requests to switch channels will
-be refused by streamdev-client once it has been deactivated. All other settings
-can be changed without restarting VDR.
-
-The client will try to connect to the server (in case it isn't yet) whenever 
-a remote channel is requested. Just activate the client and switch to a 
-channel that's not available by local devices. If anything goes wrong with the 
-connection between the two, you will see it in the logfile instantly. If you 
-now switch the client to a channel which isn't covered by it's own local
-devices, it will ask the server for it. If the server can (currently) receive
-that channel, the client will show it until you switch again, or until the 
-server needs that card (if no other is free) for a recording on a different 
-transponder.
+address of the remote VDR-to-VDR server to connect to. The client is disabled
+by default, because it wouldn't make much sense to start the client without
+specifying a server anyway. Activate the client by setting "Simultaneously used
+Devices" to at least 1. Streamdev-client will allocate as many VDR devices as
+you configure here. Each of these devices opens one connection to the server
+and becomes associated with one of the server's devices (typically a DVB card)
+on demand.
 
 Only the needed PIDs are transferred, and additional PIDs can be turned on
 during an active transfer. This makes it possible to switch languages, receive
-additional channels (for recording on the client) and use plugins that use
-receivers themselves (like osdteletext).
+additional channels on the same transponder and use plugins that use receivers
+themselves (like osdteletext).
+
+So for viewing live TV a single device is sufficient. But if the client needs
+to receive channels from different transponders simultaneously (e.g. for PiP or
+client side recordings) a second device becomes necessary.
+
+To allocate additional devices, just increase the number and push the OK button.
+There's no need to restart VDR. Deleting VDR devices on-the-fly is not possible.
+However requests to switch channels will be refused by redundant devices.
 
 The default timeout of 2 seconds for network operations should be sufficient in
 most cases. Increase "Timeout" if you get frequent timeout errors in the log.
@@ -435,12 +432,9 @@ higher, live TV will use your DVB card until a recordings kicks in. Then the
 recording will take the DVB card and live TV will be shifted to streamdev
 (you'll notice a short interruption of live TV).
 
-Note that streamdev-client acts similar to a DVB card. It is possible to receive
-multiple channels simultaneously, but only from the same transponder. Just add
-additional instances of streamdev-client and you will be able to receive as many
-transponders at a time. The same trick allows a client to receive channels from
-different servers. To create an additional instance, copy the streamdev-client
-binary to a different name (e.g. streamdev-client2):
+To receive channels from multiple servers, create additional instances of the
+streamdev-client plugin. Simply copy (don't link!) the binary to a different
+name (e.g. streamdev-client2):
 
   cd VDRPLUGINLIBDIR
   cp libvdr-streamdev-client.so.1.X.X libvdr-streamdev-client2.so.1.X.X

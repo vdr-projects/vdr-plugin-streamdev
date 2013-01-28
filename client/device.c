@@ -29,30 +29,28 @@ using namespace std;
 
 #define VIDEOBUFSIZE MEGABYTE(3)
 
-cStreamdevDevice *cStreamdevDevice::m_Device = NULL;
 const cChannel *cStreamdevDevice::m_DenyChannel = NULL;
 
 cStreamdevDevice::cStreamdevDevice(void) {
-	m_Channel    = NULL;
-	m_TSBuffer   = NULL;
+	m_Disabled = false;
+	m_ClientSocket = new cClientSocket();
+	m_Channel = NULL;
+	m_TSBuffer = NULL;
 
-	m_Filters    = new cStreamdevFilters;
+	m_Filters = new cStreamdevFilters(m_ClientSocket);
 	StartSectionHandler();
 	isyslog("streamdev-client: got device number %d", CardIndex() + 1);
 
-	m_Device = this;
 	m_Pids = 0;
-	m_Priority = -100;
 }
 
 cStreamdevDevice::~cStreamdevDevice() {
 	Dprintf("Device gets destructed\n");
 
 	Lock();
-	m_Device = NULL;
 	m_Filters->SetConnection(-1);
-	ClientSocket.Quit();
-	ClientSocket.Reset();
+	m_ClientSocket->Quit();
+	m_ClientSocket->Reset();
 	Unlock();
 
 	Cancel(3);
@@ -60,6 +58,7 @@ cStreamdevDevice::~cStreamdevDevice() {
 	StopSectionHandler();
 	DELETENULL(m_Filters);
 	DELETENULL(m_TSBuffer);
+	delete m_ClientSocket;
 }
 
 #if APIVERSNUM >= 10700
@@ -84,7 +83,7 @@ bool cStreamdevDevice::IsTunedToTransponder(const cChannel *Channel) const
 bool cStreamdevDevice::IsTunedToTransponder(const cChannel *Channel)
 #endif
 {
-	return ClientSocket.DataSocket(siLive) != NULL &&
+	return m_ClientSocket->DataSocket(siLive) != NULL &&
 			m_Channel != NULL &&
 			Channel->Transponder() == m_Channel->Transponder();
 }
@@ -92,14 +91,14 @@ bool cStreamdevDevice::IsTunedToTransponder(const cChannel *Channel)
 bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority, 
 		bool *NeedsDetachReceivers) const {
 #if APIVERSNUM >= 10725
-	bool prio = Priority == IDLEPRIORITY || Priority >= this->Priority();
+	bool prio = Priority == IDLEPRIORITY || Priority >= m_ClientSocket->Priority();
 #else
-	bool prio = Priority < 0 || Priority > this->Priority();
+	bool prio = Priority < 0 || Priority > m_ClientSocket->Priority();
 #endif
 	bool res = prio;
 	bool ndr = false;
 
-	if (!StreamdevClientSetup.StartClient || Channel == m_DenyChannel)
+	if (m_Disabled || Channel == m_DenyChannel)
 		return false;
 
 	Dprintf("ProvidesChannel, Channel=%s, Prio=%d\n", Channel->Name(), Priority);
@@ -131,7 +130,7 @@ bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority,
 	}
 	else if (prio) {
 		if (Priority == LIVEPRIORITY) {
-			if (ClientSocket.ServerVersion() >= 100) {
+			if (m_ClientSocket->ServerVersion() >= 100) {
 				Priority = StreamdevClientSetup.LivePriority;
 				UpdatePriority(true);
 			}
@@ -141,10 +140,10 @@ bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority,
 			}
 		}
 
-		res = ClientSocket.ProvidesChannel(Channel, Priority);
+		res = m_ClientSocket->ProvidesChannel(Channel, Priority);
 		ndr = Receiving();
 
-		if (ClientSocket.ServerVersion() >= 100)
+		if (m_ClientSocket->ServerVersion() >= 100)
 			UpdatePriority(false);
 	}
 
@@ -175,9 +174,9 @@ bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel,
 		m_Channel = Channel;
 		// Old servers delete cStreamdevLiveStreamer in ABRT.
 		// Delete it now or it will happen after we tuned to new channel
-		if (ClientSocket.ServerVersion() < 100)
+		if (m_ClientSocket->ServerVersion() < 100)
 			CloseDvr();
-		res = ClientSocket.SetChannelDevice(m_Channel);
+		res = m_ClientSocket->SetChannelDevice(m_Channel);
 	}
 	Dprintf("setchanneldevice res=%d\n", res);
 	return res;
@@ -189,7 +188,7 @@ bool cStreamdevDevice::SetPid(cPidHandle *Handle, int Type, bool On) {
 
 	bool res = true; 
 	if (Handle->pid && (On || !Handle->used)) {
-		res = ClientSocket.SetPid(Handle->pid, On);
+		res = m_ClientSocket->SetPid(Handle->pid, On);
 
 		m_Pids += (!res) ? 0 : On ? 1 : -1;
 		if (m_Pids < 0) 
@@ -203,8 +202,8 @@ bool cStreamdevDevice::OpenDvr(void) {
 	LOCK_THREAD;
 
 	CloseDvr();
-	if (ClientSocket.CreateDataConnection(siLive)) {
-		m_TSBuffer = new cTSBuffer(*ClientSocket.DataSocket(siLive), MEGABYTE(2), CardIndex() + 1);
+	if (m_ClientSocket->CreateDataConnection(siLive)) {
+		m_TSBuffer = new cTSBuffer(*m_ClientSocket->DataSocket(siLive), MEGABYTE(2), CardIndex() + 1);
 	}
 	else {
 		esyslog("cStreamdevDevice::OpenDvr(): DVR connection FAILED");
@@ -217,26 +216,26 @@ void cStreamdevDevice::CloseDvr(void) {
 	Dprintf("CloseDvr\n");
 	LOCK_THREAD;
 
-	ClientSocket.CloseDvr();
+	m_ClientSocket->CloseDvr();
 	DELETENULL(m_TSBuffer);
 }
 
 bool cStreamdevDevice::GetTSPacket(uchar *&Data) {
-	if (m_TSBuffer && m_Device) {
+	if (m_TSBuffer) {
 		Data = m_TSBuffer->Get();
 #if 1 // TODO: this should be fixed in vdr cTSBuffer
 		// simple disconnect detection
 		static int m_TSFails = 0;
 		if (!Data) {
 			LOCK_THREAD;
-			if(!ClientSocket.DataSocket(siLive)) {
+			if(!m_ClientSocket->DataSocket(siLive)) {
 				return false; // triggers CloseDvr() + OpenDvr() in cDevice
                         }
-			cPoller Poller(*ClientSocket.DataSocket(siLive));
+			cPoller Poller(*m_ClientSocket->DataSocket(siLive));
 			errno = 0;
 			if (Poller.Poll() && !errno) {
 				char tmp[1];
-				if (recv(*ClientSocket.DataSocket(siLive), tmp, 1, MSG_PEEK) == 0 && !errno) {
+				if (recv(*m_ClientSocket->DataSocket(siLive), tmp, 1, MSG_PEEK) == 0 && !errno) {
 esyslog("cStreamDevice::GetTSPacket: GetChecked: NOTHING (%d)", m_TSFails);
 					m_TSFails++; 
 					if (m_TSFails > 10) {
@@ -264,61 +263,50 @@ int cStreamdevDevice::OpenFilter(u_short Pid, u_char Tid, u_char Mask) {
 		return -1;
 
 
-	if (!ClientSocket.DataSocket(siLiveFilter)) {
-		if (ClientSocket.CreateDataConnection(siLiveFilter)) {
-			m_Filters->SetConnection(*ClientSocket.DataSocket(siLiveFilter));
+	if (!m_ClientSocket->DataSocket(siLiveFilter)) {
+		if (m_ClientSocket->CreateDataConnection(siLiveFilter)) {
+			m_Filters->SetConnection(*m_ClientSocket->DataSocket(siLiveFilter));
 		} else {
 			isyslog("cStreamdevDevice::OpenFilter: connect failed: %m");
 			return -1;
 		}
 	}
 
-	if (ClientSocket.SetFilter(Pid, Tid, Mask, true))
+	if (m_ClientSocket->SetFilter(Pid, Tid, Mask, true))
 		return m_Filters->OpenFilter(Pid, Tid, Mask);
 
 	return -1;
 }
 
-bool cStreamdevDevice::Init(void) {
-	if (m_Device == NULL && StreamdevClientSetup.StartClient)
-		new cStreamdevDevice;
+bool cStreamdevDevice::ReInit(bool Disable) {
+	LOCK_THREAD;
+	m_Disabled = Disable;
+	m_Filters->SetConnection(-1);
+	m_Pids = 0;
+	m_ClientSocket->Quit();
+	m_ClientSocket->Reset();
+	//DELETENULL(m_TSBuffer);
 	return true;
 }
 
-bool cStreamdevDevice::ReInit(void) {
-	if(m_Device) {
-		m_Device->Lock();
-		m_Device->m_Filters->SetConnection(-1);
-		m_Device->m_Pids = 0;
-	}
-	ClientSocket.Quit();
-	ClientSocket.Reset();
-	if (m_Device != NULL) {
-		//DELETENULL(m_Device->m_TSBuffer);
-		m_Device->Unlock();
-	}
-	return StreamdevClientSetup.StartClient ? Init() : true;
-}
-
-void cStreamdevDevice::UpdatePriority(bool SwitchingChannels) {
-	if (m_Device) {
-		m_Device->Lock();
-		if (ClientSocket.SupportsPrio() && ClientSocket.DataSocket(siLive)) {
-			int Priority = m_Device->Priority();
+void cStreamdevDevice::UpdatePriority(bool SwitchingChannels) const {
+	if (!m_Disabled) {
+		//LOCK_THREAD;
+		const_cast<cStreamdevDevice*>(this)->Lock();
+		if (m_ClientSocket->SupportsPrio() && m_ClientSocket->DataSocket(siLive)) {
+			int Priority = this->Priority();
 			// override TRANSFERPRIORITY (-1) with live TV priority from setup
-			if (m_Device == cDevice::ActualDevice() && Priority == TRANSFERPRIORITY) {
-				Priority = StreamdevClientSetup.LivePriority;
+			if (this == cDevice::ActualDevice() && m_ClientSocket->Priority() == TRANSFERPRIORITY) {
+				int Priority = StreamdevClientSetup.LivePriority;
 				// temporarily lower priority
 				if (SwitchingChannels)
 					Priority--;
-				if (Priority < 0 && ClientSocket.ServerVersion() < 100)
+				if (Priority < 0 && m_ClientSocket->ServerVersion() < 100)
 					Priority = 0;
-
 			}
-			if (m_Device->m_Priority != Priority && ClientSocket.SetPriority(Priority))
-				m_Device->m_Priority = Priority;
+			m_ClientSocket->SetPriority(Priority);
 		}
-		m_Device->Unlock();
+		const_cast<cStreamdevDevice*>(this)->Unlock();
 	}
 }
 
@@ -330,8 +318,8 @@ cString cStreamdevDevice::DeviceType(void) const {
 	static int dev = -1;
 	static cString devType("STRDev");
 	int d = -1;
-	if (ClientSocket.DataSocket(siLive) != NULL)
-		ClientSocket.GetSignal(NULL, NULL, &d);
+	if (m_ClientSocket->DataSocket(siLive) != NULL)
+		m_ClientSocket->GetSignal(NULL, NULL, &d);
 	if (d != dev) {
 		dev = d;
 		devType = d < 0 ? "STRDev" : *cString::sprintf("STRD%2d", d);
@@ -341,15 +329,15 @@ cString cStreamdevDevice::DeviceType(void) const {
 
 int cStreamdevDevice::SignalStrength(void) const {
 	int strength = -1;
-	if (ClientSocket.DataSocket(siLive) != NULL)
-		ClientSocket.GetSignal(&strength, NULL, NULL);
+	if (m_ClientSocket->DataSocket(siLive) != NULL)
+		m_ClientSocket->GetSignal(&strength, NULL, NULL);
 	return strength;
 }
 
 int cStreamdevDevice::SignalQuality(void) const {
 	int quality = -1;
-	if (ClientSocket.DataSocket(siLive) != NULL)
-		ClientSocket.GetSignal(NULL, &quality, NULL);
+	if (m_ClientSocket->DataSocket(siLive) != NULL)
+		m_ClientSocket->GetSignal(NULL, &quality, NULL);
 	return quality;
 }
 

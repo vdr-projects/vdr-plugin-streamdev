@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Implemented multi-device support for streamdev client (suggested by johns)
 - Basic support for HTTP streaming of recordings
 - Close writer when streamer is finished
 - Don't abort VTP connection if filter stream is broken

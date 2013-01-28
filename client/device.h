@@ -17,13 +17,13 @@ class cTBString;
 class cStreamdevDevice: public cDevice {
 
 private:
+	bool                 m_Disabled;
+	cClientSocket       *m_ClientSocket;
 	const cChannel      *m_Channel;
 	cTSBuffer           *m_TSBuffer;
 	cStreamdevFilters   *m_Filters;
 	int                  m_Pids;
-	int                  m_Priority;
 
-	static cStreamdevDevice *m_Device;
 	static const cChannel   *m_DenyChannel;
 
 protected:
@@ -67,12 +67,10 @@ public:
 	virtual int SignalStrength(void) const;
 	virtual int SignalQuality(void) const;
 
-	static void UpdatePriority(bool SwitchingChannels = false);
+	bool ReInit(bool Disable);
+	void UpdatePriority(bool SwitchingChannels = false) const;
+	bool SuspendServer() { return m_ClientSocket->SuspendServer(); }
 	static void DenyChannel(const cChannel *Channel) { m_DenyChannel = Channel; }
-	static bool Init(void);
-	static bool ReInit(void);
-
-	static cStreamdevDevice *GetDevice(void) { return m_Device; }
 };
 
 #endif // VDR_STREAMDEV_DEVICE_H

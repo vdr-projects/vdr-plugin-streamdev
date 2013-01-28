@@ -23,6 +23,7 @@ private:
 	char          m_Buffer[BUFSIZ + 1]; // various uses
 	unsigned int  m_ServerVersion;
 	bool          m_Prio; // server supports command PRIO
+	int           m_Priority; // current device priority
 	bool          m_Abort; // quit command pending
 
 	time_t        m_LastSignalUpdate;
@@ -55,6 +56,7 @@ public:
 	bool SetChannelDevice(const cChannel *Channel);
 	bool SupportsPrio() { return m_Prio; }
 	unsigned int ServerVersion() { return m_ServerVersion; }
+	int Priority() const { return m_Priority; }
 	bool SetPriority(int Priority);
 	bool SetPid(int Pid, bool On);
 	bool SetFilter(ushort Pid, uchar Tid, uchar Mask, bool On);
@@ -65,7 +67,5 @@ public:
 
 	cTBSocket *DataSocket(eSocketId Id) const;
 };
-
-extern class cClientSocket ClientSocket;
 
 #endif // VDR_STREAMDEV_CLIENT_CONNECTION_H

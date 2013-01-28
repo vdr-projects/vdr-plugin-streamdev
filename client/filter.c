@@ -144,8 +144,9 @@ bool cStreamdevFilter::IsClosed(void) {
 
 // --- cStreamdevFilters -----------------------------------------------------
 
-cStreamdevFilters::cStreamdevFilters(void):
+cStreamdevFilters::cStreamdevFilters(cClientSocket *ClientSocket):
 		cThread("streamdev-client: sections assembler") {
+	m_ClientSocket = ClientSocket;
 	m_TSBuffer = NULL;
 }
 
@@ -173,7 +174,7 @@ void cStreamdevFilters::CarbageCollect(void) {
 			if (errno == ECONNREFUSED ||
 					errno == ECONNRESET ||
 					errno == EPIPE) {
-				ClientSocket.SetFilter(fi->Pid(), fi->Tid(), fi->Mask(), false);
+				m_ClientSocket->SetFilter(fi->Pid(), fi->Tid(), fi->Mask(), false);
 				Dprintf("cStreamdevFilters::CarbageCollector: filter closed: Pid %4d, Tid %3d, Mask %2x (%d filters left)",
 						(int)fi->Pid(), (int)fi->Tid(), fi->Mask(), Count()-1);
 
@@ -200,7 +201,7 @@ bool cStreamdevFilters::ReActivateFilters(void)
 	bool res = true;
 	CarbageCollect();
 	for (cStreamdevFilter *fi = First(); fi; fi = Next(fi)) {
-		res = ClientSocket.SetFilter(fi->Pid(), fi->Tid(), fi->Mask(), true) && res;
+		res = m_ClientSocket->SetFilter(fi->Pid(), fi->Tid(), fi->Mask(), true) && res;
 		Dprintf("ReActivateFilters(%d, %d, %d) -> %s", fi->Pid(), fi->Tid(), fi->Mask(), res ? "Ok" :"FAIL");
 	}
 	return res;
@@ -251,7 +252,7 @@ void cStreamdevFilters::Action(void) {
 						Dprintf("FATAL ERROR: %m\n");
 						esyslog("streamdev-client: couldn't send section packet: %m");
 					}
-					ClientSocket.SetFilter(f->Pid(), f->Tid(), f->Mask(), false);
+					m_ClientSocket->SetFilter(f->Pid(), f->Tid(), f->Mask(), false);
 					Del(f);
 					// Filter was closed.
 					//  - need to check remaining filters for another match
@@ -261,7 +262,7 @@ void cStreamdevFilters::Action(void) {
 		} else {
 #if 1 // TODO: this should be fixed in vdr cTSBuffer
 			// Check disconnection
-			int fd = *ClientSocket.DataSocket(siLiveFilter);
+			int fd = *m_ClientSocket->DataSocket(siLiveFilter);
 			if(fd < 0)
 				break;
 			cPoller Poller(fd);
@@ -273,7 +274,7 @@ void cStreamdevFilters::Action(void) {
 					++fails;
 					if (fails >= 10) {
 						esyslog("cStreamdevFilters::Action(): stream disconnected ?");
-						ClientSocket.CloseDataConnection(siLiveFilter);
+						m_ClientSocket->CloseDataConnection(siLiveFilter);
 						break;
 					}
 				} else {

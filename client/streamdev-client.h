@@ -9,16 +9,20 @@
 
 #include <vdr/plugin.h>
 
+#define STREAMDEV_MAXDEVICES 8
+class cStreamdevDevice;
+
 class cPluginStreamdevClient : public cPlugin {
 private:
-	static const char *DESCRIPTION;
+  static const char *DESCRIPTION;
+  cStreamdevDevice *m_Devices[STREAMDEV_MAXDEVICES];
 
 public:
   cPluginStreamdevClient(void);
   virtual ~cPluginStreamdevClient();
   virtual const char *Version(void) { return VERSION; }
   virtual const char *Description(void);
-  virtual bool Start(void);
+  virtual bool Initialize(void);
   virtual const char *MainMenuEntry(void);
   virtual cOsdObject *MainMenuAction(void);
   virtual cMenuSetupPage *SetupMenu(void);

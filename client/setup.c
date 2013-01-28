@@ -5,7 +5,7 @@
 #include <vdr/menuitems.h>
 
 #include "client/setup.h"
-#include "client/device.h"
+#include "client/streamdev-client.h"
 
 #ifndef MINPRIORITY
 #define MINPRIORITY -MAXPRIORITY
@@ -50,11 +50,12 @@ bool cStreamdevClientSetup::SetupParse(const char *Name, const char *Value) {
 	return true;
 }
 
-cStreamdevClientMenuSetupPage::cStreamdevClientMenuSetupPage(void) {
+cStreamdevClientMenuSetupPage::cStreamdevClientMenuSetupPage(cPluginStreamdevClient *Plugin) {
+	m_Plugin = Plugin;
 	m_NewSetup = StreamdevClientSetup;
 
 	Add(new cMenuEditBoolItem(tr("Hide Mainmenu Entry"), &m_NewSetup.HideMenuEntry));
-	Add(new cMenuEditBoolItem(tr("Start Client"),        &m_NewSetup.StartClient));
+	Add(new cMenuEditIntItem (tr("Simultaneously used Devices"), &m_NewSetup.StartClient, 0, STREAMDEV_MAXDEVICES));
 	Add(new cMenuEditIpItem  (tr("Remote IP"),            m_NewSetup.RemoteIp));
 	Add(new cMenuEditIntItem (tr("Remote Port"),         &m_NewSetup.RemotePort, 0, 65535));
 	Add(new cMenuEditIntItem (tr("Timeout (s)"),         &m_NewSetup.Timeout, 1, 15));
@@ -74,11 +75,6 @@ cStreamdevClientMenuSetupPage::~cStreamdevClientMenuSetupPage() {
 }
 
 void cStreamdevClientMenuSetupPage::Store(void) {
-	if (m_NewSetup.StartClient != StreamdevClientSetup.StartClient) {
-		if (m_NewSetup.StartClient)
-			cStreamdevDevice::Init();
-	}
-
 	SetupStore("StartClient", m_NewSetup.StartClient);
 	if (strcmp(m_NewSetup.RemoteIp, "") == 0)
 		SetupStore("RemoteIp", "-none-");
@@ -97,6 +93,6 @@ void cStreamdevClientMenuSetupPage::Store(void) {
 
 	StreamdevClientSetup = m_NewSetup;
 
-	cStreamdevDevice::ReInit();
+	m_Plugin->Initialize();
 }
 

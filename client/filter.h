@@ -11,9 +11,11 @@
 
 class cTSBuffer;
 class cStreamdevFilter;
+class cClientSocket;
 
 class cStreamdevFilters: public cList<cStreamdevFilter>, public cThread {
 private:
+	cClientSocket     *m_ClientSocket;
 	cTSBuffer         *m_TSBuffer;
 	
 protected:
@@ -23,7 +25,7 @@ protected:
 	bool ReActivateFilters(void);
 
 public:
-	cStreamdevFilters(void);
+	cStreamdevFilters(cClientSocket *ClientSocket);
 	virtual ~cStreamdevFilters();
 
 	void SetConnection(int Handle);
