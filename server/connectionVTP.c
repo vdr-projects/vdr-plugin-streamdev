@@ -1815,7 +1815,11 @@ bool cConnectionVTP::Respond(int Code, const char *Message, ...)
 {
 	va_list ap;
 	va_start(ap, Message);
+#if APIVERSNUM >= 10728
+	cString str = cString::vsprintf(Message, ap);
+#else
 	cString str = cString::sprintf(Message, ap);
+#endif
 	va_end(ap);
 
 	if (Code >= 0 && m_LastCommand != NULL) {
