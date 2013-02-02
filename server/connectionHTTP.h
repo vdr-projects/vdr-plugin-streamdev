@@ -39,6 +39,8 @@ private:
 	cChannelList                     *m_ChannelList;
 
 	cChannelList* ChannelListFromString(const std::string &PathInfo, const std::string &Filebase, const std::string &Fileext) const;
+	cRecording* RecordingFromString(const char* FileBase, const char* FileExt) const;
+
 	bool ProcessURI(const std::string &PathInfo);
 	bool HttpResponse(int Code, bool Last, const char* ContentType = NULL, const char* Headers = "", ...);
 			//__attribute__ ((format (printf, 5, 6)));

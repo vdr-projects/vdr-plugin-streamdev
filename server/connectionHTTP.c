@@ -5,6 +5,11 @@
 #include <ctype.h>
 #include <time.h>
 #include <stdarg.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include <vdr/thread.h>
 #include <vdr/recording.h>
  
@@ -436,6 +441,37 @@ cChannelList* cConnectionHTTP::ChannelListFromString(const std::string& Path, co
 	return NULL;
 }
 
+cRecording* cConnectionHTTP::RecordingFromString(const char *FileBase, const char *FileExt) const
+{
+	if (strcasecmp(FileExt, ".rec") != 0)
+		return NULL;
+
+	char *p = NULL;
+	unsigned long l = strtoul(FileBase, &p, 0);
+	if (p != FileBase && l > 0L) {
+		if (*p == ':') {
+			// get recording by dev:inode
+			unsigned long inode = strtoul(p + 1, &p, 0);
+			if (*p == 0 && inode > 0) {
+				struct stat st;
+				cThreadLock RecordingsLock(&Recordings);
+				for (cRecording *rec = Recordings.First(); rec; rec = Recordings.Next(rec)) {
+					if (stat(rec->FileName(), &st) == 0 && st.st_dev == (dev_t) l && st.st_ino == (ino_t) inode)
+						return new cRecording(rec->FileName());
+				}
+			}
+		}
+		else if (*p == 0) {
+			// get recording by index
+			cThreadLock RecordingsLock(&Recordings);
+			cRecording* rec = Recordings.Get((int) l - 1);
+			if (rec)
+				return new cRecording(rec->FileName());
+		}
+	}
+	return NULL;
+}
+
 bool cConnectionHTTP::ProcessURI(const std::string& PathInfo) 
 {
 	std::string filespec, fileext;
@@ -475,13 +511,9 @@ bool cConnectionHTTP::ProcessURI(const std::string& PathInfo)
 	if ((m_ChannelList = ChannelListFromString(PathInfo.substr(1, file_pos), filespec.c_str(), fileext.c_str())) != NULL) {
 		Dprintf("Channel list requested\n");
 		return true;
-	} else if (strcmp(fileext.c_str(), ".rec") == 0) {
-		cThreadLock RecordingsLock(&Recordings);
-		cRecording* rec = Recordings.Get(atoi(filespec.c_str()) - 1);
-		Dprintf("Recording %s%s found\n", rec ? rec->Name() : filespec.c_str(), rec ? "" : " not");
-		if (rec)
-			m_Recording = new cRecording(rec->FileName());
-		return m_Recording != NULL;
+	} else if ((m_Recording = RecordingFromString(filespec.c_str(), fileext.c_str())) != NULL) {
+		Dprintf("Recording %s found\n", m_Recording->Name());
+		return true;
 	} else if ((m_Channel = ChannelFromString(filespec.c_str(), &m_Apid[0], &m_Dpid[0])) != NULL) {
 		Dprintf("Channel found. Apid/Dpid is %d/%d\n", m_Apid[0], m_Dpid[0]);
 		return true;
