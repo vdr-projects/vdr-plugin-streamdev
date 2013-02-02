@@ -107,6 +107,7 @@ class cHtmlChannelList: public cChannelList
 		const cChannel *current;
 		eStreamType streamType;
 		const char* self;
+		const char* rss;
 		const char* groupTarget;
 
 		std::string StreamTypeMenu();
@@ -124,7 +125,7 @@ class cHtmlChannelList: public cChannelList
 		}
 		virtual bool HasNext();
 		virtual std::string Next();
-		cHtmlChannelList(cChannelIterator *Iterator, eStreamType StreamType, const char *Self, const char *GroupTarget);
+		cHtmlChannelList(cChannelIterator *Iterator, eStreamType StreamType, const char *Self, const char *Rss, const char *GroupTarget);
 		virtual ~cHtmlChannelList();
 };
 
@@ -141,6 +142,23 @@ class cM3uChannelList: public cChannelList
 		virtual std::string Next();
 		cM3uChannelList(cChannelIterator *Iterator, const char* Base);
 		virtual ~cM3uChannelList();
+};
+
+class cRssChannelList: public cChannelList
+{
+	private:
+		char *base;
+		char *html;
+		enum eRssState { msFirst, msContinue, msLast };
+		eRssState rssState;
+		cCharSetConv m_IConv;
+	public:
+		virtual std::string HttpHeader() { return cChannelList::HttpHeader() + "Content-type: application/rss+xml\r\n"; };
+		virtual bool HasNext();
+		virtual std::string Next();
+		
+		cRssChannelList(cChannelIterator *Iterator, const char *Base, const char *Html);
+		virtual ~cRssChannelList();
 };
 
 inline const cChannel* cChannelIterator::SkipFakeGroups(const cChannel* Group)

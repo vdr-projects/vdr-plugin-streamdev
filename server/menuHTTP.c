@@ -119,8 +119,8 @@ const cChannel* cChannelList::GetGroup(int Index)
 const char* cHtmlChannelList::menu =
 	"[<a href=\"/\">Home</a> (<a href=\"all.html\" tvid=\"RED\">no script</a>)] "
 	"[<a href=\"tree.html\" tvid=\"GREEN\">Tree View</a>] "
-	"[<a href=\"groups.html\" tvid=\"YELLOW\">Groups</a> (<a href=\"groups.m3u\">Playlist</a>)] "
-	"[<a href=\"channels.html\" tvid=\"BLUE\">Channels</a> (<a href=\"channels.m3u\">Playlist</a>)] ";
+	"[<a href=\"groups.html\" tvid=\"YELLOW\">Groups</a> (<a href=\"groups.m3u\">Playlist</a> | <a href=\"groups.rss\">RSS</a>)] "
+	"[<a href=\"channels.html\" tvid=\"BLUE\">Channels</a> (<a href=\"channels.m3u\">Playlist</a> | <a href=\"channels.rss\">RSS</a>)] ";
 
 const char* cHtmlChannelList::css =
 	"<style type=\"text/css\">\n"
@@ -215,10 +215,11 @@ std::string cHtmlChannelList::StreamTypeMenu()
 	return typeMenu;
 }
 
-cHtmlChannelList::cHtmlChannelList(cChannelIterator *Iterator, eStreamType StreamType, const char *Self, const char *GroupTarget): cChannelList(Iterator)
+cHtmlChannelList::cHtmlChannelList(cChannelIterator *Iterator, eStreamType StreamType, const char *Self, const char *Rss, const char *GroupTarget): cChannelList(Iterator)
 {
 	streamType = StreamType;
 	self = strdup(Self);
+	rss = strdup(Rss);
 	groupTarget = (GroupTarget && *GroupTarget) ? strdup(GroupTarget) : NULL;
 	htmlState = hsRoot;
 	current = NULL;
@@ -227,6 +228,7 @@ cHtmlChannelList::cHtmlChannelList(cChannelIterator *Iterator, eStreamType Strea
 cHtmlChannelList::~cHtmlChannelList()
 {
 	free((void *) self);
+	free((void *) rss);
 	free((void *) groupTarget);
 }
 
@@ -311,7 +313,7 @@ std::string cHtmlChannelList::Next()
 
 std::string cHtmlChannelList::HtmlHead()
 {
-	return (std::string) "";
+	return (std::string) "<link rel=\"alternate\" type=\"application/rss+xml\" title=\"RSS\" href=\"" + rss + "\"/>";
 }
 
 std::string cHtmlChannelList::PageTop()
@@ -431,4 +433,64 @@ std::string cM3uChannelList::Next()
 			base + (std::string) channel->GetChannelID().ToString();
 	}
 }
+
+// ******************** cRssChannelList ******************
+cRssChannelList::cRssChannelList(cChannelIterator *Iterator, const char *Base, const char *Html)
+: cChannelList(Iterator),
+  m_IConv(cCharSetConv::SystemCharacterTable(), "UTF-8")
+{
+	base = strdup(Base);
+	html = strdup(Html);
+	rssState = msFirst;
+}
+
+cRssChannelList::~cRssChannelList()
+{
+	free(base);
+	free(html);
+}
+
+bool cRssChannelList::HasNext()
+{
+	return rssState != msLast;
+}
+
+std::string cRssChannelList::Next()
+{
+	std::string type_ext;
+
+	if (rssState == msFirst)
+	{
+		rssState = msContinue;
+		return (std::string) "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<rss version=\"2.0\">\n\t<channel>\n"
+				"\t\t<title>VDR</title>\n"
+				"\t\t<link>" + base + html + "</link>\n"
+				"\t\t<description>VDR channel list</description>\n"
+				;
+	}
+
+	const cChannel *channel = NextChannel();
+	if (!channel)
+	{
+		rssState = msLast;
+		return "\t</channel>\n</rss>\n";
+	}
+
+	std::string name = (std::string) m_IConv.Convert(channel->Name());
+
+	if (channel->GroupSep())
+	{
+		return (std::string) "\t\t<item>\n\t\t\t<title>" +
+			name + "</title>\n\t\t\t<link>" +
+			base + "group.rss?group=" + (const char*) itoa(cChannelList::GetGroupIndex(channel)) + "</link>\n\t\t</item>\n";
+	}
+	else
+	{
+		return (std::string) "\t\t<item>\n\t\t\t<title>" +
+			(const char*) itoa(channel->Number()) + " " + name + "</title>\n\t\t\t<link>" +
+			base + (std::string) channel->GetChannelID().ToString() + "</link>\n\t\t\t<enclosure url=\"" +
+			base + (std::string) channel->GetChannelID().ToString() + "\" type=\"video/mpeg\" />\n\t\t</item>\n";
+	}
+}
+
 

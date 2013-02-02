@@ -417,23 +417,35 @@ cChannelList* cConnectionHTTP::ChannelListFromString(const std::string& Path, co
 	}
 
 	if (iterator) {
+		// assemble base url: http://host/path/
+		std::string base;
+		const static std::string HOST("HTTP_HOST");
+		tStrStrMap::const_iterator it = Headers().find(HOST);
+		if (it != Headers().end())
+			base = "http://" + it->second + "/";
+		else
+			base = (std::string) "http://" + LocalIp() + ":" +
+				(const char*) itoa(StreamdevServerSetup.HTTPServerPort) + "/";
+		base += Path;
+
 		if (Filebase.empty() || Fileext.compare(".htm") == 0 || Fileext.compare(".html") == 0) {
 			std::string self = Filebase + Fileext;
+			std::string rss = Filebase + ".rss";
 			tStrStrMap::const_iterator it = Headers().find("QUERY_STRING");
-			if (it != Headers().end() && !it->second.empty())
+			if (it != Headers().end() && !it->second.empty()) {
 				self += '?' + it->second;
-			return new cHtmlChannelList(iterator, m_StreamType, self.c_str(), groupTarget.c_str());
+				rss += '?' + it->second;
+			}
+			return new cHtmlChannelList(iterator, m_StreamType, self.c_str(), rss.c_str(), groupTarget.c_str());
 		} else if (Fileext.compare(".m3u") == 0) {
-			std::string base;
-			const static std::string HOST("HTTP_HOST");
-			tStrStrMap::const_iterator it = Headers().find(HOST);
-			if (it != Headers().end())
-				base = "http://" + it->second + "/";
-			else
-				base = (std::string) "http://" + LocalIp() + ":" +
-					(const char*) itoa(StreamdevServerSetup.HTTPServerPort) + "/";
-			base += Path;
 			return new cM3uChannelList(iterator, base.c_str());
+		} else if (Fileext.compare(".rss") == 0) {
+			std::string html = Filebase + ".html";
+			tStrStrMap::const_iterator it = Headers().find("QUERY_STRING");
+			if (it != Headers().end() && !it->second.empty()) {
+				html += '?' + it->second;
+			}
+			return new cRssChannelList(iterator, base.c_str(), html.c_str());
 		} else {
 			delete iterator;
 		}
