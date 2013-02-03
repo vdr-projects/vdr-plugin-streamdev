@@ -13,7 +13,7 @@
 #include <tools/select.h>
 
 class cChannel;
-class cChannelList;
+class cMenuList;
 
 class cConnectionHTTP: public cServerConnection {
 private:
@@ -36,9 +36,9 @@ private:
 	// job: replay
 	cRecording                       *m_Recording;
 	// job: listing
-	cChannelList                     *m_ChannelList;
+	cMenuList                        *m_MenuList;
 
-	cChannelList* ChannelListFromString(const std::string &PathInfo, const std::string &Filebase, const std::string &Fileext) const;
+	cMenuList* MenuListFromString(const std::string &PathInfo, const std::string &Filebase, const std::string &Fileext) const;
 	cRecording* RecordingFromString(const char* FileBase, const char* FileExt) const;
 
 	bool ProcessURI(const std::string &PathInfo);

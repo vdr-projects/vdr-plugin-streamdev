@@ -2,15 +2,59 @@
 #include "server/menuHTTP.h"
 
 //**************************** cChannelIterator **************
-cChannelIterator::cChannelIterator(const cChannel *First): channel(First)
-{}
+cChannelIterator::cChannelIterator(const cChannel *First)
+{	
+	first = First;
+	current = NULL;
+}
 
-const cChannel* cChannelIterator::Next()
+bool cChannelIterator::Next()
 {
-	const cChannel *current = channel;
-	channel = NextChannel(channel);
+	if (first)
+	{
+		current = first;
+		first = NULL;
+	}
+	else
+		current = NextChannel(current);
 	return current;
 }
+
+const cString cChannelIterator::ItemId() const
+{
+	if (current)
+	{
+		if (current->GroupSep())
+		{
+			int index = 0;
+			for (int curr = Channels.GetNextGroup(-1); curr >= 0; curr = Channels.GetNextGroup(curr))
+			{
+				if (Channels.Get(curr) == current)
+					return itoa(index);
+				index++;
+			}
+		}
+		else
+		{
+			return itoa(current->Number());
+		}
+	}
+	return cString("-1");
+}
+
+const cChannel* cChannelIterator::GetGroup(const char* GroupId)
+{
+	int group = -1;
+	if (GroupId)
+	{
+		int Index = atoi(GroupId);
+		group = Channels.GetNextGroup(-1);
+		while (Index-- && group >= 0)
+			group = Channels.GetNextGroup(group);
+	}
+	return group >= 0 ? Channels.Get(group) : NULL;
+}
+
 
 //**************************** cListAll **************
 cListAll::cListAll(): cChannelIterator(Channels.First())
@@ -46,7 +90,7 @@ const cChannel* cListGroups::NextChannel(const cChannel *Channel)
 }
 //
 // ********************* cListGroup ****************
-cListGroup::cListGroup(const cChannel *Group): cChannelIterator(GetNextChannelInGroup(Group))
+cListGroup::cListGroup(const char *GroupId): cChannelIterator(GetNextChannelInGroup(GetGroup(GroupId)))
 {}
 
 const cChannel* cListGroup::GetNextChannelInGroup(const cChannel *Channel)
@@ -62,9 +106,9 @@ const cChannel* cListGroup::NextChannel(const cChannel *Channel)
 }
 //
 // ********************* cListTree ****************
-cListTree::cListTree(const cChannel *SelectedGroup): cChannelIterator(Channels.Get(Channels.GetNextGroup(-1)))
+cListTree::cListTree(const char *SelectedGroupId): cChannelIterator(Channels.Get(Channels.GetNextGroup(-1)))
 {
-	selectedGroup = SelectedGroup;
+	selectedGroup = GetGroup(SelectedGroupId);
 	currentGroup = Channels.Get(Channels.GetNextGroup(-1));
 }
 
@@ -86,43 +130,23 @@ const cChannel* cListTree::NextChannel(const cChannel *Channel)
 	return Channel;
 }
 
-// ******************** cChannelList ******************
-cChannelList::cChannelList(cChannelIterator *Iterator) : iterator(Iterator)
+// ******************** cMenuList ******************
+cMenuList::cMenuList(cItemIterator *Iterator) : iterator(Iterator)
 {}
 
-cChannelList::~cChannelList()
+cMenuList::~cMenuList()
 {
 	delete iterator;
 }
 
-int cChannelList::GetGroupIndex(const cChannel *Group)
-{
-	int index = 0;
-	for (int curr = Channels.GetNextGroup(-1); curr >= 0; curr = Channels.GetNextGroup(curr))
-	{
-		if (Channels.Get(curr) == Group)
-			return index;
-		index++;
-	}
-	return -1;
-}
-
-const cChannel* cChannelList::GetGroup(int Index)
-{
-	int group = Channels.GetNextGroup(-1);
-	while (Index-- && group >= 0)
-		group = Channels.GetNextGroup(group);
-	return group >= 0 ? Channels.Get(group) : NULL;
-}
-
-// ******************** cHtmlChannelList ******************
-const char* cHtmlChannelList::menu =
+// ******************** cHtmlMenuList ******************
+const char* cHtmlMenuList::menu =
 	"[<a href=\"/\">Home</a> (<a href=\"all.html\" tvid=\"RED\">no script</a>)] "
 	"[<a href=\"tree.html\" tvid=\"GREEN\">Tree View</a>] "
 	"[<a href=\"groups.html\" tvid=\"YELLOW\">Groups</a> (<a href=\"groups.m3u\">Playlist</a> | <a href=\"groups.rss\">RSS</a>)] "
 	"[<a href=\"channels.html\" tvid=\"BLUE\">Channels</a> (<a href=\"channels.m3u\">Playlist</a> | <a href=\"channels.rss\">RSS</a>)] ";
 
-const char* cHtmlChannelList::css =
+const char* cHtmlMenuList::css =
 	"<style type=\"text/css\">\n"
 	"<!--\n"
 	"a:link, a:visited, a:hover, a:active, a:focus { color:#333399; }\n"
@@ -138,7 +162,7 @@ const char* cHtmlChannelList::css =
 	"-->\n"
 	"</style>";
 
-const char* cHtmlChannelList::js =
+const char* cHtmlMenuList::js =
 	"<script language=\"JavaScript\">\n"
 	"<!--\n"
 
@@ -199,7 +223,7 @@ const char* cHtmlChannelList::js =
 	"</script>";
 
 
-std::string cHtmlChannelList::StreamTypeMenu()
+std::string cHtmlMenuList::StreamTypeMenu()
 {
 	std::string typeMenu;
 	typeMenu += (streamType == stTS ? (std::string) "[TS] " :
@@ -215,29 +239,29 @@ std::string cHtmlChannelList::StreamTypeMenu()
 	return typeMenu;
 }
 
-cHtmlChannelList::cHtmlChannelList(cChannelIterator *Iterator, eStreamType StreamType, const char *Self, const char *Rss, const char *GroupTarget): cChannelList(Iterator)
+cHtmlMenuList::cHtmlMenuList(cItemIterator *Iterator, eStreamType StreamType, const char *Self, const char *Rss, const char *GroupTarget): cMenuList(Iterator)
 {
 	streamType = StreamType;
 	self = strdup(Self);
 	rss = strdup(Rss);
 	groupTarget = (GroupTarget && *GroupTarget) ? strdup(GroupTarget) : NULL;
 	htmlState = hsRoot;
-	current = NULL;
+	onItem = true;
 }
 
-cHtmlChannelList::~cHtmlChannelList()
+cHtmlMenuList::~cHtmlMenuList()
 {
 	free((void *) self);
 	free((void *) rss);
 	free((void *) groupTarget);
 }
 
-bool cHtmlChannelList::HasNext()
+bool cHtmlMenuList::HasNext()
 {
 	return htmlState != hsPageBottom;
 }
 
-std::string cHtmlChannelList::Next()
+std::string cHtmlMenuList::Next()
 {
 	switch (htmlState)
 	{
@@ -254,39 +278,39 @@ std::string cHtmlChannelList::Next()
 			htmlState = hsPageTop;
 			break;
 		case hsPageTop:
-			current = NextChannel();
-			htmlState = current ? (current->GroupSep() ? hsGroupTop : hsPlainTop) : hsPageBottom;
+			onItem = NextItem();
+			htmlState = onItem ? (IsGroup() ? hsGroupTop : hsPlainTop) : hsPageBottom;
 			break;
 		case hsPlainTop:
 			htmlState = hsPlainItem;
 			break;
 		case hsPlainItem:
-			current = NextChannel();
-			htmlState = current && !current->GroupSep() ? hsPlainItem : hsPlainBottom;
+			onItem = NextItem();
+			htmlState = onItem && !IsGroup() ? hsPlainItem : hsPlainBottom;
 			break;
 		case hsPlainBottom:
-			htmlState = current ? hsGroupTop : hsPageBottom;
+			htmlState = onItem ? hsGroupTop : hsPageBottom;
 			break;
 		case hsGroupTop:
-			current = NextChannel();
-			htmlState = current && !current->GroupSep() ? hsItemsTop : hsGroupBottom;
+			onItem = NextItem();
+			htmlState = onItem && !IsGroup() ? hsItemsTop : hsGroupBottom;
 			break;
 		case hsItemsTop:
 			htmlState = hsItem;
 			break;
 		case hsItem:
-			current = NextChannel();
-			htmlState = current && !current->GroupSep() ? hsItem : hsItemsBottom;
+			onItem = NextItem();
+			htmlState = onItem && !IsGroup() ? hsItem : hsItemsBottom;
 			break;
 		case hsItemsBottom:
 			htmlState = hsGroupBottom;
 			break;
 		case hsGroupBottom:
-			htmlState = current ? hsGroupTop : hsPageBottom;
+			htmlState = onItem ? hsGroupTop : hsPageBottom;
 			break;
 		case hsPageBottom:
 		default:
-			esyslog("streamdev-server cHtmlChannelList: invalid call to Next()");
+			esyslog("streamdev-server cHtmlMenuList: invalid call to Next()");
 			break;
 	}
 	switch (htmlState)
@@ -311,36 +335,35 @@ std::string cHtmlChannelList::Next()
 	}
 }
 
-std::string cHtmlChannelList::HtmlHead()
+std::string cHtmlMenuList::HtmlHead()
 {
 	return (std::string) "<link rel=\"alternate\" type=\"application/rss+xml\" title=\"RSS\" href=\"" + rss + "\"/>";
 }
 
-std::string cHtmlChannelList::PageTop()
+std::string cHtmlMenuList::PageTop()
 {
 	return (std::string) "<div class=\"menu\"><div>" + menu + "</div><div>" + StreamTypeMenu() + "</div></div>";
 }
 
-std::string cHtmlChannelList::PageBottom()
+std::string cHtmlMenuList::PageBottom()
 {
 	return (std::string) "";
 }
 
-std::string cHtmlChannelList::GroupTitle()
+std::string cHtmlMenuList::GroupTitle()
 {
 	if (groupTarget)
 	{
-		return (std::string) "<a href=\"" + groupTarget + "?group=" +
-			(const char*) itoa(cChannelList::GetGroupIndex(current)) +
-			"\">" + current->Name() + "</a>";
+		return (std::string) "<a href=\"" + groupTarget + "?group=" + (const char*) ItemId() + "\">" +
+			ItemTitle() + "</a>";
 	}
 	else
 	{
-		return (std::string) current->Name();
+		return (std::string) ItemTitle();
 	}
 }
 
-std::string cHtmlChannelList::ItemText()
+std::string cHtmlMenuList::ItemText()
 {
 	std::string line;
 	std::string suffix;
@@ -352,58 +375,58 @@ std::string cHtmlChannelList::ItemText()
 		case stPES: suffix = (std::string) ".vdr"; break; 
 		default: suffix = "";
 	}
-	line += (std::string) "<li value=\"" + (const char*) itoa(current->Number()) + "\">";
-	line += (std::string) "<a href=\"" + (std::string) current->GetChannelID().ToString() + suffix + "\"";
+	line += (std::string) "<li value=\"" + (const char*) ItemId() + "\">";
+	line += (std::string) "<a href=\"" + (const char*) ItemRessource() + suffix + "\"";
 
 	// for Network Media Tank
 	line += (std::string) " vod ";
-	if (current->Number() < 1000)
-	    line += (std::string) " tvid=\"" + (const char*) itoa(current->Number()) + "\""; 
+	if (strlen(ItemId()) < 4)
+	    line += (std::string) " tvid=\"" + (const char*) ItemId() + "\""; 
 
-	line += (std::string) ">" + current->Name() + "</a>";
+	line += (std::string) ">" + ItemTitle() + "</a>";
 
-	int count = 0;
-	for (int i = 0; current->Apid(i) != 0; ++i, ++count)
-		;
-	for (int i = 0; current->Dpid(i) != 0; ++i, ++count)
-		;
-
-	if (count > 1)
+	// TS always streams all PIDs
+	if (streamType != stTS)
 	{
 		int index = 1;
-		for (int i = 0; current->Apid(i) != 0; ++i, ++index) {
-			line += (std::string) " <a href=\"" + (std::string) current->GetChannelID().ToString() +
-					"+" + (const char*)itoa(index) + suffix + "\" class=\"apid\" vod>" + current->Alang(i) + "</a>";
-			}
-		for (int i = 0; current->Dpid(i) != 0; ++i, ++index) {
-			line += (std::string) " <a href=\"" + (std::string) current->GetChannelID().ToString() +
-					"+" + (const char*)itoa(index) + suffix + "\" class=\"dpid\" vod>" + current->Dlang(i) + "</a>";
-			}
+		const char* lang;
+		std::string pids;
+		for (int i = 0; (lang = Alang(i)) != NULL; ++i, ++index) {
+			pids += (std::string) " <a href=\"" + (const char*) ItemRessource() +
+					"+" + (const char*)itoa(index) + suffix + "\" class=\"apid\" vod>" + (const char*) lang + "</a>";
+		}
+		for (int i = 0; (lang = Dlang(i)) != NULL; ++i, ++index) {
+			pids += (std::string) " <a href=\"" + (const char*) ItemRessource() +
+					"+" + (const char*)itoa(index) + suffix + "\" class=\"dpid\" vod>" + (const char*) lang + "</a>";
+		}
+		// always show audio PIDs for stES to select audio only
+		if (index > 2 || streamType == stES)
+			line += pids;
 	}
 	line += "</li>";
 	return line;
 }
 
-// ******************** cM3uChannelList ******************
-cM3uChannelList::cM3uChannelList(cChannelIterator *Iterator, const char* Base)
-: cChannelList(Iterator),
+// ******************** cM3uMenuList ******************
+cM3uMenuList::cM3uMenuList(cItemIterator *Iterator, const char* Base)
+: cMenuList(Iterator),
   m_IConv(cCharSetConv::SystemCharacterTable(), "UTF-8")
 {
 	base = strdup(Base);
 	m3uState = msFirst;
 }
 
-cM3uChannelList::~cM3uChannelList()
+cM3uMenuList::~cM3uMenuList()
 {
 	free(base);
 }
 
-bool cM3uChannelList::HasNext()
+bool cM3uMenuList::HasNext()
 {
 	return m3uState != msLast;
 }
 
-std::string cM3uChannelList::Next()
+std::string cM3uMenuList::Next()
 {
 	if (m3uState == msFirst)
 	{
@@ -411,32 +434,30 @@ std::string cM3uChannelList::Next()
 		return "#EXTM3U";
 	}
 
-	const cChannel *channel = NextChannel();
-	if (!channel)
+	if (!NextItem())
 	{
 		m3uState = msLast;
 		return "";
 	}
 
-	std::string name = (std::string) m_IConv.Convert(channel->Name());
+	std::string name = (std::string) m_IConv.Convert(ItemTitle());
 
-	if (channel->GroupSep())
+	if (IsGroup())
 	{
 		return (std::string) "#EXTINF:-1," + name + "\r\n" +
-			base + "group.m3u?group=" +
-			(const char*) itoa(cChannelList::GetGroupIndex(channel));
+			base + "group.m3u?group=" + (const char*) ItemId();
 	}
 	else
 	{
 		return (std::string) "#EXTINF:-1," +
-			(const char*) itoa(channel->Number()) + " " + name + "\r\n" +
-			base + (std::string) channel->GetChannelID().ToString();
+			(const char*) ItemId() + " " + name + "\r\n" +
+			base + (const char*) ItemRessource();
 	}
 }
 
-// ******************** cRssChannelList ******************
-cRssChannelList::cRssChannelList(cChannelIterator *Iterator, const char *Base, const char *Html)
-: cChannelList(Iterator),
+// ******************** cRssMenuList ******************
+cRssMenuList::cRssMenuList(cItemIterator *Iterator, const char *Base, const char *Html)
+: cMenuList(Iterator),
   m_IConv(cCharSetConv::SystemCharacterTable(), "UTF-8")
 {
 	base = strdup(Base);
@@ -444,18 +465,18 @@ cRssChannelList::cRssChannelList(cChannelIterator *Iterator, const char *Base, c
 	rssState = msFirst;
 }
 
-cRssChannelList::~cRssChannelList()
+cRssMenuList::~cRssMenuList()
 {
 	free(base);
 	free(html);
 }
 
-bool cRssChannelList::HasNext()
+bool cRssMenuList::HasNext()
 {
 	return rssState != msLast;
 }
 
-std::string cRssChannelList::Next()
+std::string cRssMenuList::Next()
 {
 	std::string type_ext;
 
@@ -469,27 +490,26 @@ std::string cRssChannelList::Next()
 				;
 	}
 
-	const cChannel *channel = NextChannel();
-	if (!channel)
+	if (!NextItem())
 	{
 		rssState = msLast;
 		return "\t</channel>\n</rss>\n";
 	}
 
-	std::string name = (std::string) m_IConv.Convert(channel->Name());
+	std::string name = (std::string) m_IConv.Convert(ItemTitle());
 
-	if (channel->GroupSep())
+	if (IsGroup())
 	{
 		return (std::string) "\t\t<item>\n\t\t\t<title>" +
 			name + "</title>\n\t\t\t<link>" +
-			base + "group.rss?group=" + (const char*) itoa(cChannelList::GetGroupIndex(channel)) + "</link>\n\t\t</item>\n";
+			base + "group.rss?group=" + (const char*) ItemId() + "</link>\n\t\t</item>\n";
 	}
 	else
 	{
 		return (std::string) "\t\t<item>\n\t\t\t<title>" +
-			(const char*) itoa(channel->Number()) + " " + name + "</title>\n\t\t\t<link>" +
-			base + (std::string) channel->GetChannelID().ToString() + "</link>\n\t\t\t<enclosure url=\"" +
-			base + (std::string) channel->GetChannelID().ToString() + "\" type=\"video/mpeg\" />\n\t\t</item>\n";
+			(const char*) ItemId() + " " + name + "</title>\n\t\t\t<link>" +
+			base + (const char*) ItemRessource() + "</link>\n\t\t\t<enclosure url=\"" +
+			base + (const char*) ItemRessource() + "\" type=\"video/mpeg\" />\n\t\t</item>\n";
 	}
 }
 

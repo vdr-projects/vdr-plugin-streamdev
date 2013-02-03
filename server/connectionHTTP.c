@@ -25,7 +25,7 @@ cConnectionHTTP::cConnectionHTTP(void):
 		m_StreamType((eStreamType)StreamdevServerSetup.HTTPStreamType),
 		m_Channel(NULL),
 		m_Recording(NULL),
-		m_ChannelList(NULL)
+		m_MenuList(NULL)
 {
 	Dprintf("constructor hsRequest\n");
 	m_Apid[0] = m_Apid[1] = 0;
@@ -169,8 +169,8 @@ bool cConnectionHTTP::ProcessRequest(void)
 		// should never happen
 		esyslog("streamdev-server connectionHTTP: Missing method or pathinfo");
 	} else if (it_method->second.compare("GET") == 0 && ProcessURI(it_pathinfo->second)) {
-		if (m_ChannelList)
-			return Respond("%s", true, m_ChannelList->HttpHeader().c_str());
+		if (m_MenuList)
+			return Respond("%s", true, m_MenuList->HttpHeader().c_str());
 		else if (m_Channel != NULL) {
 			cDevice *device = NULL;
 			if (ProvidesChannel(m_Channel, StreamdevServerSetup.HTTPPriority))
@@ -217,9 +217,9 @@ bool cConnectionHTTP::ProcessRequest(void)
 			return HttpResponse(404, true);
 		}
 	} else if (it_method->second.compare("HEAD") == 0 && ProcessURI(it_pathinfo->second)) {
-		if (m_ChannelList) {
+		if (m_MenuList) {
 			DeferClose();
-			return Respond("%s", true, m_ChannelList->HttpHeader().c_str());
+			return Respond("%s", true, m_MenuList->HttpHeader().c_str());
 		}
 		else if (m_Channel != NULL) {
 			if (ProvidesChannel(m_Channel, StreamdevServerSetup.HTTPPriority)) {
@@ -363,13 +363,13 @@ void cConnectionHTTP::Flushed(void)
 	if (m_Status != hsBody)
 		return;
 
-	if (m_ChannelList) {
-		if (m_ChannelList->HasNext()) {
-			if (!Respond("%s", true, m_ChannelList->Next().c_str()))
+	if (m_MenuList) {
+		if (m_MenuList->HasNext()) {
+			if (!Respond("%s", true, m_MenuList->Next().c_str()))
 				DeferClose();
 		}
 		else {
-			DELETENULL(m_ChannelList);
+			DELETENULL(m_MenuList);
 			m_Status = hsFinished;
 			DeferClose();
 		}
@@ -387,28 +387,22 @@ void cConnectionHTTP::Flushed(void)
 	}
 }
 
-cChannelList* cConnectionHTTP::ChannelListFromString(const std::string& Path, const std::string& Filebase, const std::string& Fileext) const
+cMenuList* cConnectionHTTP::MenuListFromString(const std::string& Path, const std::string& Filebase, const std::string& Fileext) const
 {
 	std::string groupTarget;
-	cChannelIterator *iterator = NULL;
+	cItemIterator *iterator = NULL;
 
 	const static std::string GROUP("group");
 	if (Filebase.compare("tree") == 0) {
-		const cChannel* c = NULL;
 		tStrStrMap::const_iterator it = m_Params.find(GROUP);
-		if (it != m_Params.end())
-			c = cChannelList::GetGroup(atoi(it->second.c_str()));
-		iterator = new cListTree(c);
+		iterator = new cListTree(it == m_Params.end() ? NULL : it->second.c_str());
 		groupTarget = Filebase + Fileext;
 	} else if (Filebase.compare("groups") == 0) {
 		iterator = new cListGroups();
 		groupTarget = (std::string) "group" + Fileext;
 	} else if (Filebase.compare("group") == 0) {
-		const cChannel* c = NULL;
 		tStrStrMap::const_iterator it = m_Params.find(GROUP);
-		if (it != m_Params.end())
-			c = cChannelList::GetGroup(atoi(it->second.c_str()));
-		iterator = new cListGroup(c);
+		iterator = new cListGroup(it == m_Params.end() ? NULL : it->second.c_str());
 	} else if (Filebase.compare("channels") == 0) {
 		iterator = new cListChannels();
 	} else if (Filebase.compare("all") == 0 ||
@@ -436,16 +430,16 @@ cChannelList* cConnectionHTTP::ChannelListFromString(const std::string& Path, co
 				self += '?' + it->second;
 				rss += '?' + it->second;
 			}
-			return new cHtmlChannelList(iterator, m_StreamType, self.c_str(), rss.c_str(), groupTarget.c_str());
+			return new cHtmlMenuList(iterator, m_StreamType, self.c_str(), rss.c_str(), groupTarget.c_str());
 		} else if (Fileext.compare(".m3u") == 0) {
-			return new cM3uChannelList(iterator, base.c_str());
+			return new cM3uMenuList(iterator, base.c_str());
 		} else if (Fileext.compare(".rss") == 0) {
 			std::string html = Filebase + ".html";
 			tStrStrMap::const_iterator it = Headers().find("QUERY_STRING");
 			if (it != Headers().end() && !it->second.empty()) {
 				html += '?' + it->second;
 			}
-			return new cRssChannelList(iterator, base.c_str(), html.c_str());
+			return new cRssMenuList(iterator, base.c_str(), html.c_str());
 		} else {
 			delete iterator;
 		}
@@ -520,7 +514,7 @@ bool cConnectionHTTP::ProcessURI(const std::string& PathInfo)
 
 	Dprintf("before channelfromstring: type(%s) filespec(%s) fileext(%s)\n", type.c_str(), filespec.c_str(), fileext.c_str());
 
-	if ((m_ChannelList = ChannelListFromString(PathInfo.substr(1, file_pos), filespec.c_str(), fileext.c_str())) != NULL) {
+	if ((m_MenuList = MenuListFromString(PathInfo.substr(1, file_pos), filespec.c_str(), fileext.c_str())) != NULL) {
 		Dprintf("Channel list requested\n");
 		return true;
 	} else if ((m_Recording = RecordingFromString(filespec.c_str(), fileext.c_str())) != NULL) {

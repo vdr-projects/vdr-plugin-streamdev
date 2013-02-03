@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Restructured menuHTTP classes
 - Added RSS format for HTTP menus
 - Recordings can now also be selected by struct stat "st_dev:st_ino.rec"
 - Implemented multi-device support for streamdev client (suggested by johns)

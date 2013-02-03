@@ -6,16 +6,38 @@
 
 class cChannel;
 
-// ******************** cChannelIterator ******************
-class cChannelIterator
+// ******************** cItemIterator ******************
+class cItemIterator
+{
+	public:
+		virtual bool Next() = 0;
+		virtual bool IsGroup() const = 0;
+		virtual const cString ItemId() const = 0;
+		virtual const char* ItemTitle() const = 0;
+		virtual const cString ItemRessource() const = 0;
+		virtual const char* Alang(int i) const = 0;
+		virtual const char* Dlang(int i) const = 0;
+};
+
+class cChannelIterator: public cItemIterator
 {
 	private:
-		const cChannel *channel;
+		const cChannel *first;
+		const cChannel *current;
 	protected:
 		virtual const cChannel* NextChannel(const cChannel *Channel) = 0;
 		static inline const cChannel* SkipFakeGroups(const cChannel *Channel);
+		// Helper which returns the group by its index
+		static const cChannel* GetGroup(const char* GroupId);
 	public:
-		const cChannel* Next();
+
+		virtual bool Next();
+		virtual bool IsGroup() const { return current && current->GroupSep(); }
+		virtual const cString ItemId() const;
+		virtual const char* ItemTitle() const { return current ? current->Name() : ""; }
+		virtual const cString ItemRessource() const { return (current ? current->GetChannelID() : tChannelID::InvalidID).ToString(); }
+		virtual const char* Alang(int i) const { return current && current->Apid(i) ? current->Alang(i) : NULL; }
+		virtual const char* Dlang(int i) const { return current && current->Dpid(i) ? current->Dlang(i) : NULL; }
 		cChannelIterator(const cChannel *First);
 		virtual ~cChannelIterator() {};
 };
@@ -54,7 +76,7 @@ class cListGroup: public cChannelIterator
 	protected:
 		virtual const cChannel* NextChannel(const cChannel *Channel);
 	public:
-		cListGroup(const cChannel *Group);
+		cListGroup(const char *GroupId);
 		virtual ~cListGroup() {};
 };
 
@@ -66,31 +88,32 @@ class cListTree: public cChannelIterator
 	protected:
 		virtual const cChannel* NextChannel(const cChannel *Channel);
 	public:
-		cListTree(const cChannel *SelectedGroup);
+		cListTree(const char *SelectedGroupId);
 		virtual ~cListTree() {};
 };
 
-// ******************** cChannelList ******************
-class cChannelList
+// ******************** cMenuList ******************
+class cMenuList
 {
 	private:
-		cChannelIterator *iterator;
+		cItemIterator *iterator;
 	protected:
-		const cChannel* NextChannel() { return iterator->Next(); }
+		bool NextItem() { return iterator->Next(); }
+		bool IsGroup() { return iterator->IsGroup(); }
+		const cString ItemId() { return iterator->ItemId(); }
+		const char* ItemTitle() { return iterator->ItemTitle(); }
+		const cString ItemRessource() { return iterator->ItemRessource(); }
+		const char* Alang(int i) { return iterator->Alang(i); }
+		const char* Dlang(int i) { return iterator->Dlang(i); }
 	public:
-		// Helper which returns the group index
-		static int GetGroupIndex(const cChannel* Group);
-		// Helper which returns the group by its index
-		static const cChannel* GetGroup(int Index);
-
 		virtual std::string HttpHeader() { return "HTTP/1.0 200 OK\r\n"; };
 		virtual bool HasNext() = 0;
 		virtual std::string Next() = 0;
-		cChannelList(cChannelIterator *Iterator);
-		virtual ~cChannelList();
+		cMenuList(cItemIterator *Iterator);
+		virtual ~cMenuList();
 };
 
-class cHtmlChannelList: public cChannelList
+class cHtmlMenuList: public cMenuList
 {
 	private:
 		static const char* menu;
@@ -104,7 +127,7 @@ class cHtmlChannelList: public cChannelList
 			hsItemsTop, hsItem, hsItemsBottom 
 		};
 		eHtmlState htmlState;
-		const cChannel *current;
+		bool onItem;
 		eStreamType streamType;
 		const char* self;
 		const char* rss;
@@ -118,18 +141,18 @@ class cHtmlChannelList: public cChannelList
 		std::string PageBottom();
 	public:
 		virtual std::string HttpHeader() {
-			return cChannelList::HttpHeader()
+			return cMenuList::HttpHeader()
 				+ "Content-type: text/html; charset="
 				+ (cCharSetConv::SystemCharacterTable() ? cCharSetConv::SystemCharacterTable() : "UTF-8")
 				+ "\r\n";
 		}
 		virtual bool HasNext();
 		virtual std::string Next();
-		cHtmlChannelList(cChannelIterator *Iterator, eStreamType StreamType, const char *Self, const char *Rss, const char *GroupTarget);
-		virtual ~cHtmlChannelList();
+		cHtmlMenuList(cItemIterator *Iterator, eStreamType StreamType, const char *Self, const char *Rss, const char *GroupTarget);
+		virtual ~cHtmlMenuList();
 };
 
-class cM3uChannelList: public cChannelList
+class cM3uMenuList: public cMenuList
 {
 	private:
 		char *base;
@@ -137,14 +160,14 @@ class cM3uChannelList: public cChannelList
 		eM3uState m3uState;
 		cCharSetConv m_IConv;
 	public:
-		virtual std::string HttpHeader() { return cChannelList::HttpHeader() + "Content-type: audio/x-mpegurl; charset=UTF-8\r\n"; };
+		virtual std::string HttpHeader() { return cMenuList::HttpHeader() + "Content-type: audio/x-mpegurl; charset=UTF-8\r\n"; };
 		virtual bool HasNext();
 		virtual std::string Next();
-		cM3uChannelList(cChannelIterator *Iterator, const char* Base);
-		virtual ~cM3uChannelList();
+		cM3uMenuList(cItemIterator *Iterator, const char* Base);
+		virtual ~cM3uMenuList();
 };
 
-class cRssChannelList: public cChannelList
+class cRssMenuList: public cMenuList
 {
 	private:
 		char *base;
@@ -153,12 +176,12 @@ class cRssChannelList: public cChannelList
 		eRssState rssState;
 		cCharSetConv m_IConv;
 	public:
-		virtual std::string HttpHeader() { return cChannelList::HttpHeader() + "Content-type: application/rss+xml\r\n"; };
+		virtual std::string HttpHeader() { return cMenuList::HttpHeader() + "Content-type: application/rss+xml\r\n"; };
 		virtual bool HasNext();
 		virtual std::string Next();
 		
-		cRssChannelList(cChannelIterator *Iterator, const char *Base, const char *Html);
-		virtual ~cRssChannelList();
+		cRssMenuList(cItemIterator *Iterator, const char *Base, const char *Html);
+		virtual ~cRssMenuList();
 };
 
 inline const cChannel* cChannelIterator::SkipFakeGroups(const cChannel* Group)
