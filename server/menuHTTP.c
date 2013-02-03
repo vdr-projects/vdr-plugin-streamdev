@@ -1,5 +1,36 @@
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include <vdr/channels.h>
 #include "server/menuHTTP.h"
+
+//**************************** cRecordingIterator **************
+cRecordingsIterator::cRecordingsIterator(): RecordingsLock(&Recordings)
+{	
+	first = Recordings.First();
+	current = NULL;
+}
+
+bool cRecordingsIterator::Next()
+{
+	if (first)
+	{
+		current = first;
+		first = NULL;
+	}
+	else
+		current = Recordings.Next(current);
+	return current;
+}
+
+const cString cRecordingsIterator::ItemRessource() const
+{
+	struct stat st;
+	if (stat(current->FileName(), &st) == 0)
+		return cString::sprintf("%lu:%lu.rec", st.st_dev, st.st_ino);
+	return "";
+}
 
 //**************************** cChannelIterator **************
 cChannelIterator::cChannelIterator(const cChannel *First)
@@ -144,7 +175,8 @@ const char* cHtmlMenuList::menu =
 	"[<a href=\"/\">Home</a> (<a href=\"all.html\" tvid=\"RED\">no script</a>)] "
 	"[<a href=\"tree.html\" tvid=\"GREEN\">Tree View</a>] "
 	"[<a href=\"groups.html\" tvid=\"YELLOW\">Groups</a> (<a href=\"groups.m3u\">Playlist</a> | <a href=\"groups.rss\">RSS</a>)] "
-	"[<a href=\"channels.html\" tvid=\"BLUE\">Channels</a> (<a href=\"channels.m3u\">Playlist</a> | <a href=\"channels.rss\">RSS</a>)] ";
+	"[<a href=\"channels.html\" tvid=\"BLUE\">Channels</a> (<a href=\"channels.m3u\">Playlist</a> | <a href=\"channels.rss\">RSS</a>)] "
+	"[<a href=\"recordings.html\">Recordings</a> (<a href=\"recordings.m3u\">Playlist</a> | <a href=\"recordings.rss\">RSS</a>)] ";
 
 const char* cHtmlMenuList::css =
 	"<style type=\"text/css\">\n"

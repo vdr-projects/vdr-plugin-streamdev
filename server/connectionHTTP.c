@@ -408,6 +408,8 @@ cMenuList* cConnectionHTTP::MenuListFromString(const std::string& Path, const st
 	} else if (Filebase.compare("all") == 0 ||
 			(Filebase.empty() && Fileext.empty())) {
 		iterator = new cListAll();
+	} else if (Filebase.compare("recordings") == 0) {
+		iterator = new cRecordingsIterator();
 	}
 
 	if (iterator) {

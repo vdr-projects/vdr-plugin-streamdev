@@ -3,6 +3,7 @@
 
 #include <string>
 #include "../common.h"
+#include <vdr/recording.h>
 
 class cChannel;
 
@@ -19,6 +20,24 @@ class cItemIterator
 		virtual const char* Dlang(int i) const = 0;
 };
 
+class cRecordingsIterator: public cItemIterator
+{
+	private:
+		const cRecording *first;
+		const cRecording *current;
+		cThreadLock RecordingsLock;
+	public:
+		virtual bool Next();
+		virtual bool IsGroup() const { return false; }
+		virtual const cString ItemId() const { return current ? itoa(current->Index() + 1) : "0"; }
+		virtual const char* ItemTitle() const { return current ? current->Title() : ""; }
+		virtual const cString ItemRessource() const;
+		virtual const char* Alang(int i) const { return NULL; }
+		virtual const char* Dlang(int i) const { return NULL; }
+		cRecordingsIterator();
+		virtual ~cRecordingsIterator() {};
+};
+
 class cChannelIterator: public cItemIterator
 {
 	private:
@@ -30,7 +49,6 @@ class cChannelIterator: public cItemIterator
 		// Helper which returns the group by its index
 		static const cChannel* GetGroup(const char* GroupId);
 	public:
-
 		virtual bool Next();
 		virtual bool IsGroup() const { return current && current->GroupSep(); }
 		virtual const cString ItemId() const;
