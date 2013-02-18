@@ -28,7 +28,11 @@ private:
 
 protected:
 	virtual bool SetChannelDevice(const cChannel *Channel, bool LiveView);
-	virtual bool HasLock(int TimeoutMs) 
+#if APIVERSNUM >= 10738
+	virtual bool HasLock(int TimeoutMs) const
+#else
+	virtual bool HasLock(int TimeoutMs)
+#endif
 	{
 		//printf("HasLock is %d\n", (ClientSocket.DataSocket(siLive) != NULL));
 		//return ClientSocket.DataSocket(siLive) != NULL;

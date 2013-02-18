@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- API changes of VDR 1.7.38 (thanks to mal@vdr-developer)
 - Added simple recordings menu in HTTP server
 - Restructured menuHTTP classes
 - Added RSS format for HTTP menus
