@@ -107,6 +107,11 @@ the streamdev-0.5.x releases for older versions.
 2.2 Compiling:
 --------------
 
+The Makefiles are for VDR 1.7.36 and above. For VDR 1.7.33 and below, please
+replace the Makefiles in the main directory and in the client/ and server/
+subdirectories with the corresponding Makefile-1.7.33 files. With VDR 1.7.34 and
+1.7.35 YMMV ;)
+
   cd vdr-1.X.X/PLUGINS/src
   tar xvfz vdr-streamdev-0.5.0.tgz
   ln -s streamdev-0.5.0 streamdev

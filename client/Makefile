@@ -1,13 +1,17 @@
 #
 # Makefile for a Video Disk Recorder plugin
 #
-# $Id: Makefile,v 1.2 2010/07/19 13:49:25 schmirl Exp $
+# $Id: $
 
 # The official name of this plugin.
 # This name will be used in the '-P...' option of VDR to load the plugin.
 # By default the main source file also carries this name.
-#
+
 PLUGIN = streamdev-client
+
+### The name of the shared object file:
+
+SOFILE = libvdr-$(PLUGIN).so
 
 ### Includes and Defines (add further entries here):
 
@@ -22,8 +26,7 @@ CLIENTOBJS = $(PLUGIN).o \
 	
 ### The main target:
 
-.PHONY: all i18n dist clean
-all: libvdr-$(PLUGIN).so i18n
+all: $(SOFILE) i18n
 
 ### Implicit rules:
 
@@ -34,51 +37,47 @@ all: libvdr-$(PLUGIN).so i18n
 
 MAKEDEP = $(CXX) -MM -MG
 DEPFILE = .dependencies
-
 $(DEPFILE): Makefile
-	@$(MAKEDEP) $(DEFINES) $(INCLUDES) $(CLIENTOBJS:%.o=%.c) $(COMMONOBJS:%.o=%.c) > $@
+	@$(MAKEDEP) $(CXXFLAGS) $(DEFINES) $(INCLUDES) $(CLIENTOBJS:%.o=%.c) $(COMMONOBJS:%.o=%.c) > $@
 
 -include $(DEPFILE)
 
 ### Internationalization (I18N):
 
 PODIR     = po
-LOCALEDIR = $(VDRDIR)/locale
 I18Npo    = $(wildcard $(PODIR)/*.po)
-I18Nmsgs  = $(addprefix $(LOCALEDIR)/, $(addsuffix /LC_MESSAGES/vdr-$(PLUGIN).mo, $(notdir $(foreach file, $(I18Npo), $(basename $(file))))))
+I18Nmo    = $(addsuffix .mo, $(foreach file, $(I18Npo), $(basename $(file))))
+I18Nmsgs  = $(addprefix $(DESTDIR)$(LOCDIR)/, $(addsuffix /LC_MESSAGES/vdr-$(PLUGIN).mo, $(notdir $(foreach file, $(I18Npo), $(basename $(file))))))
 I18Npot   = $(PODIR)/$(PLUGIN).pot
 
 %.mo: %.po
 	msgfmt -c -o $@ $<
 
 $(I18Npot): $(CLIENTOBJS:%.o=%.c)
-	xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --msgid-bugs-address='<http://www.vdr-developer.org/mantisbt/>' -o $@ $^
+	xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --package-name=vdr-$(PLUGIN) --package-version=$(VERSION) --msgid-bugs-address='<vdrdev@schmirler.de>' -o $@ `ls $^`
 
 %.po: $(I18Npot)
-	msgmerge -U --no-wrap --no-location --backup=none -q $@ $<
+	msgmerge -U --no-wrap --no-location --backup=none -q -N $@ $<
 	@touch $@
 
-$(I18Nmsgs): $(LOCALEDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
-	@mkdir -p $(dir $@)
-	cp $< $@
+$(I18Nmsgs): $(DESTDIR)$(LOCDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
+	install -D -m644 $< $@
 
-i18n: $(I18Nmsgs)
+.PHONY: i18n
+i18n: $(I18Nmo) $(I18Npot)
+
+install-i18n: $(I18Nmsgs)
 
 ### Targets:
 
-libvdr-$(PLUGIN).so: $(CLIENTOBJS) $(COMMONOBJS) ../tools/sockettools.a
+$(SOFILE): $(CLIENTOBJS) $(COMMONOBJS) ../tools/sockettools.a
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $^ -o $@
 
-%.so: 
-	$(CXX) $(CXXFLAGS) -shared $^ -o $@
-	@cp --remove-destination $@ $(LIBDIR)/$@.$(APIVERSION)
+install-lib: $(SOFILE)
+	install -D $^ $(DESTDIR)$(LIBDIR)/$^.$(APIVERSION)
 
-dist: clean
-	@-rm -rf $(TMPDIR)/$(ARCHIVE)
-	@mkdir $(TMPDIR)/$(ARCHIVE)
-	@cp -a * $(TMPDIR)/$(ARCHIVE)
-	@tar czf $(PACKAGE).tgz --exclude CVS -C $(TMPDIR) $(ARCHIVE)
-	@-rm -rf $(TMPDIR)/$(ARCHIVE)
-	@echo Distribution package created as $(PACKAGE).tgz
+install: install-lib install-i18n
 
 clean:
-	@-rm -f $(COMMONOBJS) $(CLIENTOBJS) $(DEPFILE) $(PODIR)/*.mo $(PODIR)/*.pot *.so *.tgz core* *~
+	@-rm -f $(PODIR)/*.mo $(PODIR)/*.pot
+	@-rm -f $(COMMONOBJS) $(CLIENTOBJS) $(DEPFILE) *.so *.tgz core* *~
