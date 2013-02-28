@@ -63,22 +63,30 @@ endif
 
 ### The main target:
 
-.PHONY: all client server dist clean
+.PHONY: all client server install install-client install-server dist clean
 all: client server
 
 ### Targets:
 
 client:
 	$(MAKE) -C ./tools
-	$(MAKE) -C ./client install
-	# installs to $(LIBDIR)/libvdr-streamdev-client.so.$(APIVERSION)
+	$(MAKE) -C ./client
 
 server:
 	$(MAKE) -C ./tools
 	$(MAKE) -C ./libdvbmpeg
 	$(MAKE) -C ./remux
+	$(MAKE) -C ./server
+
+install-client: client
+	$(MAKE) -C ./client install
+	# installs to $(LIBDIR)/libvdr-streamdev-client.so.$(APIVERSION)
+
+install-server: server
 	$(MAKE) -C ./server install
 	# installs to $(LIBDIR)/libvdr-streamdev-server.so.$(APIVERSION)
+
+install: install-client install-server
 
 dist: clean
 	@-rm -rf $(TMPDIR)/$(ARCHIVE)
