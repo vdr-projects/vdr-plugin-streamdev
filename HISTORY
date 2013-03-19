@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Updated Slovak translation (thanks to Milan Hrala)
 - Adapted Makefiles to VDR 1.7.36+ (thanks to macmenot). Old makefiles have
   been renamed to Makefile-1.7.33.
 - API changes of VDR 1.7.38 (thanks to mal@vdr-developer)

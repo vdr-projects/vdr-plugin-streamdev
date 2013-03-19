@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: streamdev_SK\n"
-"Report-Msgid-Bugs-To: <http://www.vdr-developer.org/mantisbt/>\n"
-"POT-Creation-Date: 2013-01-28 22:16+0100\n"
+"Report-Msgid-Bugs-To: <vdrdev@schmirler.de>\n"
+"POT-Creation-Date: 2013-03-13 14:20+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Milan Hrala <hrala.milan@gmail.com>\n"
 "Language-Team: Slovak <hrala.milan@gmail.com>\n"
@@ -18,23 +18,11 @@ msgstr ""
 "X-Poedit-Language: Slovak\n"
 "X-Poedit-Country: SLOVAKIA\n"
 
-msgid "VTP Streaming Client"
-msgstr "VTP prúdový klient"
-
-msgid "Suspend Server"
-msgstr "Server pozastavený"
-
-msgid "Server is suspended"
-msgstr "Server je doèasne preru¹ený"
-
-msgid "Couldn't suspend Server!"
-msgstr "Nepodarilo sa pozastavi» Server!"
-
 msgid "Hide Mainmenu Entry"
 msgstr "Schova» polo¾ku v hlavnom menu"
 
 msgid "Simultaneously used Devices"
-msgstr ""
+msgstr "Súèasne pou¾ívané zariadenia"
 
 msgid "Remote IP"
 msgstr "Vzdialená IP"
@@ -43,13 +31,13 @@ msgid "Remote Port"
 msgstr "Vzdialený port"
 
 msgid "Timeout (s)"
-msgstr ""
+msgstr "Èasový limit (s)"
 
 msgid "Filter Streaming"
-msgstr "filtrova» prúdy"
+msgstr "Filtrova» dátový prúd"
 
 msgid "Live TV Priority"
-msgstr ""
+msgstr "Priorita ¾ivého vysielania"
 
 msgid "Minimum Priority"
 msgstr "minimálna priorita"
@@ -58,4 +46,16 @@ msgid "Maximum Priority"
 msgstr "maximálna priorita"
 
 msgid "Broadcast Systems / Cost"
-msgstr ""
+msgstr "Systémy vysielania / Hodnota"
+
+msgid "VTP Streaming Client"
+msgstr "VDR klient streamovania"
+
+msgid "Suspend Server"
+msgstr "Pozastavi» server"
+
+msgid "Server is suspended"
+msgstr "Server je doèasne pozastavený"
+
+msgid "Couldn't suspend Server!"
+msgstr "Server sa nepodarilo pozastavi»!"

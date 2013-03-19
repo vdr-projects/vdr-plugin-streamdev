@@ -6,9 +6,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: streamdev_SK\n"
-"Report-Msgid-Bugs-To: <http://www.vdr-developer.org/mantisbt/>\n"
-"POT-Creation-Date: 2012-03-31 15:06+0200\n"
-"PO-Revision-Date: 2011-12-11 11:25+0100\n"
+"Report-Msgid-Bugs-To: <vdrdev@schmirler.de>\n"
+"POT-Creation-Date: 2013-03-13 14:21+0100\n"
+"PO-Revision-Date: 2013-03-13 14:31+0100\n"
 "Last-Translator: Milan Hrala <hrala.milan@gmail.com>\n"
 "Language-Team: Slovak <hrala.milan@gmail.com>\n"
 "Language: sk\n"
@@ -18,20 +18,17 @@ msgstr ""
 "X-Poedit-Language: Slovak\n"
 "X-Poedit-Country: SLOVAKIA\n"
 
-msgid "VDR Streaming Server"
-msgstr "VDR prúdový server"
-
 msgid "Streaming active"
-msgstr "streamovanie aktivne"
+msgstr "Streamovanie aktívne"
 
 msgid "Streamdev Connections"
-msgstr ""
+msgstr "Streamdev pripojenia"
 
 msgid "Disconnect"
-msgstr ""
+msgstr "Odpojený"
 
 msgid "Suspend"
-msgstr "Pozastavenie"
+msgstr "Pozastavi»"
 
 msgid "Common Settings"
 msgstr "V¹eobecné nastavenia"
@@ -43,49 +40,53 @@ msgid "Maximum Number of Clients"
 msgstr "Maximály poèet klientov"
 
 msgid "VDR-to-VDR Server"
-msgstr "VDR-do-VDR server"
+msgstr "prenos z VDR do VDR"
 
 msgid "Start VDR-to-VDR Server"
-msgstr "Spusti» VDR-do-VDR Server"
+msgstr "Spusti» prenos z VDR do VDR"
 
 msgid "VDR-to-VDR Server Port"
-msgstr "Port serveru pre VDR-do-VDR"
+msgstr "Port servera prenosu z VDR do VDR"
 
 msgid "Bind to IP"
-msgstr "viaza» na IP"
+msgstr "Viaza» na IP"
 
 msgid "Legacy Client Priority"
-msgstr ""
+msgstr "Dodatoèná priorita klienta"
 
 msgid "Client may suspend"
-msgstr "Klient mô¾e pozastavi»"
+msgstr "Klient mô¾e server pozastavi»"
 
 msgid "Loop Prevention"
-msgstr ""
+msgstr "Prevencia sluèky"
 
 msgid "HTTP Server"
-msgstr "server HTTP"
+msgstr "HTTP server "
 
 msgid "Start HTTP Server"
 msgstr "Spusti» HTTP Server"
 
 msgid "HTTP Server Port"
-msgstr "Port serveru HTTP"
+msgstr "Port HTTP servera"
 
 msgid "Priority"
-msgstr ""
+msgstr "Priorita"
 
 msgid "HTTP Streamtype"
-msgstr "typ prúdu HTTP"
+msgstr "Typ HTTP streamu"
 
 msgid "Multicast Streaming Server"
-msgstr "Multicast prúdový server"
+msgstr "Streamovanie Multicastového servera"
 
 msgid "Start IGMP Server"
 msgstr "Spusti» IGMP Server"
 
 msgid "Multicast Client Port"
-msgstr "Port klienta Multicast"
+msgstr "Port Multicast klienta"
 
 msgid "Multicast Streamtype"
-msgstr "Multicast typ streamu"
+msgstr "Typ Multicast streamu"
+
+msgid "VDR Streaming Server"
+msgstr "VDR server streamovania"
+
