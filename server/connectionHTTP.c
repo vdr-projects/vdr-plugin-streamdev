@@ -459,12 +459,12 @@ cRecording* cConnectionHTTP::RecordingFromString(const char *FileBase, const cha
 	if (p != FileBase && l > 0L) {
 		if (*p == ':') {
 			// get recording by dev:inode
-			unsigned long inode = strtoul(p + 1, &p, 0);
+			ino_t inode = (ino_t) strtoull(p + 1, &p, 0);
 			if (*p == 0 && inode > 0) {
 				struct stat st;
 				cThreadLock RecordingsLock(&Recordings);
 				for (cRecording *rec = Recordings.First(); rec; rec = Recordings.Next(rec)) {
-					if (stat(rec->FileName(), &st) == 0 && st.st_dev == (dev_t) l && st.st_ino == (ino_t) inode)
+					if (stat(rec->FileName(), &st) == 0 && st.st_dev == (dev_t) l && st.st_ino == inode)
 						return new cRecording(rec->FileName());
 				}
 			}

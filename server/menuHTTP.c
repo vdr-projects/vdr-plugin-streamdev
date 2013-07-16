@@ -28,7 +28,7 @@ const cString cRecordingsIterator::ItemRessource() const
 {
 	struct stat st;
 	if (stat(current->FileName(), &st) == 0)
-		return cString::sprintf("%lu:%lu.rec", st.st_dev, st.st_ino);
+		return cString::sprintf("%lu:%llu.rec", (unsigned long) st.st_dev, (unsigned long long) st.st_ino);
 	return "";
 }
 
