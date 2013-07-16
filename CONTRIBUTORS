@@ -214,3 +214,6 @@ Chris Tallon
 
 macmenot
   for adapting Makefiles to VDR 1.7.36+
+
+thomasjfox
+  for fixing cSuspendCtl preventing idle shutdown

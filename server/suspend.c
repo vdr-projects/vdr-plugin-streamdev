@@ -39,7 +39,7 @@ void cSuspendLive::Action(void) {
 bool cSuspendCtl::m_Active = false;
 
 cSuspendCtl::cSuspendCtl(void):
-		cControl(m_Suspend = new cSuspendLive) {
+		cControl(m_Suspend = new cSuspendLive, true) {
 	m_Active = true;
 }
 

@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Start cSuspendCtl hidden or it will prevent idle shutdown (thanks to
+  thomasjfox)
 - Fixed recordings menu inode numbers: ino_t is a long long on some systems
 - Updated Slovak translation (thanks to Milan Hrala)
 - Adapted Makefiles to VDR 1.7.36+ (thanks to macmenot). Old makefiles have
