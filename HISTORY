@@ -1,6 +1,9 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Select start position for replaying a recording by parameter pos=. Supported
+  values are resume, mark.#, time.#, frame.# or a plain # representing a
+  percentage if < 100 or a byte position otherwise (thanks to hivdr)
 - Start cSuspendCtl hidden or it will prevent idle shutdown (thanks to
   thomasjfox)
 - Fixed recordings menu inode numbers: ino_t is a long long on some systems

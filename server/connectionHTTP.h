@@ -35,6 +35,7 @@ private:
 	int                               m_Dpid[2];
 	// job: replay
 	cRecording                       *m_Recording;
+	std::string                       m_ReplayPos;
 	// job: listing
 	cMenuList                        *m_MenuList;
 
@@ -69,6 +70,7 @@ public:
 
 	virtual bool Abort(void) const;
 	virtual void Flushed(void);
+	inline std::string GetReplayPos() { return m_ReplayPos; }
 };
 
 inline bool cConnectionHTTP::Abort(void) const

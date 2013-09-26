@@ -46,6 +46,9 @@ class RecPlayer
     cRecording* getCurrentRecording();
     void scan();
     uint64_t positionFromFrameNumber(uint32_t frameNumber);
+    int frameFromResume();
+    int frameFromMark(int index);
+    int frameFromSeconds(int seconds);
     uint32_t frameNumberFromPosition(uint64_t position);
     bool getNextIFrame(uint32_t frameNumber, uint32_t direction, uint64_t* rfilePosition, uint32_t* rframeNumber, uint32_t* rframeLength);
 

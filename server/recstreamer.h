@@ -14,6 +14,7 @@ private:
 	RecPlayer               m_RecPlayer;
 	int64_t                 m_From;
 	int64_t                 m_To;
+	std::string		m_Pos;
 	uchar                   m_Buffer[RECBUFSIZE];
 
 protected:
@@ -25,7 +26,9 @@ public:
 	inline uint64_t GetLength() { return m_RecPlayer.getLengthBytes(); }
 	int64_t SetRange(int64_t &From, int64_t &To);
 	virtual cString ToText() const;
-	cStreamdevRecStreamer(cRecording *Recording, const cServerConnection *Connection);
+	int64_t GetFromByPos();
+	int32_t getIFrameBeforeFrame(int32_t frame);
+	cStreamdevRecStreamer(cRecording *Recording, const cServerConnection *Connection, std::string pos);
 	virtual ~cStreamdevRecStreamer();
 };
 

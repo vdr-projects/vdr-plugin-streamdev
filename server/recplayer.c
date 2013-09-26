@@ -19,6 +19,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#include <iostream>
+#include <fstream>
+#include <string>
+
 #include "recplayer.h"
 
 // for TSPLAY patch detection
@@ -208,6 +212,47 @@ uint64_t RecPlayer::getLastPosition()
 cRecording* RecPlayer::getCurrentRecording()
 {
   return recording;
+}
+
+int RecPlayer::frameFromResume()
+{
+  int frame = 0;
+  char fileName[2048];
+  snprintf(fileName, 2047, "%s/resume", recording->FileName());
+  std::ifstream ifs;
+  ifs.open(fileName);
+  if (!ifs.is_open()) return 0;
+  std::string sFrame;
+  getline(ifs, sFrame);
+  ifs.close();
+  sFrame=sFrame.substr(2);
+  frame=atoi(sFrame.c_str());
+  return frame;
+}
+
+int RecPlayer::frameFromMark(int index)
+{
+  char fileName[2048];
+  snprintf(fileName, 2047, "%s/marks", recording->FileName());
+  std::ifstream ifs;
+  ifs.open(fileName);
+  if (!ifs.is_open()) return 0;
+  std::string sTime;
+  for (int i=0; i<=index; i++) {
+	getline(ifs, sTime);
+	if (ifs.eof()) break;
+  }
+  ifs.close();
+  int seconds = 0, minutes = 0, hours = 0;
+  hours = atoi(sTime.substr(0, sTime.find(":")).c_str());
+  minutes = atoi(sTime.substr(sTime.find(":") + 1, 2).c_str());
+  seconds = atoi(sTime.substr(sTime.rfind(":") + 1, 2).c_str());
+  return frameFromSeconds(seconds + minutes * 60 + hours * 3600);
+}
+
+int RecPlayer::frameFromSeconds(int seconds)
+{
+	return 25 * seconds; // 25fps
 }
 
 uint64_t RecPlayer::positionFromFrameNumber(uint32_t frameNumber)
