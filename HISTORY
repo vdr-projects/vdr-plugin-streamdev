@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Added HTTP "Server" header (suggested by hivdr)
 - Ignore dummy file extensions (.ts, .vob, .vdr) when parsing HTTP URIs
 - Select start position for replaying a recording by parameter pos=. Supported
   values are resume, mark.#, time.#, frame.# or a plain # representing a

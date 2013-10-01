@@ -324,7 +324,8 @@ bool cConnectionHTTP::HttpResponse(int Code, bool Last, const char* ContentType,
 	if (rc)
 		rc = Respond("Connection: close")
 			&& Respond("Pragma: no-cache")
-			&& Respond("Cache-Control: no-cache");
+			&& Respond("Cache-Control: no-cache")
+			&& Respond("Server: VDR-%s / streamdev-server-%s", true, VDRVERSION, VERSION);
 
 	time_t t = time(NULL);
 	struct tm *gmt = gmtime(&t);
