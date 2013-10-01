@@ -11,10 +11,10 @@
 class cStreamdevRecStreamer: public cStreamdevStreamer {
 private:
 	//Streamdev::cTSRemux    *m_Remux;
-	RecPlayer               m_RecPlayer;
+	RecPlayer              *m_RecPlayer;
+	int64_t                 m_StartOffset;
 	int64_t                 m_From;
 	int64_t                 m_To;
-	std::string		m_Pos;
 	uchar                   m_Buffer[RECBUFSIZE];
 
 protected:
@@ -23,12 +23,10 @@ protected:
 
 public:
 	virtual bool IsReceiving(void) const { return m_From <= m_To; };
-	inline uint64_t GetLength() { return m_RecPlayer.getLengthBytes(); }
+	uint64_t GetLength() { return m_RecPlayer->getLengthBytes() - m_StartOffset; }
 	int64_t SetRange(int64_t &From, int64_t &To);
 	virtual cString ToText() const;
-	int64_t GetFromByPos();
-	int32_t getIFrameBeforeFrame(int32_t frame);
-	cStreamdevRecStreamer(cRecording *Recording, const cServerConnection *Connection, std::string pos);
+	cStreamdevRecStreamer(RecPlayer *RecPlayer, const cServerConnection *Connection, int64_t StartOffset = 0L);
 	virtual ~cStreamdevRecStreamer();
 };
 

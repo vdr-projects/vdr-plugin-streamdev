@@ -24,7 +24,9 @@ cConnectionHTTP::cConnectionHTTP(void):
 		m_Streamer(NULL),
 		m_StreamType((eStreamType)StreamdevServerSetup.HTTPStreamType),
 		m_Channel(NULL),
-		m_Recording(NULL),
+		m_RecPlayer(NULL),
+		m_ReplayPos(0),
+		m_ReplayFakeRange(false),
 		m_MenuList(NULL)
 {
 	Dprintf("constructor hsRequest\n");
@@ -35,7 +37,7 @@ cConnectionHTTP::cConnectionHTTP(void):
 cConnectionHTTP::~cConnectionHTTP() 
 {
 	delete m_Streamer;
-	delete m_Recording;
+	delete m_RecPlayer;
 }
 
 bool cConnectionHTTP::CanAuthenticate(void)
@@ -197,53 +199,32 @@ bool cConnectionHTTP::ProcessRequest(void)
 			}
 			return HttpResponse(503, true);
 		}
-		else if (m_Recording != NULL) {
+		else if (m_RecPlayer != NULL) {
 			Dprintf("GET recording\n");
-			cStreamdevRecStreamer* recStreamer = new cStreamdevRecStreamer(m_Recording, this, m_ReplayPos);
-			m_Streamer = recStreamer;
 			int64_t from, to;
+			bool hasRange = ParseRange(from, to);
+
+			cStreamdevRecStreamer* recStreamer;
+			if (from == 0 && hasRange && m_ReplayFakeRange) {
+				recStreamer = new cStreamdevRecStreamer(m_RecPlayer, this);
+				from += m_ReplayPos;
+				if (to >= 0)
+					to += m_ReplayPos;
+			}
+			else
+				recStreamer = new cStreamdevRecStreamer(m_RecPlayer, this, m_ReplayPos);
+			m_Streamer = recStreamer;
 			uint64_t total = recStreamer->GetLength();
-			if (ParseRange(from, to)) {
-				Dprintf("parsed from-to: %lld - %lld\n", (long long)from, (long long)to);
+			if (hasRange) {
 				int64_t length = recStreamer->SetRange(from, to);
-				int64_t fromByPos = recStreamer->GetFromByPos();
-				if (fromByPos > 0) {
-					if (from == 0) {
-						from = fromByPos;
-						to = total - 1;
-						Dprintf("from byte: %lld\n", (long long)from);
-						}
-					else if (m_ReplayPos.find("full_") != 0) {
-						from += fromByPos;
-						to += fromByPos;
-					}
-					Dprintf("part of recording: %lld-%lld/%lld\n", (long long)from, (long long)to, (long long)total);
-					length = recStreamer->SetRange(from, to);
-					Dprintf("part of recording: %lld-%lld/%lld, len %lld\n", (long long)from, (long long)to, (long long)total, (long long)length);
-				}
-				if (m_ReplayPos.find("full_") != 0 && fromByPos > 0) {
-					from -= fromByPos;
-					to -= fromByPos;
-					total -= fromByPos;
-				}
 				Dprintf("range response: %lld-%lld/%lld, len %lld\n", (long long)from, (long long)to, (long long)total, (long long)length);
 				if (length < 0L)
 					return HttpResponse(416, true, "video/mpeg", "Accept-Ranges: bytes\r\nContent-Range: bytes */%llu", (unsigned long long) total);
 				else
 					return HttpResponse(206, false, "video/mpeg", "Accept-Ranges: bytes\r\nContent-Range: bytes %lld-%lld/%llu\r\nContent-Length: %lld", (long long) from, (long long) to, (unsigned long long) total, (long long) length);
 			}
-			else {
-				int64_t fromByPos = recStreamer->GetFromByPos();
-				if (fromByPos > 0) {
-					from = fromByPos;
-					to = total - 1;
-					Dprintf("from byte: %lld\n", (long long)from);
-					int64_t length = recStreamer->SetRange(from, to);
-					Dprintf("part of recording: %lld-%lld/%lld, len %lld\n", (long long)from, (long long)to, (long long)total, (long long)length);
-				}
-				
+			else
 				return HttpResponse(200, false, "video/mpeg", "Accept-Ranges: bytes");
-			}
 		}
 		else {
 			return HttpResponse(404, true);
@@ -270,13 +251,23 @@ bool cConnectionHTTP::ProcessRequest(void)
 			}
 			return HttpResponse(503, true);
 		}
-		else if (m_Recording != NULL) {
+		else if (m_RecPlayer != NULL) {
 			Dprintf("HEAD recording\n");
-			cStreamdevRecStreamer *recStreamer = new cStreamdevRecStreamer(m_Recording, this, m_ReplayPos);
-			m_Streamer = recStreamer;
 			int64_t from, to;
+			bool hasRange = ParseRange(from, to);
+			
+			cStreamdevRecStreamer* recStreamer;
+			if (from == 0 && hasRange && m_ReplayFakeRange) {
+				recStreamer = new cStreamdevRecStreamer(m_RecPlayer, this, m_ReplayPos);
+				from += m_ReplayPos;
+				if (to >= 0)
+					to += m_ReplayPos;
+			}
+			else
+				recStreamer = new cStreamdevRecStreamer(m_RecPlayer, this, m_ReplayPos);
+			m_Streamer = recStreamer;
 			uint64_t total = recStreamer->GetLength();
-			if (ParseRange(from, to)) {
+			if (hasRange) {
 				int64_t length = recStreamer->SetRange(from, to);
 				if (length < 0L)
 					return HttpResponse(416, true, "video/mpeg", "Accept-Ranges: bytes\r\nContent-Range: bytes */%llu", (unsigned long long) total);
@@ -362,7 +353,6 @@ bool cConnectionHTTP::ParseRange(int64_t &From, int64_t &To) const
 	From = To = 0L;
 	tStrStrMap::const_iterator it = Headers().find(RANGE);
 	if (it != Headers().end()) {
-		Dprintf("%s: %s\n", it->first.c_str(), it->second.c_str());
 		size_t b = it->second.find("bytes=");
 		if (b != std::string::npos) {
 			char* e = NULL;
@@ -482,8 +472,10 @@ cMenuList* cConnectionHTTP::MenuListFromString(const std::string& Path, const st
 	return NULL;
 }
 
-cRecording* cConnectionHTTP::RecordingFromString(const char *FileBase, const char *FileExt) const
+RecPlayer* cConnectionHTTP::RecPlayerFromString(const char *FileBase, const char *FileExt)
 {
+	RecPlayer *recPlayer = NULL;
+
 	if (strcasecmp(FileExt, ".rec") != 0)
 		return NULL;
 
@@ -498,19 +490,63 @@ cRecording* cConnectionHTTP::RecordingFromString(const char *FileBase, const cha
 				cThreadLock RecordingsLock(&Recordings);
 				for (cRecording *rec = Recordings.First(); rec; rec = Recordings.Next(rec)) {
 					if (stat(rec->FileName(), &st) == 0 && st.st_dev == (dev_t) l && st.st_ino == inode)
-						return new cRecording(rec->FileName());
+						recPlayer = new RecPlayer(rec->FileName());
 				}
 			}
 		}
 		else if (*p == 0) {
 			// get recording by index
 			cThreadLock RecordingsLock(&Recordings);
-			cRecording* rec = Recordings.Get((int) l - 1);
+			cRecording *rec = Recordings.Get((int) l - 1);
 			if (rec)
-				return new cRecording(rec->FileName());
+				recPlayer = new RecPlayer(rec->FileName());
+		}
+
+		if (recPlayer) {
+			const char *pos = NULL;
+			tStrStrMap::const_iterator it = m_Params.begin();
+			while (it != m_Params.end()) {
+				if (it->first == "pos") {
+					pos = it->second.c_str();
+					break;
+				}
+				++it;
+			}
+			if (pos) {
+				// With prefix "full_" we try to fool players
+				// by replying with a content range starting
+				// at the requested position instead of 0.
+				// This is a heavy violation of standards.
+				// Use at your own risk!
+				if (strncasecmp(pos, "full_", 5) == 0) {
+					m_ReplayFakeRange = true;
+					pos += 5;
+				}
+				if (strncasecmp(pos, "resume", 6) == 0) {
+					int id = pos[6] == '.' ? atoi(pos + 7) : 0;
+					m_ReplayPos = recPlayer->positionFromResume(id);
+				}
+				else if (strncasecmp(pos, "mark.", 5) == 0) {
+					int index = atoi(pos + 5);
+					m_ReplayPos = recPlayer->positionFromMark(index);
+				}
+				else if (strncasecmp(pos, "time.", 5) == 0) {
+					int seconds = atoi(pos + 5);
+					m_ReplayPos = recPlayer->positionFromTime(seconds);
+				}
+				else if (strncasecmp(pos, "frame.", 6) == 0) {
+					int frame = atoi(pos + 6);
+					m_ReplayPos = recPlayer->positionFromFrameNumber(frame);
+				}
+				else {
+					m_ReplayPos = atol(pos);
+					if (m_ReplayPos > 0L && m_ReplayPos < 100L)
+						m_ReplayPos = recPlayer->positionFromPercent((int) m_ReplayPos);
+				}
+			}
 		}
 	}
-	return NULL;
+	return recPlayer;
 }
 
 bool cConnectionHTTP::ProcessURI(const std::string& PathInfo) 
@@ -552,16 +588,8 @@ bool cConnectionHTTP::ProcessURI(const std::string& PathInfo)
 	if ((m_MenuList = MenuListFromString(PathInfo.substr(1, file_pos), filespec.c_str(), fileext.c_str())) != NULL) {
 		Dprintf("Channel list requested\n");
 		return true;
-	} else if ((m_Recording = RecordingFromString(filespec.c_str(), fileext.c_str())) != NULL) {
-		Dprintf("Recording %s found\n", m_Recording->Name());
-		tStrStrMap::iterator it = m_Params.begin();
-		while (it != m_Params.end()) {
-			if (it->first == "pos") {
-				m_ReplayPos = it->second;
-				Dprintf("pos: %s\n", m_ReplayPos.c_str());
-				break;
-			}
-		}
+	} else if ((m_RecPlayer = RecPlayerFromString(filespec.c_str(), fileext.c_str())) != NULL) {
+		Dprintf("Recording %s found\n", m_RecPlayer->getCurrentRecording()->Name());
 		return true;
 	} else if ((m_Channel = ChannelFromString(filespec.c_str(), &m_Apid[0], &m_Dpid[0])) != NULL) {
 		Dprintf("Channel found. Apid/Dpid is %d/%d\n", m_Apid[0], m_Dpid[0]);

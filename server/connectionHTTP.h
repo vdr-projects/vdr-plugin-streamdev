@@ -34,13 +34,14 @@ private:
 	int                               m_Apid[2];
 	int                               m_Dpid[2];
 	// job: replay
-	cRecording                       *m_Recording;
-	std::string                       m_ReplayPos;
+	RecPlayer                        *m_RecPlayer;
+	int64_t                           m_ReplayPos;
+	bool                              m_ReplayFakeRange;
 	// job: listing
 	cMenuList                        *m_MenuList;
 
 	cMenuList* MenuListFromString(const std::string &PathInfo, const std::string &Filebase, const std::string &Fileext) const;
-	cRecording* RecordingFromString(const char* FileBase, const char* FileExt) const;
+	RecPlayer* RecPlayerFromString(const char* FileBase, const char* FileExt);
 
 	bool ProcessURI(const std::string &PathInfo);
 	bool HttpResponse(int Code, bool Last, const char* ContentType = NULL, const char* Headers = "", ...);
@@ -70,7 +71,6 @@ public:
 
 	virtual bool Abort(void) const;
 	virtual void Flushed(void);
-	inline std::string GetReplayPos() { return m_ReplayPos; }
 };
 
 inline bool cConnectionHTTP::Abort(void) const

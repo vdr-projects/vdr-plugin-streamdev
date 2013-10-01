@@ -1150,7 +1150,7 @@ bool cConnectionVTP::CmdPLAY(char *Opts)
 				if (m_RecPlayer) {
 					delete m_RecPlayer;
 				}
-				m_RecPlayer = new RecPlayer(recording);
+				m_RecPlayer = new RecPlayer(recording->FileName());
 				return Respond(220, "%llu (Bytes), %u (Frames)", (long long unsigned int) m_RecPlayer->getLengthBytes(), (unsigned int) m_RecPlayer->getLengthFrames());
 			}
 			else {

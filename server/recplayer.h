@@ -36,7 +36,7 @@ class Segment
 class RecPlayer
 {
   public:
-    RecPlayer(cRecording* rec);
+    RecPlayer(const char* FileName);
     ~RecPlayer();
     uint64_t getLengthBytes();
     uint32_t getLengthFrames();
@@ -45,10 +45,11 @@ class RecPlayer
     uint64_t getLastPosition();
     cRecording* getCurrentRecording();
     void scan();
+    uint64_t positionFromResume(int ResumeID);
+    uint64_t positionFromMark(int MarkIndex);
+    uint64_t positionFromTime(int Seconds);
+    uint64_t positionFromPercent(int Percent);
     uint64_t positionFromFrameNumber(uint32_t frameNumber);
-    int frameFromResume();
-    int frameFromMark(int index);
-    int frameFromSeconds(int seconds);
     uint32_t frameNumberFromPosition(uint64_t position);
     bool getNextIFrame(uint32_t frameNumber, uint32_t direction, uint64_t* rfilePosition, uint32_t* rframeNumber, uint32_t* rframeLength);
 

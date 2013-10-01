@@ -19,10 +19,6 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include <iostream>
-#include <fstream>
-#include <string>
-
 #include "recplayer.h"
 
 // for TSPLAY patch detection
@@ -32,17 +28,17 @@
 #define _XOPEN_SOURCE 600
 #include <fcntl.h>
 
-RecPlayer::RecPlayer(cRecording* rec)
+RecPlayer::RecPlayer(const char* FileName)
 {
   file = NULL;
   fileOpen = 0;
   lastPosition = 0;
-  recording = rec;
+  recording = new cRecording(FileName);
   for(int i = 1; i < 1000; i++) segments[i] = NULL;
 
   // FIXME find out max file path / name lengths
 
-  indexFile = new cIndexFile(recording->FileName(), false, rec->IsPesRecording());
+  indexFile = new cIndexFile(recording->FileName(), false, recording->IsPesRecording());
   if (!indexFile) esyslog("ERROR: Streamdev: Failed to create indexfile!");
 
   scan();
@@ -89,6 +85,8 @@ RecPlayer::~RecPlayer()
   int i = 1;
   while(segments[i++]) delete segments[i];
   if (file) fclose(file);
+  delete indexFile;
+  delete recording;
 }
 
 int RecPlayer::openFile(int index)
@@ -214,45 +212,39 @@ cRecording* RecPlayer::getCurrentRecording()
   return recording;
 }
 
-int RecPlayer::frameFromResume()
+#if VDRVERSNUM < 10732
+#define ALIGNED_POS(x) (positionFromFrameNumber(indexFile->GetNextIFrame(x, 1)))
+#else
+#define ALIGNED_POS(x) (positionFromFrameNumber(indexFile->GetClosestIFrame(x)))
+#endif
+uint64_t RecPlayer::positionFromResume(int ResumeID)
 {
-  int frame = 0;
-  char fileName[2048];
-  snprintf(fileName, 2047, "%s/resume", recording->FileName());
-  std::ifstream ifs;
-  ifs.open(fileName);
-  if (!ifs.is_open()) return 0;
-  std::string sFrame;
-  getline(ifs, sFrame);
-  ifs.close();
-  sFrame=sFrame.substr(2);
-  frame=atoi(sFrame.c_str());
-  return frame;
+	int resumeBackup = Setup.ResumeID;
+	Setup.ResumeID = ResumeID;
+	cResumeFile resume(recording->FileName(), recording->IsPesRecording());
+	Setup.ResumeID = resumeBackup;
+	return ALIGNED_POS(resume.Read());
 }
 
-int RecPlayer::frameFromMark(int index)
+uint64_t RecPlayer::positionFromMark(int MarkIndex)
 {
-  char fileName[2048];
-  snprintf(fileName, 2047, "%s/marks", recording->FileName());
-  std::ifstream ifs;
-  ifs.open(fileName);
-  if (!ifs.is_open()) return 0;
-  std::string sTime;
-  for (int i=0; i<=index; i++) {
-	getline(ifs, sTime);
-	if (ifs.eof()) break;
-  }
-  ifs.close();
-  int seconds = 0, minutes = 0, hours = 0;
-  hours = atoi(sTime.substr(0, sTime.find(":")).c_str());
-  minutes = atoi(sTime.substr(sTime.find(":") + 1, 2).c_str());
-  seconds = atoi(sTime.substr(sTime.rfind(":") + 1, 2).c_str());
-  return frameFromSeconds(seconds + minutes * 60 + hours * 3600);
+	cMarks marks;
+	if (marks.Load(recording->FileName(), recording->FramesPerSecond(), recording->IsPesRecording()) && marks.Count()) {
+		cMark *mark = marks.cConfig<cMark>::Get(MarkIndex);
+		if (mark)
+			return ALIGNED_POS(mark->Position());
+	}
+	return 0;
 }
 
-int RecPlayer::frameFromSeconds(int seconds)
+uint64_t RecPlayer::positionFromTime(int Seconds)
 {
-	return 25 * seconds; // 25fps
+	return ALIGNED_POS(SecondsToFrames(Seconds, recording->FramesPerSecond()));
+}
+
+uint64_t RecPlayer::positionFromPercent(int Percent)
+{
+	return ALIGNED_POS(getLengthFrames() * Percent / 100L);
 }
 
 uint64_t RecPlayer::positionFromFrameNumber(uint32_t frameNumber)
