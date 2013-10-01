@@ -556,11 +556,24 @@ bool cConnectionHTTP::ProcessURI(const std::string& PathInfo)
 
 	if (file_pos != std::string::npos) {
 		size_t ext_pos = PathInfo.rfind('.');
-		// file basename with leading / stripped off
-		filespec = PathInfo.substr(file_pos + 1, ext_pos - file_pos - 1);
-		if (ext_pos != std::string::npos)
+		if (ext_pos != std::string::npos) {
 			// file extension including leading .
 			fileext = PathInfo.substr(ext_pos);
+			const char *ext = fileext.c_str();
+			// ignore dummy file extensions
+			if (strcasecmp(ext, ".ts") == 0 ||
+					strcasecmp(ext, ".vdr") == 0 ||
+					strcasecmp(ext, ".vob") == 0) {
+				size_t ext_end = ext_pos;
+				if (ext_pos > 0)
+					ext_pos = PathInfo.rfind('.', ext_pos - 1);
+				if (ext_pos == std::string::npos)
+					ext_pos = ext_end;
+				fileext = PathInfo.substr(ext_pos, ext_end - ext_pos);
+			}
+		}
+		// file basename with leading / stripped off
+		filespec = PathInfo.substr(file_pos + 1, ext_pos - file_pos - 1);
 	}
 	if (fileext.length() > 5) {
 		//probably not an extension
