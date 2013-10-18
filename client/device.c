@@ -101,7 +101,7 @@ bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority,
 	if (m_Disabled || Channel == m_DenyChannel)
 		return false;
 
-	Dprintf("ProvidesChannel, Channel=%s, Prio=%d\n", Channel->Name(), Priority);
+	Dprintf("ProvidesChannel, Channel=%s, Priority=%d, SocketPrio=%d\n", Channel->Name(), Priority, m_ClientSocket->Priority());
 
 	if (StreamdevClientSetup.MinPriority <= StreamdevClientSetup.MaxPriority)
 	{
@@ -296,8 +296,8 @@ void cStreamdevDevice::UpdatePriority(bool SwitchingChannels) const {
 		if (m_ClientSocket->SupportsPrio() && m_ClientSocket->DataSocket(siLive)) {
 			int Priority = this->Priority();
 			// override TRANSFERPRIORITY (-1) with live TV priority from setup
-			if (this == cDevice::ActualDevice() && m_ClientSocket->Priority() == TRANSFERPRIORITY) {
-				int Priority = StreamdevClientSetup.LivePriority;
+			if (Priority == TRANSFERPRIORITY && this == cDevice::ActualDevice()) {
+				Priority = StreamdevClientSetup.LivePriority;
 				// temporarily lower priority
 				if (SwitchingChannels)
 					Priority--;

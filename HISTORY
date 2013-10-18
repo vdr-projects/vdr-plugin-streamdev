@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Fixed priority handling, messed up when adding multi-device support
 - Added HTTP "Server" header (suggested by hivdr)
 - Ignore dummy file extensions (.ts, .vob, .vdr) when parsing HTTP URIs
 - Select start position for replaying a recording by parameter pos=. Supported
