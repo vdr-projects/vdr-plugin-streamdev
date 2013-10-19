@@ -1377,7 +1377,11 @@ bool cConnectionVTP::CmdSTAT(const char *Option)
 	if (*Option) {
 		if (strcasecmp(Option, "DISK") == 0) {
 			int FreeMB, UsedMB;
+#if APIVERSNUM < 20102
 			int Percent = VideoDiskSpace(&FreeMB, &UsedMB);
+#else
+			int Percent = cVideoDirectory::VideoDiskSpace(&FreeMB, &UsedMB);
+#endif
 			Reply(250, "%dMB %dMB %d%%", FreeMB + UsedMB, FreeMB, Percent);
 		}
 		else if (strcasecmp(Option, "NAME") == 0) {
