@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Fixed HTTP menu destruction
 - API change of VDR 2.1.2
 - Fixed priority handling, messed up when adding multi-device support
 - Added HTTP "Server" header (suggested by hivdr)

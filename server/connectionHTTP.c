@@ -38,6 +38,7 @@ cConnectionHTTP::~cConnectionHTTP()
 {
 	delete m_Streamer;
 	delete m_RecPlayer;
+	delete m_MenuList;
 }
 
 bool cConnectionHTTP::CanAuthenticate(void)

@@ -18,6 +18,7 @@ class cItemIterator
 		virtual const cString ItemRessource() const = 0;
 		virtual const char* Alang(int i) const = 0;
 		virtual const char* Dlang(int i) const = 0;
+		virtual ~cItemIterator() {};
 };
 
 class cRecordingsIterator: public cItemIterator
