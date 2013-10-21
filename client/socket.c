@@ -115,18 +115,15 @@ bool cClientSocket::CheckConnection(void) {
 	if (IsOpen()) {
 		cTBSelect select;
 
-		Dprintf("connection open\n");
-
 		// XXX+ check if connection is still alive (is there a better way?)
 		// There REALLY shouldn't be anything readable according to PROTOCOL here
 		// If there is, assume it's an eof signal (subseq. read would return 0)
 		select.Add(*this, false);
 		int res;
 		if ((res = select.Select(0)) == 0) {
-			Dprintf("select said nothing happened\n");
 			return true;
 		}
-		Dprintf("closing connection (res was %d)", res);
+		Dprintf("closing connection (res was %d)\n", res);
 		Close();
 	}
 
