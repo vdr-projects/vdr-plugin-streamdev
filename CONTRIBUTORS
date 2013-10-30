@@ -221,3 +221,6 @@ thomasjfox
 hivdr
   for adding the pos= parameter for replaying recordings from a certain position
   for suggesting to add the HTTP "Server" header
+
+hummel99
+  for helping to debug channel switch issues with priority > 0

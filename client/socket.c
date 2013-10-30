@@ -40,10 +40,9 @@ cClientSocket::~cClientSocket()
 
 void cClientSocket::Reset(void) 
 {
-	for (int it = 0; it < si_Count; ++it) {
-		if (m_DataSockets[it] != NULL)
-			DELETENULL(m_DataSockets[it]);
-	}
+	for (int it = 0; it < si_Count; ++it)
+		DELETENULL(m_DataSockets[it]);
+	m_Priority = -100;
 }
 
 cTBSocket *cClientSocket::DataSocket(eSocketId Id) const {	

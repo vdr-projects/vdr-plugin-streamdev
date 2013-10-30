@@ -90,14 +90,6 @@ bool cStreamdevDevice::IsTunedToTransponder(const cChannel *Channel)
 
 bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority, 
 		bool *NeedsDetachReceivers) const {
-#if APIVERSNUM >= 10725
-	bool prio = Priority == IDLEPRIORITY || Priority >= m_ClientSocket->Priority();
-#else
-	bool prio = Priority < 0 || Priority > m_ClientSocket->Priority();
-#endif
-	bool res = prio;
-	bool ndr = false;
-
 	if (m_Disabled || Channel == m_DenyChannel)
 		return false;
 
@@ -116,6 +108,20 @@ bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority,
 			return false;
 	}
 
+	int newPrio = Priority;
+	if (Priority == LIVEPRIORITY) {
+		if (m_ClientSocket->ServerVersion() >= 100 || StreamdevClientSetup.LivePriority >= 0)
+			newPrio = StreamdevClientSetup.LivePriority;
+	}
+
+#if APIVERSNUM >= 10725
+	bool prio = Priority == IDLEPRIORITY || newPrio >= m_ClientSocket->Priority();
+#else
+	bool prio = Priority < 0 || newPrio > m_ClientSocket->Priority();
+#endif
+	bool res = prio;
+	bool ndr = false;
+
 #if APIVERSNUM >= 10722
 	if (IsTunedToTransponder(Channel)) {
 #else
@@ -129,18 +135,10 @@ bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority,
 			ndr = true;
 	}
 	else if (prio) {
-		if (Priority == LIVEPRIORITY) {
-			if (m_ClientSocket->ServerVersion() >= 100) {
-				Priority = StreamdevClientSetup.LivePriority;
-				UpdatePriority(true);
-			}
-			else {
-				if (StreamdevClientSetup.LivePriority >= 0)
-					Priority = StreamdevClientSetup.LivePriority;
-			}
-		}
+		if (Priority == LIVEPRIORITY && m_ClientSocket->ServerVersion() >= 100)
+			UpdatePriority(true);
 
-		res = m_ClientSocket->ProvidesChannel(Channel, Priority);
+		res = m_ClientSocket->ProvidesChannel(Channel, newPrio);
 		ndr = Receiving();
 
 		if (m_ClientSocket->ServerVersion() >= 100)

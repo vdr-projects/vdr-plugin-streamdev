@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Fixed channel switch issues with priority > 0
 - Removed noisy debug messages
 - Fixed HTTP menu destruction
 - API change of VDR 2.1.2
