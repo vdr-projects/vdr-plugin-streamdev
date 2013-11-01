@@ -1,7 +1,10 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
-- Fixed channel switch issues with priority > 0
+- Set device occupied when streamdev switches away LiveTV on the server, to
+  reduce the risk that the VDR main loop immediately switches back, resulting
+  in a black screen on the client (reported by hummel99)
+- Fixed channel switch issues with priority > 0 (reported by hummel99)
 - Removed noisy debug messages
 - Fixed HTTP menu destruction
 - API change of VDR 2.1.2

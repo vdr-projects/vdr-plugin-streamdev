@@ -34,6 +34,8 @@ private:
 	uint        m_WriteBytes;
 	uint        m_WriteIndex;
 
+	/* Set to occupied device when live TV was interrupted */
+	cDevice        *m_OccupiedDev;
 	/* Set to this connection's current channel when live TV was interrupted */
 	const cChannel *m_SwitchTo;
 
@@ -106,10 +108,8 @@ public:
 	   channel. This call has no side effects. */
 	static cDevice *CheckDevice(const cChannel *Channel, int Priority, bool LiveView, const cDevice *AvoidDevice = NULL);
 
-	/* Will retrieve an unused device for transmitting data. Receivers have
-	   already been attached from the device if necessary. Use the returned
-	   cDevice in a following call to StartTransfer */
-	cDevice *GetDevice(const cChannel *Channel, int Priority);
+	/* Find a suitable device and tune it to the requested channel. */
+	cDevice *SwitchDevice(const cChannel *Channel, int Priority);
 
 	/* Test if a call to GetDevice would return a usable device. */
 	bool ProvidesChannel(const cChannel *Channel, int Priority);

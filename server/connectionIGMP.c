@@ -44,9 +44,8 @@ void cConnectionIGMP::Welcome()
 {
 	cDevice *device = NULL;
 	if (ProvidesChannel(m_Channel, StreamdevServerSetup.IGMPPriority))
-		device = GetDevice(m_Channel, StreamdevServerSetup.IGMPPriority);
+		device = SwitchDevice(m_Channel, StreamdevServerSetup.IGMPPriority);
 	if (device != NULL) {
-		device->SwitchChannel(m_Channel, false);
 		m_LiveStreamer = new cStreamdevLiveStreamer(StreamdevServerSetup.IGMPPriority, this);
 		if (m_LiveStreamer->SetChannel(m_Channel, m_StreamType)) {
 			m_LiveStreamer->SetDevice(device);
@@ -61,7 +60,7 @@ void cConnectionIGMP::Welcome()
 		}
 	}
 	else
-		esyslog("streamdev-server IGMP: GetDevice failed");
+		esyslog("streamdev-server IGMP: SwitchDevice failed");
 }
 
 bool cConnectionIGMP::Close()

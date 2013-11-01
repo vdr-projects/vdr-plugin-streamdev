@@ -177,9 +177,8 @@ bool cConnectionHTTP::ProcessRequest(void)
 		else if (m_Channel != NULL) {
 			cDevice *device = NULL;
 			if (ProvidesChannel(m_Channel, StreamdevServerSetup.HTTPPriority))
-				device = GetDevice(m_Channel, StreamdevServerSetup.HTTPPriority);
+				device = SwitchDevice(m_Channel, StreamdevServerSetup.HTTPPriority);
 			if (device != NULL) {
-				device->SwitchChannel(m_Channel, false);
 				cStreamdevLiveStreamer* liveStreamer = new cStreamdevLiveStreamer(StreamdevServerSetup.HTTPPriority, this);
 				m_Streamer = liveStreamer;
 				if (liveStreamer->SetChannel(m_Channel, m_StreamType, m_Apid[0] ? m_Apid : NULL, m_Dpid[0] ? m_Dpid : NULL)) {

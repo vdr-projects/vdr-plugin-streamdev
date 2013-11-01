@@ -14,6 +14,11 @@
 #include <stdarg.h>
 #include <errno.h>
 
+// device occupied timeout to prevent VDR main loop to immediately switch back
+// when streamdev switched the live TV channel.
+// Note that there is still a gap between the GetDevice() and SetOccupied()
+// calls where the VDR main loop could strike
+#define STREAMDEVTUNETIMEOUT 5
 
 cServerConnection::cServerConnection(const char *Protocol, int Type):
 		cTBSocket(Type),
@@ -23,6 +28,7 @@ cServerConnection::cServerConnection(const char *Protocol, int Type):
 		m_ReadBytes(0),
 		m_WriteBytes(0),
 		m_WriteIndex(0),
+		m_OccupiedDev(NULL),
 		m_SwitchTo(NULL)
 {
 }
@@ -204,7 +210,7 @@ bool cServerConnection::UsedByLiveTV(cDevice *device)
 		(device->IsPrimaryDevice() && device->HasDecoder() && !device->Replaying());
 }
 
-cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority) 
+cDevice *cServerConnection::SwitchDevice(const cChannel *Channel, int Priority) 
 {
 	// turn off the streams of this connection
 	Detach();
@@ -216,8 +222,22 @@ cDevice *cServerConnection::GetDevice(const cChannel *Channel, int Priority)
 		dsyslog("streamdev: GetDevice failed for channel %d (%s) at priority %d (PrimaryDevice=%d, ActualDevice=%d)", Channel->Number(), Channel->Name(), Priority, cDevice::PrimaryDevice()->CardIndex(), cDevice::ActualDevice()->CardIndex());
 	}
 	else if (!device->IsTunedToTransponder(Channel) && UsedByLiveTV(device)) {
-		// switched away live TV
-		m_SwitchTo = Channel;
+		// make sure VDR main loop doesn't switch back
+		device->SetOccupied(STREAMDEVTUNETIMEOUT);
+		if (device->SwitchChannel(Channel, false)) {
+			// switched away live TV
+			m_OccupiedDev = device;
+			m_SwitchTo = Channel;
+		}
+		else {
+			dsyslog("streamdev: SwitchChannel (live) failed for channel %d (%s) at priority %d (PrimaryDevice=%d, ActualDevice=%d, device=%d)", Channel->Number(), Channel->Name(), Priority, cDevice::PrimaryDevice()->CardIndex(), cDevice::ActualDevice()->CardIndex(), device->CardIndex());
+			device->SetOccupied(0);
+			device = NULL;
+		}
+	}
+	else if (!device->SwitchChannel(Channel, false)) {
+		dsyslog("streamdev: SwitchChannel failed for channel %d (%s) at priority %d (PrimaryDevice=%d, ActualDevice=%d, device=%d)", Channel->Number(), Channel->Name(), Priority, cDevice::PrimaryDevice()->CardIndex(), cDevice::ActualDevice()->CardIndex(), device->CardIndex());
+		device = NULL;
 	}
 	return device;
 }
@@ -240,6 +260,7 @@ void cServerConnection::MainThreadHook()
 			Channels.SwitchTo(m_SwitchTo->Number());
 			Skins.Message(mtInfo, tr("Streaming active"));
 		}
+		m_OccupiedDev->SetOccupied(0);
 		m_SwitchTo = NULL;
 	}
 }
