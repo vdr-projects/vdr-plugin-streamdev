@@ -7,6 +7,13 @@
 
 #include "common.h"
 
+enum eStartSuspended {
+	ssNo,
+	ssYes,
+	ssAuto,
+	ss_Count
+};
+
 struct cStreamdevServerSetup {
 	cStreamdevServerSetup(void);
 
@@ -14,6 +21,7 @@ struct cStreamdevServerSetup {
 
 	int HideMenuEntry;
 	int MaxClients;
+	int StartSuspended;
 	int StartVTPServer;
 	int VTPServerPort;
 	char VTPBindIP[20];

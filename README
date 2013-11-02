@@ -218,6 +218,10 @@ image is displayed instead. This would allow a low priority client to switch
 to a different transponder. Enable "Client may suspend" in the server setup
 to allow VDR clients to suspend live TV remotely.
 
+In the server's setup there's also an option to suspend live TV when starting
+the server. The "auto" option will suspend live TV if there's no device with
+an MPEG decoder available which is typically the case on a headless server.
+
 NOTE: Precedence is mainly an issue on One-Card-Systems, since with multiple
 cards there is no need to switch transponders on the primary interface, if on
 of the other cards is idle (i.e. if it is not blocked by a recording). If all

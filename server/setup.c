@@ -12,6 +12,7 @@ cStreamdevServerSetup StreamdevServerSetup;
 cStreamdevServerSetup::cStreamdevServerSetup(void) {
 	HideMenuEntry   = false;
 	MaxClients      = 5;
+	StartSuspended  = ssAuto;
 	StartVTPServer  = true;
 	VTPServerPort   = 2004;
 	VTPPriority     = 0;
@@ -33,6 +34,7 @@ cStreamdevServerSetup::cStreamdevServerSetup(void) {
 bool cStreamdevServerSetup::SetupParse(const char *Name, const char *Value) {
 	if      (strcmp(Name, "HideMenuEntry") == 0)   HideMenuEntry   = atoi(Value);
 	else if (strcmp(Name, "MaxClients") == 0)      MaxClients      = atoi(Value);
+	else if (strcmp(Name, "StartSuspended") == 0)  StartSuspended  = atoi(Value);
 	else if (strcmp(Name, "StartServer") == 0)     StartVTPServer  = atoi(Value);
 	else if (strcmp(Name, "ServerPort") == 0)      VTPServerPort   = atoi(Value);
 	else if (strcmp(Name, "VTPPriority") == 0)     VTPPriority     = atoi(Value);
@@ -71,10 +73,18 @@ cStreamdevServerMenuSetupPage::~cStreamdevServerMenuSetupPage() {
 }
 
 void cStreamdevServerMenuSetupPage::Set(void) {
+	static const char *StartSuspendedItems[ss_Count] =
+	{
+		trVDR("no"),
+		trVDR("yes"),
+		trVDR("auto")
+	};
+
 	int current = Current();
 	Clear();
 	AddCategory (tr("Common Settings"));
 	Add(new cMenuEditBoolItem(tr("Hide Mainmenu Entry"),       &m_NewSetup.HideMenuEntry));
+	Add(new cMenuEditStraItem(tr("Start with Live TV suspended"),   &m_NewSetup.StartSuspended, ss_Count, StartSuspendedItems));
 	Add(new cMenuEditIntItem (tr("Maximum Number of Clients"), &m_NewSetup.MaxClients, 0, 100));
 
 	
@@ -131,6 +141,7 @@ void cStreamdevServerMenuSetupPage::Store(void) {
 	
 	SetupStore("HideMenuEntry",   m_NewSetup.HideMenuEntry);
 	SetupStore("MaxClients",      m_NewSetup.MaxClients);
+	SetupStore("StartSuspended",  m_NewSetup.StartSuspended);
 	SetupStore("StartServer",     m_NewSetup.StartVTPServer);
 	SetupStore("ServerPort",      m_NewSetup.VTPServerPort);
 	SetupStore("VTPBindIP",       m_NewSetup.VTPBindIP);

@@ -12,6 +12,7 @@
 #include "server/menu.h"
 #include "server/setup.h"
 #include "server/server.h"
+#include "server/suspend.h"
 
 #if !defined(APIVERSNUM) || APIVERSNUM < 10725
 #error "VDR-1.7.25 or greater required to compile server! Use 'make client' to compile client only."
@@ -21,6 +22,7 @@ const char *cPluginStreamdevServer::DESCRIPTION = trNOOP("VDR Streaming Server")
 
 cPluginStreamdevServer::cPluginStreamdevServer(void) 
 {
+	m_Suspend = false;
 }
 
 cPluginStreamdevServer::~cPluginStreamdevServer() 
@@ -98,6 +100,9 @@ bool cPluginStreamdevServer::Start(void)
 
 	cStreamdevServer::Initialize();
 
+	m_Suspend = StreamdevServerSetup.StartSuspended == ssAuto ?
+			!cDevice::PrimaryDevice()->HasDecoder() :
+			StreamdevServerSetup.StartSuspended;
 	return true;
 }
 
@@ -129,6 +134,11 @@ cOsdObject *cPluginStreamdevServer::MainMenuAction(void)
 
 void cPluginStreamdevServer::MainThreadHook(void)
 {
+	if (m_Suspend) {
+		cControl::Launch(new cSuspendCtl);
+		m_Suspend = false;
+	}
+
 	cThreadLock lock;
 	const cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
 	for (cServerConnection *s = clients.First(); s; s = clients.Next(s))

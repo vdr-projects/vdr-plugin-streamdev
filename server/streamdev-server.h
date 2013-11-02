@@ -12,6 +12,7 @@
 class cPluginStreamdevServer : public cPlugin {
 private:
 	static const char *DESCRIPTION;
+	bool m_Suspend;
 
 public:
 	cPluginStreamdevServer(void);
