@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Disabled PS remuxer which is said to produce anything but PS
 - The patches intcamdevices and ignore_missing_cam are no longer required
   on VDR >= 1.7.30. The localchannelprovide patch became obsolete with VDR
   1.7.21.

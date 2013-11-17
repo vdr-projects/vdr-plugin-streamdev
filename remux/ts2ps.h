@@ -1,3 +1,5 @@
+#ifdef STREAMDEV_PS
+
 #ifndef VDR_STREAMDEV_TS2PSREMUX_H
 #define VDR_STREAMDEV_TS2PSREMUX_H
 
@@ -34,3 +36,5 @@ public:
 } // namespace Streamdev
 
 #endif // VDR_STREAMDEV_TS2PSREMUX_H
+
+#endif

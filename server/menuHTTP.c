@@ -260,8 +260,10 @@ std::string cHtmlMenuList::StreamTypeMenu()
 	std::string typeMenu;
 	typeMenu += (streamType == stTS ? (std::string) "[TS] " :
 			(std::string) "[<a href=\"/TS/" + self + "\">TS</a>] ");
+#ifdef STREAMDEV_PS
 	typeMenu += (streamType == stPS ? (std::string) "[PS] " :
 			(std::string) "[<a href=\"/PS/" + self + "\">PS</a>] ");
+#endif
 	typeMenu += (streamType == stPES ? (std::string) "[PES] " :
 			(std::string) "[<a href=\"/PES/" + self + "\">PES</a>] ");
 	typeMenu += (streamType == stES ? (std::string) "[ES] " :
@@ -402,7 +404,9 @@ std::string cHtmlMenuList::ItemText()
 
 	switch (streamType) {
 		case stTS: suffix = (std::string) ".ts"; break;
+#ifdef STREAMDEV_PS
 		case stPS: suffix = (std::string) ".vob"; break;
+#endif
 		// for Network Media Tank
 		case stPES: suffix = (std::string) ".vdr"; break; 
 		default: suffix = "";

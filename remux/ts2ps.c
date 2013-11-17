@@ -1,3 +1,5 @@
+#ifdef STREAMDEV_PS
+
 #include "remux/ts2ps.h"
 #include "server/streamer.h"
 #include <vdr/channels.h>
@@ -216,3 +218,4 @@ uchar *cTS2PSRemux::Get(int &Count)
 	return resultData;
 }
 
+#endif

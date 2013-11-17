@@ -872,10 +872,12 @@ bool cConnectionVTP::CmdCAPS(char *Opts)
 		return Respond(220, "Capability \"%s\" accepted", Opts);
 	}
 
+#ifdef STREAMDEV_PS
 	if (strcasecmp(Opts, "PS") == 0) {
 		m_StreamType = stPS;
 		return Respond(220, "Capability \"%s\" accepted", Opts);
 	}
+#endif
 
 	if (strcasecmp(Opts, "PES") == 0) {
 		m_StreamType = stPES;

@@ -240,7 +240,6 @@ has been requested in the URL (see below). The supported stream types are:
 
   TS     Transport Stream (i.e. a dump from the device)
   PES    Packetized Elemetary Stream (VDR's native recording format)
-  PS     Program Stream (SVCD, DVD like stream)
   ES     Elementary Stream (only Video, if available, otherwise only Audio)
   EXT    Pass stream through external script (e.g. for converting with mencoder)
 
@@ -267,9 +266,9 @@ In addition, you can specify the desired stream type as a path to the channel.
   http://hostname:3000/PES/S19.2E-0-12480-898
 
 The first one would deliver the stream in TS, the second one in PES format. 
-Possible values are 'PES', 'TS', 'PS', 'ES' and 'EXT'. You need to specify
-the ES format explicitly if you want to listen to radio channels. Play them
-back i.e. with mpg123.
+Possible values are 'PES', 'TS', 'ES' and 'EXT'. You need to specify the ES
+format explicitly if you want to listen to radio channels. Play them back i.e.
+with mpg123.
 
   mpg123 http://hostname:3000/ES/200
 

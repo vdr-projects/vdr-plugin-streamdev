@@ -585,10 +585,12 @@ bool cConnectionHTTP::ProcessURI(const std::string& PathInfo)
 	// Streamtype with leading / stripped off
 	std::string type = PathInfo.substr(1, PathInfo.find_first_of("/;", 1) - 1);
 	const char* pType = type.c_str();
-	if (strcasecmp(pType, "PS") == 0) {
-		m_StreamType = stPS;
-	} else if (strcasecmp(pType, "PES") == 0) {
+	if (strcasecmp(pType, "PES") == 0) {
 		m_StreamType = stPES;
+#ifdef STREAMDEV_PS
+	} else if (strcasecmp(pType, "PS") == 0) {
+		m_StreamType = stPS;
+#endif
 	} else if (strcasecmp(pType, "TS") == 0) {
 		m_StreamType = stTS;
 	} else if (strcasecmp(pType, "ES") == 0) {

@@ -496,9 +496,11 @@ bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType Str
 		m_Remux = new cTS2PESRemux(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 
+#ifdef STREAMDEV_PS
 	case stPS:  
 		m_Remux = new cTS2PSRemux(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
+#endif
 
 	case stEXT:
 		m_Remux = new cExternRemux(Connection(), m_Channel, Apids, Dpids);
