@@ -549,10 +549,10 @@ The script should perform the following steps (pseudocode):
 6. Known Problems:
 ------------------
 
-* Viewing encrypted channels became an issue with VDR's new CAM handling code.
-Streamdev doesn't provide a (dummy) CAM, so out of the box, VDR won't ever try
-to receive encrypted channels from streamdev. Pick one of the following
-solutions to work around the problem:
+* In VDR before 1.7.30 viewing encrypted channels is an issue as Streamdev
+doesn't provide a (dummy) CAM. So out of the box, VDR won't ever try to receive
+encrypted channels from streamdev. Pick one of the following solutions to work
+around the problem:
 
 1. Force VDR to use streamdev. Open the channels menu on the client (or edit its
 channels.conf if you know how to do this) and set the CA field of all channels
@@ -562,9 +562,9 @@ up. So please consider the logs for the correct value. Remember to fill in
 hexadecimal values if you are using an editor to modify your channels.conf
 (number 10 becomes an "a", number 11 a "b", ...).
 
-2. Apply either patch "patches/vdr-1.6.0-intcamdevices.patch" or patch
-"patches/vdr-1.6.0-ignore_missing_cam.diff" to your client VDR. Intcamdevices
-is the clean solution, but it modifies the VDR API. So you will need to
-recompile all of your plugins. The ignore_missing_cam patch is trivial, no need
-to recompile other plugins. However it is not suitable for clients with a DVB
-card of their own.
+2. Apply either patch "patches/vdr-1.6.0-1.7.29-intcamdevices.patch" or patch
+"patches/vdr-1.6.0-1.7.29-ignore_missing_cam.diff" to your client VDR.
+Intcamdevices is the clean solution, but it modifies the VDR API. So you will
+need to recompile all of your plugins. The ignore_missing_cam patch is trivial,
+no need to recompile other plugins. However it is not suitable for clients with
+a DVB card of their own.
