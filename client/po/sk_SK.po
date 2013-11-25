@@ -22,7 +22,7 @@ msgid "Hide Mainmenu Entry"
 msgstr "Schova» polo¾ku v hlavnom menu"
 
 msgid "Simultaneously used Devices"
-msgstr "Súèasne pou¾ívané zariadenia"
+msgstr "Súbe¾ne pou¾íva» zariadenia"
 
 msgid "Remote IP"
 msgstr "Vzdialená IP"
@@ -40,10 +40,10 @@ msgid "Live TV Priority"
 msgstr "Priorita ¾ivého vysielania"
 
 msgid "Minimum Priority"
-msgstr "minimálna priorita"
+msgstr "Minimálna priorita"
 
 msgid "Maximum Priority"
-msgstr "maximálna priorita"
+msgstr "Maximálna priorita"
 
 msgid "Broadcast Systems / Cost"
 msgstr "Systémy vysielania / Hodnota"
@@ -59,3 +59,4 @@ msgstr "Server je doèasne pozastavený"
 
 msgid "Couldn't suspend Server!"
 msgstr "Server sa nepodarilo pozastavi»!"
+
