@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: streamdev 0.5.0\n"
-"Report-Msgid-Bugs-To: <http://www.vdr-developer.org/mantisbt/>\n"
+"Report-Msgid-Bugs-To: <vdrdev@schmirler.de>\n"
 "POT-Creation-Date: 2012-03-31 15:06+0200\n"
 "PO-Revision-Date: 2008-03-30 02:11+0200\n"
 "Last-Translator: Rolf Ahrenberg\n"
@@ -36,6 +36,9 @@ msgstr "Yleiset asetukset"
 
 msgid "Hide Mainmenu Entry"
 msgstr "Piilota valinta päävalikosta"
+
+msgid "Start with Live TV suspended"
+msgstr "Käynnistä Live-katselu pysäytettynä"
 
 msgid "Maximum Number of Clients"
 msgstr "Suurin sallittu asiakkaiden määrä"
