@@ -5,7 +5,6 @@
 #include "server/recplayer.h"
 
 class cTBSocket;
-class cStreamdevLiveStreamer;
 class cStreamdevFilterStreamer;
 class cLSTEHandler;
 class cLSTCHandler;
@@ -20,7 +19,6 @@ class cConnectionVTP: public cServerConnection {
 
 private:
 	cTBSocket                *m_LiveSocket;
-	cStreamdevLiveStreamer   *m_LiveStreamer;
 	cTBSocket                *m_FilterSocket;
 	cStreamdevFilterStreamer *m_FilterStreamer;
 	cTBSocket                *m_RecSocket;

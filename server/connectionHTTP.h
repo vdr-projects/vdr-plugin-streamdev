@@ -27,7 +27,6 @@ private:
 	std::string                       m_Authorization;
 	eHTTPStatus                       m_Status;
 	tStrStrMap                        m_Params;
-	cStreamdevStreamer               *m_Streamer;
 	eStreamType                       m_StreamType;
 	// job: transfer
 	const cChannel                   *m_Channel;
@@ -60,9 +59,6 @@ public:
 	cConnectionHTTP(void);
 	virtual ~cConnectionHTTP();
 
-	virtual void Attach(void) { if (m_Streamer != NULL) m_Streamer->Attach(); }
-	virtual void Detach(void) { if (m_Streamer != NULL) m_Streamer->Detach(); }
-
 	virtual cString ToText() const;
 
 	virtual bool CanAuthenticate(void);
@@ -75,7 +71,7 @@ public:
 
 inline bool cConnectionHTTP::Abort(void) const
 {
-	return !IsOpen() || (m_Streamer && m_Streamer->Abort());
+	return !IsOpen() || (Streamer() && Streamer()->Abort());
 }
 
 #endif // VDR_STREAMDEV_SERVERS_CONNECTIONVTP_H

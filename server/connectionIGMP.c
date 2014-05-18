@@ -11,7 +11,6 @@
 
 cConnectionIGMP::cConnectionIGMP(const char* Name, int ClientPort, eStreamType StreamType) :
 		cServerConnection(Name, SOCK_DGRAM),
-		m_LiveStreamer(NULL),
 		m_ClientPort(ClientPort),
 		m_StreamType(StreamType),
 		m_Channel(NULL)
@@ -20,7 +19,6 @@ cConnectionIGMP::cConnectionIGMP(const char* Name, int ClientPort, eStreamType S
 
 cConnectionIGMP::~cConnectionIGMP() 
 {
-	delete m_LiveStreamer;
 }
 
 bool cConnectionIGMP::SetChannel(cChannel *Channel, in_addr_t Dst)
@@ -46,17 +44,18 @@ void cConnectionIGMP::Welcome()
 	if (ProvidesChannel(m_Channel, StreamdevServerSetup.IGMPPriority))
 		device = SwitchDevice(m_Channel, StreamdevServerSetup.IGMPPriority);
 	if (device != NULL) {
-		m_LiveStreamer = new cStreamdevLiveStreamer(StreamdevServerSetup.IGMPPriority, this);
-		if (m_LiveStreamer->SetChannel(m_Channel, m_StreamType)) {
-			m_LiveStreamer->SetDevice(device);
+		cStreamdevLiveStreamer * liveStreamer = new cStreamdevLiveStreamer(StreamdevServerSetup.IGMPPriority, this);
+		SetStreamer(liveStreamer);
+		if (liveStreamer->SetChannel(m_Channel, m_StreamType)) {
+			liveStreamer->SetDevice(device);
 			if (!SetDSCP())
 				LOG_ERROR_STR("unable to set DSCP sockopt");
 			Dprintf("streamer start\n");
-			m_LiveStreamer->Start(this);
+			liveStreamer->Start(this);
 		}
 		else {
 			esyslog("streamdev-server IGMP: SetChannel failed");
-			DELETENULL(m_LiveStreamer);
+			SetStreamer(NULL);
 		}
 	}
 	else
@@ -65,13 +64,13 @@ void cConnectionIGMP::Welcome()
 
 bool cConnectionIGMP::Close()
 {
-	if (m_LiveStreamer)
-		m_LiveStreamer->Stop();
+	if (Streamer())
+		Streamer()->Stop();
 	return cServerConnection::Close();
 }
 
 cString cConnectionIGMP::ToText() const
 {
 	cString str = cServerConnection::ToText();
-	return m_LiveStreamer ? cString::sprintf("%s\t%s", *str, *m_LiveStreamer->ToText()) : str;
+	return Streamer() ? cString::sprintf("%s\t%s", *str, *Streamer()->ToText()) : str;
 }

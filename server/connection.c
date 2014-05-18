@@ -28,6 +28,7 @@ cServerConnection::cServerConnection(const char *Protocol, int Type):
 		m_ReadBytes(0),
 		m_WriteBytes(0),
 		m_WriteIndex(0),
+		m_Streamer(NULL),
 		m_OccupiedDev(NULL),
 		m_SwitchTo(NULL)
 {
@@ -35,6 +36,7 @@ cServerConnection::cServerConnection(const char *Protocol, int Type):
 
 cServerConnection::~cServerConnection() 
 {
+	delete(m_Streamer);
 }
 
 const cChannel* cServerConnection::ChannelFromString(const char *String, int *Apid, int *Dpid) {

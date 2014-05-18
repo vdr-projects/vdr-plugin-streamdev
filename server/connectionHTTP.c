@@ -21,7 +21,6 @@
 cConnectionHTTP::cConnectionHTTP(void): 
 		cServerConnection("HTTP"),
 		m_Status(hsRequest),
-		m_Streamer(NULL),
 		m_StreamType((eStreamType)StreamdevServerSetup.HTTPStreamType),
 		m_Channel(NULL),
 		m_RecPlayer(NULL),
@@ -36,7 +35,6 @@ cConnectionHTTP::cConnectionHTTP(void):
 
 cConnectionHTTP::~cConnectionHTTP() 
 {
-	delete m_Streamer;
 	delete m_RecPlayer;
 	delete m_MenuList;
 }
@@ -180,7 +178,7 @@ bool cConnectionHTTP::ProcessRequest(void)
 				device = SwitchDevice(m_Channel, StreamdevServerSetup.HTTPPriority);
 			if (device != NULL) {
 				cStreamdevLiveStreamer* liveStreamer = new cStreamdevLiveStreamer(StreamdevServerSetup.HTTPPriority, this);
-				m_Streamer = liveStreamer;
+				SetStreamer(liveStreamer);
 				if (liveStreamer->SetChannel(m_Channel, m_StreamType, m_Apid[0] ? m_Apid : NULL, m_Dpid[0] ? m_Dpid : NULL)) {
 					liveStreamer->SetDevice(device);
 					if (!SetDSCP())
@@ -195,7 +193,7 @@ bool cConnectionHTTP::ProcessRequest(void)
 						return HttpResponse(200, false, "video/mpeg");
 					}
 				}
-				DELETENULL(m_Streamer);
+				SetStreamer(NULL);
 			}
 			return HttpResponse(503, true);
 		}
@@ -213,7 +211,7 @@ bool cConnectionHTTP::ProcessRequest(void)
 			}
 			else
 				recStreamer = new cStreamdevRecStreamer(m_RecPlayer, this, m_ReplayPos);
-			m_Streamer = recStreamer;
+			SetStreamer(recStreamer);
 			uint64_t total = recStreamer->GetLength();
 			if (hasRange) {
 				int64_t length = recStreamer->SetRange(from, to);
@@ -239,7 +237,7 @@ bool cConnectionHTTP::ProcessRequest(void)
 				if (m_StreamType == stEXT) {
 					cStreamdevLiveStreamer *liveStreamer = new cStreamdevLiveStreamer(StreamdevServerSetup.HTTPPriority, this);
 					liveStreamer->SetChannel(m_Channel, m_StreamType, m_Apid[0] ? m_Apid : NULL, m_Dpid[0] ? m_Dpid : NULL);
-					m_Streamer = liveStreamer;
+					SetStreamer(liveStreamer);
 					return Respond("HTTP/1.0 200 OK");
 				} else if (m_StreamType == stES && (m_Apid[0] || m_Dpid[0] || ISRADIO(m_Channel))) {
 					return HttpResponse(200, true, "audio/mpeg", "icy-name: %s", m_Channel->Name());
@@ -265,7 +263,7 @@ bool cConnectionHTTP::ProcessRequest(void)
 			}
 			else
 				recStreamer = new cStreamdevRecStreamer(m_RecPlayer, this, m_ReplayPos);
-			m_Streamer = recStreamer;
+			SetStreamer(recStreamer);
 			uint64_t total = recStreamer->GetLength();
 			if (hasRange) {
 				int64_t length = recStreamer->SetRange(from, to);
@@ -399,9 +397,9 @@ void cConnectionHTTP::Flushed(void)
 		}
 		return;
 	}
-	else if (m_Streamer != NULL) {
+	else if (Streamer()) {
 		Dprintf("streamer start\n");
-		m_Streamer->Start(this);
+		Streamer()->Start(this);
 		m_Status = hsFinished;
 	}
 	else {
@@ -617,5 +615,5 @@ bool cConnectionHTTP::ProcessURI(const std::string& PathInfo)
 cString cConnectionHTTP::ToText() const
 {
 	cString str = cServerConnection::ToText();
-	return m_Streamer ? cString::sprintf("%s\t%s", *str, *m_Streamer->ToText()) : str;
+	return Streamer() ? cString::sprintf("%s\t%s", *str, *Streamer()->ToText()) : str;
 }

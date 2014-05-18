@@ -727,7 +727,6 @@ public:
 cConnectionVTP::cConnectionVTP(void): 
 		cServerConnection("VTP"),
 		m_LiveSocket(NULL),
-		m_LiveStreamer(NULL),
 		m_FilterSocket(NULL),
 		m_FilterStreamer(NULL),
 		m_RecSocket(NULL),
@@ -754,7 +753,8 @@ cConnectionVTP::~cConnectionVTP()
 {
 	if (m_LastCommand != NULL) 
 		free(m_LastCommand);
-	delete m_LiveStreamer;
+	if (Streamer())
+		Streamer()->Stop();
 	delete m_LiveSocket;
 	delete m_RecSocket;
 	delete m_FilterStreamer;
@@ -769,8 +769,8 @@ cConnectionVTP::~cConnectionVTP()
 
 bool cConnectionVTP::Abort(void) const
 {
-	return !IsOpen() || (m_LiveStreamer && m_LiveStreamer->Abort()) ||
-		(!m_LiveStreamer && m_FilterStreamer && m_FilterStreamer->Abort());
+	return !IsOpen() || (Streamer() && Streamer()->Abort()) ||
+		(!Streamer() && m_FilterStreamer && m_FilterStreamer->Abort());
 }
 
 void cConnectionVTP::Welcome(void) 
@@ -786,13 +786,13 @@ void cConnectionVTP::Reject(void)
 
 void cConnectionVTP::Detach(void) 
 {
-	if (m_LiveStreamer) m_LiveStreamer->Detach();
 	if (m_FilterStreamer) m_FilterStreamer->Detach();
+	cServerConnection::Detach();
 }
 
 void cConnectionVTP::Attach(void) 
 {
-	if (m_LiveStreamer) m_LiveStreamer->Attach();
+	cServerConnection::Attach();
 	if (m_FilterStreamer) m_FilterStreamer->Attach();
 }
 
@@ -1019,8 +1019,8 @@ bool cConnectionVTP::CmdPORT(char *Opts)
 		break;
 
 	case siLive:
-		if(m_LiveSocket && m_LiveStreamer)
-			m_LiveStreamer->Stop();
+		if(m_LiveSocket && Streamer())
+			Streamer()->Stop();
 		delete m_LiveSocket;
 
 		m_LiveSocket = new cTBSocket(SOCK_STREAM);
@@ -1033,8 +1033,8 @@ bool cConnectionVTP::CmdPORT(char *Opts)
 
 		if (!m_LiveSocket->SetDSCP())
 			LOG_ERROR_STR("unable to set DSCP sockopt");
-		if (m_LiveStreamer)
-			m_LiveStreamer->Start(m_LiveSocket);
+		if (Streamer())
+			Streamer()->Start(m_LiveSocket);
 
 		return Respond(220, "Port command ok, data connection opened");
 		break;
@@ -1123,12 +1123,12 @@ bool cConnectionVTP::CmdTUNE(char *Opts)
 	if ((dev = SwitchDevice(chan, prio)) == NULL)
 		return Respond(560, "Channel not available (SwitchDevice)");
 
-	delete m_LiveStreamer;
-	m_LiveStreamer = new cStreamdevLiveStreamer(prio, this);
-	m_LiveStreamer->SetChannel(chan, m_StreamType);
-	m_LiveStreamer->SetDevice(dev);
+	cStreamdevLiveStreamer* liveStreamer = new cStreamdevLiveStreamer(prio, this);
+	SetStreamer(liveStreamer);
+	liveStreamer->SetChannel(chan, m_StreamType);
+	liveStreamer->SetDevice(dev);
 	if(m_LiveSocket)
-		m_LiveStreamer->Start(m_LiveSocket);
+		liveStreamer->Start(m_LiveSocket);
 	
 	if(m_FiltersSupport) {
 		if(!m_FilterStreamer)
@@ -1174,8 +1174,8 @@ bool cConnectionVTP::CmdPRIO(char *Opts)
 	if (end == Opts || (*end != '\0' && *end != ' '))
 		return Respond(500, "Use: PRIO Priority");
 
-	if (m_LiveStreamer) {
-		m_LiveStreamer->SetPriority(prio);
+	if (Streamer()) {
+		((cStreamdevLiveStreamer*) Streamer())->SetPriority(prio);
 		return Respond(220, "Priority changed to %d", prio);
 	}
 	return Respond(550, "Priority not applicable");
@@ -1183,11 +1183,11 @@ bool cConnectionVTP::CmdPRIO(char *Opts)
 
 bool cConnectionVTP::CmdSGNL(char *Opts) 
 {
-	if (m_LiveStreamer) {
+	if (Streamer()) {
 		int devnum = -1;
 		int signal = -1;
 		int quality = -1;
-		m_LiveStreamer->GetSignal(&devnum, &signal, &quality);
+		((cStreamdevLiveStreamer*) Streamer())->GetSignal(&devnum, &signal, &quality);
 		return Respond(220, "%d %d:%d", devnum, signal, quality);
 	}
 	return Respond(550, "Signal not applicable");
@@ -1202,7 +1202,7 @@ bool cConnectionVTP::CmdADDP(char *Opts)
 	if (end == Opts || (*end != '\0' && *end != ' '))
 		return Respond(500, "Use: ADDP Pid");
 
-	return m_LiveStreamer && m_LiveStreamer->SetPid(pid, true)
+	return Streamer() && ((cStreamdevLiveStreamer*) Streamer())->SetPid(pid, true)
 			? Respond(220, "Pid %d available", pid)
 			: Respond(560, "Pid %d not available", pid);
 }
@@ -1216,7 +1216,7 @@ bool cConnectionVTP::CmdDELP(char *Opts)
 	if (end == Opts || (*end != '\0' && *end != ' '))
 		return Respond(500, "Use: DELP Pid");
 
-	return m_LiveStreamer && m_LiveStreamer->SetPid(pid, false)
+	return Streamer() && ((cStreamdevLiveStreamer*) Streamer())->SetPid(pid, false)
 			? Respond(220, "Pid %d stopped", pid)
 			: Respond(560, "Pid %d not transferring", pid);
 }
@@ -1281,8 +1281,8 @@ bool cConnectionVTP::CmdABRT(char *Opts)
 
 	switch (id) {
 	case siLive: 
-		if (m_LiveStreamer)
-			m_LiveStreamer->Stop();
+		if (Streamer())
+			Streamer()->Stop();
 		DELETENULL(m_LiveSocket);
 		break;
 	case siLiveFilter:
@@ -1838,8 +1838,8 @@ bool cConnectionVTP::Respond(int Code, const char *Message, ...)
 cString cConnectionVTP::ToText() const
 {
 	cString str = cServerConnection::ToText();
-	if (m_LiveStreamer)
-		return cString::sprintf("%s\t%s", *str, *m_LiveStreamer->ToText());
+	if (Streamer())
+		return cString::sprintf("%s\t%s", *str, *Streamer()->ToText());
 	else if (m_RecPlayer)
 		return cString::sprintf("%s\t%s", *str, m_RecPlayer->getCurrentRecording()->Name());
 	else

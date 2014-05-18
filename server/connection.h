@@ -7,6 +7,7 @@
 
 #include "tools/socket.h"
 #include "common.h"
+#include "server/streamer.h"
 
 #include <map>
 #include <string>
@@ -34,6 +35,8 @@ private:
 	uint        m_WriteBytes;
 	uint        m_WriteIndex;
 
+	cStreamdevStreamer *m_Streamer;
+
 	/* Set to occupied device when live TV was interrupted */
 	cDevice        *m_OccupiedDev;
 	/* Set to this connection's current channel when live TV was interrupted */
@@ -60,6 +63,12 @@ protected:
 
 	/* Add a request header */
 	void SetHeader(const char *Name, const char *Value, const char *Prefix = "") { m_Headers.insert(tStrStr(std::string(Prefix) + Name, Value)); }
+
+	/* Set the streamer */
+	void SetStreamer(cStreamdevStreamer* Streamer) { delete m_Streamer; m_Streamer = Streamer; }
+
+	/* Return the streamer */
+	cStreamdevStreamer *Streamer() const { return m_Streamer; }
 
 	static const cChannel *ChannelFromString(const char *String, int *Apid = NULL, int *Dpid = NULL);
 
@@ -119,8 +128,8 @@ public:
 
 	virtual void Flushed(void) {}
 
-	virtual void Detach(void) = 0;
-	virtual void Attach(void) = 0;
+	virtual void Attach(void) { if (m_Streamer != NULL) m_Streamer->Attach(); }
+	virtual void Detach(void) { if (m_Streamer != NULL) m_Streamer->Detach(); }
 
 	/* This connections protocol name */
 	virtual const char* Protocol(void) const { return m_Protocol; }
