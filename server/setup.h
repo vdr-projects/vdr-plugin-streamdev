@@ -22,6 +22,7 @@ struct cStreamdevServerSetup {
 	int HideMenuEntry;
 	int MaxClients;
 	int StartSuspended;
+	int LiveBufferMs;
 	int StartVTPServer;
 	int VTPServerPort;
 	char VTPBindIP[20];

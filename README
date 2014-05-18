@@ -228,6 +228,10 @@ of the other cards is idle (i.e. if it is not blocked by a recording). If all
 cards are in use (i.e. when something is recorded, or by multiple clients), this
 applies to Multiple-Card-Systems as well.
 
+If your client suffers from buffer underruns while watching live TV, you can
+configure buffering on the server side. Enter a reasonable value (e.g. 300ms)
+as "Live TV buffer delay (ms)" in the server setup.
+
 3.1 Usage HTTP server:
 ----------------------
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: streamdev_SK\n"
 "Report-Msgid-Bugs-To: <vdrdev@schmirler.de>\n"
-"POT-Creation-Date: 2013-11-22 23:07+0100\n"
+"POT-Creation-Date: 2014-05-05 22:46+0200\n"
 "PO-Revision-Date: 2013-11-22 23:39+0100\n"
 "Last-Translator: Milan Hrala <hrala.milan@gmail.com>\n"
 "Language-Team: Slovak <hrala.milan@gmail.com>\n"
@@ -41,6 +41,9 @@ msgstr "Pozastavi» Live TV pri ¹tarte"
 
 msgid "Maximum Number of Clients"
 msgstr "Maximály poèet klientov"
+
+msgid "Live TV buffer delay (ms)"
+msgstr ""
 
 msgid "VDR-to-VDR Server"
 msgstr "Prenos z VDR do VDR"
@@ -92,4 +95,3 @@ msgstr "Typ Multicast streamu"
 
 msgid "VDR Streaming Server"
 msgstr "VDR server streamovania"
-

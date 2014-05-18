@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: streamdev\n"
 "Report-Msgid-Bugs-To: <vdrdev@schmirler.de>\n"
-"POT-Creation-Date: 2013-11-02 16:55+0100\n"
+"POT-Creation-Date: 2014-05-05 22:46+0200\n"
 "PO-Revision-Date: 2008-03-30 02:11+0200\n"
 "Last-Translator: Frank Schmirler <vdrdev@schmirler.de>\n"
 "Language-Team: German <vdr@linuxtv.org>\n"
@@ -39,6 +39,9 @@ msgstr "Live-TV beim Start pausieren"
 
 msgid "Maximum Number of Clients"
 msgstr "Maximalanzahl an Clients"
+
+msgid "Live TV buffer delay (ms)"
+msgstr "Live-TV Pufferdauer (ms)"
 
 msgid "VDR-to-VDR Server"
 msgstr "VDR-zu-VDR Server"
@@ -90,4 +93,3 @@ msgstr "Multicast Streamtyp"
 
 msgid "VDR Streaming Server"
 msgstr "VDR Streaming Server"
-

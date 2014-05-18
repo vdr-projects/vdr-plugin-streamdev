@@ -9,7 +9,6 @@
 
 #include "server/streamer.h"
 #include "server/suspend.h"
-#include "server/setup.h"
 #include "tools/socket.h"
 #include "tools/select.h"
 #include "common.h"

@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- New option for server side live TV buffer to prevent buffer underruns
+
 2013-11-28: Version 0.6.1
 
 - Updated Slovak translation (thanks to Milan Hrala)

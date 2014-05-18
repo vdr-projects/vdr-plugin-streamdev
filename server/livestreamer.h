@@ -38,6 +38,7 @@ protected:
 	virtual void DelFromReceiver(int Count) { m_ReceiveBuffer->Del(Count); }
 
 	virtual int Put(const uchar *Data, int Count);
+	virtual void Action(void);
 
 public:
 	cStreamdevLiveStreamer(int Priority, const cServerConnection *Connection);

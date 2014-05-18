@@ -11,6 +11,7 @@
 #include <vdr/ringbuffer.h>
 
 #include "server/livestreamer.h"
+#include "server/setup.h"
 #include "common.h"
 
 using namespace Streamdev;
@@ -532,6 +533,21 @@ void cStreamdevLiveStreamer::Receive(uchar *Data, int Length)
 	int p = m_ReceiveBuffer->PutTS(Data, Length);
 	if (p != Length)
 		m_ReceiveBuffer->ReportOverflow(Length - p);
+}
+
+void cStreamdevLiveStreamer::Action(void)
+{
+	if (StreamdevServerSetup.LiveBufferMs) {
+		// wait for first data block
+		int count = 0;
+		while (Running()) {
+			if (m_ReceiveBuffer->Get(count) != NULL) {
+				cCondWait::SleepMs(StreamdevServerSetup.LiveBufferMs);
+				break;
+			}
+		}
+	}
+	cStreamdevStreamer::Action();
 }
 
 int cStreamdevLiveStreamer::Put(const uchar *Data, int Count) 
