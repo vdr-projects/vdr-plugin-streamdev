@@ -223,7 +223,7 @@ the server. The "auto" option will suspend live TV if there's no device with
 an MPEG decoder available which is typically the case on a headless server.
 
 NOTE: Precedence is mainly an issue on One-Card-Systems, since with multiple
-cards there is no need to switch transponders on the primary interface, if on
+cards there is no need to switch transponders on the primary interface, if one
 of the other cards is idle (i.e. if it is not blocked by a recording). If all
 cards are in use (i.e. when something is recorded, or by multiple clients), this
 applies to Multiple-Card-Systems as well.
