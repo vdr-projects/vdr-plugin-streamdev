@@ -7,7 +7,21 @@
 
 #include "common.h"
 
+#include <vdr/tools.h>
 #include <vdr/plugin.h>
+
+class cMainThreadHookSubscriber: public cListObject {
+private:
+	static cList<cMainThreadHookSubscriber> m_Subscribers;
+	static cMutex m_Mutex;
+public:
+	static const cList<cMainThreadHookSubscriber>& Subscribers(cMutexLock& Lock);
+
+	virtual void MainThreadHook() = 0;
+
+	cMainThreadHookSubscriber();
+	virtual ~cMainThreadHookSubscriber();
+};
 
 class cPluginStreamdevServer : public cPlugin {
 private:

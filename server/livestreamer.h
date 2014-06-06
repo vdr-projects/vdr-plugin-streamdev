@@ -5,6 +5,7 @@
 #include <vdr/receiver.h>
 
 #include "server/streamer.h"
+#include "server/streamdev-server.h"
 #include "common.h"
 
 #define LIVEBUFSIZE (20000 * TS_SIZE)
@@ -17,7 +18,7 @@ class cStreamdevLiveReceiver;
 
 // --- cStreamdevLiveStreamer -------------------------------------------------
 
-class cStreamdevLiveStreamer: public cStreamdevStreamer {
+class cStreamdevLiveStreamer: public cStreamdevStreamer, public cMainThreadHookSubscriber {
 private:
 	int                     m_Priority;
 	int                     m_Pids[MAXRECEIVEPIDS + 1];
@@ -29,9 +30,21 @@ private:
 	cStreamdevBuffer       *m_ReceiveBuffer;
 	cStreamdevPatFilter    *m_PatFilter;
 	Streamdev::cTSRemux    *m_Remux;
+	bool                    m_SwitchLive;
 
 	void StartReceiver(void);
 	bool HasPid(int Pid);
+
+	/* Test if device is in use as the transfer mode receiver device
+	   or a FF card, displaying live TV from internal tuner */
+	static bool UsedByLiveTV(cDevice *device);
+
+	/* Find a suitable device and tune it to the requested channel. */
+	cDevice *SwitchDevice(const cChannel *Channel, int Priority);
+
+	void SetDevice(cDevice *Device) { m_Device = Device; }
+
+	bool SetChannel(const cChannel *Channel, eStreamType StreamType, const int* Apid = NULL, const int* Dpid = NULL);
 
 protected:
 	virtual uchar* GetFromReceiver(int &Count) { return m_ReceiveBuffer->Get(Count); }
@@ -41,13 +54,11 @@ protected:
 	virtual void Action(void);
 
 public:
-	cStreamdevLiveStreamer(int Priority, const cServerConnection *Connection);
+	cStreamdevLiveStreamer(const cServerConnection *Connection, const cChannel *Channel, int Priority, eStreamType StreamType, const int* Apid = NULL, const int* Dpid = NULL);
 	virtual ~cStreamdevLiveStreamer();
 
-	void SetDevice(cDevice *Device) { m_Device = Device; }
 	bool SetPid(int Pid, bool On);
 	bool SetPids(int Pid, const int *Pids1 = NULL, const int *Pids2 = NULL, const int *Pids3 = NULL);
-	bool SetChannel(const cChannel *Channel, eStreamType StreamType, const int* Apid = NULL, const int* Dpid = NULL);
 	void SetPriority(int Priority);
 	void GetSignal(int *DevNum, int *Strength, int *Quality) const;
 	virtual cString ToText() const;
@@ -60,6 +71,14 @@ public:
 
 	virtual void Attach(void);
 	virtual void Detach(void);
+
+	cDevice *GetDevice() const { return m_Device; }
+
+	/* Test if a call to GetDevice would return a usable device. */
+	static bool ProvidesChannel(const cChannel *Channel, int Priority);
+
+	/* Do things which must be done in VDR's main loop */
+	void MainThreadHook();
 
 	// Statistical purposes:
 	virtual std::string Report(void);

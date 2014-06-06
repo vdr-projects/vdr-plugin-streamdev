@@ -8,6 +8,7 @@
 #include "remux/ts2es.h"
 #include "remux/extern.h"
 
+#include <vdr/transfer.h>
 #include <vdr/ringbuffer.h>
 
 #include "server/livestreamer.h"
@@ -15,6 +16,12 @@
 #include "common.h"
 
 using namespace Streamdev;
+
+// device occupied timeout to prevent VDR main loop to immediately switch back
+// when streamdev switched the live TV channel.
+// Note that there is still a gap between the GetDevice() and SetOccupied()
+// calls where the VDR main loop could strike
+#define STREAMDEVTUNETIMEOUT 5
 
 // --- cStreamdevLiveReceiver -------------------------------------------------
 
@@ -328,19 +335,28 @@ void cStreamdevPatFilter::Process(u_short Pid, u_char Tid, const u_char *Data, i
 
 // --- cStreamdevLiveStreamer -------------------------------------------------
 
-cStreamdevLiveStreamer::cStreamdevLiveStreamer(int Priority, const cServerConnection *Connection):
+cStreamdevLiveStreamer::cStreamdevLiveStreamer(const cServerConnection *Connection, const cChannel *Channel, int Priority, eStreamType StreamType, const int* Apid, const int *Dpid) :
 		cStreamdevStreamer("streamdev-livestreaming", Connection),
 		m_Priority(Priority),
 		m_NumPids(0),
 		m_StreamType(stTSPIDS),
-		m_Channel(NULL),
+		m_Channel(Channel),
 		m_Device(NULL),
 		m_Receiver(NULL),
 		m_PatFilter(NULL),
-		m_Remux(NULL)
+		m_Remux(NULL),
+		m_SwitchLive(false)
 {
 		m_ReceiveBuffer = new cStreamdevBuffer(LIVEBUFSIZE, TS_SIZE *2, true, "streamdev-livestreamer"),
 		m_ReceiveBuffer->SetTimeouts(0, 100);
+		if (Priority == IDLEPRIORITY) {
+			SetChannel(Channel, StreamType, Apid, Dpid);
+		}
+		else {
+			m_Device = SwitchDevice(Channel, Priority);
+			if (m_Device)
+				SetChannel(Channel, StreamType, Apid, Dpid);
+		}
 }
 
 cStreamdevLiveStreamer::~cStreamdevLiveStreamer() 
@@ -610,6 +626,66 @@ void cStreamdevLiveStreamer::Detach(void)
 			m_Device->Detach(m_Receiver); 
 		if (m_PatFilter)
 			m_Device->Detach(m_PatFilter); 
+	}
+}
+
+bool cStreamdevLiveStreamer::UsedByLiveTV(cDevice *device)
+{
+	return device == cTransferControl::ReceiverDevice() ||
+		(device->IsPrimaryDevice() && device->HasDecoder() && !device->Replaying());
+}
+
+cDevice *cStreamdevLiveStreamer::SwitchDevice(const cChannel *Channel, int Priority) 
+{
+	// turn off the streams of this connection
+	Detach();
+
+	cDevice *device = cDevice::GetDevice(Channel, Priority, false);
+	if (!device) {
+		// can't switch - continue the current stream
+		Attach();
+		dsyslog("streamdev: GetDevice failed for channel %d (%s) at priority %d (PrimaryDevice=%d, ActualDevice=%d)", Channel->Number(), Channel->Name(), Priority, cDevice::PrimaryDevice()->CardIndex(), cDevice::ActualDevice()->CardIndex());
+	}
+	else if (!device->IsTunedToTransponder(Channel) && UsedByLiveTV(device)) {
+		// make sure VDR main loop doesn't switch back
+		device->SetOccupied(STREAMDEVTUNETIMEOUT);
+		if (device->SwitchChannel(Channel, false)) {
+			// switched away live TV
+			m_SwitchLive = true;
+		}
+		else {
+			dsyslog("streamdev: SwitchChannel (live) failed for channel %d (%s) at priority %d (PrimaryDevice=%d, ActualDevice=%d, device=%d)", Channel->Number(), Channel->Name(), Priority, cDevice::PrimaryDevice()->CardIndex(), cDevice::ActualDevice()->CardIndex(), device->CardIndex());
+			device->SetOccupied(0);
+			device = NULL;
+		}
+	}
+	else if (!device->SwitchChannel(Channel, false)) {
+		dsyslog("streamdev: SwitchChannel failed for channel %d (%s) at priority %d (PrimaryDevice=%d, ActualDevice=%d, device=%d)", Channel->Number(), Channel->Name(), Priority, cDevice::PrimaryDevice()->CardIndex(), cDevice::ActualDevice()->CardIndex(), device->CardIndex());
+		device = NULL;
+	}
+	return device;
+}
+
+bool cStreamdevLiveStreamer::ProvidesChannel(const cChannel *Channel, int Priority) 
+{
+	cDevice *device = cDevice::GetDevice(Channel, Priority, false, true);
+	if (!device)
+		dsyslog("streamdev: No device provides channel %d (%s) at priority %d", Channel->Number(), Channel->Name(), Priority);
+	return device;
+}
+
+void cStreamdevLiveStreamer::MainThreadHook()
+{
+	if (m_SwitchLive) {
+		// switched away live TV. Try previous channel on other device first
+		if (!Channels.SwitchTo(cDevice::CurrentChannel())) {
+			// switch to streamdev channel otherwise
+			Channels.SwitchTo(m_Channel->Number());
+			Skins.Message(mtInfo, tr("Streaming active"));
+		}
+		if (m_Device)
+			m_Device->SetOccupied(0);
+		m_SwitchLive = false;
 	}
 }
 

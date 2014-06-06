@@ -173,14 +173,10 @@ bool cConnectionHTTP::ProcessRequest(void)
 		if (m_MenuList)
 			return Respond("%s", true, m_MenuList->HttpHeader().c_str());
 		else if (m_Channel != NULL) {
-			cDevice *device = NULL;
-			if (ProvidesChannel(m_Channel, StreamdevServerSetup.HTTPPriority))
-				device = SwitchDevice(m_Channel, StreamdevServerSetup.HTTPPriority);
-			if (device != NULL) {
-				cStreamdevLiveStreamer* liveStreamer = new cStreamdevLiveStreamer(StreamdevServerSetup.HTTPPriority, this);
-				SetStreamer(liveStreamer);
-				if (liveStreamer->SetChannel(m_Channel, m_StreamType, m_Apid[0] ? m_Apid : NULL, m_Dpid[0] ? m_Dpid : NULL)) {
-					liveStreamer->SetDevice(device);
+			if (cStreamdevLiveStreamer::ProvidesChannel(m_Channel, StreamdevServerSetup.HTTPPriority)) {
+				cStreamdevLiveStreamer* liveStreamer = new cStreamdevLiveStreamer(this, m_Channel, StreamdevServerSetup.HTTPPriority, m_StreamType, m_Apid[0] ? m_Apid : NULL, m_Dpid[0] ? m_Dpid : NULL);
+				if (liveStreamer->GetDevice()) {
+					SetStreamer(liveStreamer);
 					if (!SetDSCP())
 						LOG_ERROR_STR("unable to set DSCP sockopt");
 					if (m_StreamType == stEXT) {
@@ -194,6 +190,7 @@ bool cConnectionHTTP::ProcessRequest(void)
 					}
 				}
 				SetStreamer(NULL);
+				delete liveStreamer;
 			}
 			return HttpResponse(503, true);
 		}
@@ -233,10 +230,9 @@ bool cConnectionHTTP::ProcessRequest(void)
 			return Respond("%s", true, m_MenuList->HttpHeader().c_str());
 		}
 		else if (m_Channel != NULL) {
-			if (ProvidesChannel(m_Channel, StreamdevServerSetup.HTTPPriority)) {
+			if (cStreamdevLiveStreamer::ProvidesChannel(m_Channel, StreamdevServerSetup.HTTPPriority)) {
 				if (m_StreamType == stEXT) {
-					cStreamdevLiveStreamer *liveStreamer = new cStreamdevLiveStreamer(StreamdevServerSetup.HTTPPriority, this);
-					liveStreamer->SetChannel(m_Channel, m_StreamType, m_Apid[0] ? m_Apid : NULL, m_Dpid[0] ? m_Dpid : NULL);
+					cStreamdevLiveStreamer *liveStreamer = new cStreamdevLiveStreamer(this, m_Channel, IDLEPRIORITY, m_StreamType, m_Apid[0] ? m_Apid : NULL, m_Dpid[0] ? m_Dpid : NULL);
 					SetStreamer(liveStreamer);
 					return Respond("HTTP/1.0 200 OK");
 				} else if (m_StreamType == stES && (m_Apid[0] || m_Dpid[0] || ISRADIO(m_Channel))) {

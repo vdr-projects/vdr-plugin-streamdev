@@ -40,22 +40,19 @@ bool cConnectionIGMP::SetChannel(cChannel *Channel, in_addr_t Dst)
 
 void cConnectionIGMP::Welcome()
 {
-	cDevice *device = NULL;
-	if (ProvidesChannel(m_Channel, StreamdevServerSetup.IGMPPriority))
-		device = SwitchDevice(m_Channel, StreamdevServerSetup.IGMPPriority);
-	if (device != NULL) {
-		cStreamdevLiveStreamer * liveStreamer = new cStreamdevLiveStreamer(StreamdevServerSetup.IGMPPriority, this);
-		SetStreamer(liveStreamer);
-		if (liveStreamer->SetChannel(m_Channel, m_StreamType)) {
-			liveStreamer->SetDevice(device);
+	if (cStreamdevLiveStreamer::ProvidesChannel(m_Channel, StreamdevServerSetup.IGMPPriority)) {
+		cStreamdevLiveStreamer * liveStreamer = new cStreamdevLiveStreamer(this, m_Channel, StreamdevServerSetup.IGMPPriority, m_StreamType);
+		if (liveStreamer->GetDevice()) {
+			SetStreamer(liveStreamer);
 			if (!SetDSCP())
 				LOG_ERROR_STR("unable to set DSCP sockopt");
 			Dprintf("streamer start\n");
 			liveStreamer->Start(this);
 		}
 		else {
-			esyslog("streamdev-server IGMP: SetChannel failed");
 			SetStreamer(NULL);
+			delete liveStreamer;
+			esyslog("streamdev-server IGMP: SetChannel failed");
 		}
 	}
 	else

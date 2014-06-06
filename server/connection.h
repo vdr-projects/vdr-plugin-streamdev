@@ -16,7 +16,6 @@ typedef std::map<std::string,std::string> tStrStrMap;
 typedef std::pair<std::string,std::string> tStrStr;
 
 class cChannel;
-class cDevice;
 
 /* Basic capabilities of a straight text-based protocol, most functions
    virtual to support more complicated protocols */
@@ -37,16 +36,7 @@ private:
 
 	cStreamdevStreamer *m_Streamer;
 
-	/* Set to occupied device when live TV was interrupted */
-	cDevice        *m_OccupiedDev;
-	/* Set to this connection's current channel when live TV was interrupted */
-	const cChannel *m_SwitchTo;
-
 	tStrStrMap  m_Headers;
-
-	/* Test if device is in use as the transfer mode receiver device
-	   or a FF card, displaying live TV from internal tuner */
-	static bool UsedByLiveTV(cDevice *device);
 
 protected:
 	/* Will be called when a command terminated by a newline has been 
@@ -113,23 +103,7 @@ public:
 	/* Close the socket */
 	virtual bool Close(void);
 
-	/* Check if a device would be available for transferring the given
-	   channel. This call has no side effects. */
-	static cDevice *CheckDevice(const cChannel *Channel, int Priority, bool LiveView, const cDevice *AvoidDevice = NULL);
-
-	/* Find a suitable device and tune it to the requested channel. */
-	cDevice *SwitchDevice(const cChannel *Channel, int Priority);
-
-	/* Test if a call to GetDevice would return a usable device. */
-	bool ProvidesChannel(const cChannel *Channel, int Priority);
-
-	/* Do things which must be done in VDR's main loop */
-	void MainThreadHook();
-
 	virtual void Flushed(void) {}
-
-	virtual void Attach(void) { if (m_Streamer != NULL) m_Streamer->Attach(); }
-	virtual void Detach(void) { if (m_Streamer != NULL) m_Streamer->Detach(); }
 
 	/* This connections protocol name */
 	virtual const char* Protocol(void) const { return m_Protocol; }

@@ -18,6 +18,29 @@
 #error "VDR-1.7.25 or greater required to compile server! Use 'make client' to compile client only."
 #endif
 
+cList<cMainThreadHookSubscriber> cMainThreadHookSubscriber::m_Subscribers;
+cMutex cMainThreadHookSubscriber::m_Mutex;
+
+const cList<cMainThreadHookSubscriber>& cMainThreadHookSubscriber::Subscribers(cMutexLock& Lock)
+{
+	Lock.Lock(&m_Mutex);
+	return m_Subscribers;
+}
+
+cMainThreadHookSubscriber::cMainThreadHookSubscriber()
+{
+	m_Mutex.Lock();
+	m_Subscribers.Add(this);
+	m_Mutex.Unlock();
+}
+
+cMainThreadHookSubscriber::~cMainThreadHookSubscriber()
+{
+	m_Mutex.Lock();
+	m_Subscribers.Del(this, false);
+	m_Mutex.Unlock();
+}
+
 const char *cPluginStreamdevServer::DESCRIPTION = trNOOP("VDR Streaming Server");
 
 cPluginStreamdevServer::cPluginStreamdevServer(void) 
@@ -139,9 +162,9 @@ void cPluginStreamdevServer::MainThreadHook(void)
 		m_Suspend = false;
 	}
 
-	cThreadLock lock;
-	const cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
-	for (cServerConnection *s = clients.First(); s; s = clients.Next(s))
+	cMutexLock lock;
+	const cList<cMainThreadHookSubscriber>& subs = cMainThreadHookSubscriber::Subscribers(lock);
+	for (cMainThreadHookSubscriber *s = subs.First(); s; s = subs.Next(s))
 		s->MainThreadHook();
 }
 

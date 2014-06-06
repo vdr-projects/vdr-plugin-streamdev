@@ -787,12 +787,12 @@ void cConnectionVTP::Reject(void)
 void cConnectionVTP::Detach(void) 
 {
 	if (m_FilterStreamer) m_FilterStreamer->Detach();
-	cServerConnection::Detach();
+	if (m_LiveSocket && Streamer()) ((cStreamdevLiveStreamer *) Streamer())->Detach();
 }
 
 void cConnectionVTP::Attach(void) 
 {
-	cServerConnection::Attach();
+	if (m_LiveSocket && Streamer()) ((cStreamdevLiveStreamer *) Streamer())->Attach();
 	if (m_FilterStreamer) m_FilterStreamer->Attach();
 }
 
@@ -936,7 +936,7 @@ bool cConnectionVTP::CmdPROV(char *Opts)
 
 	LOOP_PREVENTION(chan);
 
-	if (ProvidesChannel(chan, prio)) {
+	if (cStreamdevLiveStreamer::ProvidesChannel(chan, prio)) {
 		m_TuneChannel = chan;
 		m_TunePriority = prio;
 		return Respond(220, "Channel available");
@@ -945,7 +945,7 @@ bool cConnectionVTP::CmdPROV(char *Opts)
 	// so get our own receiver temporarily out of the way
 	if (m_ClientVersion == 0) {
 		Detach();
-		bool provided = ProvidesChannel(chan, prio);
+		bool provided = cStreamdevLiveStreamer::ProvidesChannel(chan, prio);
 		Attach();
 		if (provided) {
 			m_TuneChannel = chan;
@@ -1117,16 +1117,18 @@ bool cConnectionVTP::CmdTUNE(char *Opts)
 	if (chan != m_TuneChannel) {
 		isyslog("streamdev-server TUNE %s: Priority unknown - using 0", Opts);
 		prio = 0;
-		if (!ProvidesChannel(chan, prio))
+		if (!cStreamdevLiveStreamer::ProvidesChannel(chan, prio))
 			return Respond(560, "Channel not available (ProvidesChannel)");
 	}
-	if ((dev = SwitchDevice(chan, prio)) == NULL)
-		return Respond(560, "Channel not available (SwitchDevice)");
 
-	cStreamdevLiveStreamer* liveStreamer = new cStreamdevLiveStreamer(prio, this);
+	cStreamdevLiveStreamer* liveStreamer = new cStreamdevLiveStreamer(this, chan, prio, m_StreamType);
+	if ((dev = liveStreamer->GetDevice()) == NULL) {
+		SetStreamer(NULL);
+		delete liveStreamer;
+		return Respond(560, "Channel not available (SwitchDevice)");
+	}
 	SetStreamer(liveStreamer);
-	liveStreamer->SetChannel(chan, m_StreamType);
-	liveStreamer->SetDevice(dev);
+
 	if(m_LiveSocket)
 		liveStreamer->Start(m_LiveSocket);
 	
