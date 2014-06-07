@@ -42,9 +42,7 @@ private:
 	/* Find a suitable device and tune it to the requested channel. */
 	cDevice *SwitchDevice(const cChannel *Channel, int Priority);
 
-	void SetDevice(cDevice *Device) { m_Device = Device; }
-
-	bool SetChannel(const cChannel *Channel, eStreamType StreamType, const int* Apid = NULL, const int* Dpid = NULL);
+	bool SetChannel(const int* Apid = NULL, const int* Dpid = NULL);
 
 protected:
 	virtual uchar* GetFromReceiver(int &Count) { return m_ReceiveBuffer->Get(Count); }

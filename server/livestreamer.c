@@ -350,12 +350,12 @@ cStreamdevLiveStreamer::cStreamdevLiveStreamer(const cServerConnection *Connecti
 		m_ReceiveBuffer = new cStreamdevBuffer(LIVEBUFSIZE, TS_SIZE *2, true, "streamdev-livestreamer"),
 		m_ReceiveBuffer->SetTimeouts(0, 100);
 		if (Priority == IDLEPRIORITY) {
-			SetChannel(Channel, StreamType, Apid, Dpid);
+			SetChannel(Apid, Dpid);
 		}
 		else {
 			m_Device = SwitchDevice(Channel, Priority);
 			if (m_Device)
-				SetChannel(Channel, StreamType, Apid, Dpid);
+				SetChannel(Apid, Dpid);
 		}
 }
 
@@ -487,12 +487,10 @@ void cStreamdevLiveStreamer::StartReceiver(void)
 		DELETENULL(m_Receiver);
 }
 
-bool cStreamdevLiveStreamer::SetChannel(const cChannel *Channel, eStreamType StreamType, const int* Apid, const int *Dpid) 
+bool cStreamdevLiveStreamer::SetChannel(const int* Apid, const int *Dpid) 
 {
 	Dprintf("Initializing Remuxer for full channel transfer\n");
 	//printf("ca pid: %d\n", Channel->Ca());
-	m_Channel = Channel;
-	m_StreamType = StreamType;
 
 	const int *Apids = Apid ? Apid : m_Channel->Apids();
 	const int *Dpids = Dpid ? Dpid : m_Channel->Dpids();
