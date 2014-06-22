@@ -339,7 +339,7 @@ cStreamdevLiveStreamer::cStreamdevLiveStreamer(const cServerConnection *Connecti
 		cStreamdevStreamer("streamdev-livestreaming", Connection),
 		m_Priority(Priority),
 		m_NumPids(0),
-		m_StreamType(stTSPIDS),
+		m_StreamType(StreamType),
 		m_Channel(Channel),
 		m_Device(NULL),
 		m_Receiver(NULL),
