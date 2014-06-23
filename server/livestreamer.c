@@ -635,13 +635,8 @@ bool cStreamdevLiveStreamer::UsedByLiveTV(cDevice *device)
 
 cDevice *cStreamdevLiveStreamer::SwitchDevice(const cChannel *Channel, int Priority) 
 {
-	// turn off the streams of this connection
-	Detach();
-
 	cDevice *device = cDevice::GetDevice(Channel, Priority, false);
 	if (!device) {
-		// can't switch - continue the current stream
-		Attach();
 		dsyslog("streamdev: GetDevice failed for channel %d (%s) at priority %d (PrimaryDevice=%d, ActualDevice=%d)", Channel->Number(), Channel->Name(), Priority, cDevice::PrimaryDevice()->CardIndex(), cDevice::ActualDevice()->CardIndex());
 	}
 	else if (!device->IsTunedToTransponder(Channel) && UsedByLiveTV(device)) {
