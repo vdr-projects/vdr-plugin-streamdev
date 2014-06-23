@@ -32,7 +32,7 @@ private:
 	Streamdev::cTSRemux    *m_Remux;
 	bool                    m_SwitchLive;
 
-	void StartReceiver(void);
+	void StartReceiver(bool Force = false);
 	bool HasPid(int Pid);
 
 	/* Test if device is in use as the transfer mode receiver device

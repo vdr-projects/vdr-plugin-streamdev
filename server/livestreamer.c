@@ -472,9 +472,9 @@ bool cStreamdevLiveStreamer::IsReceiving(void) const
 	return m_Receiver && m_Receiver->IsAttached();
 }
 
-void cStreamdevLiveStreamer::StartReceiver(void)
+void cStreamdevLiveStreamer::StartReceiver(bool Force)
 {
-	if (m_NumPids > 0) {
+	if (m_NumPids > 0 || Force) {
 		Dprintf("Creating Receiver to respect changed pids\n");
 		cReceiver *current = m_Receiver;
 		cThreadLock ThreadLock(m_Device);
@@ -536,6 +536,8 @@ bool cStreamdevLiveStreamer::SetChannel(const int* Apid, const int *Dpid)
 
 	case stTSPIDS:
 		Dprintf("pid streaming mode\n");
+		// No PIDs requested yet. Start receiver anyway to occupy device
+		StartReceiver(true);
 		return true;
 	default:
 		return false;
