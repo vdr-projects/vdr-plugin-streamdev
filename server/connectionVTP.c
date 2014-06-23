@@ -1123,7 +1123,6 @@ bool cConnectionVTP::CmdTUNE(char *Opts)
 
 	cStreamdevLiveStreamer* liveStreamer = new cStreamdevLiveStreamer(this, chan, prio, m_StreamType);
 	if ((dev = liveStreamer->GetDevice()) == NULL) {
-		SetStreamer(NULL);
 		delete liveStreamer;
 		return Respond(560, "Channel not available (SwitchDevice)");
 	}
