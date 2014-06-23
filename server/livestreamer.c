@@ -671,6 +671,18 @@ bool cStreamdevLiveStreamer::ProvidesChannel(const cChannel *Channel, int Priori
 
 void cStreamdevLiveStreamer::MainThreadHook()
 {
+	if (!m_SwitchLive && Running() && m_Device && !m_Device->IsTunedToTransponder(m_Channel) && !IsReceiving()) {
+		cDevice *dev = SwitchDevice(m_Channel, m_Priority);
+		if (dev) {
+			dsyslog("streamdev: Lost channel %d (%s) on device %d. Continuing on device %d.", m_Channel->Number(), m_Channel->Name(), m_Device->CardIndex(), dev->CardIndex());
+			m_Device = dev;
+			StartReceiver();
+		}
+		else {
+			isyslog("streamdev: Lost channel %d (%s) on device %d.", m_Channel->Number(), m_Channel->Name(), m_Device->CardIndex());
+			Stop();
+		}
+	}
 	if (m_SwitchLive) {
 		// switched away live TV. Try previous channel on other device first
 		if (!Channels.SwitchTo(cDevice::CurrentChannel())) {
