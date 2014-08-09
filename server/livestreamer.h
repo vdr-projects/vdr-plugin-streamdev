@@ -2,6 +2,7 @@
 #define VDR_STREAMDEV_LIVESTREAMER_H
 
 #include <vdr/config.h>
+#include <vdr/status.h>
 #include <vdr/receiver.h>
 
 #include "server/streamer.h"
@@ -18,7 +19,11 @@ class cStreamdevLiveReceiver;
 
 // --- cStreamdevLiveStreamer -------------------------------------------------
 
-class cStreamdevLiveStreamer: public cStreamdevStreamer, public cMainThreadHookSubscriber {
+class cStreamdevLiveStreamer: public cStreamdevStreamer, public cMainThreadHookSubscriber
+#if VDRVERSNUM >= 20104
+		, public cStatus
+#endif
+		{
 private:
 	int                     m_Priority;
 	int                     m_Pids[MAXRECEIVEPIDS + 1];
@@ -50,6 +55,8 @@ protected:
 
 	virtual int Put(const uchar *Data, int Count);
 	virtual void Action(void);
+
+	virtual void ChannelChange(const cChannel *Channel);
 
 public:
 	cStreamdevLiveStreamer(const cServerConnection *Connection, const cChannel *Channel, int Priority, eStreamType StreamType, const int* Apid = NULL, const int* Dpid = NULL);

@@ -670,6 +670,19 @@ bool cStreamdevLiveStreamer::ProvidesChannel(const cChannel *Channel, int Priori
 	return device;
 }
 
+void cStreamdevLiveStreamer::ChannelChange(const cChannel *Channel)
+{
+	if (Running() && m_Device && m_Device->ProvidesTransponder(Channel) && ISTRANSPONDER(m_Channel->Transponder(), Channel->Transponder())) {
+		Detach();
+		if (m_Device->SwitchChannel(m_Channel, false)) {
+			Attach();
+			dsyslog("streamdev: channel %d (%s) changed", Channel->Number(), Channel->Name());
+		}
+		else
+			isyslog("streamdev: failed to re-tune after channel %d (%s) changed", Channel->Number(), Channel->Name());
+	}
+}
+
 void cStreamdevLiveStreamer::MainThreadHook()
 {
 	if (!m_SwitchLive && Running() && m_Device && !m_Device->IsTunedToTransponder(m_Channel) && !IsReceiving()) {
