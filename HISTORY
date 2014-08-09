@@ -1,6 +1,11 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Implemented VDR 2.1.4 cStatus::ChannelChange(...)
+- Call detach only if receiver is attached
+- Try changing to other device when receiver got detached
+- In TSPIDS mode, create and attach receiver with empty pid list to occupy dev
+- Restructured server classes
 - New option for server side live TV buffer to prevent buffer underruns
 
 2013-11-28: Version 0.6.1
