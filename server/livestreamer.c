@@ -608,7 +608,8 @@ void cStreamdevLiveStreamer::Attach(void)
 	Dprintf("cStreamdevLiveStreamer::Attach()\n");
 	if (m_Device) {
 		if (m_Receiver) {
-			m_Device->Detach(m_Receiver); 
+			if (m_Receiver->IsAttached())
+				m_Device->Detach(m_Receiver); 
 			m_Device->AttachReceiver(m_Receiver); 
 		}
 		if (m_PatFilter) {
