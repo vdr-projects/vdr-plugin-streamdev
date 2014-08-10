@@ -11,9 +11,6 @@
 
 #define LIVEBUFSIZE (20000 * TS_SIZE)
 
-namespace Streamdev {
-	class cTSRemux;
-}
 class cStreamdevPatFilter;
 class cStreamdevLiveReceiver;
 
@@ -28,13 +25,11 @@ private:
 	int                     m_Priority;
 	int                     m_Pids[MAXRECEIVEPIDS + 1];
 	int                     m_NumPids;
-	eStreamType             m_StreamType;
 	const cChannel         *m_Channel;
 	cDevice                *m_Device;
 	cStreamdevLiveReceiver *m_Receiver;
 	cStreamdevBuffer       *m_ReceiveBuffer;
 	cStreamdevPatFilter    *m_PatFilter;
-	Streamdev::cTSRemux    *m_Remux;
 	bool                    m_SwitchLive;
 
 	void StartReceiver(bool Force = false);
@@ -47,7 +42,7 @@ private:
 	/* Find a suitable device and tune it to the requested channel. */
 	cDevice *SwitchDevice(const cChannel *Channel, int Priority);
 
-	bool SetChannel(const int* Apid = NULL, const int* Dpid = NULL);
+	bool SetChannel(eStreamType StreamType, const int* Apid = NULL, const int* Dpid = NULL);
 
 protected:
 	virtual uchar* GetFromReceiver(int &Count) { return m_ReceiveBuffer->Get(Count); }
@@ -70,9 +65,6 @@ public:
 	
 	void Receive(uchar *Data, int Length);
 	virtual bool IsReceiving(void) const;
-
-	virtual uchar *Get(int &Count);
-	virtual void Del(int Count);
 
 	virtual void Attach(void);
 	virtual void Detach(void);

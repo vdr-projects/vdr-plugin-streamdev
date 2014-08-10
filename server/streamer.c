@@ -8,7 +8,6 @@
 #include <unistd.h>
 
 #include "server/streamer.h"
-#include "server/suspend.h"
 #include "tools/socket.h"
 #include "tools/select.h"
 #include "common.h"
@@ -108,21 +107,37 @@ void cStreamdevWriter::Action(void)
 	Dprintf("Max. Transmit Blocksize was: %d\n", max);
 }
 
+// --- cRemuxDummy ------------------------------------------------------------
+
+class cRemuxDummy: public Streamdev::cTSRemux {
+private:
+	cStreamdevBuffer	m_Buffer;
+public:
+	cRemuxDummy();
+	virtual int Put(const uchar *Data, int Count) { return m_Buffer.Put(Data, Count); }
+	virtual uchar *Get(int& Count) { return m_Buffer.Get(Count); }
+	virtual void Del(int Count) { return m_Buffer.Del(Count); }
+};
+
+cRemuxDummy::cRemuxDummy(): m_Buffer(WRITERBUFSIZE, TS_SIZE * 2)
+{
+	m_Buffer.SetTimeouts(100, 100);
+}
+
 // --- cStreamdevStreamer -----------------------------------------------------
 
 cStreamdevStreamer::cStreamdevStreamer(const char *Name, const cServerConnection *Connection):
 		cThread(Name),
 		m_Connection(Connection),
-		m_Writer(NULL),
-		m_SendBuffer(new cStreamdevBuffer(WRITERBUFSIZE, TS_SIZE * 2))
+		m_Remux(new cRemuxDummy()),
+		m_Writer(NULL)
 {
-	m_SendBuffer->SetTimeouts(100, 100);
 }
 
 cStreamdevStreamer::~cStreamdevStreamer() 
 {
 	Dprintf("Desctructing streamer\n");
-	delete m_SendBuffer;
+	delete m_Remux;
 }
 
 void cStreamdevStreamer::Start(cTBSocket *Socket) 
@@ -161,5 +176,9 @@ void cStreamdevStreamer::Action(void)
 				DelFromReceiver(count);
 		}
 	}
+}
+
+int cStreamdevStreamer::Put(const uchar *Data, int Count) {
+	return m_Remux->Put(Data, Count);
 }
 
