@@ -225,3 +225,6 @@ hivdr
 hummel99
   for reporting and helping to debug channel switch issues with priority > 0
   for reporting a race condition when switching the server's LiveTV device
+
+Oliver Wagner
+  for making cStatus::ChannelChange re-tune only if CA IDs changed

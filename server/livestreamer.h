@@ -28,6 +28,7 @@ private:
 	int                     m_Priority;
 	int                     m_Pids[MAXRECEIVEPIDS + 1];
 	int                     m_NumPids;
+	int                     m_Caids[MAXCAIDS + 1];
 	eStreamType             m_StreamType;
 	const cChannel         *m_Channel;
 	cDevice                *m_Device;

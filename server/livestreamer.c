@@ -356,6 +356,7 @@ cStreamdevLiveStreamer::cStreamdevLiveStreamer(const cServerConnection *Connecti
 			m_Device = SwitchDevice(Channel, Priority);
 			if (m_Device)
 				SetChannel(Apid, Dpid);
+			memcpy(m_Caids,Channel->Caids(),sizeof(m_Caids));
 		}
 }
 
@@ -672,14 +673,22 @@ bool cStreamdevLiveStreamer::ProvidesChannel(const cChannel *Channel, int Priori
 
 void cStreamdevLiveStreamer::ChannelChange(const cChannel *Channel)
 {
-	if (Running() && m_Device && m_Device->ProvidesTransponder(Channel) && ISTRANSPONDER(m_Channel->Transponder(), Channel->Transponder())) {
-		Detach();
-		if (m_Device->SwitchChannel(m_Channel, false)) {
-			Attach();
-			dsyslog("streamdev: channel %d (%s) changed", Channel->Number(), Channel->Name());
+	if (Running() && m_Device && m_Channel == Channel) {
+		// Check whether the Caids actually changed
+		// If not, no need to re-tune, probably just an Audio PID update
+		if (!memcmp(m_Caids, Channel->Caids(), sizeof(m_Caids))) {
+			dsyslog("streamdev: channel %d (%s) changed, but caids remained the same, not re-tuning", Channel->Number(), Channel->Name());
 		}
-		else
-			isyslog("streamdev: failed to re-tune after channel %d (%s) changed", Channel->Number(), Channel->Name());
+		else {
+			Detach();
+			if (m_Device->SwitchChannel(m_Channel, false)) {
+				Attach();
+				dsyslog("streamdev: channel %d (%s) changed, re-tuned", Channel->Number(), Channel->Name());
+				memcpy(m_Caids, Channel->Caids(), sizeof(m_Caids));
+			}
+			else
+				isyslog("streamdev: failed to re-tune after channel %d (%s) changed", Channel->Number(), Channel->Name());
+		}
 	}
 }
 
