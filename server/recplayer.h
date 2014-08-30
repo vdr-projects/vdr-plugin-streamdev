@@ -23,6 +23,7 @@
 
 #include <stdio.h>
 #include <vdr/recording.h>
+#include <vdr/remux.h>
 
 #include "server/streamer.h"
 
@@ -44,6 +45,7 @@ class RecPlayer
     int openFile(int index);
     uint64_t getLastPosition();
     cRecording* getCurrentRecording();
+    const cPatPmtParser* getPatPmtData() { return parser; }
     void scan();
     uint64_t positionFromResume(int ResumeID);
     uint64_t positionFromMark(int MarkIndex);
@@ -56,6 +58,7 @@ class RecPlayer
   private:
     cRecording* recording;
     cIndexFile* indexFile;
+    cPatPmtParser* parser;
     FILE* file;
     int fileOpen;
     Segment* segments[1000];

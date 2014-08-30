@@ -3,6 +3,7 @@
 #include "server/connection.h"
 #include "server/streamer.h"
 #include <vdr/channels.h>
+#include <vdr/remux.h>
 #include <vdr/tools.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -25,7 +26,7 @@ protected:
 	virtual void Action(void);
 
 public:
-	cTSExt(cRingBufferLinear *ResultBuffer, const cServerConnection *Connection, const cChannel *Channel, const int *Apids, const int *Dpids);
+	cTSExt(cRingBufferLinear *ResultBuffer, const cServerConnection *Connection, const cChannel *Channel, const cPatPmtParser *PatPmt, const int *Apids, const int *Dpids);
 	virtual ~cTSExt();
 
 	void Put(const uchar *Data, int Count);
@@ -34,7 +35,7 @@ public:
 } // namespace Streamdev
 using namespace Streamdev;
 
-cTSExt::cTSExt(cRingBufferLinear *ResultBuffer, const cServerConnection *Connection, const cChannel *Channel, const int *Apids, const int *Dpids):
+cTSExt::cTSExt(cRingBufferLinear *ResultBuffer, const cServerConnection *Connection, const cChannel *Channel, const cPatPmtParser *PatPmt, const int *Apids, const int *Dpids):
 		m_ResultBuffer(ResultBuffer),
 		m_Active(false),
 		m_Process(-1),
@@ -73,15 +74,24 @@ cTSExt::cTSExt(cRingBufferLinear *ResultBuffer, const cServerConnection *Connect
 #define ADDENV(x...) if (asprintf(&env[i++], x) < 0) i--
 
 		// add channel ID, name and pids to environment
-		ADDENV("REMUX_CHANNEL_ID=%s", *Channel->GetChannelID().ToString());
-		ADDENV("REMUX_CHANNEL_NAME=%s", Channel->Name());
-		ADDENV("REMUX_VTYPE=%d", Channel->Vtype());
-		if (Channel->Vpid())
-			ADDENV("REMUX_VPID=%d", Channel->Vpid());
-		if (Channel->Ppid() != Channel->Vpid())
-			ADDENV("REMUX_PPID=%d", Channel->Ppid());
-		if (Channel->Tpid())
-			ADDENV("REMUX_TPID=%d", Channel->Tpid());
+		if (Channel) {
+			ADDENV("REMUX_CHANNEL_ID=%s", *Channel->GetChannelID().ToString());
+			ADDENV("REMUX_CHANNEL_NAME=%s", Channel->Name());
+			ADDENV("REMUX_VTYPE=%d", Channel->Vtype());
+			if (Channel->Vpid())
+				ADDENV("REMUX_VPID=%d", Channel->Vpid());
+			if (Channel->Ppid() != Channel->Vpid())
+				ADDENV("REMUX_PPID=%d", Channel->Ppid());
+			if (Channel->Tpid())
+				ADDENV("REMUX_TPID=%d", Channel->Tpid());
+		}
+		else if (PatPmt) {
+			ADDENV("REMUX_VTYPE=%d", PatPmt->Vtype());
+			if (PatPmt->Vpid())
+				ADDENV("REMUX_VPID=%d", PatPmt->Vpid());
+			if (PatPmt->Ppid() != PatPmt->Vpid())
+				ADDENV("REMUX_PPID=%d", PatPmt->Ppid());
+		}
 
 		std::string buffer;
 		if (Apids && *Apids) {
@@ -92,9 +102,16 @@ cTSExt::cTSExt(cRingBufferLinear *ResultBuffer, const cServerConnection *Connect
 			buffer.clear();
 			for (const int *pid = Apids; *pid; pid++) {
 				int j;
-				for (j = 0; Channel->Apid(j) && Channel->Apid(j) != *pid; j++)
-					;
-				(buffer += Channel->Alang(j)) += (*(pid + 1) ? " " : "");
+				if (Channel) {
+					for (j = 0; Channel->Apid(j) && Channel->Apid(j) != *pid; j++)
+						;
+					(buffer += Channel->Alang(j)) += (*(pid + 1) ? " " : "");
+				}
+				else if (PatPmt) {
+					for (j = 0; PatPmt->Apid(j) && PatPmt->Apid(j) != *pid; j++)
+						;
+					(buffer += PatPmt->Alang(j)) += (*(pid + 1) ? " " : "");
+				}
 			}
 			ADDENV("REMUX_ALANG=%s", buffer.c_str());
 		}
@@ -108,14 +125,21 @@ cTSExt::cTSExt(cRingBufferLinear *ResultBuffer, const cServerConnection *Connect
 			buffer.clear();
 			for (const int *pid = Dpids; *pid; pid++) {
 				int j;
-				for (j = 0; Channel->Dpid(j) && Channel->Dpid(j) != *pid; j++)
-					;
-				(buffer += Channel->Dlang(j)) += (*(pid + 1) ? " " : "");
+				if (Channel) {
+					for (j = 0; Channel->Dpid(j) && Channel->Dpid(j) != *pid; j++)
+						;
+					(buffer += Channel->Dlang(j)) += (*(pid + 1) ? " " : "");
+				}
+				else if (PatPmt) {
+					for (j = 0; PatPmt->Dpid(j) && PatPmt->Dpid(j) != *pid; j++)
+						;
+					(buffer += PatPmt->Dlang(j)) += (*(pid + 1) ? " " : "");
+				}
 			}
 			ADDENV("REMUX_DLANG=%s", buffer.c_str());
 		}
 
-		if (Channel->Spid(0)) {
+		if (Channel && Channel->Spid(0)) {
 			buffer.clear();
 			for (const int *pid = Channel->Spids(); *pid; pid++)
 				(buffer += (const char *) itoa(*pid)) += (*(pid + 1) ? " " : "");
@@ -124,6 +148,17 @@ cTSExt::cTSExt(cRingBufferLinear *ResultBuffer, const cServerConnection *Connect
 			buffer.clear();
 			for (int j = 0; Channel->Spid(j); j++)
 				(buffer += Channel->Slang(j)) += (Channel->Spid(j + 1) ? " " : "");
+			ADDENV("REMUX_SLANG=%s", buffer.c_str());
+		}
+		else if (PatPmt && PatPmt->Spid(0)) {
+			buffer.clear();
+			for (const int *pid = PatPmt->Spids(); *pid; pid++)
+				(buffer += (const char *) itoa(*pid)) += (*(pid + 1) ? " " : "");
+			ADDENV("REMUX_SPID=%s", buffer.c_str());
+
+			buffer.clear();
+			for (int j = 0; PatPmt->Spid(j); j++)
+				(buffer += PatPmt->Slang(j)) += (PatPmt->Spid(j + 1) ? " " : "");
 			ADDENV("REMUX_SLANG=%s", buffer.c_str());
 		}
 
@@ -296,7 +331,13 @@ void cTSExt::Put(const uchar *Data, int Count)
 
 cExternRemux::cExternRemux(const cServerConnection *Connection, const cChannel *Channel, const int *Apids, const int *Dpids):
 		m_ResultBuffer(new cRingBufferLinear(WRITERBUFSIZE)),
-		m_Remux(new cTSExt(m_ResultBuffer, Connection, Channel, Apids, Dpids))
+		m_Remux(new cTSExt(m_ResultBuffer, Connection, Channel, NULL, Apids, Dpids))
+{
+	m_ResultBuffer->SetTimeouts(500, 100);
+}
+cExternRemux::cExternRemux(const cServerConnection *Connection, const cPatPmtParser *PatPmt, const int *Apids, const int *Dpids):
+		m_ResultBuffer(new cRingBufferLinear(WRITERBUFSIZE)),
+		m_Remux(new cTSExt(m_ResultBuffer, Connection, NULL, PatPmt, Apids, Dpids))
 {
 	m_ResultBuffer->SetTimeouts(500, 100);
 }

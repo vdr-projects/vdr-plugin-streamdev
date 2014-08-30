@@ -6,6 +6,7 @@
 #include <string>
 
 class cChannel;
+class cPatPmtParser;
 class cServerConnection;
 
 namespace Streamdev {
@@ -19,6 +20,7 @@ private:
 
 public:
 	cExternRemux(const cServerConnection *Connection, const cChannel *Channel, const int *APids, const int *Dpids);
+	cExternRemux(const cServerConnection *Connection, const cPatPmtParser *PatPmt, const int *APids, const int *Dpids);
 	virtual ~cExternRemux();
 	
 	int Put(const uchar *Data, int Count);

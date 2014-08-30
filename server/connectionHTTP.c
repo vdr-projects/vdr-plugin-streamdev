@@ -35,6 +35,7 @@ cConnectionHTTP::cConnectionHTTP(void):
 
 cConnectionHTTP::~cConnectionHTTP() 
 {
+	SetStreamer(NULL);
 	delete m_RecPlayer;
 	delete m_MenuList;
 }
@@ -164,6 +165,14 @@ bool cConnectionHTTP::ProcessRequest(void)
 		}
 	}
 
+	tStrStrMap::const_iterator it;
+	it = m_Params.find("apid");
+	if (it != m_Params.end())
+		m_Apid[0] = atoi(it->second.c_str());
+	it = m_Params.find("dpid");
+	if (it != m_Params.end())
+		m_Dpid[0] = atoi(it->second.c_str());
+
 	tStrStrMap::const_iterator it_method = Headers().find(REQUEST_METHOD);
 	tStrStrMap::const_iterator it_pathinfo = Headers().find(PATH_INFO);
 	if (it_method == Headers().end() || it_pathinfo == Headers().end()) {
@@ -196,30 +205,46 @@ bool cConnectionHTTP::ProcessRequest(void)
 		}
 		else if (m_RecPlayer != NULL) {
 			Dprintf("GET recording\n");
+			bool isPes = m_RecPlayer->getCurrentRecording()->IsPesRecording();
+			// no remuxing for old PES recordings
+			if (isPes && m_StreamType != stPES)
+				return HttpResponse(503, true);
+
 			int64_t from, to;
 			bool hasRange = ParseRange(from, to);
 
 			cStreamdevRecStreamer* recStreamer;
 			if (from == 0 && hasRange && m_ReplayFakeRange) {
-				recStreamer = new cStreamdevRecStreamer(m_RecPlayer, this);
+				recStreamer = new cStreamdevRecStreamer(this, m_RecPlayer, m_StreamType, (int64_t) 0L, m_Apid[0] ? m_Apid : NULL, m_Dpid[0] ? m_Dpid : NULL);
 				from += m_ReplayPos;
 				if (to >= 0)
 					to += m_ReplayPos;
 			}
 			else
-				recStreamer = new cStreamdevRecStreamer(m_RecPlayer, this, m_ReplayPos);
+				recStreamer = new cStreamdevRecStreamer(this, m_RecPlayer, m_StreamType, m_ReplayPos, m_Apid[0] ? m_Apid : NULL, m_Dpid[0] ? m_Dpid : NULL);
 			SetStreamer(recStreamer);
+
+			if (m_StreamType == stEXT)
+				return Respond("HTTP/1.0 200 OK");
+			else if (m_StreamType == stES && (m_Apid[0] || m_Dpid[0]))
+				return HttpResponse(200, false, "audio/mpeg");
+
+			const char* contentType = (isPes || m_RecPlayer->getPatPmtData()->Vpid()) ? "video/mpeg" : "audio/mpeg";
+			// range not supported when remuxing
+			if (m_StreamType != stTS && !isPes)
+				return HttpResponse(200, false, contentType);
+
 			uint64_t total = recStreamer->GetLength();
 			if (hasRange) {
 				int64_t length = recStreamer->SetRange(from, to);
 				Dprintf("range response: %lld-%lld/%lld, len %lld\n", (long long)from, (long long)to, (long long)total, (long long)length);
 				if (length < 0L)
-					return HttpResponse(416, true, "video/mpeg", "Accept-Ranges: bytes\r\nContent-Range: bytes */%llu", (unsigned long long) total);
+					return HttpResponse(416, true, contentType, "Accept-Ranges: bytes\r\nContent-Range: bytes */%llu", (unsigned long long) total);
 				else
-					return HttpResponse(206, false, "video/mpeg", "Accept-Ranges: bytes\r\nContent-Range: bytes %lld-%lld/%llu\r\nContent-Length: %lld", (long long) from, (long long) to, (unsigned long long) total, (long long) length);
+					return HttpResponse(206, false, contentType, "Accept-Ranges: bytes\r\nContent-Range: bytes %lld-%lld/%llu\r\nContent-Length: %lld", (long long) from, (long long) to, (unsigned long long) total, (long long) length);
 			}
 			else
-				return HttpResponse(200, false, "video/mpeg", "Accept-Ranges: bytes");
+				return HttpResponse(200, false, contentType, "Accept-Ranges: bytes");
 		}
 		else {
 			return HttpResponse(404, true);
@@ -247,29 +272,45 @@ bool cConnectionHTTP::ProcessRequest(void)
 		}
 		else if (m_RecPlayer != NULL) {
 			Dprintf("HEAD recording\n");
+			bool isPes = m_RecPlayer->getCurrentRecording()->IsPesRecording();
+			// no remuxing for old PES recordings
+			if (isPes && m_StreamType != stPES)
+				return HttpResponse(503, true);
+
 			int64_t from, to;
 			bool hasRange = ParseRange(from, to);
 			
 			cStreamdevRecStreamer* recStreamer;
 			if (from == 0 && hasRange && m_ReplayFakeRange) {
-				recStreamer = new cStreamdevRecStreamer(m_RecPlayer, this, m_ReplayPos);
+				recStreamer = new cStreamdevRecStreamer(this, m_RecPlayer, m_StreamType, m_ReplayPos, m_Apid[0] ? m_Apid : NULL, m_Dpid[0] ? m_Dpid : NULL);
 				from += m_ReplayPos;
 				if (to >= 0)
 					to += m_ReplayPos;
 			}
 			else
-				recStreamer = new cStreamdevRecStreamer(m_RecPlayer, this, m_ReplayPos);
+				recStreamer = new cStreamdevRecStreamer(this, m_RecPlayer, m_StreamType, m_ReplayPos, m_Apid[0] ? m_Apid : NULL, m_Dpid[0] ? m_Dpid : NULL);
 			SetStreamer(recStreamer);
+
+			if (m_StreamType == stEXT)
+				return Respond("HTTP/1.0 200 OK");
+			else if (m_StreamType == stES && (m_Apid[0] || m_Dpid[0]))
+				return HttpResponse(200, true, "audio/mpeg");
+
+			const char* contentType = (isPes || m_RecPlayer->getPatPmtData()->Vpid()) ? "video/mpeg" : "audio/mpeg";
+			// range not supported when remuxing
+			if (m_StreamType != stTS && !isPes)
+				return HttpResponse(200, false, contentType);
+
 			uint64_t total = recStreamer->GetLength();
 			if (hasRange) {
 				int64_t length = recStreamer->SetRange(from, to);
 				if (length < 0L)
-					return HttpResponse(416, true, "video/mpeg", "Accept-Ranges: bytes\r\nContent-Range: bytes */%llu", (unsigned long long) total);
+					return HttpResponse(416, true, contentType, "Accept-Ranges: bytes\r\nContent-Range: bytes */%llu", (unsigned long long) total);
 				else
-					return HttpResponse(206, true, "video/mpeg", "Accept-Ranges: bytes\r\nContent-Range: bytes %lld-%lld/%llu\r\nContent-Length: %lld", (long long) from, (long long) to, (unsigned long long) total, (long long) length);
+					return HttpResponse(206, true, contentType, "Accept-Ranges: bytes\r\nContent-Range: bytes %lld-%lld/%llu\r\nContent-Length: %lld", (long long) from, (long long) to, (unsigned long long) total, (long long) length);
 			}
 			else
-				return HttpResponse(200, true, "video/mpeg", "Accept-Ranges: bytes");
+				return HttpResponse(200, true, contentType, "Accept-Ranges: bytes");
 		}
 		else {
 			return HttpResponse(404, true);
