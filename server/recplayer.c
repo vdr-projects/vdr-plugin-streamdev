@@ -42,6 +42,12 @@ RecPlayer::RecPlayer(const char* FileName)
   if (!indexFile) esyslog("ERROR: Streamdev: Failed to create indexfile!");
 
   scan();
+
+  parser = new cPatPmtParser();
+  unsigned char buffer[2 * TS_SIZE];
+  unsigned long l = getBlock(buffer, 0UL, sizeof(buffer));
+  if (!l || !parser->ParsePatPmt(buffer, (int) l))
+    esyslog("ERROR: Streamdev: Failed to parse PAT/PMT");
 }
 
 void RecPlayer::scan()
@@ -87,6 +93,7 @@ RecPlayer::~RecPlayer()
   if (file) fclose(file);
   delete indexFile;
   delete recording;
+  delete parser;
 }
 
 int RecPlayer::openFile(int index)

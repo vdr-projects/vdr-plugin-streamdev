@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- Implemented remuxing of recordings
 - Make ChannelChange retune only if CA IDs changed (thanks to Oliver Wagner)
 - Implemented VDR 2.1.4 cStatus::ChannelChange(...)
 - Call detach only if receiver is attached

@@ -9,6 +9,8 @@
 #include <vdr/ringbuffer.h>
 #include <vdr/tools.h>
 
+#include "remux/tsremux.h"
+
 class cTBSocket;
 class cStreamdevStreamer;
 class cServerConnection;
@@ -65,16 +67,18 @@ public:
 class cStreamdevStreamer: public cThread {
 private:
 	const cServerConnection *m_Connection;
-	cStreamdevWriter  *m_Writer;
-	cStreamdevBuffer  *m_SendBuffer;
+	Streamdev::cTSRemux     *m_Remux;
+	cStreamdevWriter        *m_Writer;
+	cStreamdevBuffer        *m_SendBuffer;
 
 protected:
 	virtual uchar* GetFromReceiver(int &Count) = 0;
 	virtual void DelFromReceiver(int Count) = 0;
-	virtual int Put(const uchar *Data, int Count) { return m_SendBuffer->PutTS(Data, Count); }
+	virtual int Put(const uchar *Data, int Count);
 	virtual void Action(void);
 
 	bool IsRunning(void) const { return m_Writer; }
+	void SetRemux(Streamdev::cTSRemux *Remux) { delete m_Remux; m_Remux = Remux; }
 
 public:
 	cStreamdevStreamer(const char *Name, const cServerConnection *Connection = NULL);
@@ -87,8 +91,8 @@ public:
 	virtual bool IsReceiving(void) const = 0;
 	bool Abort(void);
 
-	virtual uchar *Get(int &Count) { return m_SendBuffer->Get(Count); }
-	virtual void Del(int Count) { m_SendBuffer->Del(Count); }
+	uchar *Get(int &Count) { return m_Remux->Get(Count); }
+	void Del(int Count) { m_Remux->Del(Count); } 
 
 	virtual void Detach(void) {}
 	virtual void Attach(void) {}

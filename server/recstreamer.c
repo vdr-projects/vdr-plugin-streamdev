@@ -12,7 +12,7 @@ using namespace Streamdev;
 
 // --- cStreamdevRecStreamer -------------------------------------------------
 
-cStreamdevRecStreamer::cStreamdevRecStreamer(RecPlayer *RecPlayer, const cServerConnection *Connection, int64_t StartOffset):
+cStreamdevRecStreamer::cStreamdevRecStreamer(const cServerConnection *Connection, RecPlayer *RecPlayer, eStreamType StreamType, int64_t StartOffset, const int *Apid, const int *Dpid):
 		cStreamdevStreamer("streamdev-recstreaming", Connection),
 		m_RecPlayer(RecPlayer),
 		m_StartOffset(StartOffset),
@@ -20,6 +20,36 @@ cStreamdevRecStreamer::cStreamdevRecStreamer(RecPlayer *RecPlayer, const cServer
 {
 	Dprintf("New rec streamer\n");
 	m_To = (int64_t) m_RecPlayer->getLengthBytes() - StartOffset - 1;
+
+	const cPatPmtParser *parser = RecPlayer->getPatPmtData();
+	const int *Apids = Apid ? Apid : parser->Apids();
+	const int *Dpids = Dpid ? Dpid : parser->Dpids();
+	switch (StreamType) {
+	case stES:
+		{
+			int pid = parser->Vpid();
+			if (Apid && Apid[0])
+				pid = Apid[0];
+			else if (Dpid && Dpid[0])
+				pid = Dpid[0];
+			SetRemux(new cTS2ESRemux(pid));
+		}
+		break;
+	case stPES:
+		if (!m_RecPlayer->getCurrentRecording()->IsPesRecording())
+			SetRemux(new cTS2PESRemux(parser->Vpid(), Apids, Dpids, parser->Spids()));
+		break;
+#ifdef STREAMDEV_PS
+	case stPS:
+		SetRemux(new cTS2PSRemux(parser->Vpid(), Apids, Dpids, parser->Spids()));
+		break;
+#endif
+	case stEXT:
+		SetRemux(new cExternRemux(Connection, parser, Apids, Dpids));
+                break;
+	default:
+		break;
+	}
 }
 
 cStreamdevRecStreamer::~cStreamdevRecStreamer() 

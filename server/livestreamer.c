@@ -9,7 +9,6 @@
 #include "remux/extern.h"
 
 #include <vdr/transfer.h>
-#include <vdr/ringbuffer.h>
 
 #include "server/livestreamer.h"
 #include "server/setup.h"
@@ -339,23 +338,21 @@ cStreamdevLiveStreamer::cStreamdevLiveStreamer(const cServerConnection *Connecti
 		cStreamdevStreamer("streamdev-livestreaming", Connection),
 		m_Priority(Priority),
 		m_NumPids(0),
-		m_StreamType(StreamType),
 		m_Channel(Channel),
 		m_Device(NULL),
 		m_Receiver(NULL),
 		m_PatFilter(NULL),
-		m_Remux(NULL),
 		m_SwitchLive(false)
 {
 		m_ReceiveBuffer = new cStreamdevBuffer(LIVEBUFSIZE, TS_SIZE *2, true, "streamdev-livestreamer"),
 		m_ReceiveBuffer->SetTimeouts(0, 100);
 		if (Priority == IDLEPRIORITY) {
-			SetChannel(Apid, Dpid);
+			SetChannel(StreamType, Apid, Dpid);
 		}
 		else {
 			m_Device = SwitchDevice(Channel, Priority);
 			if (m_Device)
-				SetChannel(Apid, Dpid);
+				SetChannel(StreamType, Apid, Dpid);
 			memcpy(m_Caids,Channel->Caids(),sizeof(m_Caids));
 		}
 }
@@ -366,7 +363,6 @@ cStreamdevLiveStreamer::~cStreamdevLiveStreamer()
 	Stop();
 	DELETENULL(m_PatFilter);
 	DELETENULL(m_Receiver);
-	delete m_Remux;
 	delete m_ReceiveBuffer;
 }
 
@@ -488,7 +484,7 @@ void cStreamdevLiveStreamer::StartReceiver(bool Force)
 		DELETENULL(m_Receiver);
 }
 
-bool cStreamdevLiveStreamer::SetChannel(const int* Apid, const int *Dpid) 
+bool cStreamdevLiveStreamer::SetChannel(eStreamType StreamType, const int* Apid, const int *Dpid) 
 {
 	Dprintf("Initializing Remuxer for full channel transfer\n");
 	//printf("ca pid: %d\n", Channel->Ca());
@@ -496,7 +492,7 @@ bool cStreamdevLiveStreamer::SetChannel(const int* Apid, const int *Dpid)
 	const int *Apids = Apid ? Apid : m_Channel->Apids();
 	const int *Dpids = Dpid ? Dpid : m_Channel->Dpids();
 
-	switch (m_StreamType) {
+	switch (StreamType) {
 	case stES: 
 		{
 			int pid = ISRADIO(m_Channel) ? m_Channel->Apid(0) : m_Channel->Vpid();
@@ -504,22 +500,22 @@ bool cStreamdevLiveStreamer::SetChannel(const int* Apid, const int *Dpid)
 				pid = Apid[0];
 			else if (Dpid && Dpid[0])
 				pid = Dpid[0];
-			m_Remux = new cTS2ESRemux(pid);
+			SetRemux(new cTS2ESRemux(pid));
 			return SetPids(pid);
 		}
 
 	case stPES: 
-		m_Remux = new cTS2PESRemux(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
+		SetRemux(new cTS2PESRemux(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids()));
 		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 
 #ifdef STREAMDEV_PS
 	case stPS:  
-		m_Remux = new cTS2PSRemux(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
+		SetRemux(new cTS2PSRemux(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids()));
 		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 #endif
 
 	case stEXT:
-		m_Remux = new cExternRemux(Connection(), m_Channel, Apids, Dpids);
+		SetRemux(new cExternRemux(Connection(), m_Channel, Apids, Dpids));
 		// fall through
 	case stTS:
 		// This should never happen, but ...
@@ -574,36 +570,14 @@ int cStreamdevLiveStreamer::Put(const uchar *Data, int Count)
 		int siCount;
 		uchar *siData = m_PatFilter->Get(siCount);
 		if (siData) {
-			if (m_Remux)
-				siCount = m_Remux->Put(siData, siCount);
-			else
-				siCount = cStreamdevStreamer::Put(siData, siCount);
+			siCount = cStreamdevStreamer::Put(siData, siCount);
 			if (siCount)
 				m_PatFilter->Del(siCount);
 		}
 	}
-	if (m_Remux)
-		return m_Remux->Put(Data, Count);
-	else
-		return cStreamdevStreamer::Put(Data, Count);
+	return cStreamdevStreamer::Put(Data, Count);
 }
 
-uchar *cStreamdevLiveStreamer::Get(int &Count)
-{
-	if (m_Remux)
-		return m_Remux->Get(Count);
-	else
-		return cStreamdevStreamer::Get(Count);
-}
-
-void cStreamdevLiveStreamer::Del(int Count)
-{
-	if (m_Remux)
-		m_Remux->Del(Count);
-	else
-		cStreamdevStreamer::Del(Count);
-}
-	
 void cStreamdevLiveStreamer::Attach(void) 
 { 
 	Dprintf("cStreamdevLiveStreamer::Attach()\n");
