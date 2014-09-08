@@ -6,10 +6,23 @@
 #include "server/menuHTTP.h"
 
 //**************************** cRecordingIterator **************
-cRecordingsIterator::cRecordingsIterator(): RecordingsLock(&Recordings)
+cRecordingsIterator::cRecordingsIterator(eStreamType StreamType): RecordingsLock(&Recordings)
 {	
-	first = Recordings.First();
+	streamType = StreamType;
+	first = NextSuitable(Recordings.First());
 	current = NULL;
+}
+
+const cRecording* cRecordingsIterator::NextSuitable(const cRecording *Recording)
+{
+	while (Recording)
+	{
+		bool isPes = Recording->IsPesRecording();
+		if (!isPes || (isPes && streamType == stPES))
+			break;
+		Recording = Recordings.Next(Recording);
+	}
+	return Recording;
 }
 
 bool cRecordingsIterator::Next()
@@ -20,7 +33,7 @@ bool cRecordingsIterator::Next()
 		first = NULL;
 	}
 	else
-		current = Recordings.Next(current);
+		current = NextSuitable(Recordings.Next(current));
 	return current;
 }
 

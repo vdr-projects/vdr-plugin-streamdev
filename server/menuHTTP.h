@@ -24,9 +24,12 @@ class cItemIterator
 class cRecordingsIterator: public cItemIterator
 {
 	private:
+		eStreamType streamType;
 		const cRecording *first;
 		const cRecording *current;
 		cThreadLock RecordingsLock;
+	protected:
+		virtual const cRecording* NextSuitable(const cRecording *Recording);
 	public:
 		virtual bool Next();
 		virtual bool IsGroup() const { return false; }
@@ -35,7 +38,7 @@ class cRecordingsIterator: public cItemIterator
 		virtual const cString ItemRessource() const;
 		virtual const char* Alang(int i) const { return NULL; }
 		virtual const char* Dlang(int i) const { return NULL; }
-		cRecordingsIterator();
+		cRecordingsIterator(eStreamType StreamType);
 		virtual ~cRecordingsIterator() {};
 };
 

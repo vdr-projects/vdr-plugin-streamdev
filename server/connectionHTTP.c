@@ -468,7 +468,7 @@ cMenuList* cConnectionHTTP::MenuListFromString(const std::string& Path, const st
 			(Filebase.empty() && Fileext.empty())) {
 		iterator = new cListAll();
 	} else if (Filebase.compare("recordings") == 0) {
-		iterator = new cRecordingsIterator();
+		iterator = new cRecordingsIterator(m_StreamType);
 	}
 
 	if (iterator) {
