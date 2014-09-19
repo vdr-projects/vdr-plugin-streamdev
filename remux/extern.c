@@ -303,7 +303,7 @@ void cTSExt::Action(void)
 					dsyslog("streamdev-server: buffer full while reading from externremux");
 
 				if (result == -1) {
-					if (errno != EINTR) {
+					if (errno != EINTR && errno != EAGAIN) {
 						LOG_ERROR_STR("read failed");
 						m_Active = false;
 					}
