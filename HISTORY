@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- fixed recplayer issues with large TS files (>4GB)
 - Don't abort externremux when internal read buffer is empty
 - Implemented remuxing of recordings
 - Make ChannelChange retune only if CA IDs changed (thanks to Oliver Wagner)

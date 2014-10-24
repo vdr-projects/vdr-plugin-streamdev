@@ -75,7 +75,7 @@ void RecPlayer::scan()
     segments[i] = new Segment();
     segments[i]->start = totalLength;
     fseek(file, 0, SEEK_END);
-    totalLength += ftell(file);
+    totalLength += ftello(file);
     totalFrames = indexFile->Last();
     //log->log("RecPlayer", Log::DEBUG, "File %i found, totalLength now %llu, numFrames = %lu", i, totalLength, totalFrames);
     segments[i]->end = totalLength;
@@ -176,7 +176,7 @@ unsigned long RecPlayer::getBlock(unsigned char* buffer, uint64_t position, unsi
   uint32_t yetToGet = amount;
   uint32_t got = 0;
   uint32_t getFromThisSegment = 0;
-  uint32_t filePosition;
+  uint64_t filePosition;
 
   while(got < amount)
   {
@@ -290,7 +290,7 @@ uint32_t RecPlayer::frameNumberFromPosition(uint64_t position)
     if ((position >= segments[segmentNumber]->start) && (position < segments[segmentNumber]->end)) break;
     // position is in this block
   }
-  uint32_t askposition = position - segments[segmentNumber]->start;
+  uint64_t askposition = position - segments[segmentNumber]->start;
   return indexFile->Get((int)segmentNumber, askposition);
 
 }
