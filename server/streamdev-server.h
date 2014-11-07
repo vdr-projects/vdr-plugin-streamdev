@@ -46,6 +46,7 @@ public:
 	virtual bool SetupParse(const char *Name, const char *Value);
 	virtual const char **SVDRPHelpPages(void);
 	virtual cString SVDRPCommand(const char *Command, const char *Option, int &ReplyCode);
+	virtual bool Service(const char *Id, void *Data = NULL);
 };
 
 #endif // VDR_STREAMDEVSERVER_H

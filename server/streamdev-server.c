@@ -243,4 +243,17 @@ cString cPluginStreamdevServer::SVDRPCommand(const char *Command, const char *Op
 	return reply;
 }
 
+bool cPluginStreamdevServer::Service(const char *Id, void *Data)
+{
+	if (strcmp(Id, "StreamdevServer::ClientCount-v1.0") == 0) {
+		if (Data) {
+			int *count = (int *) Data;
+			cThreadLock lock;
+			*count = cStreamdevServer::Clients(lock).Count();
+		}
+		return true;
+	}
+	return false;
+}
+
 VDRPLUGINCREATOR(cPluginStreamdevServer); // Don't touch this!
