@@ -53,7 +53,7 @@ public:
 	virtual void Welcome(void);
 	virtual void Reject(void);
 
-	virtual cString ToText() const;
+	virtual cString ToText(char Delimiter = ' ') const;
 
 	virtual bool Abort(void) const;
 	virtual void Detach(void);

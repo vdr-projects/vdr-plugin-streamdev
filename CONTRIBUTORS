@@ -229,3 +229,6 @@ hummel99
 
 Henrik Niehaus
   for fixing replay of large TS files on 32-bit systems
+
+Guy Martin
+  for adding SVDRP commands to list and disconnect clients

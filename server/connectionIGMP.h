@@ -27,7 +27,7 @@ public:
 
 	bool SetChannel(cChannel *Channel, in_addr_t Dst);
 	virtual void Welcome(void);
-	virtual cString ToText() const;
+	virtual cString ToText(char Delimiter = ' ') const;
 
 	/* Not used here */
 	virtual bool Command(char *Cmd) { return false; }

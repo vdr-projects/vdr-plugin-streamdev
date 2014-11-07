@@ -44,6 +44,8 @@ public:
 	virtual void MainThreadHook(void);
 	virtual cMenuSetupPage *SetupMenu(void);
 	virtual bool SetupParse(const char *Name, const char *Value);
+	virtual const char **SVDRPHelpPages(void);
+	virtual cString SVDRPCommand(const char *Command, const char *Option, int &ReplyCode);
 };
 
 #endif // VDR_STREAMDEVSERVER_H

@@ -15,7 +15,7 @@ cStreamdevServerMenu::cStreamdevServerMenu(): cOsdMenu(tr("Streamdev Connections
 	cThreadLock lock;
 	const cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
 	for (cServerConnection *s = clients.First(); s; s = clients.Next(s))
-		Add(new cOsdItem(s->ToText()));
+		Add(new cOsdItem(s->ToText('\t')));
 	SetHelpKeys();
 	Display();
 }
@@ -34,7 +34,7 @@ eOSState cStreamdevServerMenu::Disconnect() {
 		const cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
 		const char *text = item->Text();
 		for (cServerConnection *s = clients.First(); s; s = clients.Next(s)) {
-			if (!strcmp(text, s->ToText())) {
+			if (!strcmp(text, s->ToText('\t'))) {
 				s->Close();
 				Del(Current());
 				SetHelpKeys();

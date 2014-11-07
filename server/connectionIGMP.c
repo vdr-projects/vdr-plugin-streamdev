@@ -66,8 +66,8 @@ bool cConnectionIGMP::Close()
 	return cServerConnection::Close();
 }
 
-cString cConnectionIGMP::ToText() const
+cString cConnectionIGMP::ToText(char Delimiter) const
 {
-	cString str = cServerConnection::ToText();
-	return Streamer() ? cString::sprintf("%s\t%s", *str, *Streamer()->ToText()) : str;
+	cString str = cServerConnection::ToText(Delimiter);
+	return Streamer() ? cString::sprintf("%s%c%s", *str, Delimiter, *Streamer()->ToText()) : str;
 }

@@ -178,4 +178,69 @@ bool cPluginStreamdevServer::SetupParse(const char *Name, const char *Value)
 	return StreamdevServerSetup.SetupParse(Name, Value);
 }
 
+const char **cPluginStreamdevServer::SVDRPHelpPages(void)
+{
+	static const char *HelpPages[]=
+	{
+		"LSTC\n"
+		"    List connected clients\n",
+		"DISC client_id\n"
+		"    Disconnect a client\n",
+		NULL
+	};
+	return HelpPages;
+}
+
+cString cPluginStreamdevServer::SVDRPCommand(const char *Command, const char *Option, int &ReplyCode)
+{
+
+	cString reply = NULL;
+	if (!strcasecmp(Command, "LSTC"))
+	{
+		reply = "";
+		cThreadLock lock;
+		const cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
+		cServerConnection *s = clients.First();
+		if (!s)
+		{
+			reply = "no client connected";
+			ReplyCode = 550;
+		} else
+		{
+			for (; s; s = clients.Next(s))
+			{
+				reply = cString::sprintf("%s%p: %s\n", (const char*) reply, s, (const char *) s->ToText());
+			}
+			ReplyCode = 250;
+		}
+	} else if (!strcasecmp(Command, "DISC"))
+	{
+		void *client = NULL;
+		if (sscanf(Option, "%p", &client) != 1 || !client)
+		{
+			reply = "invalid client handle";
+			ReplyCode = 501;
+		} else
+		{
+			cThreadLock lock;
+			const cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
+			cServerConnection *s = clients.First();
+			for (; s && s != client; s = clients.Next(s));
+
+			if (!s)
+			{
+				reply = "client not found";
+				ReplyCode = 501;
+			} else
+			{
+				s->Close();
+				reply = "client disconnected";
+				ReplyCode = 250;
+			}
+		}
+	}
+
+	return reply;
+}
+
 VDRPLUGINCREATOR(cPluginStreamdevServer); // Don't touch this!

@@ -197,5 +197,7 @@ bool cServerConnection::Close()
 	return cTBSocket::Close();
 }
 
-cString cServerConnection::ToText() const
-{	return cString::sprintf("%s\t%s:%d", Protocol(), RemoteIp().c_str(), RemotePort()); }
+cString cServerConnection::ToText(char Delimiter) const
+{
+	return cString::sprintf("%s%c%s:%d", Protocol(), Delimiter, RemoteIp().c_str(), RemotePort());
+}

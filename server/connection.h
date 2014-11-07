@@ -108,8 +108,8 @@ public:
 	/* This connections protocol name */
 	virtual const char* Protocol(void) const { return m_Protocol; }
 
-	/* Representation in menu */
-	virtual cString ToText(void) const;
+	/* Text description of stream */
+	virtual cString ToText(char Delimiter = ' ') const;
 
 	/* std::map with additional information */
 	const tStrStrMap& Headers(void) const { return m_Headers; }

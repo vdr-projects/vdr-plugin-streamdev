@@ -1836,13 +1836,13 @@ bool cConnectionVTP::Respond(int Code, const char *Message, ...)
 				Code < 0 ? '-' : ' ', *str);
 }
 
-cString cConnectionVTP::ToText() const
+cString cConnectionVTP::ToText(char Delimiter) const
 {
-	cString str = cServerConnection::ToText();
+	cString str = cServerConnection::ToText(Delimiter);
 	if (Streamer())
-		return cString::sprintf("%s\t%s", *str, *Streamer()->ToText());
+		return cString::sprintf("%s%c%s", *str, Delimiter, *Streamer()->ToText());
 	else if (m_RecPlayer)
-		return cString::sprintf("%s\t%s", *str, m_RecPlayer->getCurrentRecording()->Name());
+		return cString::sprintf("%s%c%s", *str, Delimiter, m_RecPlayer->getCurrentRecording()->Name());
 	else
 		return str;
 }

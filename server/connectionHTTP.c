@@ -649,8 +649,8 @@ bool cConnectionHTTP::ProcessURI(const std::string& PathInfo)
 		return false;
 }
 
-cString cConnectionHTTP::ToText() const
+cString cConnectionHTTP::ToText(char Delimiter) const
 {
-	cString str = cServerConnection::ToText();
-	return Streamer() ? cString::sprintf("%s\t%s", *str, *Streamer()->ToText()) : str;
+	cString str = cServerConnection::ToText(Delimiter);
+	return Streamer() ? cString::sprintf("%s%c%s", *str, Delimiter, *Streamer()->ToText()) : str;
 }

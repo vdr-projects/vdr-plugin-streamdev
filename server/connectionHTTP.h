@@ -59,7 +59,7 @@ public:
 	cConnectionHTTP(void);
 	virtual ~cConnectionHTTP();
 
-	virtual cString ToText() const;
+	virtual cString ToText(char Delimiter = ' ') const;
 
 	virtual bool CanAuthenticate(void);
 
