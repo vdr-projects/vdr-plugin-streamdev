@@ -88,6 +88,12 @@ bool cStreamdevDevice::IsTunedToTransponder(const cChannel *Channel)
 			Channel->Transponder() == m_Channel->Transponder();
 }
 
+const cChannel *cStreamdevDevice::GetCurrentlyTunedTransponder(void) const {
+	if (m_ClientSocket->DataSocket(siLive) != NULL)
+		return m_Channel;
+	return NULL;
+}
+
 bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority, 
 		bool *NeedsDetachReceivers) const {
 	if (m_Disabled || Channel == m_DenyChannel)

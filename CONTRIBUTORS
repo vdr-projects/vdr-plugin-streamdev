@@ -235,3 +235,4 @@ Guy Martin
 
 Martin1234
   for suggesting a service call, returning the number of clients
+  for implementing GetCurrentlyTunedTransponder() on client

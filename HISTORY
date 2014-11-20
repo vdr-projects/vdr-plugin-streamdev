@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- implemented GetCurrentlyTunedTransponder() on client (thanks to Martin1234)
 - added service call returning the number of clients (suggested by Martin1234)
 - added SVDRP commands to list and disconnect clients (thanks to Guy Martin)
 - fixed recplayer issues with large TS files (>4GB)
