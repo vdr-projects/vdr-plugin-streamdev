@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- converted suspend.dat into proper PES format (thanks to te36)
 - implemented GetCurrentlyTunedTransponder() on client (thanks to Martin1234)
 - added service call returning the number of clients (suggested by Martin1234)
 - added SVDRP commands to list and disconnect clients (thanks to Guy Martin)

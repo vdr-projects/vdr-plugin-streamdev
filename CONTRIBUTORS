@@ -236,3 +236,6 @@ Guy Martin
 Martin1234
   for suggesting a service call, returning the number of clients
   for implementing GetCurrentlyTunedTransponder() on client
+
+te36
+  for converting suspend.dat into proper PES format
