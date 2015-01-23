@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vdr-streamdev-client 0.6.1-git\n"
 "Report-Msgid-Bugs-To: <vdrdev@schmirler.de>\n"
-"POT-Creation-Date: 2014-11-20 14:11+0100\n"
+"POT-Creation-Date: 2015-01-16 22:32+0100\n"
 "PO-Revision-Date: 2014-11-24 18:07+0100\n"
 "Last-Translator: Tomasz Maciej Nowak <tomek_n@o2.pl>\n"
 "Language-Team: Polish <vdr@linuxtv.org>\n"
@@ -34,6 +34,9 @@ msgstr "Czas oczekiwania (s)"
 
 msgid "Filter Streaming"
 msgstr "Filtruj strumieñ"
+
+msgid "Filter SockBufSize"
+msgstr ""
 
 msgid "Live TV Priority"
 msgstr "Priorytet lokalnych ur±dzeñ"

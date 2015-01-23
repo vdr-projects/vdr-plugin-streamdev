@@ -20,8 +20,6 @@ private:
 	
 protected:
 	virtual void Action(void);
-	void CarbageCollect(void);
-
 	bool ReActivateFilters(void);
 
 public:
@@ -30,6 +28,7 @@ public:
 
 	void SetConnection(int Handle);
 	int OpenFilter(u_short Pid, u_char Tid, u_char Mask);
+	void CloseFilter(int Handle);
 };
 
 #endif // VDR_STREAMDEV_FILTER_H

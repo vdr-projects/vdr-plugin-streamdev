@@ -203,7 +203,8 @@ streamdev-server's setup menu. A negative priority gives precedence to local
 live TV on the server. Zero and positive values give precedence to the client.
 
 The priority for VDR clients watching live TV is configured in the plugin setup
-of streamdev-client. For other client tasks (e.g. recording a client side timer)the same priority as on the client is used. With the parameter "Legacy client
+of streamdev-client. For other client tasks (e.g. recording a client side timer)
+the same priority as on the client is used. With the parameter "Legacy client
 Priority" in streamdev-server's setup menu you can configure the priority for
 clients which cannot be configured to use negative priorities. It is used
 when an old client is detected an it requests priority "0".
@@ -415,6 +416,24 @@ most cases. Increase "Timeout" if you get frequent timeout errors in the log.
 With "Filter Streaming" enabled, the client will receive meta information like
 EPG data and service information, just as if the client had its own DVB card.
 Link channels and even a client-side EPG scan have been reported to work.
+
+If you have TV programs with dynamically changing PIDs (such as some german
+regional programs like NDR), then you need to enable "Filter Streaming" to
+correctly receive them. You also need to set in VDRs DVB setup the option
+"Update channels" to at least "PIDs only" (or "names and PIDs") for this
+to work.
+
+"Filter streaming" uses internally a socketpair(2) to copy meta data to
+VDR. This socketpair may require larger than default buffering. If
+you  see a mesage like the following in syslog,
+
+  cStreamdevFilter::PutSection(Pid:18 Tid: 64): Dropped 2995 bytes, max queue: 328640
+
+then you should increase the streamdev client "FilterSockBufSize" value. A 
+good value is 3072000. You will need to first configure your linux to
+permit such a large buffer size:
+
+  sysctl net.core.wmem_max=3072000
 
 The precedence among multiple client VDRs receiving live TV from the same
 server is controlled with "Live TV Priority".

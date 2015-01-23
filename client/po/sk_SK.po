@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: streamdev_SK\n"
 "Report-Msgid-Bugs-To: <vdrdev@schmirler.de>\n"
-"POT-Creation-Date: 2013-03-13 14:20+0100\n"
+"POT-Creation-Date: 2015-01-16 22:32+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Milan Hrala <hrala.milan@gmail.com>\n"
 "Language-Team: Slovak <hrala.milan@gmail.com>\n"
@@ -36,6 +36,9 @@ msgstr "Èasový limit (s)"
 msgid "Filter Streaming"
 msgstr "Filtrova» dátový prúd"
 
+msgid "Filter SockBufSize"
+msgstr ""
+
 msgid "Live TV Priority"
 msgstr "Priorita ¾ivého vysielania"
 
@@ -59,4 +62,3 @@ msgstr "Server je doèasne pozastavený"
 
 msgid "Couldn't suspend Server!"
 msgstr "Server sa nepodarilo pozastavi»!"
-

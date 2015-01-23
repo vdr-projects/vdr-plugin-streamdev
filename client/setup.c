@@ -26,6 +26,7 @@ cStreamdevClientSetup::cStreamdevClientSetup(void) {
 	NumProvidedSystems = 1;
 #endif
 	strcpy(RemoteIp, "");
+	FilterSockBufSize = 0;
 }
 
 bool cStreamdevClientSetup::SetupParse(const char *Name, const char *Value) {
@@ -43,6 +44,7 @@ bool cStreamdevClientSetup::SetupParse(const char *Name, const char *Value) {
 	else if (strcmp(Name, "LivePriority") == 0)  LivePriority = atoi(Value);
 	else if (strcmp(Name, "MinPriority") == 0)   MinPriority = atoi(Value);
 	else if (strcmp(Name, "MaxPriority") == 0)   MaxPriority = atoi(Value);
+	else if (strcmp(Name, "FilterSockBufSize") == 0) FilterSockBufSize = atoi(Value);
 #if APIVERSNUM >= 10700
 	else if (strcmp(Name, "NumProvidedSystems") == 0) NumProvidedSystems = atoi(Value);
 #endif
@@ -60,6 +62,8 @@ cStreamdevClientMenuSetupPage::cStreamdevClientMenuSetupPage(cPluginStreamdevCli
 	Add(new cMenuEditIntItem (tr("Remote Port"),         &m_NewSetup.RemotePort, 0, 65535));
 	Add(new cMenuEditIntItem (tr("Timeout (s)"),         &m_NewSetup.Timeout, 1, 15));
 	Add(new cMenuEditBoolItem(tr("Filter Streaming"),    &m_NewSetup.StreamFilters));
+	if(m_NewSetup.StreamFilters)
+		Add(new cMenuEditIntItem (tr("Filter SockBufSize"), &m_NewSetup.FilterSockBufSize, 0, 8192000));
 	Add(new cMenuEditIntItem (tr("Live TV Priority"),    &m_NewSetup.LivePriority, MINPRIORITY, MAXPRIORITY));
 	Add(new cMenuEditIntItem (tr("Minimum Priority"),    &m_NewSetup.MinPriority, MINPRIORITY, MAXPRIORITY));
 	Add(new cMenuEditIntItem (tr("Maximum Priority"),    &m_NewSetup.MaxPriority, MINPRIORITY, MAXPRIORITY));
@@ -90,6 +94,7 @@ void cStreamdevClientMenuSetupPage::Store(void) {
 #if APIVERSNUM >= 10700
 	SetupStore("NumProvidedSystems", m_NewSetup.NumProvidedSystems);
 #endif
+	SetupStore("FilterSockBufSize", m_NewSetup.FilterSockBufSize);
 
 	StreamdevClientSetup = m_NewSetup;
 

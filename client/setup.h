@@ -17,6 +17,7 @@ struct cStreamdevClientSetup {
 	int  RemotePort;
 	int  Timeout;
 	int  StreamFilters;
+	int  FilterSockBufSize;
 	int  HideMenuEntry;
 	int  LivePriority;
 	int  MinPriority;

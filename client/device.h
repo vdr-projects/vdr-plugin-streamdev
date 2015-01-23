@@ -45,6 +45,7 @@ protected:
 	virtual bool GetTSPacket(uchar *&Data);
 
 	virtual int OpenFilter(u_short Pid, u_char Tid, u_char Mask);
+	virtual void CloseFilter(int Handle);
 
 public:
 	cStreamdevDevice(void);

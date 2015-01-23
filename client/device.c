@@ -282,6 +282,14 @@ int cStreamdevDevice::OpenFilter(u_short Pid, u_char Tid, u_char Mask) {
 	return -1;
 }
 
+void cStreamdevDevice::CloseFilter(int Handle) {
+
+	if(m_Filters)
+		m_Filters->CloseFilter(Handle);
+	else
+		esyslog("cStreamdevDevice::CloseFilter called while m_Filters is null");
+}
+
 bool cStreamdevDevice::ReInit(bool Disable) {
 	LOCK_THREAD;
 	m_Disabled = Disable;

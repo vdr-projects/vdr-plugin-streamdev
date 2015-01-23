@@ -237,8 +237,9 @@ Martin1234
   for suggesting a service call, returning the number of clients
   for implementing GetCurrentlyTunedTransponder() on client
 
-te36
+Toerless Eckert
   for converting suspend.dat into proper PES format
+  for investigating and fixing problems caused by filter streaming
 
 Tomasz Maciej Nowak
   for providing Polish language texts
