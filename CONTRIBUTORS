@@ -241,6 +241,7 @@ Toerless Eckert
   for converting suspend.dat into proper PES format
   for investigating and fixing problems caused by filter streaming
   for fixing TimedWrite() so it doesn't fail after a slow but successful write
+  for suggesting to double the size of client's filter buffer
 
 Tomasz Maciej Nowak
   for providing Polish language texts

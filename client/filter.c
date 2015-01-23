@@ -18,7 +18,7 @@ static int FilterSockBufSize_warn = 0;
 
 class cStreamdevFilter: public cListObject {
 private:
-	uchar              m_Buffer[4096];
+	uchar              m_Buffer[8192];
 	int                m_Used;
 	int                m_Pipe[2];
 	u_short            m_Pid;

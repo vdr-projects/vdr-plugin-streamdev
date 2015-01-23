@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- doubled size of client's filter buffer (suggested by Toerless Eckert)
 - make sure TimedWrite(...) doesn't return failure after a slow but successful
   write operation (thanks to Toerless Eckert)
 - fixed problems related to VTP filter streaming like ringbuffer overflows,
