@@ -57,14 +57,19 @@ ssize_t cTBSource::Write(const void *Buffer, size_t Length) {
 bool cTBSource::TimedWrite(const void *Buffer, size_t Length, uint TimeoutMs) {
 	cTBSelect sel;
 	int ms, offs;
-
 	cTimeMs starttime;
-	ms = TimeoutMs;
+
 	offs = 0;
 	sel.Clear();
 	sel.Add(m_Filed, true);
 	while (Length > 0) {
 		int b;
+
+		ms = TimeoutMs - starttime.Elapsed();
+		if (ms <= 0) {
+			errno = ETIMEDOUT;
+			return false;
+		}
 
 		if (sel.Select(ms) == -1)
 			return false;
@@ -76,11 +81,6 @@ bool cTBSource::TimedWrite(const void *Buffer, size_t Length, uint TimeoutMs) {
 			Length -= b;
 		}
 
-		ms = TimeoutMs - starttime.Elapsed();
-		if (ms <= 0) {
-			errno = ETIMEDOUT;
-			return false;
-		}
 	}
 	return true;
 }

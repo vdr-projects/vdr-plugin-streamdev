@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- make sure TimedWrite(...) doesn't return failure after a slow but successful
+  write operation (thanks to Toerless Eckert)
 - fixed problems related to VTP filter streaming like ringbuffer overflows,
   stuttering or aborting video stream (thanks to Toerless Eckert)
 - added Polish translation (thanks to Tomasz Maciej Nowak)
