@@ -219,9 +219,8 @@ int cStreamdevFilters::OpenFilter(u_short Pid, u_char Tid, u_char Mask) {
 	cStreamdevFilter *f = new cStreamdevFilter(Pid, Tid, Mask);
 	int fh = f->ReadPipe();
 
-	Lock();
+	LOCK_THREAD;
 	Add(f);
-	Unlock();
 
 	return fh;
 }
