@@ -443,7 +443,13 @@ bool cStreamdevLiveStreamer::SetPids(int Pid, const int *Pids1, const int *Pids2
 void cStreamdevLiveStreamer::SetPriority(int Priority)
 {
 	m_Priority = Priority;
-	StartReceiver();
+#if VDRVERSNUM >= 20104
+	cThreadLock ThreadLock(m_Device);
+	if (m_Receiver)
+		m_Receiver->SetPriority(Priority);
+	else
+#endif
+		StartReceiver();
 }
 
 void cStreamdevLiveStreamer::GetSignal(int *DevNum, int *Strength, int *Quality) const

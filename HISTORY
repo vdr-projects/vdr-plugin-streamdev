@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- use cReceiver::SetPriority(...) in VDR 2.1.4+
 - doubled size of client's filter buffer (suggested by Toerless Eckert)
 - make sure TimedWrite(...) doesn't return failure after a slow but successful
   write operation (thanks to Toerless Eckert)
