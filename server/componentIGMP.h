@@ -9,6 +9,7 @@
 #include <time.h>
 #include <vdr/thread.h>
 #include "server/component.h"
+#include "../common.h"
 
 class cMulticastGroup;
 
@@ -23,7 +24,11 @@ private:
 	bool m_Querier;
 	cCondWait m_CondWait;
 
+#if APIVERSNUM >= 20300
+	cMulticastGroup* FindGroup(in_addr_t Group);
+#else
 	cMulticastGroup* FindGroup(in_addr_t Group) const;
+#endif
 
 	/* Add or remove local host to multicast group */
 	bool IGMPMembership(in_addr_t Group, bool Add = true);

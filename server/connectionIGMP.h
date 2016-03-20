@@ -19,13 +19,21 @@ class cConnectionIGMP: public cServerConnection {
 private:
 	int                               m_ClientPort;
 	eStreamType                       m_StreamType;
+#if APIVERSNUM >= 20300
+	const cChannel                   *m_Channel;
+#else
 	cChannel                         *m_Channel;
+#endif
 
 public:
 	cConnectionIGMP(const char* Name, int ClientPort, eStreamType StreamType);
 	virtual ~cConnectionIGMP();
 
+#if APIVERSNUM >= 20300
+	bool SetChannel(const cChannel *Channel, in_addr_t Dst);
+#else
 	bool SetChannel(cChannel *Channel, in_addr_t Dst);
+#endif
 	virtual void Welcome(void);
 	virtual cString ToText(char Delimiter = ' ') const;
 

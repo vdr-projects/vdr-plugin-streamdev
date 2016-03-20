@@ -31,7 +31,11 @@ private:
 	cStreamdevLiveStreamer *m_Streamer;
 
 protected:
+#if APIVERSNUM >= 20300
+	virtual void Receive(const uchar *Data, int Length);
+#else
 	virtual void Receive(uchar *Data, int Length);
+#endif
 
 public:
 	cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer, const cChannel *Channel, int Priority, const int *Pids);
@@ -53,7 +57,11 @@ cStreamdevLiveReceiver::~cStreamdevLiveReceiver()
 	Detach();
 }
 
+#if APIVERSNUM >= 20300
+void cStreamdevLiveReceiver::Receive(const uchar *Data, int Length) {
+#else
 void cStreamdevLiveReceiver::Receive(uchar *Data, int Length) {
+#endif
 	m_Streamer->Receive(Data, Length);
 }
 
@@ -250,7 +258,12 @@ void cStreamdevPatFilter::Process(u_short Pid, u_char Tid, const u_char *Data, i
 			SI::PAT::Association assoc;
 			for (SI::Loop::Iterator it; pat.associationLoop.getNext(assoc, it); ) {
 				if (!assoc.isNITPid()) {
+#if APIVERSNUM >= 20300
+					LOCK_CHANNELS_READ;
+					const cChannel *Channel =  Channels->GetByServiceID(Source(), Transponder(), assoc.getServiceId());
+#else
 					const cChannel *Channel =  Channels.GetByServiceID(Source(), Transponder(), assoc.getServiceId());
+#endif
 					if (Channel && (Channel == m_Channel)) {
 						int prevPmtPid = pmtPid;
 						if (0 != (pmtPid = assoc.getPid())) {
@@ -547,7 +560,11 @@ bool cStreamdevLiveStreamer::SetChannel(eStreamType StreamType, const int* Apid,
 	}
 }
 
+#if APIVERSNUM >= 20300                 
+void cStreamdevLiveStreamer::Receive(const uchar *Data, int Length)
+#else
 void cStreamdevLiveStreamer::Receive(uchar *Data, int Length)
+#endif
 {
 	int p = m_ReceiveBuffer->PutTS(Data, Length);
 	if (p != Length)
@@ -688,9 +705,16 @@ void cStreamdevLiveStreamer::MainThreadHook()
 	}
 	if (m_SwitchLive) {
 		// switched away live TV. Try previous channel on other device first
+#if APIVERSNUM >= 20300                 
+		LOCK_CHANNELS_READ;
+		if (!Channels->SwitchTo(cDevice::CurrentChannel())) {
+			// switch to streamdev channel otherwise
+			Channels->SwitchTo(m_Channel->Number());
+#else
 		if (!Channels.SwitchTo(cDevice::CurrentChannel())) {
 			// switch to streamdev channel otherwise
 			Channels.SwitchTo(m_Channel->Number());
+#endif
 			Skins.Message(mtInfo, tr("Streaming active"));
 		}
 		if (m_Device)

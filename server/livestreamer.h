@@ -64,7 +64,11 @@ public:
 	void GetSignal(int *DevNum, int *Strength, int *Quality) const;
 	virtual cString ToText() const;
 	
+#if APIVERSNUM >= 20300
+	void Receive(const uchar *Data, int Length);
+#else
 	void Receive(uchar *Data, int Length);
+#endif
 	virtual bool IsReceiving(void) const;
 
 	virtual void Attach(void);

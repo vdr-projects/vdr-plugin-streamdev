@@ -523,8 +523,13 @@ RecPlayer* cConnectionHTTP::RecPlayerFromString(const char *FileBase, const char
 			ino_t inode = (ino_t) strtoull(p + 1, &p, 0);
 			if (*p == 0 && inode > 0) {
 				struct stat st;
+#if APIVERSNUM >= 20300
+				LOCK_RECORDINGS_READ;
+				for (const cRecording *rec = Recordings->First(); rec; rec = Recordings->Next(rec)) {
+#else
 				cThreadLock RecordingsLock(&Recordings);
 				for (cRecording *rec = Recordings.First(); rec; rec = Recordings.Next(rec)) {
+#endif
 					if (stat(rec->FileName(), &st) == 0 && st.st_dev == (dev_t) l && st.st_ino == inode)
 						recPlayer = new RecPlayer(rec->FileName());
 				}
@@ -532,8 +537,13 @@ RecPlayer* cConnectionHTTP::RecPlayerFromString(const char *FileBase, const char
 		}
 		else if (*p == 0) {
 			// get recording by index
+#if APIVERSNUM >= 20300
+			LOCK_RECORDINGS_READ;
+			const cRecording *rec = Recordings->Get((int) l - 1);
+#else
 			cThreadLock RecordingsLock(&Recordings);
 			cRecording *rec = Recordings.Get((int) l - 1);
+#endif
 			if (rec)
 				recPlayer = new RecPlayer(rec->FileName());
 		}

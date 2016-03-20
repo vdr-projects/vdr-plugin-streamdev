@@ -21,7 +21,11 @@ cConnectionIGMP::~cConnectionIGMP()
 {
 }
 
+#if APIVERSNUM >= 20300
+bool cConnectionIGMP::SetChannel(const cChannel *Channel, in_addr_t Dst)
+#else
 bool cConnectionIGMP::SetChannel(cChannel *Channel, in_addr_t Dst)
+#endif
 {
 	if (Channel) {
 		m_Channel = Channel;

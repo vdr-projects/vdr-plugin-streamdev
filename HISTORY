@@ -1,6 +1,8 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- server compatibility with VDR 2.3.1 (thanks to Christopher Reimer and
+  Matthias Senzel)
 - client compatibility with VDR 2.3.1
 - use cReceiver::SetPriority(...) in VDR 2.1.4+
 - doubled size of client's filter buffer (suggested by Toerless Eckert)

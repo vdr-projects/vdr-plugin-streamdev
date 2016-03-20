@@ -13,7 +13,11 @@
 
 cStreamdevServerMenu::cStreamdevServerMenu(): cOsdMenu(tr("Streamdev Connections"), 4, 20) {
 	cThreadLock lock;
+#if APIVERSNUM >= 20300
+	cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
+#else
 	const cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
+#endif
 	for (cServerConnection *s = clients.First(); s; s = clients.Next(s))
 		Add(new cOsdItem(s->ToText('\t')));
 	SetHelpKeys();
@@ -31,7 +35,11 @@ eOSState cStreamdevServerMenu::Disconnect() {
 	cOsdItem *item = Get(Current());
 	if (item) {
 		cThreadLock lock;
+#if APIVERSNUM >= 20300
+		cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
+#else
 		const cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
+#endif
 		const char *text = item->Text();
 		for (cServerConnection *s = clients.First(); s; s = clients.Next(s)) {
 			if (!strcmp(text, s->ToText('\t'))) {

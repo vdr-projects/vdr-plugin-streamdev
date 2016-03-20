@@ -21,7 +21,11 @@
 cList<cMainThreadHookSubscriber> cMainThreadHookSubscriber::m_Subscribers;
 cMutex cMainThreadHookSubscriber::m_Mutex;
 
+#if APIVERSNUM >= 20300
+cList<cMainThreadHookSubscriber>& cMainThreadHookSubscriber::Subscribers(cMutexLock& Lock)
+#else
 const cList<cMainThreadHookSubscriber>& cMainThreadHookSubscriber::Subscribers(cMutexLock& Lock)
+#endif
 {
 	Lock.Lock(&m_Mutex);
 	return m_Subscribers;
@@ -163,7 +167,11 @@ void cPluginStreamdevServer::MainThreadHook(void)
 	}
 
 	cMutexLock lock;
+#if APIVERSNUM >= 20300
+	cList<cMainThreadHookSubscriber>& subs = cMainThreadHookSubscriber::Subscribers(lock);
+#else
 	const cList<cMainThreadHookSubscriber>& subs = cMainThreadHookSubscriber::Subscribers(lock);
+#endif
 	for (cMainThreadHookSubscriber *s = subs.First(); s; s = subs.Next(s))
 		s->MainThreadHook();
 }
@@ -199,7 +207,11 @@ cString cPluginStreamdevServer::SVDRPCommand(const char *Command, const char *Op
 	{
 		reply = "";
 		cThreadLock lock;
+#if APIVERSNUM >= 20300
+		cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
+#else
 		const cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
+#endif
 		cServerConnection *s = clients.First();
 		if (!s)
 		{
@@ -223,7 +235,11 @@ cString cPluginStreamdevServer::SVDRPCommand(const char *Command, const char *Op
 		} else
 		{
 			cThreadLock lock;
+#if APIVERSNUM >= 20300
+			cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
+#else
 			const cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
+#endif
 			cServerConnection *s = clients.First();
 			for (; s && s != client; s = clients.Next(s));
 

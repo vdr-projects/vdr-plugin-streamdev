@@ -46,14 +46,29 @@ const cChannel* cServerConnection::ChannelFromString(const char *String, int *Ap
 		int temp = strtol(String, NULL, 10);
 		if (temp == 0)
 			temp = cDevice::CurrentChannel();
+#if APIVERSNUM >= 20300
+		LOCK_CHANNELS_READ;
+		if (temp >= 1 && temp <= Channels->MaxNumber())
+			channel = Channels->GetByNumber(temp);
+#else
 		if (temp >= 1 && temp <= Channels.MaxNumber())
 			channel = Channels.GetByNumber(temp);
+#endif
 	} else {
+#if APIVERSNUM >= 20300
+		LOCK_CHANNELS_READ;
+		channel = Channels->GetByChannelID(tChannelID::FromString(string));
+#else
 		channel = Channels.GetByChannelID(tChannelID::FromString(string));
+#endif
 
 		if (channel == NULL) {
 			int i = 1;
+#if APIVERSNUM >= 20300
+			while ((channel = Channels->GetByNumber(i, 1)) != NULL) {
+#else
 			while ((channel = Channels.GetByNumber(i, 1)) != NULL) {
+#endif
 				if (String == channel->Name())
 					break;
 

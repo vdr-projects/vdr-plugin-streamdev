@@ -6,10 +6,19 @@
 #include "server/menuHTTP.h"
 
 //**************************** cRecordingIterator **************
+#if APIVERSNUM >= 20300
+cRecordingsIterator::cRecordingsIterator(eStreamType StreamType)
+#else
 cRecordingsIterator::cRecordingsIterator(eStreamType StreamType): RecordingsLock(&Recordings)
+#endif
 {	
 	streamType = StreamType;
+#if APIVERSNUM >= 20300
+	LOCK_RECORDINGS_READ;
+	first = NextSuitable(Recordings->First());
+#else
 	first = NextSuitable(Recordings.First());
+#endif
 	current = NULL;
 }
 
@@ -20,20 +29,32 @@ const cRecording* cRecordingsIterator::NextSuitable(const cRecording *Recording)
 		bool isPes = Recording->IsPesRecording();
 		if (!isPes || (isPes && streamType == stPES))
 			break;
+#if APIVERSNUM >= 20300
+		LOCK_RECORDINGS_READ;
+		Recording = Recordings->Next(Recording);
+#else
 		Recording = Recordings.Next(Recording);
+#endif
 	}
 	return Recording;
 }
 
 bool cRecordingsIterator::Next()
 {
+#if APIVERSNUM >= 20300
+	LOCK_RECORDINGS_READ;
+#endif
 	if (first)
 	{
 		current = first;
 		first = NULL;
 	}
 	else
+#if APIVERSNUM >= 20300
+		current = NextSuitable(Recordings->Next(current));
+#else
 		current = NextSuitable(Recordings.Next(current));
+#endif
 	return current;
 }
 
@@ -71,9 +92,16 @@ const cString cChannelIterator::ItemId() const
 		if (current->GroupSep())
 		{
 			int index = 0;
+#if APIVERSNUM >= 20300
+			LOCK_CHANNELS_READ;
+			for (int curr = Channels->GetNextGroup(-1); curr >= 0; curr = Channels->GetNextGroup(curr))
+			{
+				if (Channels->Get(curr) == current)
+#else
 			for (int curr = Channels.GetNextGroup(-1); curr >= 0; curr = Channels.GetNextGroup(curr))
 			{
 				if (Channels.Get(curr) == current)
+#endif
 					return itoa(index);
 				index++;
 			}
@@ -89,47 +117,111 @@ const cString cChannelIterator::ItemId() const
 const cChannel* cChannelIterator::GetGroup(const char* GroupId)
 {
 	int group = -1;
+#if APIVERSNUM >= 20300
+	LOCK_CHANNELS_READ;
+#endif
 	if (GroupId)
 	{
 		int Index = atoi(GroupId);
+#if APIVERSNUM >= 20300
+		group = Channels->GetNextGroup(-1);
+		while (Index-- && group >= 0)
+			group = Channels->GetNextGroup(group);
+	}
+	return group >= 0 ? Channels->Get(group) : NULL;
+#else
 		group = Channels.GetNextGroup(-1);
 		while (Index-- && group >= 0)
 			group = Channels.GetNextGroup(group);
 	}
 	return group >= 0 ? Channels.Get(group) : NULL;
+#endif
 }
 
+const cChannel* cChannelIterator::FirstChannel()
+{
+const cChannel *Channel;
+#if APIVERSNUM >= 20300
+	LOCK_CHANNELS_READ;
+	Channel = Channels->First();
+#else
+	Channel = Channels.First();
+#endif
+	return Channel;
+}
+
+const cChannel* cChannelIterator::NextNormal()
+{
+const cChannel *Channel;
+#if APIVERSNUM >= 20300
+	LOCK_CHANNELS_READ;
+	Channel = Channels->Get(Channels->GetNextNormal(-1));
+#else
+	Channel = Channels.Get(Channels.GetNextNormal(-1));
+#endif
+	return Channel;
+}
+
+const cChannel* cChannelIterator::NextGroup()
+{
+const cChannel *Channel;
+#if APIVERSNUM >= 20300
+	LOCK_CHANNELS_READ;
+	Channel = Channels->Get(Channels->GetNextGroup(-1));
+#else
+	Channel = Channels.Get(Channels.GetNextGroup(-1));
+#endif
+	return Channel;
+}
 
 //**************************** cListAll **************
-cListAll::cListAll(): cChannelIterator(Channels.First())
+cListAll::cListAll(): cChannelIterator(FirstChannel())
 {}
 
 const cChannel* cListAll::NextChannel(const cChannel *Channel)
 {
+#if APIVERSNUM >= 20300
+	LOCK_CHANNELS_READ;
+	if (Channel)
+		Channel = SkipFakeGroups(Channels->Next(Channel));
+#else
 	if (Channel)
 		Channel = SkipFakeGroups(Channels.Next(Channel));
+#endif
 	return Channel;
 }
 
 //**************************** cListChannels **************
-cListChannels::cListChannels(): cChannelIterator(Channels.Get(Channels.GetNextNormal(-1)))
+cListChannels::cListChannels(): cChannelIterator(NextNormal())
 {}
 
 const cChannel* cListChannels::NextChannel(const cChannel *Channel)
 {
+#if APIVERSNUM >= 20300
+	LOCK_CHANNELS_READ;
+	if (Channel)
+		Channel = Channels->Get(Channels->GetNextNormal(Channel->Index()));
+#else
 	if (Channel)
 		Channel = Channels.Get(Channels.GetNextNormal(Channel->Index()));
+#endif
 	return Channel;
 }
 
 // ********************* cListGroups ****************
-cListGroups::cListGroups(): cChannelIterator(Channels.Get(Channels.GetNextGroup(-1)))
+cListGroups::cListGroups(): cChannelIterator(NextGroup())
 {}
 
 const cChannel* cListGroups::NextChannel(const cChannel *Channel)
 {
+#if APIVERSNUM >= 20300
+	LOCK_CHANNELS_READ;
+	if (Channel)
+		Channel = Channels->Get(Channels->GetNextGroup(Channel->Index()));
+#else
 	if (Channel)
 		Channel = Channels.Get(Channels.GetNextGroup(Channel->Index()));
+#endif
 	return Channel;
 }
 //
@@ -139,8 +231,14 @@ cListGroup::cListGroup(const char *GroupId): cChannelIterator(GetNextChannelInGr
 
 const cChannel* cListGroup::GetNextChannelInGroup(const cChannel *Channel)
 {
+#if APIVERSNUM >= 20300
+	LOCK_CHANNELS_READ;
+	if (Channel)
+		Channel = SkipFakeGroups(Channels->Next(Channel));
+#else
 	if (Channel)
 		Channel = SkipFakeGroups(Channels.Next(Channel));
+#endif
 	return Channel && !Channel->GroupSep() ? Channel : NULL;
 }
 
@@ -150,25 +248,42 @@ const cChannel* cListGroup::NextChannel(const cChannel *Channel)
 }
 //
 // ********************* cListTree ****************
-cListTree::cListTree(const char *SelectedGroupId): cChannelIterator(Channels.Get(Channels.GetNextGroup(-1)))
+cListTree::cListTree(const char *SelectedGroupId): cChannelIterator(NextGroup())
 {
 	selectedGroup = GetGroup(SelectedGroupId);
+#if APIVERSNUM >= 20300
+	LOCK_CHANNELS_READ;
+	currentGroup = Channels->Get(Channels->GetNextGroup(-1));
+#else
 	currentGroup = Channels.Get(Channels.GetNextGroup(-1));
+#endif
 }
 
 const cChannel* cListTree::NextChannel(const cChannel *Channel)
 {
 	if (currentGroup == selectedGroup)
 	{
+#if APIVERSNUM >= 20300
+		LOCK_CHANNELS_READ;
+		if (Channel)
+			Channel = SkipFakeGroups(Channels->Next(Channel));
+#else
 		if (Channel)
 			Channel = SkipFakeGroups(Channels.Next(Channel));
+#endif
 		if (Channel && Channel->GroupSep())
 			currentGroup = Channel;
 	}
 	else
 	{
+#if APIVERSNUM >= 20300
+		LOCK_CHANNELS_READ;
+		if (Channel)
+			Channel = Channels->Get(Channels->GetNextGroup(Channel->Index()));
+#else
 		if (Channel)
 			Channel = Channels.Get(Channels.GetNextGroup(Channel->Index()));
+#endif
 		currentGroup = Channel;
 	}
 	return Channel;

@@ -15,7 +15,11 @@ private:
 	static cList<cMainThreadHookSubscriber> m_Subscribers;
 	static cMutex m_Mutex;
 public:
+#if APIVERSNUM >= 20300
+	static cList<cMainThreadHookSubscriber>& Subscribers(cMutexLock& Lock);
+#else
 	static const cList<cMainThreadHookSubscriber>& Subscribers(cMutexLock& Lock);
+#endif
 
 	virtual void MainThreadHook() = 0;
 

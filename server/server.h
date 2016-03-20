@@ -37,7 +37,11 @@ public:
 	static void Destruct(void);
 	static bool Active(void);
 
+#if APIVERSNUM >= 20300
+	static cList<cServerConnection>& Clients(cThreadLock& Lock);
+#else
 	static const cList<cServerConnection>& Clients(cThreadLock& Lock);
+#endif
 };
 
 inline bool cStreamdevServer::Active(void) 

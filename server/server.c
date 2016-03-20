@@ -177,7 +177,11 @@ void cStreamdevServer::Action(void)
 	}
 }
 
+#if APIVERSNUM >= 20300
+cList<cServerConnection>& cStreamdevServer::Clients(cThreadLock& Lock)
+#else
 const cList<cServerConnection>& cStreamdevServer::Clients(cThreadLock& Lock)
+#endif
 {
 	Lock.Lock(m_Instance);
 	return m_Clients;

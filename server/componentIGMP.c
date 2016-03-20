@@ -105,7 +105,11 @@ cComponentIGMP::~cComponentIGMP(void)
 {
 }
 
+#if APIVERSNUM >= 20300
+cMulticastGroup* cComponentIGMP::FindGroup(in_addr_t Group)
+#else
 cMulticastGroup* cComponentIGMP::FindGroup(in_addr_t Group) const
+#endif
 {
 	cMulticastGroup *group = m_Groups.First();
 	while (group && group->group != Group)
@@ -117,7 +121,12 @@ bool cComponentIGMP::Initialize(void)
 {
 	if (cServerComponent::Initialize() && IGMPMembership(IGMP_ALL_ROUTER))
 	{
+#if APIVERSNUM >= 20300
+		LOCK_CHANNELS_READ;
+		for (const cChannel *channel = Channels->First(); channel; channel = Channels->Next(channel))
+#else
 		for (cChannel *channel = Channels.First(); channel; channel = Channels.Next(channel))
+#endif
 		{
 			if (channel->GroupSep())
 				continue;
@@ -146,7 +155,12 @@ void cComponentIGMP::Destruct(void)
 		Cancel(-1);
 		m_CondWait.Signal();
 		Cancel(2);
+#if APIVERSNUM >= 20300
+		LOCK_CHANNELS_READ;
+		for (const cChannel *channel = Channels->First(); channel; channel = Channels->Next(channel))
+#else
 		for (cChannel *channel = Channels.First(); channel; channel = Channels.Next(channel))
+#endif
 		{
 			if (channel->GroupSep())
 				continue;
@@ -432,9 +446,18 @@ cServerConnection* cComponentIGMP::IGMPStartMulticast(cMulticastGroup* Group)
 	in_addr_t g = ntohl(Group->group);
 	if (g > MULTICAST_PRIV_MIN && g <= MULTICAST_PRIV_MAX) {
 		cThreadLock lock;
+#if APIVERSNUM >= 20300
+		LOCK_CHANNELS_READ;
+		const cChannel *channel = Channels->GetByNumber(g - MULTICAST_PRIV_MIN);
+#else
 		cChannel *channel = Channels.GetByNumber(g - MULTICAST_PRIV_MIN);
+#endif
 		const cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
+#if APIVERSNUM >= 20300
+		const cServerConnection *s = clients.First();
+#else
 		cServerConnection *s = clients.First();
+#endif
 		while (s) {
 			if (s->RemoteIpAddr() == Group->group)
 				break;
@@ -453,7 +476,11 @@ cServerConnection* cComponentIGMP::IGMPStartMulticast(cMulticastGroup* Group)
 void cComponentIGMP::IGMPStopMulticast(cMulticastGroup* Group)
 {
 	cThreadLock lock;
+#if APIVERSNUM >= 20300
+	cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
+#else
 	const cList<cServerConnection>& clients = cStreamdevServer::Clients(lock);
+#endif
 	for (cServerConnection *s = clients.First(); s; s = clients.Next(s)) {
 		if (s->RemoteIpAddr() == Group->group)
 			s->Close();

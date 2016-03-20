@@ -58,8 +58,10 @@ public:
 
 cLSTEHandler::cLSTEHandler(cConnectionVTP *Client, const char *Option):
 		m_Client(Client),
+#if APIVERSNUM < 20300
 		m_SchedulesLock(new cSchedulesLock(false, 500)),
 		m_Schedules(cSchedules::Schedules(*m_SchedulesLock)),
+#endif
 		m_Schedule(NULL),
 		m_Event(NULL),
 		m_Errno(0),
@@ -131,11 +133,20 @@ cLSTEHandler::cLSTEHandler(cConnectionVTP *Client, const char *Option):
 					break;
 				}
 			} else if (!m_Schedule) {
+#if APIVERSNUM >= 20300
+				LOCK_CHANNELS_READ;
+				const cChannel* Channel = NULL;
+				if (isnumber(p))
+					Channel = Channels->GetByNumber(strtol(Option, NULL, 10));
+				else
+					Channel = Channels->GetByChannelID(tChannelID::FromString(
+#else
 				cChannel* Channel = NULL;
 				if (isnumber(p))
 					Channel = Channels.GetByNumber(strtol(Option, NULL, 10));
 				else
 					Channel = Channels.GetByChannelID(tChannelID::FromString(
+#endif
 					                                  Option));
 				if (Channel) {
 					m_Schedule = m_Schedules->GetSchedule(Channel->GetChannelID());
@@ -215,7 +226,12 @@ bool cLSTEHandler::Next(bool &Last)
 	switch (m_State) {
 	case Channel:
 		if (m_Schedule != NULL) {
+#if APIVERSNUM >= 20300
+			LOCK_CHANNELS_READ;
+			const cChannel *channel = Channels->GetByChannelID(m_Schedule->ChannelID(),
+#else
 			cChannel *channel = Channels.GetByChannelID(m_Schedule->ChannelID(),
+#endif
 			                                            true);
 			if (channel != NULL) {
 				m_State = Event;
@@ -371,12 +387,21 @@ cLSTCHandler::cLSTCHandler(cConnectionVTP *Client, const char *Option):
 		m_Errno(0),
 		m_Traverse(false)
 {
+#if APIVERSNUM >= 20300
+	LOCK_CHANNELS_READ;
+	if (!Channels) {
+#else
 	if (!Channels.Lock(false, 500)) {
+#endif
 		m_Errno = 451;
 		m_Error = "Channels are being modified - try again";
 	} else if (*Option) {
 		if (isnumber(Option)) {
+#if APIVERSNUM >= 20300
+			m_Channel = Channels->GetByNumber(strtol(Option, NULL, 10));
+#else
 			m_Channel = Channels.GetByNumber(strtol(Option, NULL, 10));
+#endif
 			if (m_Channel == NULL) {
 				m_Errno = 501;
 				m_Error = cString::sprintf("Channel \"%s\" not defined", Option);
@@ -386,21 +411,35 @@ cLSTCHandler::cLSTCHandler(cConnectionVTP *Client, const char *Option):
 			int i = 1;
 			m_Traverse = true;
 			m_Option = strdup(Option);
+#if APIVERSNUM >= 20300
+			while (i <= Channels->MaxNumber()) {
+				m_Channel = Channels->GetByNumber(i, 1);
+#else
 			while (i <= Channels.MaxNumber()) {
 				m_Channel = Channels.GetByNumber(i, 1);
+#endif
 				if (strcasestr(m_Channel->Name(), Option) != NULL)
 					break;
 				i = m_Channel->Number() + 1;
 			}
 
+#if APIVERSNUM >= 20300
+			if (i > Channels->MaxNumber()) {
+#else
 			if (i > Channels.MaxNumber()) {
+#endif
 				m_Errno = 501;
 				m_Error = cString::sprintf("Channel \"%s\" not defined", Option);
 				return;
 			}
 		}
+#if APIVERSNUM >= 20300
+	} else if (Channels->MaxNumber() >= 1) {
+		m_Channel = Channels->GetByNumber(1, 1);
+#else
 	} else if (Channels.MaxNumber() >= 1) {
 		m_Channel = Channels.GetByNumber(1, 1);
+#endif
 		m_Traverse = true;
 	} else {
 		m_Errno = 550;
@@ -410,7 +449,9 @@ cLSTCHandler::cLSTCHandler(cConnectionVTP *Client, const char *Option):
 
 cLSTCHandler::~cLSTCHandler()
 {
+#if APIVERSNUM < 20300
 	Channels.Unlock();
+#endif
 	if (m_Option != NULL)
 		free(m_Option);
 }
@@ -435,8 +476,14 @@ bool cLSTCHandler::Next(bool &Last)
 	Last = true;
 	if (m_Traverse) {
 		int i = m_Channel->Number() + 1;
+#if APIVERSNUM >= 20300
+		LOCK_CHANNELS_READ;
+		while (i <= Channels->MaxNumber()) {
+			m_Channel = Channels->GetByNumber(i, 1);
+#else
 		while (i <= Channels.MaxNumber()) {
 			m_Channel = Channels.GetByNumber(i, 1);
+#endif
 			if (m_Channel != NULL) {
 				if (m_Option == NULL || strcasestr(m_Channel->Name(), 
 												   m_Option) != NULL)
@@ -448,7 +495,11 @@ bool cLSTCHandler::Next(bool &Last)
 			}
 		}
 
+#if APIVERSNUM >= 20300
+		if (i < Channels->MaxNumber() + 1)
+#else
 		if (i < Channels.MaxNumber() + 1)
+#endif
 			Last = false;
 	}
 
@@ -461,7 +512,11 @@ class cLSTTHandler
 {
 private:
 	cConnectionVTP *m_Client;
+#if APIVERSNUM >= 20300
+	const cTimer   *m_Timer;
+#else
 	cTimer         *m_Timer;
+#endif
 	int             m_Index;
 	int             m_Errno;
 	cString         m_Error;
@@ -479,9 +534,16 @@ cLSTTHandler::cLSTTHandler(cConnectionVTP *Client, const char *Option):
 		m_Errno(0),
 		m_Traverse(false)
 {
+#if APIVERSNUM >= 20300
+	LOCK_TIMERS_READ;
+#endif
 	if (*Option) {
 		if (isnumber(Option)) {
+#if APIVERSNUM >= 20300
+			m_Timer = Timers->Get(strtol(Option, NULL, 10) - 1);
+#else
 			m_Timer = Timers.Get(strtol(Option, NULL, 10) - 1);
+#endif
 			if (m_Timer == NULL) {
 				m_Errno = 501;
 				m_Error = cString::sprintf("Timer \"%s\" not defined", Option);
@@ -490,10 +552,18 @@ cLSTTHandler::cLSTTHandler(cConnectionVTP *Client, const char *Option):
 			m_Errno = 501;
 			m_Error = cString::sprintf("Error in timer number \"%s\"", Option);
 		}
+#if APIVERSNUM >= 20300
+	} else if (Timers->Count()) {
+#else
 	} else if (Timers.Count()) {
+#endif
 		m_Traverse = true;
 		m_Index = 0;
+#if APIVERSNUM >= 20300
+		m_Timer = Timers->Get(m_Index);
+#else
 		m_Timer = Timers.Get(m_Index);
+#endif
 		if (m_Timer == NULL) {
 			m_Errno = 501;
 			m_Error = cString::sprintf("Timer \"%d\" not found", m_Index + 1);
@@ -519,7 +589,12 @@ bool cLSTTHandler::Next(bool &Last)
 
 	bool result;
 	char *buffer;
+#if APIVERSNUM >= 20300
+	LOCK_TIMERS_READ;
+	Last = !m_Traverse || m_Index >= Timers->Count() - 1;
+#else
 	Last = !m_Traverse || m_Index >= Timers.Count() - 1;
+#endif
 	buffer = strdup(*m_Timer->ToText());
 	buffer[strlen(buffer) - 1] = '\0'; // strip \n
 	result = m_Client->Respond(Last ? 250 : -250, "%d %s", m_Timer->Index() + 1,
@@ -527,7 +602,11 @@ bool cLSTTHandler::Next(bool &Last)
 	free(buffer);
 
 	if (m_Traverse && !Last) {
+#if APIVERSNUM >= 20300
+		m_Timer = Timers->Get(++m_Index);
+#else
 		m_Timer = Timers.Get(++m_Index);
+#endif
 		if (m_Timer == NULL) {
 			m_Errno = 501;
 			m_Error = cString::sprintf("Timer \"%d\" not found", m_Index + 1);
@@ -544,7 +623,11 @@ private:
 	enum eStates { Recording, Event, Title, Subtitle, Description, Components, Vps, 
 	               EndRecording };
 	cConnectionVTP *m_Client;
+#if APIVERSNUM >= 20300
+	const cRecording     *m_Recording;
+#else
 	cRecording     *m_Recording;
+#endif
 	const cEvent   *m_Event;
 	int             m_Index;
 	int             m_Errno;
@@ -570,9 +653,16 @@ cLSTRHandler::cLSTRHandler(cConnectionVTP *Client, const char *Option):
 		m_State(Recording),
 		m_CurrentComponent(0)
 {
+#if APIVERSNUM >= 20300
+	LOCK_RECORDINGS_READ;
+#endif
 	if (*Option) {
 		if (isnumber(Option)) {
+#if APIVERSNUM >= 20300
+			m_Recording = Recordings->Get(strtol(Option, NULL, 10) - 1);
+#else
 			m_Recording = Recordings.Get(strtol(Option, NULL, 10) - 1);
+#endif
 			m_Event = m_Recording->Info()->GetEvent();
 			m_Info = true;
 			if (m_Recording == NULL) {
@@ -585,10 +675,18 @@ cLSTRHandler::cLSTRHandler(cConnectionVTP *Client, const char *Option):
 			m_Error = cString::sprintf("Error in Recording number \"%s\"", Option);
 		}
 	} 
+#if APIVERSNUM >= 20300 
+	else if (Recordings->Count()) {
+#else
 	else if (Recordings.Count()) {
+#endif
 		m_Traverse = true;
 		m_Index = 0;
+#if APIVERSNUM >= 20300
+		m_Recording = Recordings->Get(m_Index);
+#else
 		m_Recording = Recordings.Get(m_Index);
+#endif
 		if (m_Recording == NULL) {
 			m_Errno = 501;
 			m_Error = cString::sprintf("Recording \"%d\" not found", m_Index + 1);
@@ -691,11 +789,20 @@ bool cLSTRHandler::Next(bool &Last)
 	}
 	else {
 		bool result;
+#if APIVERSNUM >= 20300
+		LOCK_RECORDINGS_READ;
+		Last = !m_Traverse || m_Index >= Recordings->Count() - 1;
+#else
 		Last = !m_Traverse || m_Index >= Recordings.Count() - 1;
+#endif
 		result = m_Client->Respond(Last ? 250 : -250, "%d %s", m_Recording->Index() + 1, m_Recording->Title(' ', true));
 
 		if (m_Traverse && !Last) {
+#if APIVERSNUM >= 20300
+			m_Recording = Recordings->Get(++m_Index);
+#else
 			m_Recording = Recordings.Get(++m_Index);
+#endif
 			if (m_Recording == NULL) {
 				m_Errno = 501;
 				m_Error = cString::sprintf("Recording \"%d\" not found", m_Index + 1);
@@ -1145,7 +1252,12 @@ bool cConnectionVTP::CmdPLAY(char *Opts)
 {
 	if (*Opts) {
 		if (isnumber(Opts)) {
+#if APIVERSNUM >= 20300
+			LOCK_RECORDINGS_READ;
+			const cRecording *recording = Recordings->Get(strtol(Opts, NULL, 10) - 1);
+#else
 			cRecording *recording = Recordings.Get(strtol(Opts, NULL, 10) - 1);
+#endif
 			if (recording) {
 				if (m_RecPlayer) {
 					delete m_RecPlayer;
@@ -1391,10 +1503,17 @@ bool cConnectionVTP::CmdSTAT(const char *Option)
 			Reply(250, "VDR: %s | Streamdev: %s", VDRVERSION, VERSION);
 		}
 		else if (strcasecmp(Option, "RECORDS") == 0) {
+#if APIVERSNUM >= 20300
+			LOCK_RECORDINGS_WRITE;
+			Recordings->Sort();
+			if (Recordings) {
+				cRecording *recording = Recordings->Last();
+#else
 			bool recordings = Recordings.Load();
 			Recordings.Sort();
 			if (recordings) {
 				cRecording *recording = Recordings.Last();
+#endif
 				Reply(250, "%d", recording->Index() + 1);
 			}
 			else {
@@ -1402,10 +1521,20 @@ bool cConnectionVTP::CmdSTAT(const char *Option)
 			}
 		}
 		else if (strcasecmp(Option, "CHANNELS") == 0) {
+#if APIVERSNUM >= 20300 
+			LOCK_CHANNELS_READ;
+			Reply(250, "%d", Channels->MaxNumber());
+#else
 			Reply(250, "%d", Channels.MaxNumber());
+#endif
 		}
 		else if (strcasecmp(Option, "TIMERS") == 0) {
+#if APIVERSNUM >= 20300 
+			LOCK_TIMERS_READ;
+			Reply(250, "%d", Timers->Count());
+#else
 			Reply(250, "%d", Timers.Count());
+#endif
 		}
 		else if (strcasecmp(Option, "CHARSET") == 0) {
 			Reply(250, "%s", cCharSetConv::SystemCharacterTable());
@@ -1433,7 +1562,12 @@ bool cConnectionVTP::CmdMODT(const char *Option)
 		int n = strtol(Option, &tail, 10);
 		if (tail && tail != Option) {
 			tail = skipspace(tail);
+#if APIVERSNUM >= 20300
+			LOCK_TIMERS_WRITE;
+			cTimer *timer = Timers->Get(n - 1);
+#else
 			cTimer *timer = Timers.Get(n - 1);
+#endif
 			if (timer) {
 				cTimer t = *timer;
 				if (strcasecmp(tail, "ON") == 0)
@@ -1445,7 +1579,11 @@ bool cConnectionVTP::CmdMODT(const char *Option)
 					EXIT_WRAPPER();
 				}
 				*timer = t;
+#if APIVERSNUM >= 20300
+				Timers->SetModified();
+#else
 				Timers.SetModified();
+#endif
 				isyslog("timer %s modified (%s)", *timer->ToDescr(), 
 				        timer->HasFlags(tfActive) ? "active" : "inactive");
 				Reply(250, "%d %s", timer->Index() + 1, *timer->ToText());
@@ -1464,10 +1602,18 @@ bool cConnectionVTP::CmdNEWT(const char *Option)
 	if (*Option) {
 		cTimer *timer = new cTimer;
 		if (timer->Parse(Option)) {
+#if APIVERSNUM >= 20300
+			LOCK_TIMERS_WRITE;
+			cTimer *t = Timers->GetTimer(timer);
+			if (!t) {
+				Timers->Add(timer);
+				Timers->SetModified();
+#else
 			cTimer *t = Timers.GetTimer(timer);
 			if (!t) {
 				Timers.Add(timer);
 				Timers.SetModified();
+#endif
 				isyslog("timer %s added", *timer->ToDescr());
 				Reply(250, "%d %s", timer->Index() + 1, *timer->ToText());
 				EXIT_WRAPPER();
@@ -1512,21 +1658,39 @@ bool cConnectionVTP::CmdDELT(const char *Option)
 			}
 		}
 
+#if APIVERSNUM >= 20300
+		LOCK_TIMERS_WRITE;
+		cTimer *Timer = Timers->Get(number);
+			if (Timer) {
+			if (Timer->Recording()) {
+				if (force) {
+					if (!Timer->Remote()) {
+						Timer->Skip();
+						cRecordControls::Process(Timers, time(NULL));
+					}
+#else
 		cTimer *timer = Timers.Get(number);
 			if (timer) {
 			if (timer->Recording()) {
 				if (force) {
 					timer->Skip();
 					cRecordControls::Process(time(NULL));
+#endif
 				}
 				else {
 					Reply(550, "Timer \"%i\" is recording", number);
 					EXIT_WRAPPER();
 				}
 			}
+#if APIVERSNUM >= 20300
+					isyslog("deleting timer %s", *Timer->ToDescr());
+					Timers->Del(Timer);
+					Timers->SetModified();
+#else
 					isyslog("deleting timer %s", *timer->ToDescr());
 					Timers.Del(timer);
 					Timers.SetModified();
+#endif
 			Reply(250, "Timer \"%i\" deleted", number);
 				} else
 			Reply(501, "Timer \"%i\" not defined", number);
@@ -1538,7 +1702,12 @@ bool cConnectionVTP::CmdDELT(const char *Option)
 bool cConnectionVTP::CmdNEXT(const char *Option)
 {
 	INIT_WRAPPER();
+#if APIVERSNUM >= 20300
+	LOCK_TIMERS_READ;
+	const cTimer *t = Timers->GetNextActiveTimer();
+#else
 	cTimer *t = Timers.GetNextActiveTimer();
+#endif
 	if (t) {
 		time_t Start = t->StartTime();
 		int Number = t->Index() + 1;
@@ -1562,12 +1731,23 @@ bool cConnectionVTP::CmdNEWC(const char *Option)
 	if (*Option) {
 		cChannel ch;
 		if (ch.Parse(Option)) {
+#if APIVERSNUM >= 20300
+			LOCK_CHANNELS_WRITE;
+			if (Channels->HasUniqueChannelID(&ch)) {
+#else
 			if (Channels.HasUniqueChannelID(&ch)) {
+#endif
 				cChannel *channel = new cChannel;
 				*channel = ch;
+#if APIVERSNUM >= 20300 
+				Channels->Add(channel);
+				Channels->ReNumber();
+				Channels->SetModified();
+#else
 				Channels.Add(channel);
 				Channels.ReNumber();
 				Channels.SetModified(true);
+#endif
 				isyslog("new channel %d %s", channel->Number(), *channel->ToText());
 				Reply(250, "%d %s", channel->Number(), *channel->ToText());
 			}
@@ -1593,15 +1773,28 @@ bool cConnectionVTP::CmdMODC(const char *Option)
 		int n = strtol(Option, &tail, 10);
 		if (tail && tail != Option) {
 			tail = skipspace(tail);
+#if APIVERSNUM >= 20300         
+			LOCK_CHANNELS_WRITE;
+			Channels->SetExplicitModify();
+				cChannel *channel = Channels->GetByNumber(n);
+#else
 			if (!Channels.BeingEdited()) {
 				cChannel *channel = Channels.GetByNumber(n);
+#endif
 				if (channel) {
 					cChannel ch;
 					if (ch.Parse(tail)) {
+#if APIVERSNUM >= 20300         
+						if (Channels->HasUniqueChannelID(&ch, channel)) {
+							*channel = ch;
+							Channels->ReNumber();
+							Channels->SetModified();
+#else
 						if (Channels.HasUniqueChannelID(&ch, channel)) {
 							*channel = ch;
 							Channels.ReNumber();
 							Channels.SetModified(true);
+#endif
 							isyslog("modifed channel %d %s", channel->Number(), *channel->ToText());
 							Reply(250, "%d %s", channel->Number(), *channel->ToText());
 						}
@@ -1616,10 +1809,12 @@ bool cConnectionVTP::CmdMODC(const char *Option)
 				else {
 					Reply(501, "Channel \"%d\" not defined", n);
 				}
+#if APIVERSNUM < 20300
 			}
 			else {
 				Reply(550, "Channels are being edited - try again later");
 			}
+#endif
 		}
 		else {
 			Reply(501, "Error in channel number");
@@ -1635,7 +1830,14 @@ bool cConnectionVTP::CmdMOVC(const char *Option)
 {
 	INIT_WRAPPER();
 	if (*Option) {
+#if APIVERSNUM >= 20300
+		LOCK_CHANNELS_WRITE;
+		Channels->SetExplicitModify();
+//		LOCK_TIMERS_WRITE;
+//		Timers->SetExplicitModify();
+#else
 		if (!Channels.BeingEdited() && !Timers.BeingEdited()) {
+#endif
 			char *tail;
 			int From = strtol(Option, &tail, 10);
 			if (tail && tail != Option) {
@@ -1643,20 +1845,37 @@ bool cConnectionVTP::CmdMOVC(const char *Option)
 				if (tail && tail != Option) {
 					int To = strtol(tail, NULL, 10);
 					int CurrentChannelNr = cDevice::CurrentChannel();
+#if APIVERSNUM >= 20300
+					cChannel *CurrentChannel = Channels->GetByNumber(CurrentChannelNr);
+					cChannel *FromChannel = Channels->GetByNumber(From);
+					if (FromChannel) {
+						cChannel *ToChannel = Channels->GetByNumber(To);
+#else
 					cChannel *CurrentChannel = Channels.GetByNumber(CurrentChannelNr);
 					cChannel *FromChannel = Channels.GetByNumber(From);
 					if (FromChannel) {
 						cChannel *ToChannel = Channels.GetByNumber(To);
+#endif
 						if (ToChannel) {
 							int FromNumber = FromChannel->Number();
 							int ToNumber = ToChannel->Number();
 							if (FromNumber != ToNumber) {
+#if APIVERSNUM >= 20300
+								Channels->Move(FromChannel, ToChannel);
+								Channels->ReNumber();
+								Channels->SetModified();
+#else
 								Channels.Move(FromChannel, ToChannel);
 								Channels.ReNumber();
 								Channels.SetModified(true);
+#endif
 								if (CurrentChannel && CurrentChannel->Number() != CurrentChannelNr) {
 									if (!cDevice::PrimaryDevice()->Replaying() || cDevice::PrimaryDevice()->Transferring()) {
+#if APIVERSNUM >= 20300
+										Channels->SwitchTo(CurrentChannel->Number());
+#else
 										Channels.SwitchTo(CurrentChannel->Number());
+#endif
 									}
 									else {
 										cDevice::SetCurrentChannel(CurrentChannel);
@@ -1684,10 +1903,12 @@ bool cConnectionVTP::CmdMOVC(const char *Option)
 			else {
 				Reply(501, "Error in channel number");
 			}
+#if APIVERSNUM < 20300
 		}
 		else {
 			Reply(550, "Channels or timers are being edited - try again later");
 		}
+#endif
 	}
 	else {
 		Reply(501, "Missing channel number");
@@ -1700,31 +1921,63 @@ bool cConnectionVTP::CmdDELC(const char *Option)
 	INIT_WRAPPER();
 	if (*Option) {
 		if (isnumber(Option)) {
+#if APIVERSNUM >= 20300
+			LOCK_CHANNELS_WRITE;
+			Channels->SetExplicitModify();
+			cChannel *channel = Channels->GetByNumber(strtol(Option, NULL, 10));
+#else
 			if (!Channels.BeingEdited()) {
 				cChannel *channel = Channels.GetByNumber(strtol(Option, NULL, 10));
+#endif
 				if (channel) {
+#if APIVERSNUM >= 20300
+					LOCK_TIMERS_READ;
+					for (const cTimer *timer = Timers->First(); timer; timer = Timers->Next(timer)) {
+#else
 					for (cTimer *timer = Timers.First(); timer; timer = Timers.Next(timer)) {
+#endif
 						if (timer->Channel() == channel) {
 							Reply(550, "Channel \"%s\" is in use by timer %d", Option, timer->Index() + 1);
 							return false;
 						}
 					}
 					int CurrentChannelNr = cDevice::CurrentChannel();
+#if APIVERSNUM >= 20300
+					cChannel *CurrentChannel = Channels->GetByNumber(CurrentChannelNr);
+#else
 					cChannel *CurrentChannel = Channels.GetByNumber(CurrentChannelNr);
+#endif
 					if (CurrentChannel && channel == CurrentChannel) {
+#if APIVERSNUM >= 20300
+						int n = Channels->GetNextNormal(CurrentChannel->Index());
+						if (n < 0)
+							n = Channels->GetPrevNormal(CurrentChannel->Index());
+						CurrentChannel = Channels->Get(n);
+#else
 						int n = Channels.GetNextNormal(CurrentChannel->Index());
 						if (n < 0)
 							n = Channels.GetPrevNormal(CurrentChannel->Index());
 						CurrentChannel = Channels.Get(n);
+#endif
 						CurrentChannelNr = 0; // triggers channel switch below
 					}
+#if APIVERSNUM >= 20300
+					Channels->Del(channel);
+					Channels->ReNumber();
+					Channels->SetModified();
+#else
 					Channels.Del(channel);
 					Channels.ReNumber();
 					Channels.SetModified(true);
+#endif
 					isyslog("channel %s deleted", Option);
 					if (CurrentChannel && CurrentChannel->Number() != CurrentChannelNr) {
 						if (!cDevice::PrimaryDevice()->Replaying() || cDevice::PrimaryDevice()->Transferring())
+#if APIVERSNUM >= 20300
+							Channels->SwitchTo(CurrentChannel->Number());
+#else
 							Channels.SwitchTo(CurrentChannel->Number());
+#endif
 						else
 							cDevice::SetCurrentChannel(CurrentChannel);
 					}
@@ -1733,9 +1986,11 @@ bool cConnectionVTP::CmdDELC(const char *Option)
 				else
 					Reply(501, "Channel \"%s\" not defined", Option);
 			}
+#if APIVERSNUM < 20300
 			else
 				Reply(550, "Channels are being edited - try again later");
 		}
+#endif
 		else
 			Reply(501, "Error in channel number \"%s\"", Option);
 	}
@@ -1750,13 +2005,22 @@ bool cConnectionVTP::CmdDELR(const char *Option)
 	INIT_WRAPPER();
 	if (*Option) {
 		if (isnumber(Option)) {
+#if APIVERSNUM >= 20300
+			LOCK_RECORDINGS_WRITE;
+			cRecording *recording = Recordings->Get(strtol(Option, NULL, 10) - 1);
+#else
 			cRecording *recording = Recordings.Get(strtol(Option, NULL, 10) - 1);
+#endif
 			if (recording) {
 				cRecordControl *rc = cRecordControls::GetRecordControl(recording->FileName());
 				if (!rc) {
 					if (recording->Delete()) {
 						Reply(250, "Recording \"%s\" deleted", Option);
+#if APIVERSNUM >= 20300
+						Recordings->DelByName(recording->FileName());
+#else
 						::Recordings.DelByName(recording->FileName());
+#endif
 					}
 					else
 						Reply(554, "Error while deleting recording!");
@@ -1765,7 +2029,11 @@ bool cConnectionVTP::CmdDELR(const char *Option)
 					Reply(550, "Recording \"%s\" is in use by timer %d", Option, rc->Timer()->Index() + 1);
 			}
 			else
+#if APIVERSNUM >= 20300
+				Reply(550, "Recording \"%s\" not found%s", Option, Recordings->Count() ? "" : " (use LSTR before deleting)");
+#else
 				Reply(550, "Recording \"%s\" not found%s", Option, Recordings.Count() ? "" : " (use LSTR before deleting)");
+#endif
 		}
 		else
 			Reply(501, "Error in recording number \"%s\"", Option);

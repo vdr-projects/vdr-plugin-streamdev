@@ -48,6 +48,9 @@ class cChannelIterator: public cItemIterator
 		const cChannel *first;
 		const cChannel *current;
 	protected:
+		virtual const cChannel* FirstChannel();
+		virtual const cChannel* NextNormal();
+		virtual const cChannel* NextGroup();
 		virtual const cChannel* NextChannel(const cChannel *Channel) = 0;
 		static inline const cChannel* SkipFakeGroups(const cChannel *Channel);
 		// Helper which returns the group by its index
@@ -208,8 +211,15 @@ class cRssMenuList: public cMenuList
 
 inline const cChannel* cChannelIterator::SkipFakeGroups(const cChannel* Group)
 {
+#if APIVERSNUM >= 20300
+	LOCK_CHANNELS_READ;
+#endif
 	while (Group && Group->GroupSep() && !*Group->Name())
+#if APIVERSNUM >= 20300
+		Group = Channels->Next(Group);
+#else
 		Group = Channels.Next(Group);
+#endif
 	return Group;
 }
 
