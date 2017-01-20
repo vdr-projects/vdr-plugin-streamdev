@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- fixed lseek error check in libdvbmpeg (thanks to David Binderman)
 - server compatibility with VDR 2.3.1 (thanks to Christopher Reimer and
   Matthias Senzel)
 - client compatibility with VDR 2.3.1

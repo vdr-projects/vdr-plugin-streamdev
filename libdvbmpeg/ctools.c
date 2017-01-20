@@ -558,7 +558,7 @@ int read_pes(int f, pes_packet *p){
 
 	while (neof > 0 && !found) {
 	        po = lseek(f,0,SEEK_CUR);
-		if (po < 0) return -1;
+		if (po == (off_t) -1) return -1;
 		if ((neof = save_read(f,&sync4,4)) < 4) return -1;
 		if (sync4[0] == 0x00 && sync4[1] == 0x00 && sync4[2] == 0x01) {
 			p->stream_id = sync4[3];

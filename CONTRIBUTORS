@@ -251,3 +251,6 @@ Christopher Reimer
 
 Matthias Senzel
   for refining the compatibility patch for VDR 2.3.1
+
+David Binderman
+  for fixing an lseek error check in libdvbmpeg
