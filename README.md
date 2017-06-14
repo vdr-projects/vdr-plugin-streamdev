@@ -16,18 +16,18 @@ See the file COPYING for license information.
 
 1. [Description](#description)
 1. [Installation](#installation)
-  1. [Compatibility](#compatibility)
-  1. [Compiling](#compiling)
-  1. [Updating](#updating)
+    1. [Compatibility](#compatibility)
+    1. [Compiling](#compiling)
+    1. [Updating](#updating)
 1. [Usage](#usage)
-  1. [Usage HTTP server](#usage-http-server)
-  1. [Usage IGMP multicast server](#usage-igmp-multicast-server)
-  1. [Usage VDR-to-VDR server](#usage-vdr-to-vdr-server)
-  1. [Usage VDR-to-VDR client](#usage-vdr-to-vdr-client)
+    1. [Usage HTTP server](#usage-http-server)
+    1. [Usage IGMP multicast server](#usage-igmp-multicast-server)
+    1. [Usage VDR-to-VDR server](#usage-vdr-to-vdr-server)
+    1. [Usage VDR-to-VDR client](#usage-vdr-to-vdr-client)
 1. [Other useful Plugins](#other-useful-plugins)
-  1. [Plugins for VDR-to-VDR clients](#plugins-for-vdr-to-vdr)
-  1. [Plugins for Server](#plugins-for-server)
-  1. [Alternatives](#alternatives)
+    1. [Plugins for VDR-to-VDR clients](#plugins-for-vdr-to-vdr)
+    1. [Plugins for Server](#plugins-for-server)
+    1. [Alternatives](#alternatives)
 1. [externremux.sh](#externremux.sh)
 1. [Known Problems](#known-problems)
 
@@ -52,7 +52,7 @@ Additional clients can be programmed using the Protocol Instructions inside the 
 
 Let's say streamdev's version is 0.5.0 and vdr's version is 1.X.X. If you use anything else please exchange the version numbers appropriately (this way I don't have to update this section all the times;) ).
 
-After compiling the PlugIn as stated below, start either (or both) parts of it by specifying "-P streamdev-client" and/or "-P streamdev-server" on the VDR command line.
+After compiling the PlugIn as stated below, start either (or both) parts of it by specifying ```-P streamdev-client``` and/or ```-P streamdev-server``` on the VDR command line.
 
 What's important is that the client requests a channel using its Unique Channel ID. So, in order to find the channel at the server, it must have the same ID that is used on the client. You can achieve this by putting the server's channels.conf on the client, preferably after scanning.
 
@@ -63,8 +63,7 @@ Last, but not least you have to copy the streamdev-server folder into the "plugi
 The directory contains a file named streamdevhosts.conf which you must adjust to your needs. The syntax is the same as for svdrphosts.conf, so please consult VDR's documentation on how to fill that file, if you can't do it on-the-fly.
 
 There's also a sample externremux.sh script in this directory. It is used by streamdev's external remux feature. The sample script uses mencoder by default. Please check the script for further information. You can specify a different script location with the -r parameter. The VDR commandline would then include a
-"-P 'streamdev-server -r /usr/local/bin/remux.sh'". Note the additional quotes, as otherwise -r will be passed to VDR and not to streamdev.
-
+```-P 'streamdev-server -r /usr/local/bin/remux.sh'```. Note the additional quotes, as otherwise -r will be passed to VDR and not to streamdev.
 
 ### Compatibility
 
@@ -74,7 +73,7 @@ This version is not compatible to VDR releases older than 1.7.25. Use one of the
 
 The Makefiles are for VDR 1.7.36 and above. For VDR 1.7.33 and below, please replace the Makefiles in the main directory and in the client/ and server/ subdirectories with the corresponding Makefile-1.7.33 files. With VDR 1.7.34 and 1.7.35 YMMV ;)
 
-```sh
+```bash
 cd vdr-1.X.X/PLUGINS/src
 tar xvfz vdr-streamdev-0.5.0.tgz
 ln -s streamdev-0.5.0 streamdev
@@ -85,13 +84,12 @@ make [options, if necary] plugins
 ```
 
 To build only the plugin, change into the streamdev source folder and issue
-
-```sh
+```bash
 make
 ```
-To build only streamdev-server or only streamdev-client, use
 
-```sh
+To build only streamdev-server or only streamdev-client, use
+```bash
 make server
 make client
 ```
@@ -100,8 +98,7 @@ make client
 
 If you are updating streamdev from an earlier release, you might have to perform some additional steps. Check which version you've been running before, then read below for the necessary changes.
 
-* Priorities:
--------------
+**Priorities**
 (Affected: 0.5.x and older)
 
 The server-side setting "Suspend behaviour" has been dropped in 0.6.0 in favour of priority based precedence. A priority of 0 and above means that clients have precedence. A negative priority gives precedence to local live TV on the server. So if "Suspend behaviour" was previously set to "Client may suspend" or "Never suspended", you will have to configure a negative priority. If the "Suspend behaviour" was set to "Always suspended", the default values should do.
@@ -110,28 +107,31 @@ Configure the desired priorities for HTTP and IGMP Multicast streaming in the se
 
 In streamdev-client, you should set "Minimum Priority" to -99. Adjust "Live TV Priority" if necessary.
 
-* Location of files:
---------------------
+**Location of files** 
 (Affected: 0.3.x, 0.4.x, 0.4.0pre, 0.5.0pre)
 
 Starting with streamdev 0.5.0, all additional files are kept in a directory called "streamdev-server" inside VDR's plugin config directory. It is the new default location of externremux.sh and the new place where streamdev-server expects the file "streamdevhosts.conf". You will have to move this file to its new location:
 
 streamdev 0.3.x:
-  mv VDRCONFDIR/plugins/streamdevhosts.conf VDRCONFDIR/plugins/streamdev-server/
+```bash
+mv VDRCONFDIR/plugins/streamdevhosts.conf VDRCONFDIR/plugins/streamdev-server/
+```
 
 streamdev 0.4.x, 0.4.0pre and 0.5.0pre:
-  mv VDRCONFDIR/plugins/streamdev VDRCONFDIR/plugins/streamdev-server/
+```bash
+mv VDRCONFDIR/plugins/streamdev VDRCONFDIR/plugins/streamdev-server/
+```
 
 Now check the contents of streamdevhosts.conf. Does it contain a "0.0.0.0/0" entry? If your VDR machine is connected to the Internet, this line gives *anyone* full access to streamdev, unless you took some other measures to prevent this (e.g. firewall). You might want to remove this line and enable HTTP authentication instead.
 
-* Handling of externremux script:
----------------------------------
+**Handling of externremux script** 
 (Affected: 0.3.x, 0.4.0pre, 0.5.0pre)
 
 Streamdev server's externremux script became responsible for emitting all HTTP headers. A quick and dirty extension to your current script would be:
-
-  echo -ne 'Content-type: video/mpeg\r\n'
-  echo -ne '\r\n'
+```bash
+echo -ne 'Content-type: video/mpeg\r\n'
+echo -ne '\r\n'
+```
 
 However I encourage you to try the new externremux.sh script shipped with the streamdev source distribution.
 
@@ -139,7 +139,7 @@ To emphasize the required change in externremux, the URL path for passing the st
 
 ## Usage
 
-Start the server core itself by specifying -Pstreamdev-server on your VDR commandline. To use the client core, specify -Pstreamdev-client. Both parts can run in one VDR instance, if necessary.
+Start the server core itself by specifying ```-Pstreamdev-server``` on your VDR commandline. To use the client core, specify -Pstreamdev-client. Both parts can run in one VDR instance, if necessary.
 
 Precedence between multiple clients and between client and server is controlled with priorities. For HTTP and IGMP Multicast, the priority is configured in streamdev-server's setup menu. A negative priority gives precedence to local live TV on the server. Zero and positive values give precedence to the client.
 
@@ -200,7 +200,7 @@ With ```EXT``` you can also add parameters which are passed as arguments to the 
 
 If you want to access streamdev's HTTP server from the Internet, do *not* grant access for anyone by allowing any IP in "streamdevhosts.conf". Instead, pass the ```-a``` commandline option to streamdev-server. It takes a username and a password as argument. Clients with an IP not accepted by "streamdevhosts.conf" will then have to login. The VDR commandline will have to look like this:
 
-```
+```bash
 vdr ... -P 'streamdev-server -a vdr:secret' ...
 ```
 
@@ -222,7 +222,7 @@ Now edit your streamdevhosts.conf. To allow streaming of all channels, it must c
 
 By default, the linux kernel will refuse to join more than 20 multicast groups. You might want to increase this up to "number_of_channels + 1". Note that it's "number_of_channels", not "maximum_channel_number".
 
-```sh
+```bash
 #First 100 channels:
 bash# sysctl -w net.ipv4.igmp_max_memberships=101
 
@@ -263,13 +263,13 @@ If you have TV programs with dynamically changing PIDs (such as some german regi
 
 "Filter streaming" uses internally a socketpair(2) to copy meta data to VDR. This socketpair may require larger than default buffering. If you  see a mesage like the following in syslog,
 
-```
+```bash
 cStreamdevFilter::PutSection(Pid:18 Tid: 64): Dropped 2995 bytes, max queue: 328640
 ```
 
 then you should increase the streamdev client "FilterSockBufSize" value. A good value is 3072000. You will need to first configure your linux to permit such a large buffer size:
 
-```sh
+```bash
 sysctl net.core.wmem_max=3072000
 ```
 
@@ -281,7 +281,7 @@ You can also configure the "Broadcast Systems / Cost" of the streamdev-client de
 
 To receive channels from multiple servers, create additional instances of the streamdev-client plugin. Simply copy (don't link!) the binary to a different name (e.g. streamdev-client2):
 
-```sh
+```bash
 cd VDRPLUGINLIBDIR
 cp libvdr-streamdev-client.so.1.X.X libvdr-streamdev-client2.so.1.X.X
 ```
@@ -349,7 +349,7 @@ All HTTP headers converted to uppercase, '-' replaced by '_' (e.g. USER_AGENT)
 
 The script should perform the following steps (pseudocode):
 
-```sh
+```bash
   if (SERVER_PROTOCOL == HTTP)
     write headers (including Content-Type) to STDOUT
     write empty line to STDOUT
