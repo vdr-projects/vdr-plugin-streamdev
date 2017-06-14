@@ -25,10 +25,10 @@ See the file COPYING for license information.
     1. [Usage VDR-to-VDR server](#usage-vdr-to-vdr-server)
     1. [Usage VDR-to-VDR client](#usage-vdr-to-vdr-client)
 1. [Other useful Plugins](#other-useful-plugins)
-    1. [Plugins for VDR-to-VDR clients](#plugins-for-vdr-to-vdr)
+    1. [Plugins for VDR-to-VDR clients](#plugins-for-vdr-to-vdr-clients)
     1. [Plugins for Server](#plugins-for-server)
     1. [Alternatives](#alternatives)
-1. [externremux.sh](#externremux.sh)
+1. [externremux.sh](#externremuxsh)
 1. [Known Problems](#known-problems)
 
 
