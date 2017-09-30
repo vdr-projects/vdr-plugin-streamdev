@@ -1,6 +1,7 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
  
+- added .gitignore (thanks to Jasmin J)
 - fixed some warnings in libdvbmpeg (thanks to Jasmin J)
 - fixed lseek error check in libdvbmpeg (thanks to David Binderman)
 - server compatibility with VDR 2.3.1 (thanks to Christopher Reimer and
