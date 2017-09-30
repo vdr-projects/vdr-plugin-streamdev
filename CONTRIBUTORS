@@ -258,3 +258,4 @@ David Binderman
 Jasmin J
   for fixing some warnings in libdvbmpeg
   for adding .gitignore
+  for fixing compilation for VDR 2.3.7

@@ -41,7 +41,9 @@ private:
 	enum eStates { Channel, Event, Title, Subtitle, Description, Vps, Content, Rating,
 	               EndEvent, EndChannel, EndEPG };
 	cConnectionVTP    *m_Client;
+#if APIVERSNUM < 20300
 	cSchedulesLock    *m_SchedulesLock;
+#endif
 	const cSchedules  *m_Schedules;
 	const cSchedule   *m_Schedule;
 	const cEvent      *m_Event;
@@ -210,7 +212,9 @@ cLSTEHandler::cLSTEHandler(cConnectionVTP *Client, const char *Option):
 
 cLSTEHandler::~cLSTEHandler()
 {
+#if APIVERSNUM < 20300
 	delete m_SchedulesLock;
+#endif
 }
 
 bool cLSTEHandler::Next(bool &Last)
