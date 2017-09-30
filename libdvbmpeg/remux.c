@@ -756,7 +756,6 @@ int write_video_pes( Remux *rem, uint8_t *buf, int *vlength)
 	int pos = 0;
 	int p   = 0;
 	uint32_t pts = 0;
-	uint32_t dts = 0;
 	int stuff = 0;
 	int length = *vlength;
 	long diff = 0;
@@ -787,7 +786,6 @@ int write_video_pes( Remux *rem, uint8_t *buf, int *vlength)
 	if (add < 0) return -1;
 	pos += add;
 	rem->vpts_old = rem->vpts;
-	dts = rem->vdts;
 	rem->vpts = rem->vpts_list[0].PTS;
 	rem->vdts = rem->vpts_list[0].dts;
 	if ( diff > 0) rem->SCR += diff;

@@ -254,3 +254,6 @@ Matthias Senzel
 
 David Binderman
   for fixing an lseek error check in libdvbmpeg
+
+Jasmin J
+  for fixing some warnings in libdvbmpeg

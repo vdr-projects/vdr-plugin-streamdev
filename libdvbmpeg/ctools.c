@@ -298,7 +298,6 @@ void write_pes(int fd, pes_packet *p){
 }
 
 static unsigned int find_length(int f){
-	uint64_t p = 0;
 	uint64_t start = 0;
 	uint64_t q = 0;
 	int found = 0;
@@ -309,7 +308,7 @@ static unsigned int find_length(int f){
 	start -=2;
         lseek(f,start,SEEK_SET);
 	while ( neof > 0 && !found ){
-		p = lseek(f,0,SEEK_CUR);
+		lseek(f,0,SEEK_CUR);
 		neof = save_read(f,&sync4,4);
 		if (sync4[0] == 0x00 && sync4[1] == 0x00 && sync4[2] == 0x01) {
 			switch ( sync4[3] ) {
@@ -1334,7 +1333,7 @@ void tfilter(trans *p)
 {
 	int l,c;
 	int tpid;
-	uint8_t flag,flags;
+	uint8_t flags;
 	uint8_t adapt_length = 0;
 	uint8_t cpid[2];
 
@@ -1350,7 +1349,6 @@ void tfilter(trans *p)
 			tpid);
 	}
 
-	flag = cpid[0];
 	flags = p->packet[3];
 	
 	if ( flags & ADAPT_FIELD ) {
