@@ -1,0 +1,7 @@
+*		text=auto
+*.c		text eol=lf
+*.diff		text eol=lf
+*.h		text eol=lf
+*.patch		text eol=lf
+*.sh		text eol=lf
+Make*		text eol=lf
