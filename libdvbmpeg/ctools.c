@@ -1265,8 +1265,8 @@ void clear_trans_filt(trans *p,int filtn)
 	p->pes_started &= ~((tflags) (1 << filtn) );
 
 	for (i = MASKL*filtn; i < MASKL*(filtn+1) ; i++){
-		p->mask[i] = 0;
-		p->filt[i] = 0;
+		p->mask[(unsigned int)i] = 0;
+		p->filt[(unsigned int)i] = 0;
 	}
 	p->sec[filtn].found = 0;
 	p->sec[filtn].length = 0;
