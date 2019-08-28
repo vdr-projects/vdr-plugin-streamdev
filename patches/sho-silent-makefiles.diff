@@ -1,0 +1,224 @@
+diff --git a/Makefile b/Makefile
+index 90f3261..a54594d 100644
+--- a/Makefile
++++ b/Makefile
+@@ -69,22 +69,22 @@ all: client server
+ ### Targets:
+ 
+ client:
+-	$(MAKE) -C ./tools
+-	$(MAKE) -C ./client
++	$(Q)$(MAKE) --no-print-directory -C ./tools
++	$(Q)$(MAKE) --no-print-directory -C ./client
+ 
+ server:
+-	$(MAKE) -C ./tools
+-	$(MAKE) -C ./libdvbmpeg
+-	$(MAKE) -C ./remux
+-	$(MAKE) -C ./server
++	$(Q)$(MAKE) --no-print-directory -C ./tools
++	$(Q)$(MAKE) --no-print-directory -C ./libdvbmpeg
++	$(Q)$(MAKE) --no-print-directory -C ./remux
++	$(Q)$(MAKE) --no-print-directory -C ./server
+ 
+ install-client: client
+-	$(MAKE) -C ./client install
+-	# installs to $(LIBDIR)/libvdr-streamdev-client.so.$(APIVERSION)
++	$(Q)$(MAKE) --no-print-directory -C ./client install
++	$(Q)# installs to $(LIBDIR)/libvdr-streamdev-client.so.$(APIVERSION)
+ 
+ install-server: server
+-	$(MAKE) -C ./server install
+-	# installs to $(LIBDIR)/libvdr-streamdev-server.so.$(APIVERSION)
++	$(Q)$(MAKE) --no-print-directory -C ./server install
++	$(Q)# installs to $(LIBDIR)/libvdr-streamdev-server.so.$(APIVERSION)
+ 
+ install: install-client install-server
+ 
+@@ -97,8 +97,8 @@ dist: clean
+ 	@echo Distribution package created as $(PACKAGE).tgz
+ 
+ clean:
+-	$(MAKE) -C ./tools clean
+-	$(MAKE) -C ./libdvbmpeg clean
+-	$(MAKE) -C ./remux clean
+-	$(MAKE) -C ./client clean
+-	$(MAKE) -C ./server clean
++	$(Q)$(MAKE) --no-print-directory -C ./tools clean
++	$(Q)$(MAKE) --no-print-directory -C ./libdvbmpeg clean
++	$(Q)$(MAKE) --no-print-directory -C ./remux clean
++	$(Q)$(MAKE) --no-print-directory -C ./client clean
++	$(Q)$(MAKE) --no-print-directory -C ./server clean
+diff --git a/client/Makefile b/client/Makefile
+index ea9dc45..4b515ad 100644
+--- a/client/Makefile
++++ b/client/Makefile
+@@ -31,7 +31,8 @@ all: $(SOFILE) i18n
+ ### Implicit rules:
+ 
+ %.o: %.c
+-	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
++	@echo CC client/ $@
++	$(Q)$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
+ 
+ ### Dependencies:
+ 
+@@ -51,17 +52,21 @@ I18Nmsgs  = $(addprefix $(DESTDIR)$(LOCDIR)/, $(addsuffix /LC_MESSAGES/vdr-$(PLU
+ I18Npot   = $(PODIR)/$(PLUGIN).pot
+ 
+ %.mo: %.po
+-	msgfmt -c -o $@ $<
++	@echo MO client/ $@
++	$(Q)msgfmt -c -o $@ $<
+ 
+ $(I18Npot): $(CLIENTOBJS:%.o=%.c)
+-	xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --package-name=vdr-$(PLUGIN) --package-version=$(VERSION) --msgid-bugs-address='<vdrdev@schmirler.de>' -o $@ `ls $^`
++	@echo GT client/ $@
++	$(Q)xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --package-name=vdr-$(PLUGIN) --package-version=$(VERSION) --msgid-bugs-address='<vdrdev@schmirler.de>' -o $@ `ls $^`
+ 
+ %.po: $(I18Npot)
+-	msgmerge -U --no-wrap --no-location --backup=none -q -N $@ $<
++	@echo PO client/ $@
++	$(Q)msgmerge -U --no-wrap --no-location --backup=none -q -N $@ $<
+ 	@touch $@
+ 
+ $(I18Nmsgs): $(DESTDIR)$(LOCDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
+-	install -D -m644 $< $@
++	@echo IN client/ $@
++	$(Q)install -D -m644 $< $@
+ 
+ .PHONY: i18n
+ i18n: $(I18Nmo) $(I18Npot)
+@@ -71,10 +76,12 @@ install-i18n: $(I18Nmsgs)
+ ### Targets:
+ 
+ $(SOFILE): $(CLIENTOBJS) $(COMMONOBJS) ../tools/sockettools.a
+-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $^ -o $@
++	@echo LD client/ $@
++	$(Q)$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $^ -o $@
+ 
+ install-lib: $(SOFILE)
+-	install -D $^ $(DESTDIR)$(LIBDIR)/$^.$(APIVERSION)
++	@echo IN client/ $(DESTDIR)$(LIBDIR)/$^.$(APIVERSION)
++	$(Q)install -D $^ $(DESTDIR)$(LIBDIR)/$^.$(APIVERSION)
+ 
+ install: install-lib install-i18n
+ 
+diff --git a/libdvbmpeg/Makefile b/libdvbmpeg/Makefile
+index 4a78a12..0f1d46b 100644
+--- a/libdvbmpeg/Makefile
++++ b/libdvbmpeg/Makefile
+@@ -15,12 +15,14 @@ DEFINES += -U_FORTIFY_SOURCE
+ 
+ .PHONY: clean
+ libdvbmpegtools.a: $(OBJS)
+-	ar -rcs libdvbmpegtools.a $(OBJS) 
++	@echo AR libdvbmpeg/ $@
++	$(Q)$(AR) -rcs libdvbmpegtools.a $(OBJS) 
+ 
+ ### Implicit rules:
+ 
+ %.o: %.c 
+-	$(CC) $(CFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
++	@echo CC libdvbmpeg/ $@
++	$(Q)$(CC) $(CFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
+ 
+ ### Dependencies:
+ 
+diff --git a/remux/Makefile b/remux/Makefile
+index 89cf4fd..cae9e2b 100644
+--- a/remux/Makefile
++++ b/remux/Makefile
+@@ -11,12 +11,14 @@ OBJS = tsremux.o ts2es.o ts2pes.o ts2ps.o extern.o
+ 
+ .PHONY: clean
+ remux.a: $(OBJS)
+-	ar -rcs remux.a $^
++	@echo AR remux/ $@
++	$(Q)$(AR) -rcs remux.a $^
+ 
+ ### Implicit rules:
+ 
+ %.o: %.c 
+-	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
++	@echo CC remux/ $@
++	$(Q)$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
+ 
+ ### Dependencies:
+ 
+diff --git a/server/Makefile b/server/Makefile
+index 37cd4bb..d5120d1 100644
+--- a/server/Makefile
++++ b/server/Makefile
+@@ -36,7 +36,8 @@ all: $(SOFILE) i18n
+ ### Implicit rules:
+ 
+ %.o: %.c
+-	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
++	@echo CC server/ $@
++	$(Q)$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
+ 
+ ### Dependencies:
+ 
+@@ -56,17 +57,21 @@ I18Nmsgs  = $(addprefix $(DESTDIR)$(LOCDIR)/, $(addsuffix /LC_MESSAGES/vdr-$(PLU
+ I18Npot   = $(PODIR)/$(PLUGIN).pot
+ 
+ %.mo: %.po
+-	msgfmt -c -o $@ $<
++	@echo MO server/ $@
++	$(Q)msgfmt -c -o $@ $<
+ 
+ $(I18Npot): $(SERVEROBJS:%.o=%.c)
+-	xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --package-name=vdr-$(PLUGIN) --package-version=$(VERSION) --msgid-bugs-address='<vdrdev@schmirler.de>' -o $@ `ls $^`
++	@echo GT server/ $@
++	$(Q)xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --package-name=vdr-$(PLUGIN) --package-version=$(VERSION) --msgid-bugs-address='<vdrdev@schmirler.de>' -o $@ `ls $^`
+ 
+ %.po: $(I18Npot)
+-	msgmerge -U --no-wrap --no-location --backup=none -q -N $@ $<
++	@echo PO server/ $@
++	$(Q)msgmerge -U --no-wrap --no-location --backup=none -q -N $@ $<
+ 	@touch $@
+ 
+ $(I18Nmsgs): $(DESTDIR)$(LOCDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
+-	install -D -m644 $< $@
++	@echo IN server/ $@
++	$(Q)install -D -m644 $< $@
+ 
+ .PHONY: i18n
+ i18n: $(I18Nmo) $(I18Npot)
+@@ -77,10 +82,12 @@ install-i18n: $(I18Nmsgs)
+ 
+ $(SOFILE): $(SERVEROBJS) $(COMMONOBJS) \
+ 	../tools/sockettools.a ../remux/remux.a ../libdvbmpeg/libdvbmpegtools.a
+-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $^ -o $@
++	@echo AR server/ $@
++	$(Q)$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $^ -o $@
+ 
+ install-lib: $(SOFILE)
+-	install -D $^ $(DESTDIR)$(LIBDIR)/$^.$(APIVERSION)
++	@echo IN server/ $(DESTDIR)$(LIBDIR)/$^.$(APIVERSION)
++	$(Q)install -D $^ $(DESTDIR)$(LIBDIR)/$^.$(APIVERSION)
+ 
+ install: install-lib install-i18n
+ 
+diff --git a/tools/Makefile b/tools/Makefile
+index 60da509..0419016 100644
+--- a/tools/Makefile
++++ b/tools/Makefile
+@@ -11,12 +11,14 @@ OBJS = select.o socket.o source.o tools.o
+ 
+ .PHONY: clean
+ sockettools.a: $(OBJS)
+-	ar -rcs sockettools.a $(OBJS) 
++	@echo AR tools/ $@
++	$(Q)$(AR) -rcs sockettools.a $(OBJS) 
+ 
+ ### Implicit rules:
+ 
+ %.o: %.c 
+-	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
++	@echo CC tools/ $@
++	$(Q)$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
+ 
+ ### Dependencies:
+ 
