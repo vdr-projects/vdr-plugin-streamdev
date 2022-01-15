@@ -3,10 +3,9 @@ This is a "plugin" for the Video Disk Recorder (VDR).
 Written by:                  Sascha Volkenandt <sascha@akv-soft.de>
 Current maintainer:          Frank Schmirler <vdrdev@schmirler.de>
 
-Project's homepage:          http://streamdev.vdr-developer.org/
-Former project homepage:     http://linux.kompiliert.net/
+Project's homepage:          https://github.com/vdr-projects/vdr-plugin-streamdev
 
-Latest version available at: http://streamdev.vdr-developer.org/
+Latest version available at: https://github.com/vdr-projects/vdr-plugin-streamdev
 
 See the file COPYING for license information.
 
