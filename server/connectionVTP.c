@@ -1882,7 +1882,11 @@ bool cConnectionVTP::CmdMOVC(const char *Option)
 #endif
 									}
 									else {
+#if APIVERSNUM >= 20302
+										cDevice::SetCurrentChannel(CurrentChannel->Number());
+#else
 										cDevice::SetCurrentChannel(CurrentChannel);
+#endif
 									}
 								}
 								isyslog("channel %d moved to %d", FromNumber, ToNumber);
@@ -1983,7 +1987,11 @@ bool cConnectionVTP::CmdDELC(const char *Option)
 							Channels.SwitchTo(CurrentChannel->Number());
 #endif
 						else
+#if APIVERSNUM >= 20302
+							cDevice::SetCurrentChannel(CurrentChannel->Number());
+#else
 							cDevice::SetCurrentChannel(CurrentChannel);
+#endif
 					}
 					Reply(250, "Channel \"%s\" deleted", Option);
 				}
