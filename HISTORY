@@ -1,6 +1,12 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+2022-01-22: Version 0.6.3
+
+- added HEVC support (thanks to jsffm)
+- fixed order of ABRT and TUNE message (thanks to nanohcv)
+- fixed Deadlock (thanks to kls and nanohcv)
+
 2022-01-15: Version 0.6.2
 
 - fixed compilation for VDR 2.3.7 (thanks to Jasmin J)

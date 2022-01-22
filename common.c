@@ -10,7 +10,7 @@
 
 using namespace std;
 
-const char *VERSION = "0.6.2";
+const char *VERSION = "0.6.3";
 
 const char cMenuEditIpItem::IpCharacters[] = "0123456789.";
 
@@ -34,7 +34,7 @@ void cMenuEditIpItem::Set(void) {
 			addr = 0;
 		int p = 0;
 		for (int i = 0; i < 4; ++i) {
-			p += snprintf(buf + p, sizeof(buf) - p, pos == i ? "[%d]" : "%d", 
+			p += snprintf(buf + p, sizeof(buf) - p, pos == i ? "[%d]" : "%d",
 					pos == i ? curNum : (addr >> (i * 8)) & 0xff);
 			if (i < 3)
 				buf[p++] = '.';
@@ -78,7 +78,7 @@ eOSState cMenuEditIpItem::ProcessKey(eKeys Key) {
 		curNum = -1;
 		pos = -1;
 		break;
-		
+
 	case kRight:
 		if (pos >= 0) {
 			addr.s_addr = inet_addr(value);
