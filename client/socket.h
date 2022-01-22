@@ -25,6 +25,7 @@ private:
 	bool          m_Prio; // server supports command PRIO
 	int           m_Priority; // current device priority
 	bool          m_Abort; // quit command pending
+	bool          m_SendABRT;
 
 	time_t        m_LastSignalUpdate;
 	int           m_LastSignalStrength;

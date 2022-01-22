@@ -25,6 +25,7 @@ cClientSocket::cClientSocket(void)
 	m_Priority = -100;
 	m_Prio = false;
 	m_Abort = false;
+	m_SendABRT = true;
 	m_LastSignalUpdate = 0;
 	m_LastSignalStrength = -1;
 	m_LastSignalQuality = -1;
@@ -269,7 +270,10 @@ bool cClientSocket::SetChannelDevice(const cChannel *Channel) {
 
 	CMD_LOCK;
 
-	std::string command = (std::string)"TUNE " 
+	std::string command = (std::string)"ABRT " + (const char*)itoa(siLive);
+	m_SendABRT = !Command(command, 220);
+
+	command = (std::string)"TUNE "
 				+ (const char*)Channel->GetChannelID().ToString();
 	if (!Command(command, 220))
 		return false;
@@ -345,9 +349,12 @@ bool cClientSocket::CloseDvr(void) {
 	CMD_LOCK;
 
 	if (m_DataSockets[siLive] != NULL) {
-		std::string command = (std::string)"ABRT " + (const char*)itoa(siLive);
-		if (!Command(command, 220))
-			return false;
+		if(m_SendABRT) {
+			std::string command = (std::string)"ABRT " + (const char*)itoa(siLive);
+			if (!Command(command, 220))
+				return false;
+		}
+		m_SendABRT = true;
 		DELETENULL(m_DataSockets[siLive]);
 	}
 	return true;

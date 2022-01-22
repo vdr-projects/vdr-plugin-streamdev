@@ -674,20 +674,36 @@ bool cStreamdevLiveStreamer::ProvidesChannel(const cChannel *Channel, int Priori
 void cStreamdevLiveStreamer::ChannelChange(const cChannel *Channel)
 {
 	if (Running() && m_Device && m_Channel == Channel) {
-		// Check whether the Caids actually changed
-		// If not, no need to re-tune, probably just an Audio PID update
-		if (!memcmp(m_Caids, Channel->Caids(), sizeof(m_Caids))) {
-			dsyslog("streamdev: channel %d (%s) changed, but caids remained the same, not re-tuning", Channel->Number(), Channel->Name());
-		}
-		else {
-			Detach();
-			if (m_Device->SwitchChannel(m_Channel, false)) {
-				Attach();
-				dsyslog("streamdev: channel %d (%s) changed, re-tuned", Channel->Number(), Channel->Name());
-				memcpy(m_Caids, Channel->Caids(), sizeof(m_Caids));
+		Detach();
+		int NumUsableSlots = 0;
+		if (Channel->Ca() >= CA_ENCRYPTED_MIN) {
+			for (cCamSlot *CamSlot = CamSlots.First(); CamSlot; CamSlot = CamSlots.Next(CamSlot)) {
+				if (CamSlot->ModuleStatus() == msReady) {
+					if (CamSlot->ProvidesCa(Channel->Caids())) {
+#if APIVERSNUM >= 20303
+						if (!ChannelCamRelations.CamChecked(Channel->GetChannelID(), CamSlot->MasterSlotNumber())) {
+#else
+						if (!ChannelCamRelations.CamChecked(Channel->GetChannelID(), CamSlot->SlotNumber())) {
+#endif
+							NumUsableSlots++;
+						}
+					}
+				}
 			}
-			else
+			if (!NumUsableSlots) {
+				isyslog("streamdev: cam slot not available");
+				return;
+			}
+		}
+
+		if (m_Device = cDevice::GetDevice(Channel, LIVEPRIORITY, false)) {
+			if (m_Device->SwitchChannel(Channel, false)) {
+				Attach();
+			} else {
 				isyslog("streamdev: failed to re-tune after channel %d (%s) changed", Channel->Number(), Channel->Name());
+			}
+		} else {
+			isyslog("streamdev: device not available");
 		}
 	}
 }
