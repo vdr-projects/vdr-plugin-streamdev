@@ -188,7 +188,7 @@ bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel,
 
 bool cStreamdevDevice::SetPid(cPidHandle *Handle, int Type, bool On) {
 	Dprintf("SetPid, Pid=%d, Type=%d, On=%d, used=%d\n", Handle->pid, Type, On, Handle->used);
-	LOCK_THREAD;
+	//LOCK_THREAD;
 
 	bool res = true; 
 	if (Handle->pid && (On || !Handle->used)) {
