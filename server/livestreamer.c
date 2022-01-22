@@ -51,7 +51,7 @@ cStreamdevLiveReceiver::cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer,
 		AddPids(Pids);
 }
 
-cStreamdevLiveReceiver::~cStreamdevLiveReceiver() 
+cStreamdevLiveReceiver::~cStreamdevLiveReceiver()
 {
 	Dprintf("Killing live receiver\n");
 	Detach();
@@ -123,14 +123,14 @@ cStreamdevPatFilter::cStreamdevPatFilter(cStreamdevLiveStreamer *Streamer, const
 }
 
 static const char * const psStreamTypes[] = {
-	"UNKNOWN", 
-	"ISO/IEC 11172 Video", 
-	"ISO/IEC 13818-2 Video", 
-	"ISO/IEC 11172 Audio", 
+	"UNKNOWN",
+	"ISO/IEC 11172 Video",
+	"ISO/IEC 13818-2 Video",
+	"ISO/IEC 11172 Audio",
 	"ISO/IEC 13818-3 Audio",
-	"ISO/IEC 13818-1 Privete sections", 
+	"ISO/IEC 13818-1 Privete sections",
 	"ISO/IEC 13818-1 Private PES data",
-	"ISO/IEC 13512 MHEG", 
+	"ISO/IEC 13512 MHEG",
 	"ISO/IEC 13818-1 Annex A DSM CC",
 	"0x09",
 	"ISO/IEC 13818-6 Multiprotocol encapsulation",
@@ -152,7 +152,7 @@ int cStreamdevPatFilter::GetPid(SI::PMT::Stream& stream)
 {
 	SI::Descriptor *d;
 
-	if (!stream.getPid()) 
+	if (!stream.getPid())
 		return 0;
 
 	switch (stream.getStreamType()) {
@@ -161,7 +161,7 @@ int cStreamdevPatFilter::GetPid(SI::PMT::Stream& stream)
 	case 0x03: // ISO/IEC 11172 Audio
 	case 0x04: // ISO/IEC 13818-3 Audio
 #if 0
-	case 0x07: // ISO/IEC 13512 MHEG 
+	case 0x07: // ISO/IEC 13512 MHEG
 	case 0x08: // ISO/IEC 13818-1 Annex A  DSM CC
 	case 0x0a: // ISO/IEC 13818-6 Multiprotocol encapsulation
 	case 0x0b: // ISO/IEC 13818-6 DSM-CC U-N Messages
@@ -206,9 +206,9 @@ int cStreamdevPatFilter::GetPid(SI::PMT::Stream& stream)
 		}
 		break;
 	default:
-		/* This following section handles all the cases where the audio track 
+		/* This following section handles all the cases where the audio track
 		 * info is stored in PMT user info with stream id >= 0x80
-		 * we check the registration format identifier to see if it 
+		 * we check the registration format identifier to see if it
 		 * holds "AC-3"
 		 */
 		if (stream.getStreamType() >= 0x80) {
@@ -224,22 +224,22 @@ int cStreamdevPatFilter::GetPid(SI::PMT::Stream& stream)
 						    rawdata[2] == 'A' && rawdata[3] == 'C' &&
 						    rawdata[4] == '-' && rawdata[5] == '3') {
 							isyslog("cStreamdevPatFilter PMT scanner:"
-								"Adding pid %d (type 0x%x) RegDesc len %d (%c%c%c%c)", 
-								stream.getPid(), stream.getStreamType(), 
-								d->getLength(), rawdata[2], rawdata[3], 
+								"Adding pid %d (type 0x%x) RegDesc len %d (%c%c%c%c)",
+								stream.getPid(), stream.getStreamType(),
+								d->getLength(), rawdata[2], rawdata[3],
 								rawdata[4], rawdata[5]);
 							delete d;
 							return stream.getPid();
 						}
 					}
 					break;
-				default: 
+				default:
 					break;
 				}
 				delete d;
 			}
 			if(!found) {
-				isyslog("Adding pid %d (type 0x%x) RegDesc not found -> assume AC-3", 
+				isyslog("Adding pid %d (type 0x%x) RegDesc not found -> assume AC-3",
 					stream.getPid(), stream.getStreamType());
 				return stream.getPid();
 			}
@@ -334,11 +334,11 @@ void cStreamdevPatFilter::Process(u_short Pid, u_char Tid, const u_char *Data, i
 		int pids[MAXRECEIVEPIDS + 1], npids = 0;
 		pids[npids++] = pmtPid;
 #if 0
-		pids[npids++] = 0x10;  // pid 0x10, tid 0x40: NIT 
+		pids[npids++] = 0x10;  // pid 0x10, tid 0x40: NIT
 #endif
-		pids[npids++] = 0x11;  // pid 0x11, tid 0x42: SDT 
-		pids[npids++] = 0x14;  // pid 0x14, tid 0x70: TDT 
-		pids[npids++] = 0x12;  // pid 0x12, tid 0x4E...0x6F: EIT 
+		pids[npids++] = 0x11;  // pid 0x11, tid 0x42: SDT
+		pids[npids++] = 0x14;  // pid 0x14, tid 0x70: TDT
+		pids[npids++] = 0x12;  // pid 0x12, tid 0x4E...0x6F: EIT
 		for (SI::Loop::Iterator it; pmt.streamLoop.getNext(stream, it); )
 			if (0 != (pids[npids] = GetPid(stream)) && npids < MAXRECEIVEPIDS)
 				npids++;
@@ -373,7 +373,7 @@ cStreamdevLiveStreamer::cStreamdevLiveStreamer(const cServerConnection *Connecti
 		}
 }
 
-cStreamdevLiveStreamer::~cStreamdevLiveStreamer() 
+cStreamdevLiveStreamer::~cStreamdevLiveStreamer()
 {
 	Dprintf("Desctructing Live streamer\n");
 	Stop();
@@ -382,7 +382,7 @@ cStreamdevLiveStreamer::~cStreamdevLiveStreamer()
 	delete m_ReceiveBuffer;
 }
 
-bool cStreamdevLiveStreamer::HasPid(int Pid) 
+bool cStreamdevLiveStreamer::HasPid(int Pid)
 {
 	int idx;
 	for (idx = 0; idx < m_NumPids; ++idx)
@@ -391,13 +391,13 @@ bool cStreamdevLiveStreamer::HasPid(int Pid)
 	return false;
 }
 
-bool cStreamdevLiveStreamer::SetPid(int Pid, bool On) 
+bool cStreamdevLiveStreamer::SetPid(int Pid, bool On)
 {
 	int idx;
 
 	if (Pid == 0)
 		return true;
-	
+
 	if (On) {
 		for (idx = 0; idx < m_NumPids; ++idx) {
 			if (m_Pids[idx] == Pid)
@@ -506,7 +506,7 @@ void cStreamdevLiveStreamer::StartReceiver(bool Force)
 		DELETENULL(m_Receiver);
 }
 
-bool cStreamdevLiveStreamer::SetChannel(eStreamType StreamType, const int* Apid, const int *Dpid) 
+bool cStreamdevLiveStreamer::SetChannel(eStreamType StreamType, const int* Apid, const int *Dpid)
 {
 	Dprintf("Initializing Remuxer for full channel transfer\n");
 	//printf("ca pid: %d\n", Channel->Ca());
@@ -515,7 +515,7 @@ bool cStreamdevLiveStreamer::SetChannel(eStreamType StreamType, const int* Apid,
 	const int *Dpids = Dpid ? Dpid : m_Channel->Dpids();
 
 	switch (StreamType) {
-	case stES: 
+	case stES:
 		{
 			int pid = ISRADIO(m_Channel) ? m_Channel->Apid(0) : m_Channel->Vpid();
 			if (Apid && Apid[0])
@@ -526,12 +526,12 @@ bool cStreamdevLiveStreamer::SetChannel(eStreamType StreamType, const int* Apid,
 			return SetPids(pid);
 		}
 
-	case stPES: 
+	case stPES:
 		SetRemux(new cTS2PESRemux(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids()));
 		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 
 #ifdef STREAMDEV_PS
-	case stPS:  
+	case stPS:
 		SetRemux(new cTS2PSRemux(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids()));
 		return SetPids(m_Channel->Vpid(), Apids, Dpids, m_Channel->Spids());
 #endif
@@ -563,7 +563,7 @@ bool cStreamdevLiveStreamer::SetChannel(eStreamType StreamType, const int* Apid,
 	}
 }
 
-#if APIVERSNUM >= 20300                 
+#if APIVERSNUM >= 20300
 void cStreamdevLiveStreamer::Receive(const uchar *Data, int Length)
 #else
 void cStreamdevLiveStreamer::Receive(uchar *Data, int Length)
@@ -589,7 +589,7 @@ void cStreamdevLiveStreamer::Action(void)
 	cStreamdevStreamer::Action();
 }
 
-int cStreamdevLiveStreamer::Put(const uchar *Data, int Count) 
+int cStreamdevLiveStreamer::Put(const uchar *Data, int Count)
 {
 	// insert si data
 	if (m_PatFilter) {
@@ -604,30 +604,30 @@ int cStreamdevLiveStreamer::Put(const uchar *Data, int Count)
 	return cStreamdevStreamer::Put(Data, Count);
 }
 
-void cStreamdevLiveStreamer::Attach(void) 
-{ 
+void cStreamdevLiveStreamer::Attach(void)
+{
 	Dprintf("cStreamdevLiveStreamer::Attach()\n");
 	if (m_Device) {
 		if (m_Receiver) {
 			if (m_Receiver->IsAttached())
-				m_Device->Detach(m_Receiver); 
-			m_Device->AttachReceiver(m_Receiver); 
+				m_Device->Detach(m_Receiver);
+			m_Device->AttachReceiver(m_Receiver);
 		}
 		if (m_PatFilter) {
-			m_Device->Detach(m_PatFilter); 
-			m_Device->AttachFilter(m_PatFilter); 
+			m_Device->Detach(m_PatFilter);
+			m_Device->AttachFilter(m_PatFilter);
 		}
 	}
 }
 
-void cStreamdevLiveStreamer::Detach(void) 
-{ 
+void cStreamdevLiveStreamer::Detach(void)
+{
 	Dprintf("cStreamdevLiveStreamer::Detach()\n");
 	if (m_Device) {
 		if (m_Receiver)
-			m_Device->Detach(m_Receiver); 
+			m_Device->Detach(m_Receiver);
 		if (m_PatFilter)
-			m_Device->Detach(m_PatFilter); 
+			m_Device->Detach(m_PatFilter);
 	}
 }
 
@@ -637,7 +637,7 @@ bool cStreamdevLiveStreamer::UsedByLiveTV(cDevice *device)
 		(device->IsPrimaryDevice() && device->HasDecoder() && !device->Replaying());
 }
 
-cDevice *cStreamdevLiveStreamer::SwitchDevice(const cChannel *Channel, int Priority) 
+cDevice *cStreamdevLiveStreamer::SwitchDevice(const cChannel *Channel, int Priority)
 {
 	cDevice *device = cDevice::GetDevice(Channel, Priority, false);
 	if (!device) {
@@ -663,7 +663,7 @@ cDevice *cStreamdevLiveStreamer::SwitchDevice(const cChannel *Channel, int Prior
 	return device;
 }
 
-bool cStreamdevLiveStreamer::ProvidesChannel(const cChannel *Channel, int Priority) 
+bool cStreamdevLiveStreamer::ProvidesChannel(const cChannel *Channel, int Priority)
 {
 	cDevice *device = cDevice::GetDevice(Channel, Priority, false, true);
 	if (!device)
@@ -708,7 +708,7 @@ void cStreamdevLiveStreamer::MainThreadHook()
 	}
 	if (m_SwitchLive) {
 		// switched away live TV. Try previous channel on other device first
-#if APIVERSNUM >= 20300                 
+#if APIVERSNUM >= 20300
 		LOCK_CHANNELS_READ;
 		if (!Channels->SwitchTo(cDevice::CurrentChannel())) {
 			// switch to streamdev channel otherwise
@@ -726,7 +726,7 @@ void cStreamdevLiveStreamer::MainThreadHook()
 	}
 }
 
-std::string cStreamdevLiveStreamer::Report(void) 
+std::string cStreamdevLiveStreamer::Report(void)
 {
 	std::string result;
 
@@ -734,9 +734,9 @@ std::string cStreamdevLiveStreamer::Report(void)
 		result += (std::string)"+- Device is " + (const char*)itoa(m_Device->CardIndex()) + "\n";
 	if (m_Receiver != NULL)
 		result += "+- Receiver is allocated\n";
-		
+
 	result += "+- Pids are ";
-	for (int i = 0; i < MAXRECEIVEPIDS; ++i) 
+	for (int i = 0; i < MAXRECEIVEPIDS; ++i)
 		if (m_Pids[i] != 0)
 			result += (std::string)(const char*)itoa(m_Pids[i]) + ", ";
 	result += "\n";
