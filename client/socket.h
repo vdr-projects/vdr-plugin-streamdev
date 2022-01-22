@@ -1,7 +1,7 @@
 /*
  *  $Id: socket.h,v 1.8 2010/08/18 10:26:55 schmirl Exp $
  */
- 
+
 #ifndef VDR_STREAMDEV_CLIENT_CONNECTION_H
 #define VDR_STREAMDEV_CLIENT_CONNECTION_H
 
@@ -32,7 +32,7 @@ private:
 	int           m_LastSignalQuality;
 	int           m_LastDev;
 protected:
-	/* Send Command, and return true if the command results in Expected. 
+	/* Send Command, and return true if the command results in Expected.
 	   Returns false on failure. */
 	bool Command(const std::string &Command, uint Expected);
 

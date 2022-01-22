@@ -1,7 +1,7 @@
 /*
  *  $Id: socket.c,v 1.15 2010/08/18 10:26:55 schmirl Exp $
  */
- 
+
 #include <tools/select.h>
 #include <string.h>
 #include <errno.h>
@@ -18,7 +18,7 @@
 #include "client/socket.h"
 #include "common.h"
 
-cClientSocket::cClientSocket(void) 
+cClientSocket::cClientSocket(void)
 {
 	memset(m_DataSockets, 0, sizeof(cTBSocket*) * si_Count);
 	m_ServerVersion = 0;
@@ -33,24 +33,24 @@ cClientSocket::cClientSocket(void)
 	Reset();
 }
 
-cClientSocket::~cClientSocket() 
+cClientSocket::~cClientSocket()
 {
 	Reset();
 	if (IsOpen()) Quit();
 }
 
-void cClientSocket::Reset(void) 
+void cClientSocket::Reset(void)
 {
 	for (int it = 0; it < si_Count; ++it)
 		DELETENULL(m_DataSockets[it]);
 	m_Priority = -100;
 }
 
-cTBSocket *cClientSocket::DataSocket(eSocketId Id) const {	
+cTBSocket *cClientSocket::DataSocket(eSocketId Id) const {
 	return m_DataSockets[Id];
 }
 
-bool cClientSocket::Command(const std::string &Command, uint Expected) 
+bool cClientSocket::Command(const std::string &Command, uint Expected)
 {
 	uint code = 0;
 	std::string buffer;
@@ -130,7 +130,7 @@ bool cClientSocket::CheckConnection(void) {
 	if (!Connect(StreamdevClientSetup.RemoteIp, StreamdevClientSetup.RemotePort, StreamdevClientSetup.Timeout * 1000)){
 		static time_t lastTime = 0;
 		if (time(NULL) - lastTime > MINLOGREPEAT) {
-			esyslog("ERROR: streamdev-client: Couldn't connect to %s:%d: %s", 
+			esyslog("ERROR: streamdev-client: Couldn't connect to %s:%d: %s",
 				(const char*)StreamdevClientSetup.RemoteIp,
 				StreamdevClientSetup.RemotePort, strerror(errno));
 			lastTime = time(NULL);
@@ -191,7 +191,7 @@ bool cClientSocket::ProvidesChannel(const cChannel *Channel, int Priority) {
 
 	CMD_LOCK;
 
-	std::string command = (std::string)"PROV " + (const char*)itoa(Priority) + " " 
+	std::string command = (std::string)"PROV " + (const char*)itoa(Priority) + " "
 	                    + (const char*)Channel->GetChannelID().ToString();
 	if (!Send(command))
 		return false;
@@ -217,13 +217,13 @@ bool cClientSocket::CreateDataConnection(eSocketId Id) {
 		DELETENULL(m_DataSockets[Id]);
 
 	if (!listen.Listen(LocalIp(), 0, 1)) {
-		esyslog("ERROR: streamdev-client: Couldn't create data connection: %s", 
+		esyslog("ERROR: streamdev-client: Couldn't create data connection: %s",
 				strerror(errno));
 		return false;
 	}
 
-	std::string command = (std::string)"PORT " + (const char*)itoa(Id) + " " 
-	                    + LocalIp().c_str() + "," 
+	std::string command = (std::string)"PORT " + (const char*)itoa(Id) + " "
+	                    + LocalIp().c_str() + ","
 	                    + (const char*)itoa((listen.LocalPort() >> 8) & 0xff) + ","
 	                    + (const char*)itoa(listen.LocalPort() & 0xff);
 	size_t idx = 4;
@@ -370,7 +370,7 @@ bool cClientSocket::Quit(void) {
 	Close();
 	return res;
 }
-	
+
 bool cClientSocket::SuspendServer(void) {
 	if (!CheckConnection()) return false;
 
