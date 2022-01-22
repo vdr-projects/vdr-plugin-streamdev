@@ -1,7 +1,7 @@
 /*
  *  $Id: device.c,v 1.27 2010/08/18 10:26:55 schmirl Exp $
  */
- 
+
 #include "client/device.h"
 #include "client/setup.h"
 #include "client/filter.h"
@@ -94,7 +94,7 @@ const cChannel *cStreamdevDevice::GetCurrentlyTunedTransponder(void) const {
 	return NULL;
 }
 
-bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority, 
+bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority,
 		bool *NeedsDetachReceivers) const {
 	if (m_Disabled || Channel == m_DenyChannel)
 		return false;
@@ -157,7 +157,7 @@ bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority,
 	return res;
 }
 
-bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel, 
+bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel,
 		bool LiveView) {
 	bool res;
 	Dprintf("SetChannelDevice Channel: %s, LiveView: %s\n", Channel->Name(),
@@ -190,12 +190,12 @@ bool cStreamdevDevice::SetPid(cPidHandle *Handle, int Type, bool On) {
 	Dprintf("SetPid, Pid=%d, Type=%d, On=%d, used=%d\n", Handle->pid, Type, On, Handle->used);
 	//LOCK_THREAD;
 
-	bool res = true; 
+	bool res = true;
 	if (Handle->pid && (On || !Handle->used)) {
 		res = m_ClientSocket->SetPid(Handle->pid, On);
 
 		m_Pids += (!res) ? 0 : On ? 1 : -1;
-		if (m_Pids < 0) 
+		if (m_Pids < 0)
 			m_Pids = 0;
 	}
 	return res;
@@ -241,7 +241,7 @@ bool cStreamdevDevice::GetTSPacket(uchar *&Data) {
 				char tmp[1];
 				if (recv(*m_ClientSocket->DataSocket(siLive), tmp, 1, MSG_PEEK) == 0 && !errno) {
 esyslog("cStreamDevice::GetTSPacket: GetChecked: NOTHING (%d)", m_TSFails);
-					m_TSFails++; 
+					m_TSFails++;
 					if (m_TSFails > 10) {
 						isyslog("cStreamdevDevice::GetTSPacket(): disconnected");
 						m_Pids = 0;
@@ -352,4 +352,3 @@ int cStreamdevDevice::SignalQuality(void) const {
 		m_ClientSocket->GetSignal(NULL, &quality, NULL);
 	return quality;
 }
-
