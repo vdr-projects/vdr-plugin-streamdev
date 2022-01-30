@@ -48,7 +48,11 @@ cStreamdevLiveReceiver::cStreamdevLiveReceiver(cStreamdevLiveStreamer *Streamer,
 {
 		// clears all PIDs but channel remains set
 		SetPids(NULL);
-		AddPids(Pids);
+		if(Pids) {
+			for(;*Pids;Pids++) {
+				if(*Pids != 18) AddPid(*Pids);
+			}
+		}
 }
 
 cStreamdevLiveReceiver::~cStreamdevLiveReceiver()
