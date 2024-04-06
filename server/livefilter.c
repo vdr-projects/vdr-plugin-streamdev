@@ -55,7 +55,7 @@ void cStreamdevLiveFilter::Process(u_short Pid, u_char Tid, const u_char *Data, 
 	int pos = 0;
 
 	while (length > 0) {
-		int chunk = min(length, TS_SIZE - 5);
+		int chunk = std::min(length, TS_SIZE - 5);
 		buffer[0] = TS_SYNC_BYTE;
 		buffer[1] = ((Pid >> 8) & 0x3f) | (pos==0 ? 0x40 : 0); /* bit 6: payload unit start indicator (PUSI) */
 		buffer[2] = Pid & 0xff;
