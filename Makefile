@@ -69,22 +69,22 @@ all: client server
 ### Targets:
 
 client:
-	$(MAKE) -C ./tools
-	$(MAKE) -C ./client
+	$(Q)$(MAKE) --no-print-directory -C ./tools
+	$(Q)$(MAKE) --no-print-directory -C ./client
 
 server:
-	$(MAKE) -C ./tools
-	$(MAKE) -C ./libdvbmpeg
-	$(MAKE) -C ./remux
-	$(MAKE) -C ./server
+	$(Q)$(MAKE) --no-print-directory -C ./tools
+	$(Q)$(MAKE) --no-print-directory -C ./libdvbmpeg
+	$(Q)$(MAKE) --no-print-directory -C ./remux
+	$(Q)$(MAKE) --no-print-directory -C ./server
 
 install-client: client
-	$(MAKE) -C ./client install
-	# installs to $(LIBDIR)/libvdr-streamdev-client.so.$(APIVERSION)
+	$(Q)$(MAKE) --no-print-directory -C ./client install
+	$(Q)# installs to $(LIBDIR)/libvdr-streamdev-client.so.$(APIVERSION)
 
 install-server: server
-	$(MAKE) -C ./server install
-	# installs to $(LIBDIR)/libvdr-streamdev-server.so.$(APIVERSION)
+	$(Q)$(MAKE) --no-print-directory -C ./server install
+	$(Q)# installs to $(LIBDIR)/libvdr-streamdev-server.so.$(APIVERSION)
 
 install: install-client install-server
 
@@ -97,8 +97,8 @@ dist: clean
 	@echo Distribution package created as $(PACKAGE).tgz
 
 clean:
-	$(MAKE) -C ./tools clean
-	$(MAKE) -C ./libdvbmpeg clean
-	$(MAKE) -C ./remux clean
-	$(MAKE) -C ./client clean
-	$(MAKE) -C ./server clean
+	$(Q)$(MAKE) --no-print-directory -C ./tools clean
+	$(Q)$(MAKE) --no-print-directory -C ./libdvbmpeg clean
+	$(Q)$(MAKE) --no-print-directory -C ./remux clean
+	$(Q)$(MAKE) --no-print-directory -C ./client clean
+	$(Q)$(MAKE) --no-print-directory -C ./server clean

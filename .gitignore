@@ -1,25 +1,24 @@
-# Compiled Object files
-*.slo
-*.lo
-*.o
+# directories
+/.settings/
+/patches/
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-
-# Eclipse project files
-.project
+# supplemental files
 .cproject
-.settings
-
-# Generated dependency file
 .dependencies
+.project
+apply-patches.sh
+*~
+*.bak
+*.new
+*.old
+*.orig
+*.rej
+*.sav
+*.tmp
 
-# translations
+# compilation results
+*.a
 *.mo
+*.o
 *.pot
+*.so

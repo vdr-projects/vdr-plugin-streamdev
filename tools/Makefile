@@ -11,12 +11,14 @@ OBJS = select.o socket.o source.o tools.o
 
 .PHONY: clean
 sockettools.a: $(OBJS)
-	ar -rcs sockettools.a $(OBJS) 
+	@echo AR tools/ $@
+	$(Q)$(AR) -rcs sockettools.a $(OBJS) 
 
 ### Implicit rules:
 
 %.o: %.c 
-	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
+	@echo CC tools/ $@
+	$(Q)$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
 
 ### Dependencies:
 
