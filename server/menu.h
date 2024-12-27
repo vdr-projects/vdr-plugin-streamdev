@@ -1,5 +1,5 @@
 /*
- *  $Id: menu.h,v 1.4 2010/07/19 13:49:31 schmirl Exp $
+ *  menu.h
  */
  
 #ifndef VDR_STREAMDEV_MENU_H

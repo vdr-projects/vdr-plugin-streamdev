@@ -1,5 +1,5 @@
 /*
- *  $Id: streamer.h,v 1.12 2010/07/19 13:49:32 schmirl Exp $
+ *  streamer.h
  */
  
 #ifndef VDR_STREAMDEV_STREAMER_H

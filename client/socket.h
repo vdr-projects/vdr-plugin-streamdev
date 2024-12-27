@@ -1,5 +1,5 @@
 /*
- *  $Id: socket.h,v 1.8 2010/08/18 10:26:55 schmirl Exp $
+ *  socket.h
  */
 
 #ifndef VDR_STREAMDEV_CLIENT_CONNECTION_H

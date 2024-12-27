@@ -1,5 +1,5 @@
 /*
- *  $Id: componentVTP.h,v 1.2 2005/05/09 20:22:29 lordjaxom Exp $
+ *  componentVTP.h
  */
  
 #ifndef VDR_STREAMDEV_SERVERS_SERVERVTP_H

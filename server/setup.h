@@ -1,5 +1,5 @@
 /*
- *  $Id: setup.h,v 1.4 2010/07/19 13:49:31 schmirl Exp $
+ *  setup.h
  */
  
 #ifndef VDR_STREAMDEV_SETUPSERVER_H

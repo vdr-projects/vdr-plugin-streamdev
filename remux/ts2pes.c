@@ -9,8 +9,6 @@
  *
  * The cRepacker family's code was originally written by Reinhard Nissl <rnissl@gmx.de>,
  * and adapted to the VDR coding style by Klaus.Schmidinger@cadsoft.de.
- *
- * $Id: ts2pes.c,v 1.2 2009/06/30 06:04:33 schmirl Exp $
  */
 
 #include "remux/ts2pes.h"

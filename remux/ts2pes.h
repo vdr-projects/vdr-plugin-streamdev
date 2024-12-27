@@ -3,8 +3,6 @@
  *
  * This file is based on a copy of remux.h from Klaus Schmidinger's
  * VDR, version 1.6.0.
- *
- * $Id: ts2pes.h,v 1.4 2009/07/06 06:11:11 schmirl Exp $
  */
 
 #ifndef VDR_STREAMDEV_TS2PES_H

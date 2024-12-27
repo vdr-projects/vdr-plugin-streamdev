@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.c,v 1.21 2010/08/03 10:46:41 schmirl Exp $
+ *  connectionHTTP.c
  */
 
 #include <ctype.h>

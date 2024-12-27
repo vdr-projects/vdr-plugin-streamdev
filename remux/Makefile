@@ -1,7 +1,6 @@
 #
 # Makefile for a Video Disk Recorder plugin
 #
-# $Id: Makefile,v 1.2 2010/07/19 13:49:28 schmirl Exp $
 
 ### The object files (add further files here):
 

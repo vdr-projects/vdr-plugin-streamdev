@@ -1,5 +1,5 @@
 /*
- *  $Id: suspend.h,v 1.2 2008/10/22 11:59:32 schmirl Exp $
+ *  suspend.h
  */
  
 #ifndef VDR_STREAMDEV_SUSPEND_H

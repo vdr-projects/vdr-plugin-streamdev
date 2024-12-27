@@ -1,5 +1,5 @@
 /*
- *  $Id: livefilter.c,v 1.7 2009/02/13 13:02:40 schmirl Exp $
+ *  livefilter.c
  */
 
 #include <vdr/filter.h>

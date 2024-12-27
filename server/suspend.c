@@ -1,5 +1,5 @@
 /*
- *  $Id: suspend.c,v 1.3 2008/10/22 11:59:32 schmirl Exp $
+ *  suspend.c
  */
  
 #include "server/suspend.h"

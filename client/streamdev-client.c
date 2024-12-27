@@ -2,8 +2,6 @@
  * streamdev.c: A plugin for the Video Disk Recorder
  *
  * See the README file for copyright information and how to reach the author.
- *
- * $Id: streamdev-client.c,v 1.3 2010/08/18 10:26:56 schmirl Exp $
  */
 
 #include "streamdev-client.h"

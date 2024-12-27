@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionHTTP.h,v 1.7 2010/07/19 13:49:31 schmirl Exp $
+ *  connectionHTTP.h
  */
  
 #ifndef VDR_STREAMDEV_SERVERS_CONNECTIONHTTP_H

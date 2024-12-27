@@ -1,5 +1,5 @@
 /*
- *  $Id: menu.c,v 1.10 2010/07/19 13:49:31 schmirl Exp $
+ *  menu.c
  */
  
 #include <vdr/menuitems.h>

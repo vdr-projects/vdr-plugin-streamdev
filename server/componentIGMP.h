@@ -1,5 +1,5 @@
 /*
- *  $Id: componentIGMP.h,v 1.1 2009/02/13 10:39:22 schmirl Exp $
+ *  componentIGMP.h
  */
  
 #ifndef VDR_STREAMDEV_IGMPSERVER_H

@@ -1,5 +1,5 @@
 /*
- *  $Id: device.h,v 1.10 2010/08/18 10:26:55 schmirl Exp $
+ *  device.h
  */
  
 #ifndef VDR_STREAMDEV_DEVICE_H

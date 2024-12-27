@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionIGMP.c,v 1.3 2010/08/03 10:46:41 schmirl Exp $
+ *  connectionIGMP.c
  */
 
 #include <ctype.h>

@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionIGMP.h,v 1.1 2009/02/13 10:39:22 schmirl Exp $
+ *  connectionIGMP.h
  */
  
 #ifndef VDR_STREAMDEV_SERVERS_CONNECTIONIGMP_H
