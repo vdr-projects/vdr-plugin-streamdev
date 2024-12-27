@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: <vdrdev@schmirler.de>\n"
 "POT-Creation-Date: 2014-10-20 22:57+0200\n"
 "PO-Revision-Date: 2008-03-30 02:11+0200\n"
-"Last-Translator: Frank Schmirler <vdrdev@schmirler.de>\n"
+"Last-Translator: Stefan Hofmann\n"
 "Language-Team: German <vdr@linuxtv.org>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
@@ -17,28 +17,28 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "Hide Mainmenu Entry"
-msgstr "Hauptmenüeintrag verstecken"
+msgstr "Hauptmenüeintrag verbergen"
 
 msgid "Simultaneously used Devices"
 msgstr "Gleichzeitig genutzte DVB-Karten"
 
 msgid "Remote IP"
-msgstr "IP der Gegenseite"
+msgstr "IP-Adresse der Gegenseite"
 
 msgid "Remote Port"
-msgstr "Port der Gegenseite"
+msgstr "Portnummer der Gegenseite"
 
 msgid "Timeout (s)"
-msgstr "Timeout (s)"
+msgstr "Timeout [s]"
 
 msgid "Filter Streaming"
 msgstr "Filter-Daten streamen"
 
 msgid "Filter SockBufSize"
-msgstr "Filter Socket Puffergröße"
+msgstr "Socket-Puffergröße des Filters"
 
 msgid "Live TV Priority"
-msgstr "Live TV Priorität"
+msgstr "Priorität des Live-TVs"
 
 msgid "Minimum Priority"
 msgstr "Minimale Priorität"
@@ -50,7 +50,7 @@ msgid "Broadcast Systems / Cost"
 msgstr "Empfangssysteme / Kosten"
 
 msgid "VTP Streaming Client"
-msgstr "VTP Streaming Client"
+msgstr "VTP-Streaming-Client"
 
 msgid "Suspend Server"
 msgstr "Server pausieren"
