@@ -159,6 +159,7 @@ bool cStreamdevDevice::ProvidesChannel(const cChannel *Channel, int Priority,
 
 bool cStreamdevDevice::SetChannelDevice(const cChannel *Channel,
 		bool LiveView) {
+	if (!Channel) return true;
 	bool res;
 	Dprintf("SetChannelDevice Channel: %s, LiveView: %s\n", Channel->Name(),
 			LiveView ? "true" : "false");
