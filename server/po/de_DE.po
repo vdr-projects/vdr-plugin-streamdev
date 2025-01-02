@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: <vdrdev@schmirler.de>\n"
 "POT-Creation-Date: 2014-05-05 22:46+0200\n"
 "PO-Revision-Date: 2008-03-30 02:11+0200\n"
-"Last-Translator: Frank Schmirler <vdrdev@schmirler.de>\n"
+"Last-Translator: Stefan Hofmann\n"
 "Language-Team: German <vdr@linuxtv.org>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
@@ -20,7 +20,7 @@ msgid "Streaming active"
 msgstr "Streamen im Gange"
 
 msgid "Streamdev Connections"
-msgstr "Streamdev Verbindungen"
+msgstr "StreamDev-Verbindungen"
 
 msgid "Disconnect"
 msgstr "Trennen"
@@ -32,28 +32,28 @@ msgid "Common Settings"
 msgstr "Allgemeines"
 
 msgid "Hide Mainmenu Entry"
-msgstr "Hauptmenüeintrag verstecken"
+msgstr "Hauptmenüeintrag verbergen"
 
 msgid "Start with Live TV suspended"
 msgstr "Live-TV beim Start pausieren"
 
 msgid "Maximum Number of Clients"
-msgstr "Maximalanzahl an Clients"
+msgstr "Maximale Anzahl von Clients"
 
 msgid "Live TV buffer delay (ms)"
-msgstr "Live-TV Pufferdauer (ms)"
+msgstr "Pufferdauer für Live-TV [ms]"
 
 msgid "VDR-to-VDR Server"
-msgstr "VDR-zu-VDR Server"
+msgstr "VDR-zu-VDR-Server"
 
 msgid "Start VDR-to-VDR Server"
-msgstr "VDR-zu-VDR Server starten"
+msgstr "VDR-zu-VDR-Server starten"
 
 msgid "VDR-to-VDR Server Port"
-msgstr "Port des VDR-zu-VDR Servers"
+msgstr "Portnummer des VDR-zu-VDR-Servers"
 
 msgid "Bind to IP"
-msgstr "Binde an IP"
+msgstr "Binde an IP-Adresse"
 
 msgid "Legacy Client Priority"
 msgstr "Priorität für alte Clients"
@@ -65,31 +65,31 @@ msgid "Loop Prevention"
 msgstr "Schleifen verhindern"
 
 msgid "HTTP Server"
-msgstr "HTTP Server"
+msgstr "HTTP-Server"
 
 msgid "Start HTTP Server"
-msgstr "HTTP Server starten"
+msgstr "HTTP-Server starten"
 
 msgid "HTTP Server Port"
-msgstr "Port des HTTP Servers"
+msgstr "Portnummer des HTTP-Servers"
 
 msgid "Priority"
 msgstr "Priorität"
 
 msgid "HTTP Streamtype"
-msgstr "HTTP Streamtyp"
+msgstr "HTTP-Streamtyp"
 
 msgid "Multicast Streaming Server"
-msgstr "Multicast Streaming Server"
+msgstr "Multicast-Streaming-Server"
 
 msgid "Start IGMP Server"
-msgstr "IGMP Server starten"
+msgstr "IGMP-Server starten"
 
 msgid "Multicast Client Port"
-msgstr "Port des Multicast Clients"
+msgstr "Portnummer des Multicast-Clients"
 
 msgid "Multicast Streamtype"
-msgstr "Multicast Streamtyp"
+msgstr "Multicast-Streamtyp"
 
 msgid "VDR Streaming Server"
-msgstr "VDR Streaming Server"
+msgstr "VDR-Streaming-Server"

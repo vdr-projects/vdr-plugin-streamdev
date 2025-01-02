@@ -1,5 +1,5 @@
 /*
- *  $Id: connectionVTP.c,v 1.31 2010/08/18 10:26:54 schmirl Exp $
+ *  connectionVTP.c
  */
  
 #include "server/connectionVTP.h"

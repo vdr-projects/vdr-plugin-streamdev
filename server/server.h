@@ -1,5 +1,5 @@
 /*
- *  $Id: server.h,v 1.6 2008/10/22 11:59:32 schmirl Exp $
+ *  server.h
  */
  
 #ifndef VDR_STREAMDEV_SERVER_H

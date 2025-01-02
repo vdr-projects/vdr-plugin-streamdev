@@ -1,7 +1,6 @@
 #
 # Makefile for a Video Disk Recorder plugin
 #
-# $Id: Makefile,v 1.2 2010/07/19 13:49:28 schmirl Exp $
 
 ### The object files (add further files here):
 
@@ -11,12 +10,14 @@ OBJS = tsremux.o ts2es.o ts2pes.o ts2ps.o extern.o
 
 .PHONY: clean
 remux.a: $(OBJS)
-	ar -rcs remux.a $^
+	@echo AR remux/ $@
+	$(Q)$(AR) -rcs remux.a $^
 
 ### Implicit rules:
 
 %.o: %.c 
-	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
+	@echo CC remux/ $@
+	$(Q)$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
 
 ### Dependencies:
 

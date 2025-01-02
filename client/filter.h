@@ -1,5 +1,5 @@
 /*
- *  $Id: filter.h,v 1.5 2008/04/07 14:27:28 schmirl Exp $
+ *  filter.h
  */
 
 #ifndef VDR_STREAMDEV_FILTER_H

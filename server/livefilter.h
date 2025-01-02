@@ -1,5 +1,5 @@
 /*
- *  $Id: livefilter.h,v 1.5 2008/04/07 14:27:31 schmirl Exp $
+ *  livefilter.h
  */
 
 #ifndef VDR_STREAMEV_LIVEFILTER_H

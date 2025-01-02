@@ -1,5 +1,5 @@
 /*
- *  $Id: streamdev-client.h,v 1.3 2010/08/18 10:26:56 schmirl Exp $
+ *  streamdev-client.h
  */
  
 #ifndef VDR_STREAMDEVCLIENT_H

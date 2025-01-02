@@ -1,6 +1,14 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+2025-01-02: Version 0.6.4
+
+- removed RCS "$Id:" tags, which are meaningless for Git
+- revised Makefiles to compile silently (Q macro)
+- revised German translation
+- support of the NULL Channel in SetChannelDevice (thanks to Markus Ehrnsperger)
+- added missing std:: namespace
+
 2022-01-22: Version 0.6.3
 
 - added HEVC support (thanks to jsffm)

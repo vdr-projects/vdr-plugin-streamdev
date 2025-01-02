@@ -1,5 +1,5 @@
 /*
- *  $Id: device.c,v 1.27 2010/08/18 10:26:55 schmirl Exp $
+ *  device.c
  */
 
 #include "client/device.h"

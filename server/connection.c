@@ -1,5 +1,5 @@
 /*
- *  $Id: connection.c,v 1.16 2010/08/03 10:51:53 schmirl Exp $
+ *  connection.c
  */
  
 #include "server/connection.h"

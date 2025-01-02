@@ -1,5 +1,5 @@
 /*
- *  $Id: common.c,v 1.12 2010/07/19 13:49:24 schmirl Exp $
+ *  common.c
  */
 
 #include <vdr/channels.h>
@@ -10,7 +10,7 @@
 
 using namespace std;
 
-const char *VERSION = "0.6.3";
+const char *VERSION = "0.6.4";
 
 const char cMenuEditIpItem::IpCharacters[] = "0123456789.";
 

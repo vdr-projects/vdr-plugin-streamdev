@@ -1,5 +1,5 @@
 /*
- *  $Id: socket.c,v 1.15 2010/08/18 10:26:55 schmirl Exp $
+ *  socket.c
  */
 
 #include <tools/select.h>

@@ -1,5 +1,5 @@
 /*
- *  $Id: componentIGMP.c,v 1.2 2009/07/03 21:44:19 schmirl Exp $
+ *  componentIGMP.c
  */
 #include <netinet/ip.h>
 #include <netinet/igmp.h>

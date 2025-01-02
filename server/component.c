@@ -1,5 +1,5 @@
 /*
- *  $Id: component.c,v 1.4 2009/02/13 10:39:22 schmirl Exp $
+ *  component.c
  */
  
 #include "server/component.h"

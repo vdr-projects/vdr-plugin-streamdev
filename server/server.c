@@ -1,5 +1,5 @@
 /*
- *  $Id: server.c,v 1.10 2009/02/13 10:39:22 schmirl Exp $
+ *  server.c
  */
 
 #include "server/server.h"

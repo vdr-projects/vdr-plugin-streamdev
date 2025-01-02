@@ -15,12 +15,14 @@ DEFINES += -U_FORTIFY_SOURCE
 
 .PHONY: clean
 libdvbmpegtools.a: $(OBJS)
-	ar -rcs libdvbmpegtools.a $(OBJS) 
+	@echo AR libdvbmpeg/ $@
+	$(Q)$(AR) -rcs libdvbmpegtools.a $(OBJS) 
 
 ### Implicit rules:
 
 %.o: %.c 
-	$(CC) $(CFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
+	@echo CC libdvbmpeg/ $@
+	$(Q)$(CC) $(CFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
 
 ### Dependencies:
 

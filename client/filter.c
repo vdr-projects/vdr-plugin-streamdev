@@ -1,5 +1,5 @@
 /*
- *  $Id: filter.c,v 1.14 2009/02/13 13:02:39 schmirl Exp $
+ *  filter.c
  */
 
 #include "client/filter.h"

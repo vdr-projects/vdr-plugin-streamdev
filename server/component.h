@@ -1,5 +1,5 @@
 /*
- *  $Id: component.h,v 1.3 2009/02/13 10:39:22 schmirl Exp $
+ *  component.h
  */
  
 #ifndef VDR_STREAMDEV_SERVERS_COMPONENT_H
