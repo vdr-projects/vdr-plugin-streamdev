@@ -1,6 +1,10 @@
 VDR Plugin 'streamdev' Revision History
 ---------------------------------------
 
+2026-03-07: Version 0.6.5
+
+- make LSTE work over VTP for modern VDR versions (thanks to @seahawk1986)
+
 2025-01-02: Version 0.6.4
 
 - removed RCS "$Id:" tags, which are meaningless for Git

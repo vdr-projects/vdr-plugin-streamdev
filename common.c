@@ -10,7 +10,7 @@
 
 using namespace std;
 
-const char *VERSION = "0.6.4";
+const char *VERSION = "0.6.5";
 
 const char cMenuEditIpItem::IpCharacters[] = "0123456789.";
 
