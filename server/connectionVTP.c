@@ -74,6 +74,10 @@ cLSTEHandler::cLSTEHandler(cConnectionVTP *Client, const char *Option):
 	eDumpModeStreamdev dumpmode = dmsdAll;
 	time_t attime = 0;
 	time_t fromtime = 0;
+#if APIVERSNUM >= 20300
+	LOCK_SCHEDULES_READ;
+	m_Schedules = Schedules;
+#endif
 
 	if (m_Schedules != NULL && *Option) {
 		char buf[strlen(Option) + 1];
