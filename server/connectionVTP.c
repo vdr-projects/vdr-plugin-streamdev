@@ -2032,7 +2032,11 @@ bool cConnectionVTP::CmdDELR(const char *Option)
 				if (!rc) {
 					if (recording->Delete()) {
 						Reply(250, "Recording \"%s\" deleted", Option);
-#if APIVERSNUM >= 20300
+#if APIVERSNUM >= 20304
+						LOCK_DELETEDRECORDINGS_WRITE;
+						Recordings->Del(recording, false);
+						DeletedRecordings->Add(recording);
+#elif APIVERSNUM >= 20300
 						Recordings->DelByName(recording->FileName());
 #else
 						::Recordings.DelByName(recording->FileName());
