@@ -482,7 +482,6 @@ int get_video_info(Remux *rem)
 	uint8_t *headr;
 	int found = 0;
         int sw;
-	long off = 0;
 	int form = -1;
 	ringbuffy *vid_buffy = &rem->vid_buffy;
 	VideoInfo *vi = &rem->video_info;
@@ -494,7 +493,6 @@ int get_video_info(Remux *rem)
 		if ( b[0] == 0x00 && b[1] == 0x00 && b[2] == 0x01
 		     && b[3] == 0xb3) found = 4;
 		else {
-			off++;
 			vring_read( rem, b, 1);
 		}
 	}
@@ -604,7 +602,6 @@ int get_audio_info( Remux *rem)
 {
 	uint8_t *headr;
 	uint8_t buf[3];
-	long off = 0;
 	int found = 0;
 	ringbuffy *aud_buffy = &rem->aud_buffy;
 	AudioInfo *ai = &rem->audio_info;
@@ -618,7 +615,6 @@ int get_audio_info( Remux *rem)
 		if ( b[0] == 0xff && (b[1] & 0xf8) == 0xf8)
 			found = 2;
 		else {
-			off++;
 			aring_read( rem, b, 1);
 		}
 	}	
@@ -831,7 +827,6 @@ void remux(int fin, int fout, int pack_size, int mult)
 	long pos = 0;
 	int r = 0;
 	int i, r1, r2;
-	long packets = 0;
 	uint8_t mpeg_end[4] = { 0x00, 0x00, 0x01, 0xB9 };
 	uint32_t SCR_inc = 0;
 	int data_size;
@@ -963,7 +958,6 @@ void remux(int fin, int fout, int pack_size, int mult)
 			vbuf += vpack_size;
 			vbufn = add_pts( vbufl, rem.vdts, vpack_size, 
 					 0, vbufn, 0);
-			packets++;
 		} else if ( abuf+asize < abuf_max && asize &&
 			    ok_video  ){
 			fprintf(stderr,"2 ");
@@ -972,7 +966,6 @@ void remux(int fin, int fout, int pack_size, int mult)
 			abuf += apack_size;
 			abufn = add_pts( abufl, rem.apts, apack_size, 
 					 0, abufn, 0);
-			packets++;
 		} else if ( abuf+asize < abuf_max && asize &&
 			    !ok_audio){
 			fprintf(stderr,"3 ");
@@ -981,7 +974,6 @@ void remux(int fin, int fout, int pack_size, int mult)
 			abuf += apack_size;
 			abufn = add_pts( abufl, rem.apts, apack_size, 
 					 0, abufn, 0);
-			packets++;
 		} else if (vbuf+vsize  < vbuf_max && vsize &&
 			   !ok_video){
 			fprintf(stderr,"4 ");
@@ -990,7 +982,6 @@ void remux(int fin, int fout, int pack_size, int mult)
 			vbuf += vpack_size;
 			vbufn = add_pts( vbufl, rem.vdts, vpack_size, 
 					 0, vbufn, 0);
-			packets++;
 		} else {
 		fprintf(stderr,"5 ");
 			pos = write_ps_header(buf,rem.SCR,rem.muxr, 1, 0, 0, 
