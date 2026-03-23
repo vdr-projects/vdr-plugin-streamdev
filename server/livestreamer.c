@@ -696,7 +696,7 @@ void cStreamdevLiveStreamer::ChannelChange(const cChannel *Channel)
 			}
 		}
 
-		if (m_Device = cDevice::GetDevice(Channel, LIVEPRIORITY, false)) {
+		if ((m_Device = cDevice::GetDevice(Channel, LIVEPRIORITY, false))) {
 			if (m_Device->SwitchChannel(Channel, false)) {
 				Attach();
 			} else {
