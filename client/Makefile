@@ -65,7 +65,7 @@ $(I18Npot): $(CLIENTOBJS:%.o=%.c)
 
 $(I18Nmsgs): $(DESTDIR)$(LOCDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
 	@echo IN client/ $@
-	$(Q)install -D -m644 $< $@
+	$(Q)mkdir -p $(dir $@) && install -m644 $< $@
 
 .PHONY: i18n
 i18n: $(I18Nmo) $(I18Npot)
