@@ -772,9 +772,10 @@ bool cLSTRHandler::Next(bool &Last)
 				if (m_CurrentComponent < m_Recording->Info()->Components()->NumComponents()) {
 					tComponent *p = m_Recording->Info()->Components()->Component(m_CurrentComponent);
 					m_CurrentComponent++;
+#if APIVERSNUM < 30014
 					if (!Setup.UseDolbyDigital && p->stream == 0x02 && p->type == 0x05)
 						return Next(Last);
-
+#endif
 					return m_Client->Respond(-215, "X %s", *p->ToString());
 				}
 			}
